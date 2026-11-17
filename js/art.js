@@ -25,6 +25,7 @@ const ICON_SRC = {
   taxi: ['...KK...', '..YYYY..', '.YccccY.', 'YYYYYYYY', 'YYYYYYYY', '.KK..KK.', '.KK..KK.', '........'],
   scissors: ['S.....S.', '.S...S..', '..S.S...', '...S....', '..S.S...', '.RR.RR..', '.RR.RR..', '........'],
   star: ['...Y....', '...Y....', 'YYYYYYY.', '.YYYYY..', '..YYY...', '.YY.YY..', '.Y...Y..', '........'],
+  boat: ['........', '...K....', '..KKK...', '..KKKK..', 'WWWWWWWW', 'BBBBBBBB', '.BBBBBB.', '........'],
   umb: ['..VVVV..', '.VVVVVV.', 'VVVVVVVV', '...K....', '...K....', '...K.K..', '...KK...', '........'],
   cyclo: ['......K.', '.RR...K.', '.RRR.KK.', 'RRRRSSK.', 'KKSSSKKK', 'K.K..K.K', 'KKK..KKK', '........']
 };

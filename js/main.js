@@ -42,18 +42,22 @@ function draw() {
   const g = R.ctx, lg = R.lctx, W = G.world, vw = R.vw, vh = R.vh, cx = R.cx, cy = R.cy; if (!W) return;
   visList();
   const h = G.hour, lights = Math.max(h > 12 ? sstep(17.5, 19.2, h) : 1 - sstep(5.3, 6.6, h), clamp(G.cloud * 0.9 - 0.5, 0, 0.4)), useL = lights > 0.03; G.lights = lights;
-  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#2f2b27'; g.fillRect(0, 0, vw, vh);
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#34403f'; g.fillRect(0, 0, vw, vh);
   const gx = WORLD - cx, gy = -cy, sx0 = Math.max(0, gx), sy0 = Math.max(0, gy), sx1 = Math.min(WORLD * 2, gx + vw), sy1 = Math.min(WORLD, gy + vh);
   if (sx1 > sx0 && sy1 > sy0) g.drawImage(W.ground, sx0, sy0, sx1 - sx0, sy1 - sy0, sx0 - gx, sy0 - gy, sx1 - sx0, sy1 - sy0);
+  const ov = G.era > 0 ? OV[G.season + G.era] : null;
+  if (ov) { const ox1 = Math.min(ov.width, gx + vw), oy1 = Math.min(ov.height, gy + vh); if (ox1 > sx0 && oy1 > sy0) g.drawImage(ov, sx0, sy0, ox1 - sx0, oy1 - sy0, sx0 - gx, sy0 - gy, ox1 - sx0, oy1 - sy0); }
+  drawWater(g);
   if (G.wet > 0.02) { g.fillStyle = 'rgba(26,38,74,' + (G.wet * 0.2).toFixed(3) + ')'; g.fillRect(0, 0, vw, vh); }
   if (useL) { lg.globalCompositeOperation = 'source-over'; lg.globalAlpha = 1; lg.clearRect(0, 0, vw, vh); }
   // dynamic things
   const dyn = [], bubbles = [], halos = [];
   g.fillStyle = 'rgba(38,30,66,0.2)';
   const shadow = (x, y) => { const s = scn(x, y, 0); g.fillRect(s[0] - 4, s[1] - 1, 8, 2); g.fillRect(s[0] - 3, s[1] - 2, 6, 1); g.fillRect(s[0] - 3, s[1] + 1, 6, 1); };
-  for (const p of SIM.peds) { if (!G.onScreen(p.x, p.y, 24)) continue; if (p.alpha > 0.5) shadow(p.x, p.y); dyn.push({ key: p.x + p.y + (p.sit ? 0.6 : 0), ped: p }); }
+  for (const p of SIM.peds) { if (!G.onScreen(p.x, p.y, 24)) continue; const lf = bridgeLift(p.x, p.y); if (p.alpha > 0.5 && !lf) shadow(p.x, p.y); dyn.push({ key: p.x + p.y + (p.sit ? 0.6 : 0) + (lf ? 40 : 0), ped: p }); }
   for (const a of SIM.actors) if (G.onScreen(a.x, a.y, 24)) { shadow(a.x, a.y); dyn.push({ key: a.x + a.y, ped: a }); }
   for (const v of SIM.vehs) { const q = vehPos(v); if (G.onScreen(q[0], q[1], 44)) dyn.push({ key: q[0] + q[1], veh: v, q }); }
+  for (const b of SIM.boats) if (G.onScreen(b.x, b.y, 60)) dyn.push({ key: b.x + b.y, boat: b });
   for (const s of CITY.stands) if (s.state === 'parked' && G.onScreen(s.x, s.y, 30)) dyn.push({ key: s.x + s.y, stand: s });
   for (const s of W.visSig) dyn.push({ key: s[0] + s[1] + 0.5, sig: s });
   dyn.sort((a, b) => a.key - b.key);
@@ -75,14 +79,15 @@ function draw() {
   };
   const drawDyn = d => {
     if (d.ped) {
-      const p = d.ped, s = scn(p.x, p.y, 0);
+      const p = d.ped, s = scn(p.x, p.y, bridgeLift(p.x, p.y));
       if (p.dog !== undefined) { const fr = DOGS[p.dog % DOGS.length][p.dir === 1 || p.dir === 2 ? 1 : 0][p.moving ? (Math.floor(p.an * 1.6) & 1) : 0]; g.globalAlpha = p.alpha; g.drawImage(fr.c, s[0] - 5, s[1] - 7); g.globalAlpha = 1; if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, s[1] - 21]); return; }
       const hold = p.umb > 0.05, row = DIR_ROW[p.dir], x = s[0] - 10, y = s[1] - 23 - (p.sit ? 2 : 0), a = p.alpha === undefined ? 1 : p.alpha;
       let col = p.sit ? 5 : p.moving ? 1 + (Math.floor(p.an) & 3) : p.pose; if (hold && !p.moving && !p.sit && col === 0) col = 6;
       person(p.sheet, col, row, x, y, a);
       if (hold) { const fr = UMB[p.look.umbC][p.umb < 0.4 ? 0 : p.umb < 0.8 ? 1 : 2], ux = x + (row >= 2 ? -3 : 6), uy = y + (p.look.kid ? 2 : -2) - (p.moving && (Math.floor(p.an) & 1) ? 1 : 0); g.drawImage(fr.c, ux, uy); if (useL) lg.drawImage(fr.e, ux, uy); }
       if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, y - 11 - (hold ? 5 : 0) + (p.bub.a < 0.1 ? 2 : p.bub.a < 0.2 ? -1 : 0)]);
-    } else if (d.veh) vehicle(d.veh.kind, d.veh.v, d.veh.lane.di, d.q, d.veh.riders, 1);
+    } else if (d.boat) vehicle(d.boat.kind, d.boat.v, d.boat.dir > 0 ? 1 : 3, [d.boat.x, d.boat.y], d.boat.riders, 1);
+    else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
     else if (d.sig) { const st = sigOf(d.sig[2]), s = scn(d.sig[0], d.sig[1], st === 0 ? 31.5 : st === 2 ? 29 : 26.5); g.fillStyle = SIGC[st]; g.fillRect(s[0] - 1, s[1], 2, 2); if (useL) { lg.fillStyle = SIGC[st]; lg.fillRect(s[0] - 1, s[1], 2, 2); } }
   };
@@ -96,6 +101,7 @@ function draw() {
     lg.globalCompositeOperation = 'lighter';
     for (const l of W.visLamps) { const a = scn(l[0], l[1], l[2]), b = scn(l[0], l[1], 0); lg.drawImage(R.halo, a[0] - 22, a[1] - 22); lg.drawImage(R.pool, b[0] - 30, b[1] - 15); }
     for (const hl of halos) lg.drawImage(R.pool2, hl[0] - 13, hl[1] - 7);
+    drawWaterLights(lg, lights);
     drawFxLights(lg);
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = lights; g.drawImage(R.lc, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
@@ -104,6 +110,7 @@ function draw() {
   if (R.xf > 0 && R.snap) { g.globalAlpha = Math.ceil(R.xf * 8) / 8; g.drawImage(R.snap, 0, 0); g.globalAlpha = 1; }
 }
 // ----- eras: swap buildings / signs / skyline in place with a short crossfade; people and traffic turn over on their own -----
+function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; $('viewRiver').textContent = nearRiver ? 'Bến sông' : 'Về phố'; if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
 function setTet(on, quiet) {
   if (!G.world || G.busy || on === G.tet) return;
   snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1;
@@ -112,12 +119,13 @@ function setTet(on, quiet) {
 function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
-  G.era = e; G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1;
+  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1;
   eraShift(); updateUI(); save(); if (!quiet) ticker(ERA[e].msg, true);
 }
 // bake the other eras' buildings a few at a time while idle, so the first switch has no hitch
 let _pb = 0;
 function prebake() {
+  if (ovPrebake()) return;
   if (!G.world || G.busy) return; const recs = CITY.recs, snow = G.season === 'winter', t0 = performance.now();
   while (_pb < recs.length * 4 && performance.now() - t0 < 5) { const r = recs[_pb >> 2], e = _pb & 3; _pb++; if (r.t === 'b' && e >= r.e0 && e <= r.e1 && (r.gen || e === r.e0)) bakeRec(r, e, snow); }
 }
@@ -126,7 +134,7 @@ function tick(dt) {
   if (G.autoTime) G.hour = (G.hour + dt * G.daySpeed) % 24; else { const df = ((G.hourTarget - G.hour + 36) % 24) - 12; G.hour = (G.hour + clamp(df, -dt * 7, dt * 7) + 24) % 24; }
   if (G.autoSeason && !G.busy) { G.seasonT += dt; if (G.seasonT > 150) setSeason(SEASONS[(SEASONS.indexOf(G.season) + 1) % 4]); }
   if (R.xf > 0) R.xf -= dt / 1.1;
-  updateWeather(dt); updateSim(dt); updateFx(dt); ambTick(dt);
+  updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
 }
 let _last = 0, _uiT = 0;
 function frame(ts) {
@@ -148,7 +156,7 @@ async function setSeason(s, first) {
   if (!GROUNDS[s]) GROUNDS[s] = await paintGround(s, p => { if (first) $('fadeB').style.width = Math.round(p * 70) + '%'; });
   await sleep(20);
   if (!first) snapshot();
-  G.season = s; const items = buildStatics(s, G.era); if (first) $('fadeB').style.width = '100%';
+  G.season = s; for (const k in OV) delete OV[k]; OVJOB = null; ensureOv(s, G.era); const items = buildStatics(s, G.era); if (first) $('fadeB').style.width = '100%';
   if (!G.world) G.world = { ground: GROUNDS[s], items }; else { G.world.ground = GROUNDS[s]; G.world.items = items; }
   G.world.vis = null; R.dirty = true; visList();
   if (first) initSim(); else { reseasonPeds(); R.xf = 1; }
@@ -190,6 +198,7 @@ function initUI() {
   document.querySelectorAll('[data-era]').forEach(b => b.onclick = () => setEra(+b.dataset.era));
   $('tetBtn').onclick = () => setTet(!G.tet); $('streetOn').onclick = () => { AU.streetOn = !AU.streetOn; setVol(); updateUI(); save(); };
   $('vStreet').oninput = e => { AU.vol.street = e.target.value / 100; setVol(); save(); };
+  $('viewRiver').onclick = toggleRiverView;
   $('autoSeason').onclick = () => { G.autoSeason = !G.autoSeason; G.seasonT = 0; updateUI(); save(); };
   document.querySelectorAll('[data-time]').forEach(b => b.onclick = () => setTime(b.dataset.time));
   document.querySelectorAll('[data-wx]').forEach(b => b.onclick = () => setWx(b.dataset.wx));
@@ -197,10 +206,10 @@ function initUI() {
   $('zin').onclick = () => { R.zoom++; resize(); save(); }; $('zout').onclick = () => { R.zoom--; resize(); save(); };
   $('full').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); };
   $('hide').onclick = () => { document.body.classList.add('clean'); ticker('Bấm phím H hoặc chạm 2 lần để hiện lại bảng', true); };
-  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setTet(!G.tet); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
+  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setTet(!G.tet); else if (k === 'b') toggleRiverView(); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
   // drag to pan, wheel to zoom
   const cv = R.canvas; let drag = null;
-  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointerdown', e => { R.tween = null; drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY }; cv.setPointerCapture(e.pointerId); });
   cv.addEventListener('pointermove', e => { if (!drag) return; const k = R.dpr / R.scale; R.panX = drag.px - (e.clientX - drag.x) * k; R.panY = drag.py - (e.clientY - drag.y) * k; camera(); });
   cv.addEventListener('pointerup', () => { drag = null; }); cv.addEventListener('pointercancel', () => { drag = null; });
   cv.addEventListener('dblclick', () => document.body.classList.remove('clean'));
@@ -225,7 +234,9 @@ async function boot() {
   if (q.get('yt')) { $('panel').hidden = false; $('ytUrl').value = q.get('yt'); ytLoad(q.get('yt')); }
   if (q.get('clean')) { document.body.classList.add('clean'); $('fade').style.display = 'none'; }
   const warp = +q.get('warp') || 0; for (let i = 0; i < warp * 20; i++) tick(0.05);
+  if (q.get('boat')) { SIM.boats.push(makeBoat({ x: RIV.laneB, dir: -1 }, q.get('boat'), RIV.pierStop + 70)); for (let i = 0; i < (+q.get('bw') || 0) * 20; i++) tick(0.05); }
   if (q.get('toera')) { draw(); setEra(+q.get('toera')); const w2 = +q.get('warp2') || 0; for (let i = 0; i < w2 * 20; i++) tick(0.05); }
+  if (q.get('toseason')) { await setSeason(q.get('toseason')); for (let i = 0; i < 40; i++) tick(0.05); }
   updateUI(); requestAnimationFrame(frame);
 }
 window.addEventListener('DOMContentLoaded', boot);

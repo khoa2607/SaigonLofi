@@ -1,6 +1,6 @@
 'use strict';
 // ===== Sài Gòn Lofi — city layout, ground painter, static world assembly, navigation grid =====
-const G_YARD = 0, G_ROAD = 1, G_SIDE = 2, G_ZEB = 3, G_ALLEY = 4, G_GRASS = 5, G_PATH = 6, G_PLAZA = 7, G_PAD = 8, G_WATER = 9;
+const G_YARD = 0, G_ROAD = 1, G_SIDE = 2, G_ZEB = 3, G_ALLEY = 4, G_GRASS = 5, G_PATH = 6, G_PLAZA = 7, G_PAD = 8, G_WATER = 9, G_RIVER = 10, G_BANK = 11, G_PROM = 12, G_PIER = 13, G_BRIDGE = 14;
 const GT = new Uint8Array(N * N), BLK = new Uint8Array(N * N), PAVE = new Uint8Array(N * N), WALK = new Uint8Array(N * N);
 const ROADS_H = [38, 78, 124], ROADS_V = [30, 74, 112], RW = 4, SW = 3;
 const XS = [[0, 30], [34, 74], [78, 112], [116, 160]], YS = [[0, 38], [42, 78], [82, 124], [128, 160]];
@@ -15,8 +15,8 @@ const blockAt = (wx, wy) => { const x = Math.floor(wx / T), y = Math.floor(wy / 
 const isBlk = (tx, ty) => tx < 0 || ty < 0 || tx >= N || ty >= N || BLK[gi(tx, ty)] === 1;
 // a building record: `g` is a box list, or a function era -> box list for buildings that change with the era. o: {e0, e1} = eras it exists in
 const NOTREE = [];
-function addB(g, tx, ty, tw, td, o) { o = o || {}; if (o.lm) NOTREE.push({ x0: tx - 1, y0: ty - 1, x1: tx + tw + 2, y1: ty + td + 3 }); const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1 }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
-const ERA_SWAP = { parked: [['parked', 0, 1], ['pscooter', 2, 2], ['ebike', 3, 3]], vend: [['tuThuoc', 0, 0], ['vend', 1, 3]], booth: [['booth', 0, 1], ['atm', 2, 3]], tuThuoc: [['tuThuoc', 0, 1], ['pot', 2, 3]] };
+function addB(g, tx, ty, tw, td, o) { o = o || {}; if (o.lm) NOTREE.push({ x0: tx - 1, y0: ty - 1, x1: tx + tw + 2, y1: ty + td + 3 }); const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1 }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (!o.keep && x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
+const ERA_SWAP = { parked: [['parked', 0, 1], ['pscooter', 2, 2], ['ebike', 3, 3]], vend: [['tuThuoc', 0, 0], ['vend', 1, 3]], booth: [['booth', 0, 1], ['atm', 2, 3]], tuThuoc: [['tuThuoc', 0, 1], ['pot', 2, 3]] };   // river.js adds rail + rlamp
 function addP(name, p, o) { o = o || {}; const sw = o.e0 === undefined && o.e1 === undefined ? ERA_SWAP[name] : null; for (const q of sw || [[name, o.e0 || 0, o.e1 === undefined ? 3 : o.e1]]) CITY.recs.push({ t: 'p', name: q[0], x: p[0], y: p[1], v: o.v || 0, m: !!o.mirror, kb: o.kb || 0, only: o.only, e0: q[1], e1: q[2], tet: o.tet }); if (o.block) blockAt(p[0], p[1]); if (name === 'cartPho') (CITY.steam || (CITY.steam = [])).push([p[0] - 2.6, p[1]]); if (name === 'lamp' || name === 'pole') CITY.lamps.push(o.mirror ? [p[0] + (name === 'pole' ? 6.8 : 0), p[1], name === 'pole' ? 29 : 23] : [p[0], p[1] + (name === 'pole' ? 6.8 : 0), name === 'pole' ? 29 : 23]); }
 function addT(spc, wx, wy, v) { const r = { t: 't', spc, v: v || 0, x: wx, y: wy, ph: hash2(wx, wy) * 9 }; CITY.recs.push(r); CITY.trees.push(r); blockAt(wx, wy); }
 function actor(p, dir, type, o) { CITY.actors.push(Object.assign({ x: p[0], y: p[1], dir, type: type || 'baba', pose: 0 }, o)); }
@@ -186,15 +186,16 @@ function furniture(B, R) {
 }
 function planCity() {
   const R0 = mulberry32(1995);
-  for (const h of ROADS_H) fill(0, h, N, h + RW, G_ROAD);
+  for (const h of ROADS_H) fill(ROADS_V[0], h, N, h + RW, G_ROAD);          // horizontal streets end at the riverside road
   for (const v of ROADS_V) fill(v, 0, v + RW, N, G_ROAD);
   for (const v of ROADS_V) for (const h of ROADS_H) {
-    fill(v - 2, h, v, h + RW, G_ZEB); fill(v + RW, h, v + RW + 2, h + RW, G_ZEB); fill(v, h - 2, v + RW, h, G_ZEB); fill(v, h + RW, v + RW, h + RW + 2, G_ZEB);
-    CITY.signals.push([(v - 1) * T + 4, (h - 1) * T + 4, 0], [(v + RW) * T + 4, (h + RW) * T + 4, 0], [(v + RW) * T + 4, (h - 1) * T + 4, 1], [(v - 1) * T + 4, (h + RW) * T + 4, 1]);
+    if (v !== ROADS_V[0]) fill(v - 2, h, v, h + RW, G_ZEB); fill(v + RW, h, v + RW + 2, h + RW, G_ZEB); fill(v, h - 2, v + RW, h, G_ZEB); fill(v, h + RW, v + RW, h + RW + 2, G_ZEB);
+    CITY.signals.push([(v + RW) * T + 4, (h + RW) * T + 4, 0], [(v + RW) * T + 4, (h - 1) * T + 4, 1]); if (v !== ROADS_V[0]) CITY.signals.push([(v - 1) * T + 4, (h - 1) * T + 4, 0], [(v - 1) * T + 4, (h + RW) * T + 4, 1]);
   }
   const blocks = [];
   for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) blocks.push({ i, j, x0: XS[i][0], x1: XS[i][1], y0: YS[j][0], y1: YS[j][1], kind: KINDS[j][i] });
   for (const B of blocks) {
+    if (B.i === 0) continue;                                        // column 0 becomes the riverfront
     const R = mulberry32(B.i * 131 + B.j * 977 + 7), pv = si(R, 0, 2), s = B.i + B.j, maxF = s <= 2 ? 5 : s === 3 ? 4 : s === 4 ? 3 : 2;
     fill(B.x0, B.y0, B.x1, B.y1, G_SIDE); for (let y = B.y0; y < B.y1; y++) for (let x = B.x0; x < B.x1; x++) PAVE[gi(x, y)] = pv;
     fill(B.x0 + SW, B.y0 + SW, B.x1 - SW, B.y1 - SW, G_YARD);
@@ -209,6 +210,7 @@ function planCity() {
     else genShops(B, R, { maxF, minF: maxF > 3 ? 2 : 1, alley: R() < 0.7, big: B.kind === 'shops' && R() < 0.35 ? 'chungcu' : null });
   }
   for (const s of CITY.signals) { addP('signal', [s[0], s[1]], { block: true }); }
+  genRiverfront();
   // xe ôm + xích lô stands near the centre crossroads (kerb row). lane: [axis, dir, centre coordinate]
   const HY = ROADS_H[1] * T, VX = ROADS_V[1] * T;
   const stand = (kind, x, y, dir, lane, p, wx, wy) => { CITY.stands.push({ kind, x, y, dir, lane, p, wx, wy, state: 'parked', t: 0, v: ri(0, 7) }); blockAt(x, y); };
@@ -219,11 +221,11 @@ function planCity() {
   // kerbside taxi / cyclo hailing spots
   for (const [x, y, lane, p] of [[VX - 150, HY - 4, ['x', -1, HY + 8], VX - 150], [VX + 150, HY - 4, ['x', -1, HY + 8], VX + 150], [VX - 4, HY - 150, ['y', 1, VX + 8], HY - 150], [VX - 130, HY + 36, ['x', 1, HY + 24], VX - 130], [VX + 36, HY - 120, ['y', -1, VX + 24], HY - 120], [VX - 4, HY + 150, ['y', 1, VX + 8], HY + 150]])
     { POI.ride.push({ x, y, lane, p, ped: null, veh: null }); BLK[gi(Math.floor(x / T), Math.floor(y / T))] = 2; }
-  for (const B of blocks) furniture(B, mulberry32(B.i * 31 + B.j * 71 + 3));
+  for (const B of blocks) if (B.i > 0) furniture(B, mulberry32(B.i * 31 + B.j * 71 + 3));
   // Tết: mai pots and red lanterns at every shop / landmark door (only drawn while G.tet)
   for (const d of POI.doors) { const out = DIRV[(d.dir + 2) % 4], pr = [-out[1], out[0]]; addP('maiTet', [d.ix + out[0] * 5 + pr[0] * 11, d.iy + out[1] * 5 + pr[1] * 11], { tet: 1, e0: 0, e1: 3, v: 1 }); if (d.shop) addP('lanterns', [d.ix + out[0] * 1.8, d.iy + out[1] * 1.8], { tet: 1, e0: 0, e1: 3, mirror: out[0] === 1 }); }
   // walk costs
-  for (let i = 0; i < N * N; i++) { const t = GT[i]; WALK[i] = BLK[i] === 1 ? 0 : t === G_SIDE || t === G_ALLEY || t === G_PATH || t === G_PLAZA ? 10 : t === G_ZEB ? 12 : t === G_GRASS ? 26 : 0; }
+  for (let i = 0; i < N * N; i++) { const t = GT[i]; WALK[i] = BLK[i] === 1 ? 0 : t === G_SIDE || t === G_ALLEY || t === G_PATH || t === G_PLAZA || t === G_PROM || t === G_PIER || t === G_BRIDGE ? 10 : t === G_ZEB ? 12 : t === G_GRASS ? 26 : 0; }
 }
 
 // ----- ground painter (ImageData, one pass per season) -----
@@ -263,7 +265,8 @@ function groundColor(t, wx, wy, tx, ty, season) {
     const edge = (lx < 2 && nb(-1, 0) !== G_WATER) || (ly < 2 && nb(0, -1) !== G_WATER) || (lx > T - 2 && nb(1, 0) !== G_WATER) || (ly > T - 2 && nb(0, 1) !== G_WATER);
     if (edge) c = win ? 0xdfe6ef : 0x8f958c; else if (win) c = n > 0.97 ? 0xffffff : vn > 0.6 ? 0xc4dcea : 0xd2e8f3; else c = ((wy + Math.sin(wx / 5) * 2.2) % 7 < 1) ? 0x8fcbe0 : vn > 0.6 ? 0x559cc0 : 0x5fa8c8;
   }
-  if (!win && t !== G_WATER && t !== G_PAD) { if (season === 'fall' && n < (t === G_GRASS ? 0.06 : 0.016)) c = [0xe0853a, 0xf2c14a, 0xc0622a][(n * 1000 | 0) % 3]; else if (season === 'spring' && t !== G_GRASS && n < 0.008) c = n < 0.004 ? 0xf7c4d8 : 0xfbe88a; }
+  if (t >= G_RIVER) c = riverColor(t, wx, wy, tx, ty, season);
+  if (!win && t !== G_WATER && t !== G_PAD && t < G_RIVER) { if (season === 'fall' && n < (t === G_GRASS ? 0.06 : 0.016)) c = [0xe0853a, 0xf2c14a, 0xc0622a][(n * 1000 | 0) % 3]; else if (season === 'spring' && t !== G_GRASS && n < 0.008) c = n < 0.004 ? 0xf7c4d8 : 0xfbe88a; }
   return c;
 }
 function paintGround(season, progress) {

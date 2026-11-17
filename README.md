@@ -10,7 +10,7 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 - Era plate (top left) or keys `[` `]`: 199x / 200x / 201x / 202x. The switch crossfades in place.
 - Play / Space, prev / next, seasons (keys 1-4), "Tự đổi" auto seasons.
 - "..." opens: YouTube playlist, time of day, weather, volumes, zoom, fullscreen, hide panel (H).
-- Drag to pan, wheel to zoom, R = rain, N = night, T = Tết decorations.
+- Drag to pan, wheel to zoom, R = rain, N = night, T = Tết decorations, B = fly to the riverfront and back.
 - Panel: "Âm phố" toggles and sets the volume of street sounds (bells, horns, engines, murmur), separate from music.
 
 ## Adding content per era
@@ -20,7 +20,10 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 - `js/art.js`: `randLook()` people types; `VEH` vehicle models.
 
 ## Other files
-`js/core.js` baker and maths, `js/landmarks.js` the seven historic landmarks, `js/sim.js` traffic and NPCs, `js/fx.js` weather and particles, `js/audio.js` built-in music, `js/yt.js` YouTube player, `js/main.js` renderer, camera, UI.
+`js/river.js` riverfront: river, promenade, Cầu Mống-style bridge, pier, boats, animated water, per-era paving overlay. `js/core.js` baker and maths, `js/landmarks.js` the seven historic landmarks, `js/sim.js` traffic and NPCs, `js/fx.js` weather and particles, `js/audio.js` built-in music, `js/yt.js` YouTube player, `js/main.js` renderer, camera, UI.
 
 ## Test URL parameters
 `?tet=1&look=48,74&era=2&season=winter&time=night&wx=rain&zoom=1&pan=0,-60&warp=60&toera=3&clean=1&yt=<playlist url>`
+
+## Riverfront (west edge of the map)
+Tiles: far bank 0-5, river 5-20, quay/promenade 20-27, sidewalk 27-30, then the existing riverside road. Edit `genRiverfront()` in `js/river.js`; era variants live in `PROP.railA-D`, `PROP.lampA-D`, `pierBoxes(era)`, `bridgeBoxes(era)`, `BOAT_ERA` and `riverColor()`.
