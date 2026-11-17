@@ -2,38 +2,71 @@
 // ===== Sài Gòn Lofi — era definitions (199x → 202x) and the modern skyline =====
 // To add content to an era: edit its row here (traffic mix, people mix) and ESTYLE / SHOPS in build.js (building look, shop skins).
 const ERA = [
-  { key: '199x', sub: 'Sài Gòn thập niên 90', msg: '199x: xích lô, xe Cub, xe lam, hàng rong và nón lá',
-    veh: [['moto', 40], ['bike', 22], ['cyclo', 12], ['lam', 6], ['car', 3], ['taxi', 1.5], ['truck', 3], ['bus', 1.5]],
+  { key: '199x', sub: 'Sài Gòn thập niên 90', msg: '199x: xích lô, xe Cub, Dream, xe lam, hàng rong và nón lá',
+    veh: [['cub', 26], ['moto', 20], ['bike', 20], ['cyclo', 11], ['lam', 6], ['taxi', 2], ['car', 2.5], ['truck', 3], ['bus', 1.5]],
     ped: [['aodai', 1.4], ['office', 1], ['baba', 1.6], ['dobo', 1.2], ['youth', 1.1], ['worker', 1.3], ['oldman', 0.8], ['oldlady', 0.8], ['kid', 1], ['dress', 0.6], ['monk', 0.12]],
-    hawker: 0.09, helmet: 0, phone: 0, mask: 0, nonla: 1, xeom: 'moto', taxi: 'taxi' },
-  { key: '200x', sub: 'đầu những năm 2000', msg: '200x: Wave, Dream đầy đường, tiệm Internet và điện thoại mọc lên',
-    veh: [['wave', 44], ['moto', 16], ['bike', 8], ['cyclo', 4], ['taxi', 8], ['car', 6], ['truck', 3], ['bus', 2.5], ['lam', 0.6], ['scooter', 4]],
+    hawker: 0.09, helmet: 0, phone: 0, mask: 0, nonla: 1, xeom: 'cub', taxi: ['taxi'] },
+  { key: '200x', sub: 'đầu những năm 2000', msg: '200x: Wave, Dream, taxi Mai Linh – Vinasun, tiệm Internet và điện thoại',
+    veh: [['wave', 32], ['moto', 14], ['cub', 4], ['scooter', 9], ['bike', 7], ['cyclo', 2], ['vinasun', 7], ['mailinh', 8], ['car', 4], ['truck', 3], ['bus', 2.5], ['lam', 0.5]],
     ped: [['aodai', 1], ['office', 1.6], ['baba', 0.9], ['dobo', 1.1], ['youth', 1.9], ['worker', 1], ['oldman', 0.7], ['oldlady', 0.7], ['kid', 1.2], ['dress', 1.1], ['monk', 0.1]],
-    hawker: 0.05, helmet: 0.12, phone: 0.06, mask: 0, nonla: 0.6, xeom: 'wave', taxi: 'taxi' },
-  { key: '201x', sub: 'thành phố vươn cao', msg: '201x: Bitexco, Vincom, Air Blade, SH và những anh shipper',
-    veh: [['scooter', 46], ['wave', 14], ['taxi', 10], ['suv', 9], ['car', 5], ['grab', 6], ['bus', 3], ['truck', 2], ['bike', 2], ['cyclo', 0.7]],
+    hawker: 0.05, helmet: 0.12, phone: 0.06, mask: 0, nonla: 0.6, xeom: 'wave', taxi: ['vinasun', 'mailinh'] },
+  { key: '201x', sub: 'thành phố vươn cao', msg: '201x: Bitexco, Vincom, SH, Air Blade, taxi xanh – trắng và shipper',
+    veh: [['airblade', 20], ['sh', 14], ['vision', 10], ['scooter', 6], ['wave', 6], ['vinasun', 8], ['mailinh', 9], ['suv', 8], ['car', 4], ['grab', 3], ['ship', 3], ['bus', 3], ['truck', 2]],
     ped: [['modern', 2.4], ['fashion', 1.6], ['office', 1.8], ['youth', 1.4], ['aodai', 0.5], ['dobo', 0.8], ['baba', 0.4], ['worker', 0.7], ['oldman', 0.6], ['oldlady', 0.6], ['kid', 1], ['dress', 1], ['monk', 0.08]],
-    hawker: 0.025, helmet: 0.95, phone: 0.3, mask: 0.05, nonla: 0.3, xeom: 'grab', taxi: 'taxi' },
-  { key: '202x', sub: 'Thành phố Hồ Chí Minh hôm nay', msg: '202x: Landmark 81, Metro số 1, taxi điện và xe máy điện',
-    veh: [['scooter', 28], ['escoot', 20], ['etaxi', 12], ['suv', 10], ['grab', 11], ['ebus', 3], ['car', 4], ['truck', 2], ['bike', 2.5], ['cyclo', 0.4]],
+    hawker: 0.025, helmet: 0.95, phone: 0.3, mask: 0.05, nonla: 0.3, xeom: 'airblade', taxi: ['vinasun', 'mailinh'] },
+  { key: '202x', sub: 'Thành phố Hồ Chí Minh hôm nay', msg: '202x: Landmark 81, Metro số 1, taxi Xanh SM, xe máy điện VinFast, GrabBike',
+    veh: [['sh', 12], ['vision', 12], ['airblade', 8], ['vfscooter', 14], ['grab', 12], ['ship', 8], ['xanhsm', 14], ['suv', 6], ['car', 3], ['mailinh', 3], ['vinasun', 3], ['ebus', 3], ['truck', 1.5]],
     ped: [['modern', 3], ['fashion', 2], ['office', 1.6], ['youth', 1.2], ['aodai', 0.4], ['dobo', 0.6], ['baba', 0.3], ['worker', 0.6], ['oldman', 0.6], ['oldlady', 0.6], ['kid', 1], ['dress', 0.9], ['monk', 0.08]],
-    hawker: 0.012, helmet: 0.98, phone: 0.45, mask: 0.2, nonla: 0.2, xeom: 'grab', taxi: 'etaxi' }
+    hawker: 0.012, helmet: 0.98, phone: 0.45, mask: 0.2, nonla: 0.2, xeom: 'grab', taxi: ['xanhsm'] }
 ];
-const TWO_WHEEL = { moto: 1, wave: 1, scooter: 1, escoot: 1, grab: 1 };
+const TWO_WHEEL = { moto: 1, cub: 1, wave: 1, scooter: 1, sh: 1, airblade: 1, vision: 1, vfscooter: 1, grab: 1, ship: 1 };
+const TAXIS = { taxi: 1, vinasun: 1, mailinh: 1, xanhsm: 1 };
 
-// ----- modern vehicles -----
-function mScooter(c, trim, boxC) {
-  const B = [box(0.4, 1.5, 0, 4.2, 2, 4.2, DKC), box(11.8, 1.5, 0, 4.2, 2, 4.2, DKC), box(1.6, 0.8, 2.8, 8.4, 3.4, 4, c), box(0.2, 1.1, 5, 3.2, 2.8, 2.2, c), box(3.6, 0.6, 6.8, 6, 3.8, 1.3, 0x2a2428), box(9.6, 1, 2.2, 2.2, 3, 1.2, trim), box(11, 0.5, 3, 1.8, 4, 6.6, c), box(11.2, 0, 9.4, 1.2, 5, 0.9, DKC), box(12.8, 1.4, 6.8, 1, 2.2, 2.2, 0xf4fbff, null, { em: 0xe8f4ff }), box(0, 1.6, 6, 0.7, 1.8, 1.2, 0xd03a3a, null, TAIL)];
-  if (boxC !== undefined) B.push(box(0, 0.4, 7.2, 4.2, 4.2, 4.6, boxC, (f, u, v) => f !== 0 && v > 3.6 ? shade(boxC, -0.2) : undefined));
-  return { L: 16, W: 5, boxes: B, seats: [{ x: 7.6, z: 7.4 }, { x: 4.8, z: 7.6 }] };
+// ----- two-wheelers: each model has its own silhouette (frame type, shield, rear, nose) -----
+// Honda Cub: step-through frame, round headlight, rack
+VEH.cub = v => { const c = [0x2f4f8a, 0xc0392b, 0xe8e2d0, 0x3a6a4a, 0x8a8f98][v % 5], B = [box(0, 1.4, 0, 4.6, 2, 4.6, DKC), box(11.4, 1.4, 0, 4.6, 2, 4.6, DKC), box(4.6, 1.2, 2.4, 6, 2.4, 1.3, c), box(0.6, 1.2, 4.2, 5.6, 2.8, 3, c), box(1, 1.2, 7.2, 7, 2.8, 1.1, 0x2a2428), box(10.4, 1.4, 3, 1.1, 2.8, 7.4, c), box(10.2, 0.2, 10.4, 1, 4.4, 0.8, DKC), box(11.4, 1.5, 8.2, 1.5, 1.8, 1.9, 0xfff0b0, null, HEAD), box(-1.6, 1.4, 6.6, 2.4, 2.4, 0.8, MTL), box(1.6, 0.3, 1.2, 5, 0.9, 1, MTL), box(-0.2, 1.7, 5.6, 0.6, 1.4, 1, 0xd03a3a, null, TAIL), box(10.6, 1.2, 0.8, 4, 2.4, 1.4, c)]; return { L: 16, W: 4.8, boxes: B, seats: [{ x: 5, z: 8 }, { x: 2.2, z: 8.1 }] }; };
+// Honda Wave: underbone with a plastic fairing (cub frame, fuller front cowl, tank cover)
+VEH.wave = v => { const m = VEH.cub(v + 1), c = [0xc0392b, 0x2f5fb5, 0x2a2a30, 0xe0e4ea, 0x1f8a6a, 0xd9a02a, 0x8a2f6a, 0x4a6a9a][v % 8]; m.boxes[2].c = c; m.boxes[3].c = c; m.boxes.push(box(9.2, 0.8, 3, 1.8, 4, 8, c), box(4.4, 1, 4.4, 5, 2.8, 2.2, c), box(1.6, 1.4, 6.5, 5.6, 2, 0.6, 0xc8ccd0)); return m; };
+// generic modern scooter builder
+function scoot(o) {
+  const L = o.L, W = o.W, r = o.r, c = o.c, tr = o.tr || 0x3a3a44, rear = o.rear, fh = o.fh, y0 = (W - 3.4) / 2, zs = r * 0.6 + 2.2 + rear, B = [];
+  B.push(box(0.2, W / 2 - 1, 0, r, 2, r, DKC), box(L - r - 0.2, W / 2 - 1, 0, r, 2, r, DKC));
+  B.push(box(r * 0.5, y0, r * 0.55, L - r * 2.1, 3.4, 2, c), box(0, y0 - 0.1, r * 0.6, r * 2.1, 3.6, 2.2 + rear, c), box(r * 0.9, y0 + 0.2, zs, r * 1.9, 3, 1.1, 0x2a2428));
+  const sx = L - r * 1.9 - (o.nose === 1 ? 0.5 : 0);
+  B.push(box(sx, y0 + 0.1, r * 0.55, 1.4, 3.2, fh, c), box(L - r - 0.6, W / 2 - 1.5, r, r + 0.8, 3, 0.9, c), box(sx - 0.2, 0.2, r * 0.55 + fh + 1.8, 1, W - 0.4, 0.8, DKC));
+  if (o.nose === 1) B.push(box(sx + 0.2, y0 + 0.7, r * 0.55 + fh, 2.6, 2, 1.6, c), box(sx + 1.6, y0 + 1, r * 0.55 + fh - 0.2, 0.8, 1.4, 1.2, 0xfff0b0, null, HEAD), box(-0.6, y0 + 0.6, zs + 1.1, 2.6, 2.2, 1.2, tr), box(r, y0 + 1.1, zs + 1.1, r * 1.1, 1.2, 0.5, tr));   // pointed nose + tail spoiler (Air Blade)
+  else if (o.nose === 3) B.push(box(sx + 0.2, y0 + 0.1, r * 0.55 + fh, 2.2, 3.2, 1.5, c), box(sx + 1.8, y0 - 0.2, r * 0.55 + fh + 0.1, 0.6, 3.8, 1, 0xf4fbff, null, { em: 0xe8f4ff }), box(sx - 0.2, y0 + 0.8, r * 0.55 + fh + 2.6, 1, 1.8, 1.2, 0x2a2a30));   // wide LED bar (VinFast)
+  else B.push(box(sx + 0.2, y0 + 0.1, r * 0.55 + fh, 2.2, 3.2, o.nose === 2 ? 1.2 : 1.8, c), box(sx + 1.8, y0 + 0.9, r * 0.55 + fh + 0.1, 0.8, 1.6, 1.4, 0xfff0b0, null, HEAD));
+  B.push(box(-0.2, W / 2 - 1, zs - 0.4, 0.7, 2, 1.1, 0xd03a3a, null, TAIL));
+  if (o.boxC !== undefined) B.push(box(-0.6, y0 - 0.9, zs + 1.1, r * 1.9 + 0.8, 5.2, o.bh || 4.4, o.boxC, (f, u, v) => f !== 0 && v > (o.bh || 4.4) - 1.2 ? shade(o.boxC, -0.2) : f === 1 && o.logo && u > 1 && u < 4 && v > 1 && v < 3 ? 0xf7f4ec : undefined));
+  return { L, W, boxes: B, seats: [{ x: r * 0.9 + 3.6, z: zs + 0.3 }, { x: r * 0.9 + 1, z: zs + 0.4 }] };
 }
-VEH.wave = v => { const m = VEH.moto(0), c = [0xc0392b, 0x2f5fb5, 0x2a2a30, 0xe0e4ea, 0x1f8a6a, 0xd9a02a, 0x8a2f6a, 0x4a6a9a][v % 8]; m.boxes[2].c = c; m.boxes[3].c = c; m.boxes.push(box(9.8, 0.5, 3.4, 1.4, 3.8, 3.4, 0xe8eaee)); return m; };
-VEH.scooter = v => mScooter([0xc0392b, 0x2a2a30, 0xf2f2f0, 0x8a8f98, 0x1f4f8a, 0xf2f2f0, 0x5a3a2a, 0x2a2a30][v % 8], 0x3a3a44);
-VEH.escoot = v => mScooter([0x1fb5ad, 0xf2f2f0, 0xe0503a, 0x2a2a30, 0x9fd8e8, 0xf2c94c, 0x1fb5ad, 0xf2f2f0][v % 8], 0xc8ccd0);
-VEH.grab = v => mScooter([0x2a2a30, 0xc0392b, 0x8a8f98, 0x1f4f8a][v % 4], 0x3a3a44, [0x1faa59, 0xf08a2b, 0x1faa59, 0xe8437a][v % 4]);
-VEH.etaxi = v => { const c = [0x1fb5ad, 0x1fb5ad, 0xf2f2f0][v % 3], L = 28, W = 12, B = wheels4(L, W, 3.6).concat([box(0, 0, 1.6, L, W, 5.4, c, (f, u, v2) => f !== 0 && v2 > 1.4 && v2 < 2.4 ? 0xf2f2f0 : undefined), box(6, 1, 7, 15, 10, 4.2, c, glassP(c)), box(27.4, 1, 4.6, 0.6, 10, 0.9, 0xf4fbff, null, { em: 0xe8f4ff }), box(-0.2, 1, 4.6, 0.6, 10, 0.9, 0xd03a3a, null, TAIL), box(13, 4.5, 11.2, 2, 3, 1.4, 0xf4fff8, null, { em: 0xa0ffd0 })]); return { L, W, boxes: B, seats: [] }; };
-VEH.suv = v => { const c = [0xf2f2f0, 0x2a2a30, 0x8a8f98, 0xb8383a, 0x1f3f6a, 0xd8d2c4][v % 6], L = 30, W = 12.5, B = wheels4(L, W, 4.2).concat([box(0, 0, 2, L, W, 6, c), box(4, 0.8, 8, 19, W - 1.6, 4.8, c, glassP(c)), box(29.4, 1, 5, 0.6, 2.6, 1.4, 0xf4fbff, null, { em: 0xe8f4ff }), box(29.4, W - 3.6, 5, 0.6, 2.6, 1.4, 0xf4fbff, null, { em: 0xe8f4ff }), box(-0.2, 1, 5.4, 0.6, W - 2, 1, 0xd03a3a, null, TAIL)]); return { L, W, boxes: B, seats: [] }; };
-VEH.ebus = v => { const c = [0x2fa86a, 0x2f9ab8][v % 2], L = 44, W = 13; return { L, W, boxes: wheels4(L, W, 4).concat([box(0, 0, 1.8, L, W, 12.4, c, (f, u, v2, b) => { if (f === 0) return 0xe8ecee; const Wd = f === 1 ? b.w : b.d; if (v2 > 5 && v2 < 10.4 && u > 1 && u < Wd - 1) return (u % 7 < 0.8) ? 0x2a2a30 : GLS; if (v2 > 10.8) return 0xf2f2f0; }), box(10, 2, 14.2, 22, 9, 1.6, 0xd8dcde), box(43.4, 1, 4, 0.6, 11, 1, 0xf4fbff, null, { em: 0xe8f4ff })]), seats: [] }; };
+VEH.scooter = v => scoot({ L: 16.5, W: 5, r: 4.2, rear: 2.8, fh: 5.4, nose: 0, c: [0x8a8f98, 0x7a2a3a, 0x2f4f8a, 0x5a5a62, 0xc9b88a][v % 5] });                                   // early 2000s (Spacy / Nouvo era)
+VEH.sh = v => scoot({ L: 18.5, W: 5.8, r: 5, rear: 3.2, fh: 7, nose: 0, c: [0xf2f2f0, 0x2a2a30, 0x8a8f98, 0xb8383a, 0x1f3f6a][v % 5], tr: 0x2a2a30 });                        // big wheels, tall body
+VEH.airblade = v => scoot({ L: 16, W: 5, r: 4.4, rear: 1.6, fh: 5.2, nose: 1, c: [0xc0392b, 0x2a2a30, 0x1f4f8a, 0xf2f2f0, 0x8a2f6a][v % 5], tr: 0xc8ccd0 });                    // sporty pointed nose, spoiler
+VEH.vision = v => scoot({ L: 14, W: 4.4, r: 3.8, rear: 2.2, fh: 4.4, nose: 2, c: [0xf2b8c8, 0xf2f2f0, 0x9fd8e8, 0x2a2a30, 0xd8d2b0, 0xe8c8a0][v % 6] });                       // small and slim
+VEH.vfscooter = v => scoot({ L: 16, W: 5, r: 4.4, rear: 2.6, fh: 6, nose: 3, c: [0x1fb5ad, 0xf2f2f0, 0x2a2a30, 0xe0503a, 0x9fd8e8, 0xf2c94c][v % 6] });                        // smooth body, LED headlight bar
+VEH.grab = v => scoot({ L: 16, W: 5, r: 4.4, rear: 2.2, fh: 5.4, nose: v % 2 ? 1 : 2, c: [0x2a2a30, 0xc0392b, 0x8a8f98, 0x1f4f8a][v % 4], boxC: 0x1faa59, bh: 5, logo: 1 });
+VEH.ship = v => scoot({ L: 16, W: 5, r: 4.4, rear: 2.2, fh: 5.4, nose: 2, c: [0x2a2a30, 0x8a8f98, 0xf2f2f0][v % 3], boxC: [0xf08a2b, 0xd9281e, 0x2f6ab8, 0xf2c94c][v % 4], bh: 6.6, logo: 1 });
+
+// ----- cars -----
+function sedan(o) {
+  const L = o.L || 28, W = o.W || 12, c = o.c, bh = o.bh || 3.8, ch = o.ch || 4.2, cl = o.cl || 0.46, cx = o.cx || 0.24, z0 = o.z0 || 1.6;
+  const B = wheels4(L, W, o.wr || 3.6).concat([
+    box(0, 0, z0, L, W, bh, c, (f, u, v) => f === 0 ? c : o.s1 !== undefined && v < 1.1 ? o.s1 : o.s2 !== undefined && v < 2.2 ? o.s2 : undefined),
+    box(L * cx, 1, z0 + bh, L * cl, W - 2, ch, c, glassP(c)),
+    box(L * 0.74, 0.3, z0 + bh, L * 0.26 - 0.3, W - 0.6, o.hood || 0.8, c), box(0.3, 0.3, z0 + bh, L * 0.2, W - 0.6, o.trunk || 1, c)], lights(L, W, z0 + 2.2));
+  if (o.lamp) B.push(box(L * (cx + cl / 2) - 2, W / 2 - 1.6, z0 + bh + ch, 4, 3.2, 1.8, o.lamp, null, { em: o.lampE }));
+  if (o.rack) B.push(box(L * cx + 1, 1.4, z0 + bh + ch, L * cl - 2, 0.6, 0.8, MTL), box(L * cx + 1, W - 2, z0 + bh + ch, L * cl - 2, 0.6, 0.8, MTL));
+  return { L, W, boxes: B, seats: [] };
+}
+VEH.taxi = v => sedan({ c: [0xf2c23a, 0xefe6b8][v % 2], s1: 0x2a2a30, bh: 4.2, ch: 4.8, cl: 0.52, cx: 0.2, hood: 0.4, trunk: 0.4, lamp: 0xfff4c0, lampE: 0xffe680 });          // boxy older sedan
+VEH.vinasun = v => sedan({ c: 0xf4f4f0, s1: 0x2f8a3a, s2: 0xd9281e, cl: 0.45, cx: 0.26, lamp: 0xf4f4f0, lampE: 0xdde8d0 });                                                     // white with green + red band
+VEH.mailinh = v => sedan({ c: 0x2fa86a, s1: 0xf4f4f0, cl: 0.45, cx: 0.26, lamp: 0xf4f8f4, lampE: 0xbfe8c8 });                                                                    // green
+VEH.xanhsm = v => sedan({ c: 0x1fb5ad, s1: 0xf4f4f0, bh: 4.8, ch: 4.8, cl: 0.62, cx: 0.18, z0: 2, wr: 4, hood: 0.4, lamp: 0xe8fff8, lampE: 0xa0ffe0, rack: 1 });             // taller crossover (electric)
+VEH.etaxi = VEH.xanhsm;
+VEH.suv = v => { const c = [0xf2f2f0, 0x2a2a30, 0x8a8f98, 0xb8383a, 0x1f3f6a, 0xd8d2c4][v % 6], L = 30, W = 12.5, B = wheels4(L, W, 4.2).concat([box(0, 0, 2, L, W, 6, c), box(4, 0.8, 8, 19, W - 1.6, 4.8, c, glassP(c)), box(29.4, 1, 5, 0.6, 2.6, 1.4, 0xf4fbff, null, { em: 0xe8f4ff }), box(29.4, W - 3.6, 5, 0.6, 2.6, 1.4, 0xf4fbff, null, { em: 0xe8f4ff }), box(-0.2, 1, 5.4, 0.6, W - 2, 1, 0xd03a3a, null, TAIL), box(5, 1.6, 12.8, 17, 0.6, 0.8, MTL), box(5, W - 2.2, 12.8, 17, 0.6, 0.8, MTL)]); return { L, W, boxes: B, seats: [] }; };
+VEH.ebus = v => { const c = [0xf4f4f0, 0xf4f4f0][v % 2], L = 44, W = 13; return { L, W, boxes: wheels4(L, W, 4).concat([box(0, 0, 1.8, L, W, 12.4, c, (f, u, v2, b) => { if (f === 0) return 0xe8ecee; const Wd = f === 1 ? b.w : b.d; if (v2 > 5 && v2 < 10.4 && u > 1 && u < Wd - 1) return (u % 7 < 0.8) ? 0xdfe4e6 : GLS; if (v2 < 3.6) return 0x2fa86a; if (v2 < 4.6) return 0x1f8a5a; }), box(10, 2, 14.2, 22, 9, 1.6, 0xd8dcde), box(43.4, 1, 4, 0.6, 11, 1, 0xf4fbff, null, { em: 0xe8f4ff })]), seats: [] }; };
 
 // ----- towers -----
 const curtain = (base, seed, band) => (f, u, v, b) => {
@@ -77,5 +110,9 @@ function vincom() {
 }
 PROP.metro = () => [box(-8, -5, 0, 1, 1, 12, 0x8a9098), box(7, -5, 0, 1, 1, 12, 0x8a9098), box(-8, 4, 0, 1, 1, 12, 0x8a9098), box(7, 4, 0, 1, 1, 12, 0x8a9098), box(-7, -4, 0, 14, 8, 1.2, 0x3a3a44, (f, u, v) => f === 0 ? ((u | 0) % 2 ? 0x55555f : 0x2f2f38) : undefined), box(-9, -6, 12, 18, 12, 1.6, 0xb8dcea, (f, u, v) => f === 0 ? ((u | 0) % 6 === 0 || (v | 0) % 6 === 0 ? 0xe8f0f4 : 0x9ccbe0) : 0xe8f0f4), box(-9, 5, 13.6, 18, 1, 5, 0x1f5fa8, (f, u, v) => { if (f !== 1) return undefined; EM = 0x103060; if (textAt('METRO', u - 0.5, v - 0.2)) { EM = 0xffffff; return 0xf7f4ec; } }, { nf: 1 })];
 PROP.atm = () => [box(-3, -3, 0, 6, 6, 16, 0xe8ecef, (f, u, v) => { if (f !== 1) return undefined; if (v > 12) { EM = 0x2040a0; return textAt('ATM', u + 2.5 - 3, v - 12.6) ? 0xf7f4ec : 0x1f4f8a; } if (v > 6 && v < 11 && u > 1 && u < 5) { EM = 0x9fd0ff; return 0x8fc8f0; } if (v > 3 && v < 5 && u > 1.5 && u < 4.5) return 0x3a3a44; }), box(-3.4, -3.4, 16, 6.8, 6.8, 1, 0x1f4f8a)];
-PROP.ebike = (s, v) => rotBoxes(vehModel('escoot', v), 1);
+PROP.ebike = (s, v) => rotBoxes(vehModel('vfscooter', v), 1);
 PROP.pscooter = (s, v) => rotBoxes(vehModel('scooter', v), 1);
+
+// ----- Tết decorations (placed once, shown only while G.tet) -----
+PROP.maiTet = (sn, v) => [box(-2.6, -2.6, 0, 5.2, 5.2, 4, 0xc4583a, (f, u, vv) => f !== 0 && (vv | 0) === 2 ? 0xf2c94c : undefined), box(-0.6, -0.6, 4, 1.2, 1.2, 5, 0x6b4a3a), box(-5.2, -5.2, 8, 10.4, 10.4, 10, 0xf2c94c, (f, u, vv, b, wx, wy) => { const h = hash2(u * 5 + f * 3 + (wx | 0), vv * 5 + (wy | 0)); return h < 0.3 ? 0xffe680 : h > 0.84 ? 0x6ab04a : h > 0.72 ? 0xe0a820 : undefined; }, { ns: 1 })];
+PROP.lanterns = () => { const B = [box(-10, -0.3, 24, 20, 0.6, 0.7, 0x8a6a3a)]; for (let i = 0; i < 5; i++) { const x = -8.4 + i * 4.2; B.push(box(x + 1, -0.2, 22.6, 0.4, 0.4, 1.4, 0x8a6a3a), box(x, -1.4, 18.4, 2.4, 2.8, 4.2, 0xd9281e, (f, u, v) => v < 0.9 || v > 3.3 ? 0xf2c94c : undefined, { em: 0xff7a3a, nf: 1 }), box(x + 0.9, -0.2, 16.4, 0.6, 0.6, 2, 0xf2c94c)); } return B; };

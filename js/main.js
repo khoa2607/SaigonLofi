@@ -1,6 +1,6 @@
 'use strict';
 // ===== Sài Gòn Lofi — game state, camera, renderer, UI wiring, boot =====
-const G = { era: 0, season: 'spring', hour: 7.5, hourTarget: 7.5, t: 0, daySpeed: 24 / 600, autoTime: true, autoSeason: false, autoWeather: true, seasonT: 0, weather: 'clear', weatherT: 45, rain: 0, rainTarget: 0, cloud: 0, cloudTarget: 0, gust: 0, gustT: 6, gustP: 0, windy: false, wet: 0, flash: 0, lights: 0, hot: false, snowAmt: 0, world: null, busy: true, tickT: -9 };
+const G = { tet: false, era: 0, season: 'spring', hour: 7.5, hourTarget: 7.5, t: 0, daySpeed: 24 / 600, autoTime: true, autoSeason: false, autoWeather: true, seasonT: 0, weather: 'clear', weatherT: 45, rain: 0, rainTarget: 0, cloud: 0, cloudTarget: 0, gust: 0, gustT: 6, gustP: 0, windy: false, wet: 0, flash: 0, lights: 0, hot: false, snowAmt: 0, world: null, busy: true, tickT: -9 };
 const R = { canvas: null, ctx: null, lc: null, lctx: null, vw: 640, vh: 360, scale: 3, zoom: 0, panX: -110, panY: -120, cx: 0, cy: 0, dirty: true, dpr: 1 };
 const GROUNDS = {}, SEASONS = ['spring', 'summer', 'fall', 'winter'];
 const SNAME = { spring: 'Xuân', summer: 'Hạ', fall: 'Thu', winter: 'Đông' };
@@ -23,8 +23,8 @@ function resize() {
   R.ctx.imageSmoothingEnabled = false; R.lctx.imageSmoothingEnabled = false; camera();
 }
 function camera() {
-  const hw = R.vw / 2, hh = R.vh / 2, mx = Math.max(0, WORLD * (1 - hh / (WORLD / 2)) - hw); R.panX = clamp(R.panX, -mx, mx);
-  const my = Math.max(0, (WORLD / 2) * (1 - (Math.abs(R.panX) + hw) / WORLD) - hh); R.panY = clamp(R.panY, -my, my);
+  const hw = R.vw / 2, hh = R.vh / 2, mx = Math.max(0, WORLD * (1 - hh / (WORLD / 2)) - hw) + hw * 0.7; R.panX = clamp(R.panX, -mx, mx);   // a little overscroll so edge landmarks (Dinh Độc Lập) can be centred
+  const my = Math.max(0, (WORLD / 2) * (1 - (Math.abs(R.panX) + hw) / WORLD) - hh) + hh * 0.75; R.panY = clamp(R.panY, -my, my);
   R.cx = Math.round(hw - R.panX); R.cy = Math.round(hh - WORLD / 2 - R.panY); R.dirty = true;
   const sy = WORLD / 2 + R.panY; SIM.focus[0] = sy + R.panX / 2; SIM.focus[1] = sy - R.panX / 2;
 }
@@ -42,7 +42,7 @@ function draw() {
   const g = R.ctx, lg = R.lctx, W = G.world, vw = R.vw, vh = R.vh, cx = R.cx, cy = R.cy; if (!W) return;
   visList();
   const h = G.hour, lights = Math.max(h > 12 ? sstep(17.5, 19.2, h) : 1 - sstep(5.3, 6.6, h), clamp(G.cloud * 0.9 - 0.5, 0, 0.4)), useL = lights > 0.03; G.lights = lights;
-  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = G.season === 'winter' ? '#cfd8e4' : '#9a96a2'; g.fillRect(0, 0, vw, vh);
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#2f2b27'; g.fillRect(0, 0, vw, vh);
   const gx = WORLD - cx, gy = -cy, sx0 = Math.max(0, gx), sy0 = Math.max(0, gy), sx1 = Math.min(WORLD * 2, gx + vw), sy1 = Math.min(WORLD, gy + vh);
   if (sx1 > sx0 && sy1 > sy0) g.drawImage(W.ground, sx0, sy0, sx1 - sx0, sy1 - sy0, sx0 - gx, sy0 - gy, sx1 - sx0, sy1 - sy0);
   if (G.wet > 0.02) { g.fillStyle = 'rgba(26,38,74,' + (G.wet * 0.2).toFixed(3) + ')'; g.fillRect(0, 0, vw, vh); }
@@ -104,6 +104,11 @@ function draw() {
   if (R.xf > 0 && R.snap) { g.globalAlpha = Math.ceil(R.xf * 8) / 8; g.drawImage(R.snap, 0, 0); g.globalAlpha = 1; }
 }
 // ----- eras: swap buildings / signs / skyline in place with a short crossfade; people and traffic turn over on their own -----
+function setTet(on, quiet) {
+  if (!G.world || G.busy || on === G.tet) return;
+  snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1;
+  updateUI(); save(); if (!quiet) ticker(on ? 'Tết đến rồi! Hoa mai nở vàng, đèn lồng đỏ khắp phố' : 'Hết Tết, phố trở lại nhịp sống thường ngày', true);
+}
 function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
@@ -154,7 +159,7 @@ async function setSeason(s, first) {
 }
 
 // ----- UI -----
-function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom })); } catch (e) { } }
+function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom })); } catch (e) { } }
 function load() { try { return JSON.parse(localStorage.getItem('saigonlofi') || '{}'); } catch (e) { return {}; } }
 const TIMES = { morning: 7.5, noon: 12.5, dusk: 17.9, night: 21.5 };
 function setTime(k) { G.timeKey = k; if (k === 'auto') G.autoTime = true; else { G.autoTime = false; G.hourTarget = TIMES[k]; } updateUI(); save(); }
@@ -164,7 +169,7 @@ function updateStatus() { const h = Math.floor(G.hour), m = Math.floor((G.hour -
 function updateUI() {
   document.querySelectorAll('[data-era]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.era === G.era)); $('eraSub').textContent = ERA[G.era].sub;
   document.querySelectorAll('[data-season]').forEach(b => b.setAttribute('aria-pressed', b.dataset.season === G.season));
-  $('autoSeason').setAttribute('aria-pressed', G.autoSeason);
+  $('autoSeason').setAttribute('aria-pressed', G.autoSeason); $('tetBtn').setAttribute('aria-pressed', !!G.tet); $('streetOn').setAttribute('aria-pressed', AU.streetOn); $('streetOn').textContent = AU.streetOn ? 'Bật' : 'Tắt';
   document.querySelectorAll('[data-time]').forEach(b => b.setAttribute('aria-pressed', b.dataset.time === (G.autoTime ? 'auto' : G.timeKey)));
   document.querySelectorAll('[data-wx]').forEach(b => b.setAttribute('aria-pressed', b.dataset.wx === (G.autoWeather ? 'auto' : G.weather)));
   $('wxRainL').textContent = G.season === 'winter' ? 'Tuyết dày' : 'Mưa';
@@ -175,7 +180,7 @@ function drawViz() { const c = $('viz'), g = c.getContext('2d'), a = vizLevel();
 function initUI() {
   const st = load();
   if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
-  $('vMusic').value = AU.vol.music * 100; $('vAmb').value = AU.vol.amb * 100; $('vVinyl').value = AU.vol.vinyl * 100;
+  if (st.streetOn === false) AU.streetOn = false; $('vStreet').value = AU.vol.street * 100; $('vMusic').value = AU.vol.music * 100; $('vAmb').value = AU.vol.amb * 100; $('vVinyl').value = AU.vol.vinyl * 100;
   $('play').onclick = () => { $('hint').classList.add('gone'); if (YTS.on) { ytToggle(); return; } if (AU.playing) audioPause(); else audioPlay(); updateUI(); };
   $('prev').onclick = () => { if (YTS.on) ytNext(-1); else nextTrack(-1); updateUI(); save(); }; $('next').onclick = () => { if (YTS.on) ytNext(1); else nextTrack(1); updateUI(); save(); };
   $('ytGo').onclick = () => { $('hint').classList.add('gone'); ytLoad($('ytUrl').value); }; $('ytUrl').addEventListener('keydown', e => { if (e.key === 'Enter') $('ytGo').click(); }); $('ytOff').onclick = () => ytOff();
@@ -183,6 +188,8 @@ function initUI() {
   $('more').onclick = () => { const p = $('panel'); p.hidden = !p.hidden; $('more').setAttribute('aria-expanded', !p.hidden); };
   document.querySelectorAll('[data-season]').forEach(b => b.onclick = () => { if (b.dataset.season !== G.season) setSeason(b.dataset.season); });
   document.querySelectorAll('[data-era]').forEach(b => b.onclick = () => setEra(+b.dataset.era));
+  $('tetBtn').onclick = () => setTet(!G.tet); $('streetOn').onclick = () => { AU.streetOn = !AU.streetOn; setVol(); updateUI(); save(); };
+  $('vStreet').oninput = e => { AU.vol.street = e.target.value / 100; setVol(); save(); };
   $('autoSeason').onclick = () => { G.autoSeason = !G.autoSeason; G.seasonT = 0; updateUI(); save(); };
   document.querySelectorAll('[data-time]').forEach(b => b.onclick = () => setTime(b.dataset.time));
   document.querySelectorAll('[data-wx]').forEach(b => b.onclick = () => setWx(b.dataset.wx));
@@ -190,7 +197,7 @@ function initUI() {
   $('zin').onclick = () => { R.zoom++; resize(); save(); }; $('zout').onclick = () => { R.zoom--; resize(); save(); };
   $('full').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); };
   $('hide').onclick = () => { document.body.classList.add('clean'); ticker('Bấm phím H hoặc chạm 2 lần để hiện lại bảng', true); };
-  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
+  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setTet(!G.tet); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
   // drag to pan, wheel to zoom
   const cv = R.canvas; let drag = null;
   cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY }; cv.setPointerCapture(e.pointerId); });
@@ -206,9 +213,10 @@ async function boot() {
   R.canvas = $('cv'); R.ctx = R.canvas.getContext('2d'); R.lc = mk(4, 4); R.lctx = R.lc.getContext('2d');
   R.halo = glow(44, 255, 214, 140, 150); R.pool = glow(60, 255, 206, 130, 70, true); R.pool2 = glow(26, 255, 236, 180, 110, true);
   const st = initUI(), q = new URLSearchParams(location.search);
-  G.era = clamp(+(q.get('era') || st.era || 0) | 0, 0, 3);
+  G.era = clamp(+(q.get('era') || st.era || 0) | 0, 0, 3); G.tet = q.get('tet') === '1' || (q.get('tet') === null && !!st.tet);
   G.season = q.get('season') || st.season || 'spring'; if (!SEASONS.includes(G.season)) G.season = 'spring';
   if (q.get('zoom')) R.zoom = +q.get('zoom');
+  if (q.get('look')) { const t = q.get('look').split(','), wx = t[0] * T + 4, wy = t[1] * T + 4; R.panX = wx - wy; R.panY = (wx + wy) / 2 - WORLD / 2; }
   if (q.get('pan')) { const p = q.get('pan').split(','); R.panX = +p[0]; R.panY = +p[1]; }
   initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); resize();
   const tm = q.get('time') || st.time; if (tm && tm !== 'auto' && TIMES[tm]) { G.timeKey = tm; G.autoTime = false; G.hour = G.hourTarget = TIMES[tm]; }

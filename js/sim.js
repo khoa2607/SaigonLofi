@@ -16,14 +16,15 @@ function initLanes() {
 }
 const faceLane = L => L.axis === 'x' ? (L.cs > 0 ? 3 : 1) : (L.cs > 0 ? 2 : 0);   // direction a kerbside pedestrian looks to face this lane
 const findLane = l => SIM.lanes.find(L => L.axis === l[0] && L.dir === l[1] && L.c === l[2]);
-const VSPEED = { moto: [44, 60], wave: [46, 62], scooter: [46, 62], escoot: [42, 56], grab: [46, 60], bike: [19, 25], cyclo: [15, 19], taxi: [46, 56], etaxi: [46, 56], car: [46, 56], suv: [46, 56], lam: [32, 38], truck: [36, 42], bus: [34, 40], ebus: [34, 40] };
-const isTaxi = k => k === 'taxi' || k === 'etaxi';
+const VSPEED = { moto: [44, 58], cub: [36, 48], wave: [46, 62], scooter: [44, 58], sh: [46, 60], airblade: [50, 66], vision: [42, 54], vfscooter: [44, 56], grab: [46, 60], ship: [50, 66], bike: [19, 25], cyclo: [15, 19], taxi: [42, 52], vinasun: [46, 56], mailinh: [46, 56], xanhsm: [46, 56], car: [46, 56], suv: [46, 56], lam: [32, 38], truck: [36, 42], bus: [34, 40], ebus: [34, 40] };
+const isTaxi = k => !!TAXIS[k];
 function riderSheet(type) { const L = dressFor(randLook(type), G.season); L.carry = null; L.ganh = false; L.pack = 0; if (L.type !== 'monk' && L.hat !== 'helm' && Math.random() < ERA[G.era].helmet) { L.hat = 'helm'; L.b.hat = 'helm'; L.hatC = pick([0x2a2a30, 0xf2f2f0, 0xd9534f, 0x3d6fb5, 0xf2c94c, 0xf2a0b5, 0x8a8f98]); } if (G.rain > 0.3 && L.type !== 'monk') L.poncho = 1; return { look: L, sheet: personSheet(L) }; }
 function makeVeh(lane, kind, s) {
   const v = ri(0, 7), m = vehModel(kind, v), sp = VSPEED[kind], tw = TWO_WHEEL[kind], small = tw || kind === 'bike' || kind === 'cyclo';
   const o = { kind, v, lane, s, sp: 0, vmax: rr(sp[0], sp[1]), len: m.L, era: G.era, mask: small ? (tw && chance(0.5) ? 2 : 1) : 3, lat: 0, riders: [], stopAt: null, dwell: 0, dwellT: 0, onStop: null, busy: false, lc: 0, honk: rr(5, 40) };
   o.lat = o.latT = o.mask === 3 ? 0 : o.mask === 1 ? 4.2 : -3.8;
-  if (kind === 'grab') { o.riders.push(riderSheet('grabber')); if (chance(0.35)) o.riders.push(riderSheet(wpick([['modern', 3], ['fashion', 2], ['office', 2]]))); }
+  if (kind === 'ship') { o.riders.push(riderSheet('shipper')); }
+  else if (kind === 'grab') { o.riders.push(riderSheet('grabber')); if (chance(0.35)) o.riders.push(riderSheet(wpick([['modern', 3], ['fashion', 2], ['office', 2]]))); }
   else if (tw) { o.riders.push(riderSheet(G.era >= 2 ? wpick([['modern', 3], ['office', 2], ['fashion', 2], ['youth', 2], ['worker', 1], ['dobo', 1]]) : wpick([['youth', 3], ['office', 2], ['worker', 2], ['driver', 2], ['dress', 1], ['dobo', 1], ['oldman', 0.5]]))); if (chance(0.3)) o.riders.push(riderSheet(wpick([['youth', 2], ['dress', 2], ['kid', 2], ['aodai', 1], ['baba', 1]]))); }
   else if (kind === 'bike') o.riders.push(riderSheet(wpick([['aodai', 3], ['kid', 2], ['youth', 2], ['oldman', 1], ['baba', 1.5]])));
   else if (kind === 'cyclo') { o.riders.push(riderSheet('driver')); if (chance(0.45)) { o.riders.push(riderSheet(wpick([['oldlady', 2], ['dress', 2], ['office', 1], ['baba', 2], ['aodai', 1]]))); o.busy = true; } }
@@ -49,9 +50,9 @@ function updateVehicles(dt) {
       v.lc -= dt;
       if (v.mask !== 3 && byLeader && lim < 18 && v.sp < v.vmax * 0.7 && v.lc <= 0 && v.stopAt === null) { const om = 3 - v.mask; let ok = true; for (const o of vs) if (o !== v && (o.mask & om) && o.s + o.len / 2 > v.s - 14 && o.s - o.len / 2 < v.s + 24) { ok = false; break; } if (ok) { v.mask = om; v.latT = om === 1 ? 4.2 : -3.8; v.lc = 2.5; } else v.lc = 0.6; }
       v.lat += clamp(v.latT - v.lat, -9 * dt, 9 * dt);
-      v.honk -= dt; if (v.honk < 0) { v.honk = rr(18, 70); if (G.onSfx && v.kind !== 'bike' && v.kind !== 'cyclo' && onScreen(vehPos(v), 0)) G.onSfx(TWO_WHEEL[v.kind] ? 'beep' : 'horn'); if (G.onSfx && v.kind === 'bike' && onScreen(vehPos(v), 0)) G.onSfx('bell'); }
+      v.honk -= dt; if (v.honk < 0) { v.honk = rr(18, 70); if (G.onSfx && v.kind !== 'bike' && v.kind !== 'cyclo' && !(G.era === 3 && Math.random() < 0.6) && onScreen(vehPos(v), 0)) G.onSfx(TWO_WHEEL[v.kind] ? 'beep' : 'horn'); if (G.onSfx && v.kind === 'bike' && onScreen(vehPos(v), 0)) G.onSfx('bell'); }
     }
-    for (let i = vs.length - 1; i >= 0; i--) if (vs[i].s > WORLD + 50) { vs[i].dead = true; vs.splice(i, 1); }
+    for (let i = vs.length - 1; i >= 0; i--) if (vs[i].s > WORLD + 50 || (vs[i].obs && vs[i].stopAt === null && !onScreen(vehPos(vs[i]), 60))) { vs[i].dead = true; vs.splice(i, 1); }
     L.spawnT -= dt * dens;
     if (L.spawnT <= 0 || L.want) {
       let clear = true; for (const o of vs) if (o.s - o.len / 2 < 16) { clear = false; break; }
@@ -61,16 +62,19 @@ function updateVehicles(dt) {
   SIM.vehs = SIM.vehs.filter(v => !v.dead);
   // stands (xe ôm / xích lô waiting at the kerb)
   for (const s of CITY.stands) {
+    if (s.kind === 'cyclo' && G.era >= 2) { s.state = 'off'; s.ped = null; continue; }
+    if (s.state === 'off') { s.state = 'away'; s.t = 2; }
     if (s.state === 'away') { s.t -= dt; if (s.t <= 0) { s.state = 'parked'; s.alpha = 0; s.driver = null; s.v = ri(0, 7); } }
     else { s.alpha = Math.min(1, (s.alpha === undefined ? 1 : s.alpha) + dt * 1.5); if (!s.driver) s.driver = riderSheet(s.kind === 'xeom' && ERA[G.era].xeom === 'grab' ? 'grabber' : 'driver'); s.nap = (s.nap || rr(4, 30)) - dt; if (s.nap < 0) { s.nap = rr(14, 40); s.bub = { k: pick(['zzz', 'dots', 'note', G.season === 'summer' ? 'sun' : 'zzz']), t: 2.6, a: 0 }; } if (s.bub) { s.bub.t -= dt; s.bub.a += dt; if (s.bub.t <= 0) s.bub = null; } }
   }
   // kerbside hails: find or request a taxi / cyclo for a waiting pedestrian
   for (const r of POI.ride) {
+    if (r.veh && r.veh.dead) r.veh = null;
     if (!r.ped || r.veh) continue;
     const L = r.L || (r.L = findLane(r.lane)), sp = laneS(L, r.p); let best = null;
     for (const v of L.vehs) if ((isTaxi(v.kind) || (v.kind === 'cyclo' && r.ped.wantCyclo)) && !v.busy && v.stopAt === null && v.s < sp - 26 && (!best || v.s > best.s)) best = v;
     if (best) { r.veh = best; best.busy = true; best.stopAt = sp; best.dwell = 2; best.latT = isTaxi(best.kind) ? 1.6 : 4.4; best.onStop = v => { const p = r.ped; r.ped = null; r.veh = null; if (p && !p.dead) { p.dead = true; if (v.kind === 'cyclo') v.riders.push({ look: p.look, sheet: p.sheet }); ticker(isTaxi(v.kind) ? (v.kind === 'etaxi' ? 'Taxi điện êm ru vừa đón khách' : 'Taxi vừa đón một vị khách') : 'Xích lô thong thả chở khách dạo phố'); if (G.onSfx) G.onSfx('door'); } else v.busy = v.kind === 'cyclo' && v.riders.length > 1; v.latT = v.mask === 3 ? 0 : v.mask === 1 ? 4.2 : -3.8; }; }
-    else if (!L.want) L.want = r.ped.wantCyclo ? 'cyclo' : ERA[G.era].taxi;
+    else if (!L.want) L.want = r.ped.wantCyclo ? 'cyclo' : pick(ERA[G.era].taxi);
   }
   // now and then a taxi drops someone off
   SIM.dropT -= dt;
@@ -156,7 +160,7 @@ function makePlan(p) {
   if (L.ganh) { for (let i = 0; i < 4; i++) { const d = freeOfDoor(p, 260); if (d) st.push(goStep(d.x, d.y), { t: 'wait', dur: rr(3, 6), dir: (d.dir + 2) % 4, em: pick(['banhmi', 'pho', 'cup', 'note']) }); } st.push(...exitSteps(p)); return; }
   if (L.type === 'monk') { st.push(...exitSteps(p)); return; }
   const kidAM = L.kid && h > 6 && h < 8;
-  const k = wpick([['pass', 2.4], ['cafe', day && !kidAM ? (h < 10 ? 3 : 2) : 0.2], ['eat', h > 5.5 && h < 22 ? 2.2 : 0.3], ['drink', S === 'summer' ? 3 : 1.4], ['barber', day && !L.fem && !L.kid ? 1.1 : 0], ['xeom', 1.5], ['taxi', L.kid ? 0 : 1], ['cyclo', L.kid ? 0 : 0.9], ['door', (h > 6 && h < 9) || (h > 16.5 && h < 19) ? 3.2 : 1.6], ['market', day ? 1.8 : 0], ['park', wet ? 0.2 : (h > 5 && h < 8) || (h > 16 && h < 20) ? 2.6 : 1.4], ['school', kidAM ? 6 : 0]]);
+  const k = wpick([['pass', 2.4], ['cafe', day && !kidAM ? (h < 10 ? 3 : 2) : 0.2], ['eat', h > 5.5 && h < 22 ? 2.2 : 0.3], ['drink', S === 'summer' ? 3 : 1.4], ['barber', day && !L.fem && !L.kid ? 1.1 : 0], ['xeom', 1.5], ['taxi', L.kid ? 0 : 1], ['cyclo', L.kid || G.era >= 2 ? 0 : 0.9], ['door', (h > 6 && h < 9) || (h > 16.5 && h < 19) ? 3.2 : 1.6], ['market', day ? 1.8 : 0], ['park', wet ? 0.2 : (h > 5 && h < 8) || (h > 16 && h < 20) ? 2.6 : 1.4], ['school', kidAM ? 6 : 0]]);
   let s;
   if (k === 'cafe' && (s = freeOf(POI.cafe, q => q.k === 'cafe'))) seatSteps(p, s, rr(18, 40), 'cup', ['note', 'cup', 'smile', 'zzz', 'heart', 'dots'], q => { if (chance(0.3)) ticker('Thêm một ly cà phê sữa đá, ngồi ngắm phố'); });
   else if (k === 'eat' && (s = freeOf(POI.eat))) { p.reserve(s); st.push(goStep(s.x, s.y), { t: 'wait', dur: rr(2.6, 4), dir: s.dir, em: 'dots' }, { t: 'do', fn: q => { q.release(); q.say(s.icon, 2.4); if (s.carry) { q.look.carry = s.carry; q.resheet(); } if (chance(0.5)) ticker(s.icon === 'pho' ? 'Một tô phở nóng hổi vừa ra lò' : s.icon === 'banhmi' ? 'Bánh mì Sài Gòn, đặc biệt thơm bơ!' : 'Một ly chè mát lạnh giữa phố'); } }); const t = !s.carry && freeOf(POI.cafe, q => q.k === 'eat', 300); if (t) seatSteps(p, t, rr(12, 22), s.icon, ['smile', s.icon, 'note']); }
@@ -231,7 +235,7 @@ function updatePeds(dt) {
 // era change: old-era walkers drift away, old vehicles hurry off, waiting drivers change over
 function eraShift() {
   for (const p of SIM.peds) { if (p.dog !== undefined) continue; p.old = true; if (!p.sit && !p.chat && p.st !== 'hail' && chance(0.6)) { p.release(); p.steps = [{ t: 'wait', dur: rr(0, 5), pose: 0 }].concat(exitSteps(p)); p.st = 'idle'; p.cur = null; } }
-  for (const v of SIM.vehs) v.vmax *= 1.25;
+  for (const v of SIM.vehs) { v.obs = !ERA[G.era].veh.some(e => e[0] === v.kind); v.vmax *= v.obs ? 1.5 : 1.15; }   // out-of-era vehicles hurry off and vanish once off screen
   for (const s of CITY.stands) { s.driver = null; s.alpha = 0; }
   SIM.spawnT = 0;
 }

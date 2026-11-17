@@ -10,7 +10,8 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 - Era plate (top left) or keys `[` `]`: 199x / 200x / 201x / 202x. The switch crossfades in place.
 - Play / Space, prev / next, seasons (keys 1-4), "Tự đổi" auto seasons.
 - "..." opens: YouTube playlist, time of day, weather, volumes, zoom, fullscreen, hide panel (H).
-- Drag to pan, wheel to zoom, R = rain, N = night.
+- Drag to pan, wheel to zoom, R = rain, N = night, T = Tết decorations.
+- Panel: "Âm phố" toggles and sets the volume of street sounds (bells, horns, engines, murmur), separate from music.
 
 ## Adding content per era
 - `js/eras.js`: `ERA[]` holds the traffic mix, people mix, and helmet/phone/mask rates per era. Also the modern vehicles and towers (Bitexco, Landmark 81, Vincom, apartment tower).
@@ -22,4 +23,4 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 `js/core.js` baker and maths, `js/landmarks.js` the seven historic landmarks, `js/sim.js` traffic and NPCs, `js/fx.js` weather and particles, `js/audio.js` built-in music, `js/yt.js` YouTube player, `js/main.js` renderer, camera, UI.
 
 ## Test URL parameters
-`?era=2&season=winter&time=night&wx=rain&zoom=1&pan=0,-60&warp=60&toera=3&clean=1&yt=<playlist url>`
+`?tet=1&look=48,74&era=2&season=winter&time=night&wx=rain&zoom=1&pan=0,-60&warp=60&toera=3&clean=1&yt=<playlist url>`

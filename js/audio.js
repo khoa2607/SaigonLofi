@@ -1,6 +1,6 @@
 'use strict';
 // ===== Sài Gòn Lofi — generative lofi music + ambience (WebAudio, no samples) =====
-const AU = { ctx: null, playing: false, track: 0, vol: { music: 0.7, amb: 0.5, vinyl: 0.35 }, next: 0, bar: 0, timer: null, level: 0 };
+const AU = { ctx: null, playing: false, track: 0, vol: { music: 0.7, amb: 0.5, vinyl: 0.35, street: 0.4 }, streetOn: true, next: 0, bar: 0, timer: null, level: 0 };
 const QUAL = { M7: [0, 4, 7, 11], m7: [0, 3, 7, 10], 7: [0, 4, 7, 10], m9: [0, 3, 7, 10, 14], M9: [0, 4, 7, 11, 14], 6: [0, 4, 7, 9] };
 const TRACKS = [
   { name: 'Cà phê sữa đá', bpm: 72, key: 53, min: 0, prog: [[53, 'M7'], [52, 'm7'], [50, 'm7'], [48, 'M7']] },
@@ -15,22 +15,22 @@ function noiseBuf(sec, fn) { const c = AU.ctx, b = c.createBuffer(1, c.sampleRat
 function audioInit() {
   if (AU.ctx) return; const c = AU.ctx = new (window.AudioContext || window.webkitAudioContext)();
   AU.master = c.createGain(); AU.master.gain.value = 0.9; AU.master.connect(c.destination);
-  AU.mus = c.createGain(); AU.amb = c.createGain(); AU.vin = c.createGain();
+  AU.mus = c.createGain(); AU.amb = c.createGain(); AU.vin = c.createGain(); AU.str = c.createGain();
   // tape path: gentle low-pass + slow wow
   const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3000; lp.Q.value = 0.4;
   const dl = c.createDelay(0.05); dl.delayTime.value = 0.012; const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 0.33; lg.gain.value = 0.0016; lfo.connect(lg); lg.connect(dl.delayTime); lfo.start();
-  AU.bus = c.createGain(); AU.bus.connect(lp); lp.connect(dl); dl.connect(AU.mus); AU.mus.connect(AU.master); AU.amb.connect(AU.master); AU.vin.connect(AU.master);
+  AU.bus = c.createGain(); AU.bus.connect(lp); lp.connect(dl); dl.connect(AU.mus); AU.mus.connect(AU.master); AU.amb.connect(AU.master); AU.vin.connect(AU.master); AU.str.connect(AU.master);
   AU.an = c.createAnalyser(); AU.an.fftSize = 64; AU.mus.connect(AU.an);
   AU.white = noiseBuf(2);
   // vinyl crackle
   const cr = noiseBuf(4, () => Math.random() < 0.0009 ? (Math.random() * 2 - 1) * 0.9 : (Math.random() * 2 - 1) * 0.018), s = c.createBufferSource(); s.buffer = cr; s.loop = true; const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900; s.connect(hp); hp.connect(AU.vin); s.start();
   // ambience beds: rain, wind, city hum, cicadas
-  const bed = (type, f, q) => { const n = c.createBufferSource(); n.buffer = AU.white; n.loop = true; const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q || 0.5; const g = c.createGain(); g.gain.value = 0; n.connect(fl); fl.connect(g); g.connect(AU.amb); n.start(); return { g, fl }; };
-  AU.rainBed = bed('bandpass', 2600, 0.35); AU.windBed = bed('lowpass', 420, 0.9); AU.humBed = bed('lowpass', 150, 0.6); AU.cicBed = bed('bandpass', 5200, 9);
+  const bed = (type, f, q, dest) => { const n = c.createBufferSource(); n.buffer = AU.white; n.loop = true; const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q || 0.5; const g = c.createGain(); g.gain.value = 0; n.connect(fl); fl.connect(g); g.connect(dest || AU.amb); n.start(); return { g, fl }; };
+  AU.rainBed = bed('bandpass', 2600, 0.35); AU.windBed = bed('lowpass', 420, 0.9); AU.humBed = bed('lowpass', 150, 0.6, AU.str); AU.murBed = bed('bandpass', 720, 1.1, AU.str); AU.cicBed = bed('bandpass', 5200, 9);
   const tr = c.createOscillator(), tg = c.createGain(); tr.type = 'square'; tr.frequency.value = 19; tg.gain.value = 0; tr.connect(tg); tr.start(); AU.cicTrem = tg;
   setVol(); AU.ambT = 1;
 }
-function setVol() { if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.mus.gain.setTargetAtTime(AU.vol.music * 0.85, t, 0.05); AU.amb.gain.setTargetAtTime(AU.vol.amb * 0.9, t, 0.05); AU.vin.gain.setTargetAtTime(AU.playing ? AU.vol.vinyl * 0.5 : 0, t, 0.1); }
+function setVol() { if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.mus.gain.setTargetAtTime(AU.vol.music * 0.85, t, 0.05); AU.amb.gain.setTargetAtTime(AU.vol.amb * 0.9, t, 0.05); AU.vin.gain.setTargetAtTime(AU.playing ? AU.vol.vinyl * 0.5 : 0, t, 0.1); AU.str.gain.setTargetAtTime(AU.streetOn ? AU.vol.street * 1.1 : 0, t, 0.15); }
 function env(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
 function tone(type, f, t, a, peak, d, dest, det, bend) { const c = AU.ctx, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.setValueAtTime(bend ? f * bend : f, t); if (bend) o.frequency.exponentialRampToValueAtTime(f, t + 0.09); if (det) o.detune.value = det; env(g, t, a, peak, d); o.connect(g); g.connect(dest || AU.bus); o.start(t); o.stop(t + a + d + 0.05); return o; }
 function nz(t, d, peak, type, f, dest) { const c = AU.ctx, s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(); s.buffer = AU.white; fl.type = type; fl.frequency.value = f; env(g, t, 0.002, peak, d); s.connect(fl); fl.connect(g); g.connect(dest || AU.bus); s.start(t, Math.random()); s.stop(t + d + 0.05); }
@@ -61,22 +61,29 @@ function ambTick(dt) {
   if (!AU.ctx || AU.ctx.state !== 'running') return; const c = AU.ctx, t = c.currentTime, day = G.hour > 5.5 && G.hour < 18.5, on = AU.playing ? 1 : 0;
   AU.rainBed.g.gain.setTargetAtTime(on * (G.season === 'winter' ? 0 : G.rain) * 0.3, t, 0.4);
   AU.windBed.g.gain.setTargetAtTime(on * (0.03 + G.gust * 0.3 + (G.windy ? 0.07 : 0)), t, 0.3); AU.windBed.fl.frequency.setTargetAtTime(320 + G.gust * 700, t, 0.3);
-  AU.humBed.g.gain.setTargetAtTime(on * 0.09 * (day ? 1 : 0.5), t, 1);
+  AU.humBed.g.gain.setTargetAtTime(on * (G.era === 3 ? 0.07 : 0.11) * (day ? 1 : 0.5), t, 1);
+  AU.murBed.g.gain.setTargetAtTime(on * Math.min(1, SIM.peds.length / 55) * 0.05 * (day ? 1 : 0.4) * (1 - Math.min(1, G.rain)), t, 1);
+  AU.strT = (AU.strT === undefined ? 3 : AU.strT) - dt; if (AU.strT <= 0) { AU.strT = rr(4, 11); if (on && AU.streetOn) streetEvent(); }
   AU.cicBed.g.gain.setTargetAtTime(on * (G.season === 'summer' && day && G.rain < 0.1 ? 0.016 + (G.hot ? 0.012 : 0) : 0), t, 1);
   AU.ambT -= dt; if (AU.ambT > 0 || !on) return; AU.ambT = rr(1.2, 5);
   if (day && G.rain < 0.2 && G.season !== 'winter') { const n = ri(2, 5), f0 = rr(2600, 4200); for (let i = 0; i < n; i++) { const o = c.createOscillator(), g = c.createGain(), tt = t + i * rr(0.07, 0.13); o.frequency.setValueAtTime(f0 * rr(0.9, 1.2), tt); o.frequency.exponentialRampToValueAtTime(f0 * rr(1.2, 1.6), tt + 0.05); env(g, tt, 0.006, 0.02, 0.07); o.connect(g); g.connect(AU.amb); o.start(tt); o.stop(tt + 0.15); } }
   else if (!day && G.rain < 0.2 && G.season !== 'winter') { for (let i = 0; i < 4; i++) { const o = c.createOscillator(), g = c.createGain(), tt = t + i * 0.085; o.frequency.value = 4300; env(g, tt, 0.004, 0.012, 0.04); o.connect(g); g.connect(AU.amb); o.start(tt); o.stop(tt + 0.1); } }
 }
 function sfx(k) {
-  if (!AU.ctx || !AU.playing || AU.ctx.state !== 'running') return; const c = AU.ctx, t = c.currentTime + 0.01, d = AU.amb;
+  if (!AU.ctx || !AU.playing || AU.ctx.state !== 'running') return; const c = AU.ctx, t = c.currentTime + 0.01, d = (k === 'thunder' || k === 'gust' || k === 'plane') ? AU.amb : AU.str;
   if (k === 'beep') { tone('square', 620, t, 0.004, 0.012, 0.08, d); tone('square', 620, t + 0.13, 0.004, 0.012, 0.09, d); }
   else if (k === 'horn') { tone('sawtooth', 392, t, 0.01, 0.014, 0.22, d); tone('sawtooth', 494, t, 0.01, 0.012, 0.22, d); }
   else if (k === 'bell') { tone('sine', 2350, t, 0.002, 0.03, 0.5, d); tone('sine', 3520, t, 0.002, 0.012, 0.3, d); tone('sine', 2350, t + 0.16, 0.002, 0.024, 0.5, d); }
   else if (k === 'vend') { nz(t, 0.09, 0.2, 'lowpass', 500, d); nz(t + 0.16, 0.12, 0.22, 'lowpass', 320, d); }
   else if (k === 'door') { nz(t, 0.08, 0.14, 'lowpass', 380, d); }
   else if (k === 'moto') { const o = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.setValueAtTime(62, t); o.frequency.linearRampToValueAtTime(128, t + 0.9); f.type = 'lowpass'; f.frequency.value = 600; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.035, t + 0.15); g.gain.linearRampToValueAtTime(0.0001, t + 1.2); o.connect(f); f.connect(g); g.connect(d); o.start(t); o.stop(t + 1.3); }
+  else if (k === 'kenh') { for (let i = 0; i < 3; i++) { tone('triangle', 1568, t + i * 0.19, 0.003, 0.03, 0.12, d); tone('triangle', 2093, t + i * 0.19 + 0.07, 0.003, 0.02, 0.1, d); } }
+  else if (k === 'ev') { const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(320, t); o.frequency.linearRampToValueAtTime(520, t + 1.1); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.016, t + 0.4); g.gain.linearRampToValueAtTime(0.0001, t + 1.4); o.connect(g); g.connect(d); o.start(t); o.stop(t + 1.5); }
   else if (k === 'thunder') { nz(t, 1.6, 0.3, 'lowpass', 140, d); nz(t + 0.25, 1.1, 0.16, 'lowpass', 90, d); }
   else if (k === 'gust') { nz(t, 1.3, 0.05, 'bandpass', 500, d); }
   else if (k === 'plane') { nz(t, 3.5, 0.03, 'lowpass', 260, d); }
 }
 function vizLevel() { if (!AU.an || !AU.playing) return null; const a = new Uint8Array(AU.an.frequencyBinCount); AU.an.getByteFrequencyData(a); return a; }
+
+// era-flavoured street ambience: vendor bells and cyclo bells in the 90s, engines in the 2000s, near-silent EVs today
+function streetEvent() { const e = G.era, r = Math.random(); if (e <= 1 && r < 0.35) sfx('kenh'); else if (e === 0 && r < 0.55) sfx('bell'); else if (e === 3) sfx(r < 0.55 ? 'ev' : r < 0.8 ? 'door' : 'beep'); else sfx(r < 0.6 ? 'moto' : r < 0.85 ? 'beep' : 'door'); }

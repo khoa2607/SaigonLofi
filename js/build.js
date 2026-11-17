@@ -28,7 +28,9 @@ const SHOPS = {
   xoso: { sign: ['XO SO'], bg: 0xf2c94c, fg: 0xc0392b, kind: 'glass', e: { 2: { sign: ['NGAN HANG', 'ATM'], kind: 'modern', bg: 0x1f4f8a, fg: 0xf7f4ec } } },
   dientu: { sign: ['VIDEO', 'TIVI'], bg: 0xf2c94c, fg: 0x2f4f8a, kind: 'open', tv: 1, e: { 1: { sign: ['INTERNET', 'NET'], bg: 0x2a3a5a, fg: 0x9fe0ff, neon: 1 }, 2: { sign: ['GAME NET', 'NET'] }, 3: { sign: ['E-SPORT', 'NET'], bg: 0x2a1a4a, fg: 0xc79aff } } },
   che: { sign: ['CHE', 'CHE'], bg: 0x4fa3a0, fg: 0xf7f4ec, kind: 'open', aw: [0x4fa3a0, 0xf7f4ec], e: { 2: { sign: ['TRA SUA', 'TRA'], bg: 0xf2a0b5, fg: 0x3a2050 } } },
-  banh: { sign: ['BANH MI'], bg: 0xf08a2b, fg: 0xf7f4ec, kind: 'open', aw: [0xf08a2b, 0xf7f4ec] }
+  banh: { sign: ['BANH MI'], bg: 0xf08a2b, fg: 0xf7f4ec, kind: 'open', aw: [0xf08a2b, 0xf7f4ec] },
+  // one lot, four lives: grocery -> Internet cafe -> phone shop -> modern cafe
+  evo: { sign: ['TAP HOA', 'T.HOA'], bg: 0x2f8a5a, fg: 0xf7f4ec, kind: 'open', aw: [0x2f8a5a, 0xf7f4ec], e: { 1: { sign: ['INTERNET', 'NET'], kind: 'glass', bg: 0x2a3a5a, fg: 0x9fe0ff, neon: 1, aw: null }, 2: { sign: ['DIEN THOAI', 'MOBILE'], kind: 'modern', bg: 0xd9281e, fg: 0xf7f4ec, neon: 0, aw: null }, 3: { sign: ['COFFEE', 'CAFE'], kind: 'modern', bg: 0x1f6a5a, fg: 0xf7f4ec, neon: 0, aw: null } } }
 };
 const SHOP_KEYS = Object.keys(SHOPS);
 function shopSpec(key, era) { const b = SHOPS[key]; if (!b) return null; const s = Object.assign({}, b); if (b.e) for (let i = 1; i <= era; i++) if (b.e[i]) Object.assign(s, b.e[i]); return s; }
@@ -185,42 +187,6 @@ function chungcu(R, w, d, era) {
   const Z = GH + n * FH;
   B.push(box(w / 2 - 6, d, 0, 12, 4, Z + 7, era === 3 ? acc : shade(wall, -0.06), (f, u, v) => f === 1 && u > 4 && u < 8 && v % 15 > 4 && v % 15 < 12 && v > 20 ? 0x3f566e : f === 1 && v < 15 && u > 3 && u < 9 ? 0x2f2a38 : undefined));
   for (let i = 0; i < 5; i++) roofStuff(R, B, 4 + i * (w - 8) / 5, 2, (w - 8) / 5, d - 4, Z, Math.min(era, 2));
-  return B;
-}
-// Bến Thành-style market hall with clock tower
-function market(w, d, era) {
-  const cream = 0xeadfc4, trim = 0xf7f1e0, tile = TILE, B = [], wk = ESTYLE[era || 0].wear;
-  const arch = (f, u, v, b) => {
-    if (f === 0) return 0xa89f90; const W = f === 1 ? b.w : b.d;
-    if (v > b.h - 2.2) return trim; if (v < 1.5) return shade(cream, -0.2);
-    const bay = Math.floor(u / 16), a = Math.abs(u - bay * 16 - 8);
-    if (a < 5.2 && v < 15.5 - Math.max(0, a - 2.6) * 1.4) { if (a > 4.3 || v > 14.3 - Math.max(0, a - 2.2) * 1.4) return trim; EM = 0x6a4a24; return v < 6 && hash2(u * 0.7 | 0, bay + f) < 0.6 ? GOODS[(u + bay | 0) % GOODS.length] : 0x3b3140; }
-    if (f === 1 && v > 16 && v < 22) { if (textAt('CHO', u - (W / 2 - 34), v - 16.5)) return 0xb5553a; if (textAt('BEN THANH', u - (W / 2 + 14), v - 16.5)) return 0xb5553a; }
-    return vnoise(u / 4, v / 9) > 0.63 ? mixc(shade(cream, -0.07), 0x8a6a4a, 0.15 * wk) : cream;
-  };
-  B.push(box(0, 0, 0, w, d, 24, cream, arch));
-  for (let k = 0; k < 6; k++) B.push(box(-1 + k * 1.5, k * 8, 24 + k * 3, w + 2 - k * 3, d - k * 16, 3, tile, (f, u, v) => f === 0 ? ((v | 0) % 2 ? tile : shade(tile, -0.13)) : shade(tile, -0.1)));
-  const tx = w / 2 - 11, ty = d - 12;
-  B.push(box(tx, ty, 0, 22, 16, 54, cream, (f, u, v, b) => {
-    if (f === 0) return trim; const W = f === 1 ? b.w : b.d, a = Math.abs(u - W / 2);
-    if (v > 51.5 || (v > 30 && v < 31.5)) return trim;
-    if (f === 1) { const r = Math.hypot(u - 11, v - 41); if (r < 6.2) { if (r > 5.2) return 0x6b5238; EM = 0xfff2c0; if ((Math.abs(u - 11) < 0.6 && v > 41 && v < 45) || (Math.abs(v - 41) < 0.6 && u > 11 && u < 14.2)) return 0x2a2140; return 0xfbf6e4; } }
-    if (a < 4.6 && v < 19 - Math.max(0, a - 2.2) * 1.5) return a > 3.7 || v > 17.8 - Math.max(0, a - 2) * 1.5 ? trim : 0x3b3140;
-    if (a < 1.4 && v > 22 && v < 28) return 0x3f566e;
-    return vnoise(u / 4, v / 9) > 0.63 ? shade(cream, -0.07) : cream;
-  }));
-  B.push(box(tx - 1.5, ty - 1.5, 54, 25, 19, 2, trim), box(tx + 3, ty + 2.5, 56, 16, 11, 5, tile, corr(tile)), box(tx + 7, ty + 5.5, 61, 8, 5, 4, tile, corr(tile)), box(tx + 10.4, ty + 7.4, 65, 1.2, 1.2, 8, 0x8a8f98));
-  return B;
-}
-// pink church (Tân Định style)
-function church(w, d) {
-  const pink = 0xf0a8b8, trim = 0xfbe4ea, B = [];
-  const p = (f, u, v, b) => { if (f === 0) return 0xc98a98; if (v > b.h - 1.6 || v < 1.2) return trim; const bay = Math.floor(u / 12), a = Math.abs(u - bay * 12 - 6); if (a < 2.2 && v > 7 && v < 20 - Math.max(0, a - 0.8) * 2.2) { if (hash2(bay, f) < 0.7) EM = 0xffd0a0; return a < 0.4 ? trim : 0x6a88b8; } return vnoise(u / 4, v / 8) > 0.65 ? shade(pink, -0.06) : pink; };
-  B.push(box(0, 0, 0, w, d, 28, pink, p));
-  for (let k = 0; k < 5; k++) B.push(box(k * 3.4, -1, 28 + k * 3, w - k * 6.8, d + 2, 3, 0xc9707a, (f, u, v) => f === 0 ? ((u | 0) % 2 ? 0xc9707a : 0xb85f6a) : 0xb85f6a));
-  const tx = w / 2 - 8;
-  B.push(box(tx, d - 4, 0, 16, 12, 62, pink, (f, u, v, b) => { if (f === 0) return trim; const W = f === 1 ? b.w : b.d, a = Math.abs(u - W / 2); if (v > 60 || (v > 28 && v < 29.6) || (v > 44 && v < 45.4)) return trim; if (f === 1 && a < 3.6 && v < 17 - Math.max(0, a - 1.4) * 2) return a > 2.8 ? trim : 0x5a3a44; if (a < 1.8 && ((v > 33 && v < 41) || (v > 48 && v < 57))) { EM = 0xffd0a0; return 0x6a88b8; } return vnoise(u / 4, v / 8) > 0.65 ? shade(pink, -0.06) : pink; }));
-  B.push(box(tx + 2, d - 2, 62, 12, 8, 5, 0xc9707a), box(tx + 4.5, d, 67, 7, 4, 6, 0xc9707a), box(tx + 6.6, d + 1.2, 73, 2.8, 1.6, 7, 0xc9707a), box(tx + 7.6, d + 1.6, 80, 0.8, 0.8, 7, trim), box(tx + 5.8, d + 1.6, 83, 4.4, 0.8, 0.8, trim));
   return B;
 }
 // colonial villa / school block

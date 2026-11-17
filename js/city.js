@@ -14,9 +14,10 @@ function fill(x0, y0, x1, y1, t) { for (let y = Math.max(0, y0); y < Math.min(N,
 const blockAt = (wx, wy) => { const x = Math.floor(wx / T), y = Math.floor(wy / T); if (x >= 0 && y >= 0 && x < N && y < N) BLK[gi(x, y)] = 1; };
 const isBlk = (tx, ty) => tx < 0 || ty < 0 || tx >= N || ty >= N || BLK[gi(tx, ty)] === 1;
 // a building record: `g` is a box list, or a function era -> box list for buildings that change with the era. o: {e0, e1} = eras it exists in
-function addB(g, tx, ty, tw, td, o) { o = o || {}; const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1 }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
+const NOTREE = [];
+function addB(g, tx, ty, tw, td, o) { o = o || {}; if (o.lm) NOTREE.push({ x0: tx - 1, y0: ty - 1, x1: tx + tw + 2, y1: ty + td + 3 }); const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1 }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
 const ERA_SWAP = { parked: [['parked', 0, 1], ['pscooter', 2, 2], ['ebike', 3, 3]], vend: [['tuThuoc', 0, 0], ['vend', 1, 3]], booth: [['booth', 0, 1], ['atm', 2, 3]], tuThuoc: [['tuThuoc', 0, 1], ['pot', 2, 3]] };
-function addP(name, p, o) { o = o || {}; const sw = o.e0 === undefined && o.e1 === undefined ? ERA_SWAP[name] : null; for (const q of sw || [[name, o.e0 || 0, o.e1 === undefined ? 3 : o.e1]]) CITY.recs.push({ t: 'p', name: q[0], x: p[0], y: p[1], v: o.v || 0, m: !!o.mirror, kb: o.kb || 0, only: o.only, e0: q[1], e1: q[2] }); if (o.block) blockAt(p[0], p[1]); if (name === 'cartPho') (CITY.steam || (CITY.steam = [])).push([p[0] - 2.6, p[1]]); if (name === 'lamp' || name === 'pole') CITY.lamps.push(o.mirror ? [p[0] + (name === 'pole' ? 6.8 : 0), p[1], name === 'pole' ? 29 : 23] : [p[0], p[1] + (name === 'pole' ? 6.8 : 0), name === 'pole' ? 29 : 23]); }
+function addP(name, p, o) { o = o || {}; const sw = o.e0 === undefined && o.e1 === undefined ? ERA_SWAP[name] : null; for (const q of sw || [[name, o.e0 || 0, o.e1 === undefined ? 3 : o.e1]]) CITY.recs.push({ t: 'p', name: q[0], x: p[0], y: p[1], v: o.v || 0, m: !!o.mirror, kb: o.kb || 0, only: o.only, e0: q[1], e1: q[2], tet: o.tet }); if (o.block) blockAt(p[0], p[1]); if (name === 'cartPho') (CITY.steam || (CITY.steam = [])).push([p[0] - 2.6, p[1]]); if (name === 'lamp' || name === 'pole') CITY.lamps.push(o.mirror ? [p[0] + (name === 'pole' ? 6.8 : 0), p[1], name === 'pole' ? 29 : 23] : [p[0], p[1] + (name === 'pole' ? 6.8 : 0), name === 'pole' ? 29 : 23]); }
 function addT(spc, wx, wy, v) { const r = { t: 't', spc, v: v || 0, x: wx, y: wy, ph: hash2(wx, wy) * 9 }; CITY.recs.push(r); CITY.trees.push(r); blockAt(wx, wy); }
 function actor(p, dir, type, o) { CITY.actors.push(Object.assign({ x: p[0], y: p[1], dir, type: type || 'baba', pose: 0 }, o)); }
 
@@ -35,6 +36,7 @@ function spill(R, shop, F, w) {
   else if (shop === 'pho' || shop === 'com' || shop === 'che' || shop === 'banh') { put(shop === 'che' ? 'cartChe' : shop === 'banh' ? 'cartBanhmi' : 'cartPho', 5, 4.2, 0, true, 3); actor(P(12.5, 3.2), out, 'baba', { role: 'vendor', apron: 1 }); const p = P(5, 12); POI.eat.push({ x: p[0], y: p[1], dir: wall, icon: shop === 'banh' ? 'banhmi' : shop === 'che' ? 'cup' : 'pho', carry: shop === 'banh' ? 'banhmi' : shop === 'che' ? 'cup' : null, ped: null }); if (w >= 32) tableSet(w - 4, 'eat'); }
   else if (shop === 'taphoa') { put('crates', 4, 3.4, si(R, 0, 2)); put('vend', w - 4, 3.2, 0); const p = P(w - 4, 11.5); POI.drink.push({ x: p[0], y: p[1], dir: wall, icon: 'cup', carry: 'cup', ped: null, vend: 1 }); if (w >= 32) put('tuThuoc', 12, 3, 0); }
   else if (shop === 'suaxe') { put('tires', 3.5, 3.5, 0); put('parked', 11, 4, si(R, 0, 7)); if (w >= 32) put('parked', w - 5, 4, si(R, 0, 7)); actor(P(15.5, 5), back, 'worker', { role: 'mech', pose: 5 }); }
+  else if (shop === 'evo') { addP('crates', P(4, 3.4), { v: 1, e0: 0, e1: 1 }); addP('table', P(5, 4.4), { v: 1, e0: 3 }); addP('stool', P(1.6, 8.4), { v: 2, e0: 3 }); addP('stool', P(8.6, 8.4), { v: 0, e0: 3 }); addP('pot', P(w - 3, 2.5), { v: 3 }); }
   else { if (R() < 0.6) put('pot', 2.5, 2.5, si(R, 0, 5)); if (R() < 0.45) put('parked', w - 4, 4.4, si(R, 0, 7)); }
   if (S.aw) { const p = P(w / 2 + 3, 3); POI.shelter.push({ x: p[0], y: p[1], ped: null }); }
 }
@@ -91,11 +93,11 @@ function genShops(B, R, o) {
   let xs = ix0, alley = -1;
   if (o.alley && ix1 - ix0 > 22) { alley = ix0 + si(R, 8, ix1 - ix0 - 18); fill(alley, iy0, alley + 2, iy1, G_ALLEY); addP('gate', [(alley + 1) * T, iy1 * T - 2], { v: si(R, 0, 4), kb: 2 }); }
   if (o.big === 'chungcu') { const w = 14, cseed = (R() * 1e9) | 0; addB(era => chungcu(mulberry32(cseed), w * T, 6 * T, era), ix0, iy1 - 6, w, 6); for (let k = 0; k < 3; k++) { const p = [(ix0 + 2 + k * 5) * T, iy1 * T + 12]; POI.doors.push({ x: p[0], y: p[1], ix: p[0], iy: iy1 * T + 1.5, dir: 3 }); } addP('parked', [(ix0 + 4) * T, iy1 * T + 4], { v: 2, block: true }); addP('parked', [(ix0 + 5) * T + 2, iy1 * T + 4], { v: 4, block: true }); addP('cartChe', [(ix0 + 9) * T, iy1 * T + 4.4], { block: true, kb: 3 }); actor([(ix0 + 10) * T + 3, iy1 * T + 3.4], 1, 'baba', { role: 'vendor' }); POI.eat.push({ x: (ix0 + 9) * T, y: iy1 * T + 12, dir: 3, icon: 'cup', carry: 'cup', ped: null }); xs = ix0 + w; }
-  if (o.big === 'ducba') { fill(ix0, iy1 - 15, ix0 + 12, iy1, G_PLAZA); addB(ducba(80, 104), ix0 + 1, iy1 - 13, 10, 13); POI.doors.push({ x: (ix0 + 6) * T, y: iy1 * T + 12, ix: (ix0 + 6) * T, iy: iy1 * T + 1, dir: 3 }); addP('mary', [(ix0 + 6) * T, iy1 * T + 20], { block: true }); alley = ix0 + 12; fill(alley, iy0, alley + 2, iy1, G_ALLEY); addP('gate', [(alley + 1) * T, iy1 * T - 2], { v: 2, kb: 2 }); xs = alley + 2; alley = -1; }
-  if (o.big === 'nhahat') { fill(ix0, iy1 - 12, ix0 + 11, iy1, G_PLAZA); addB(nhahat(72, 88), ix0 + 1, iy1 - 11, 9, 11); POI.doors.push({ x: (ix0 + 5.5) * T, y: iy1 * T + 12, ix: (ix0 + 5.5) * T, iy: iy1 * T + 1, dir: 3 }); xs = ix0 + 11; }
+  if (o.big === 'ducba') { fill(ix0, iy1 - 15, ix0 + 12, iy1, G_PLAZA); addB(ducba(80, 104), ix0 + 1, iy1 - 13, 10, 13, { lm: 1 }); POI.doors.push({ x: (ix0 + 6) * T, y: iy1 * T + 12, ix: (ix0 + 6) * T, iy: iy1 * T + 1, dir: 3 }); addP('mary', [(ix0 + 6) * T, iy1 * T + 20], { block: true }); alley = ix0 + 12; fill(alley, iy0, alley + 2, iy1, G_ALLEY); addP('gate', [(alley + 1) * T, iy1 * T - 2], { v: 2, kb: 2 }); xs = alley + 2; alley = -1; }
+  if (o.big === 'nhahat') { fill(ix0, iy1 - 12, ix0 + 11, iy1, G_PLAZA); addB(nhahat(72, 88), ix0 + 1, iy1 - 11, 9, 11, { lm: 1 }); POI.doors.push({ x: (ix0 + 5.5) * T, y: iy1 * T + 12, ix: (ix0 + 5.5) * T, iy: iy1 * T + 1, dir: 3 }); xs = ix0 + 11; }
   if (alley >= 0 && alley > xs + 3) { rowS(R, B, xs, alley, o); rowS(R, B, alley + 2, ix1 - 6, o); } else rowS(R, B, xs, ix1 - 6, o);
   cornerLot(R, B, o.corner || sp(R, SHOP_KEYS), Math.max(2, o.maxF - (o.cornerLow ? 1 : 0)));
-  if (o.east === 'buudien') { fill(ix1 - 9, iy0, ix1, iy0 + 18, G_PLAZA); addB(mirrorBoxes(buudien(112, 64)), ix1 - 8, iy0 + 3, 8, 14); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 10) * T, ix: ix1 * T + 1, iy: (iy0 + 10) * T, dir: 2 }); addP('mailbox', [ix1 * T + 4, (iy0 + 6) * T], { block: true }); addP('booth', [ix1 * T + 4, (iy0 + 14) * T], { block: true }); addP('flag', [(ix1 - 4) * T, (iy0 + 1) * T + 4], { block: true }); rowE(R, B, iy0 + 18, iy1 - 6, o); }
+  if (o.east === 'buudien') { fill(ix1 - 9, iy0, ix1, iy0 + 18, G_PLAZA); addB(mirrorBoxes(buudien(112, 64)), ix1 - 8, iy0 + 3, 8, 14, { lm: 1 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 10) * T, ix: ix1 * T + 1, iy: (iy0 + 10) * T, dir: 2 }); addP('mailbox', [ix1 * T + 4, (iy0 + 6) * T], { block: true }); addP('booth', [ix1 * T + 4, (iy0 + 14) * T], { block: true }); addP('flag', [(ix1 - 4) * T, (iy0 + 1) * T + 4], { block: true }); rowE(R, B, iy0 + 18, iy1 - 6, o); }
   else rowE(R, B, iy0, iy1 - 6, o);
   for (const t of o.sites || []) towerSite(R, t[0], t[1], t[2], t[3], t[4], t[5]);
   infill(R, B, ix0, iy0, ix1 - 7, iy1 - 8, Math.min(3, o.maxF));
@@ -123,9 +125,9 @@ function genPark(B, R) {
 function genMarket(B, R) {
   const ix0 = B.x0 + SW, iy0 = B.y0 + SW, ix1 = B.x1 - SW, iy1 = B.y1 - SW;
   fill(ix0, iy0, ix1, iy1, G_PLAZA);
-  addB(era => market(160, 112, era), ix0 + 1, iy1 - 14, 20, 14);
+  addB(era => market(160, 112, era), ix0 + 1, iy1 - 14, 20, 14, { lm: 1 });
   for (const a of [28, 60, 100, 132]) { const p = [(ix0 + 1) * T + a, iy1 * T + 12]; POI.doors.push({ x: p[0], y: p[1], ix: p[0], iy: iy1 * T + 1.5, dir: 3, shop: 'cho' }); }
-  addB(mirrorBoxes(ubnd(96, 56)), ix1 - 7, iy0 + 1, 7, 12); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 7) * T, ix: ix1 * T + 1, iy: (iy0 + 7) * T, dir: 2 });
+  addB(mirrorBoxes(ubnd(96, 56)), ix1 - 7, iy0 + 1, 7, 12, { lm: 1 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 7) * T, ix: ix1 * T + 1, iy: (iy0 + 7) * T, dir: 2 });
   rowE(R, B, iy0 + 14, iy1, { maxF: 3, shops: ['vang', 'may', 'taphoa', 'dientu', 'xoso', 'thuoc'] });
   rowS(R, { y1: iy1 - 22 + SW }, ix0 + 1, ix1 - 8, { maxF: 3, shops: ['com', 'sach', 'photo'] });
   let k = 0; for (const yy of [iy1 - 20, iy1 - 17]) for (let x = ix0 + 2; x < ix1 - 9; x += 3, k++) {
@@ -140,7 +142,7 @@ function genMarket(B, R) {
 function genChurch(B, R) {
   const ix0 = B.x0 + SW, iy0 = B.y0 + SW, ix1 = B.x1 - SW, iy1 = B.y1 - SW, cx = ix0 + 13;
   fill(cx - 2, iy1 - 16, cx + 12, iy1, G_PLAZA);
-  addB(church(80, 96), cx, iy1 - 13, 10, 12);
+  addB(church(80, 96), cx, iy1 - 13, 10, 12, { lm: 1 });
   POI.doors.push({ x: (cx + 5) * T, y: iy1 * T + 12, ix: (cx + 5) * T, iy: iy1 * T + 1, dir: 3 });
   rowS(R, B, ix0, cx - 2, { maxF: 4 }); rowS(R, B, cx + 12, ix1 - 6, { maxF: 4 }); cornerLot(R, B, 'sach', 3); rowE(R, B, iy0, iy1 - 6, { maxF: 4 });
   infill(R, B, ix0, iy0, ix1 - 7, iy1 - 17, 3);
@@ -148,7 +150,7 @@ function genChurch(B, R) {
 function genDinh(B, R) {
   const ix0 = B.x0 + SW, iy0 = B.y0 + SW, ix1 = B.x1 - SW, iy1 = B.y1 - SW, cx = (ix0 + ix1) >> 1;
   fill(ix0, iy0, ix1, iy1, G_GRASS); fill(cx - 2, iy0 + 12, cx + 2, iy1, G_PATH); fill(cx - 6, iy0 + 16, cx + 6, iy0 + 24, G_PLAZA);
-  addB(dinh(160, 72), cx - 10, iy0 + 2, 20, 9); addP('fountain', [cx * T, (iy0 + 20) * T], {}); for (let y = iy0 + 18; y < iy0 + 22; y++) for (let x = cx - 2; x < cx + 2; x++) BLK[gi(x, y)] = 1;
+  addB(dinh(160, 72), cx - 10, iy0 + 2, 20, 9, { lm: 1 }); addP('fountain', [cx * T, (iy0 + 20) * T], {}); for (let y = iy0 + 18; y < iy0 + 22; y++) for (let x = cx - 2; x < cx + 2; x++) BLK[gi(x, y)] = 1;
   POI.doors.push({ x: cx * T, y: (iy0 + 14) * T, ix: cx * T, iy: (iy0 + 11) * T + 2, dir: 3 });
   for (let x = ix0; x < ix1; x += 3) { addP('fence', [tc(x) + 4, iy1 * T - 2], {}); }
   for (let i = 0; i < 30; i++) { const x = si(R, ix0, ix1 - 1), y = si(R, iy0 + 12, iy1 - 2); if (GT[gi(x, y)] === G_GRASS && !BLK[gi(x, y)] && Math.abs(x - cx) > 7) addT(sp(R, ['dau', 'me', 'cau', 'dau', 'bang']), tc(x), tc(y), si(R, 0, 3)); }
@@ -165,7 +167,7 @@ function genVilla(B, R) {
 // trees / poles / lamps / parked bikes along the kerb
 function furniture(B, R) {
   const { x0, y0, x1, y1 } = B, facade = B.kind !== 'park' && B.kind !== 'villa' && B.kind !== 'dinh';
-  const free = (x, y) => x >= 0 && y >= 0 && x < N && y < N && GT[gi(x, y)] === G_SIDE && !BLK[gi(x, y)];
+  const free = (x, y) => x >= 0 && y >= 0 && x < N && y < N && GT[gi(x, y)] === G_SIDE && !BLK[gi(x, y)] && !NOTREE.some(r => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1);
   let last = null;
   for (let x = x0 + 5, i = 0; x < x1 - 5; x += 5, i++) {                 // south kerb
     const y = y1 - 1; if (!free(x, y)) { continue; }
@@ -196,8 +198,8 @@ function planCity() {
     const R = mulberry32(B.i * 131 + B.j * 977 + 7), pv = si(R, 0, 2), s = B.i + B.j, maxF = s <= 2 ? 5 : s === 3 ? 4 : s === 4 ? 3 : 2;
     fill(B.x0, B.y0, B.x1, B.y1, G_SIDE); for (let y = B.y0; y < B.y1; y++) for (let x = B.x0; x < B.x1; x++) PAVE[gi(x, y)] = pv;
     fill(B.x0 + SW, B.y0 + SW, B.x1 - SW, B.y1 - SW, G_YARD);
-    if (B.kind === 'hero') genShops(B, R, { maxF: 4, minF: 1, sites: [[55, 56, 8, 8, 2, bitexco()], [38, 46, 10, 10, 2, vincom()]], alley: false, big: 'ducba', corner: 'cafe', cornerLow: true, shops: ['photo', 'com', 'karaoke', 'hottoc', 'taphoa', 'pho', 'suaxe', 'dientu', 'vang', 'sach', 'bia', null, 'may'] });
-    else if (B.kind === 'mix') genShops(B, R, { maxF: 4, minF: 1, sites: [[38, 87, 8, 8, 3, landmark81()], [39, 99, 6, 5, 3, aptTower(mulberry32(81), 48, 40, 13)], [48, 99, 6, 5, 3, aptTower(mulberry32(82), 48, 40, 9)]], big: 'chungcu', east: 'buudien', alley: false, corner: 'banh', shops: ['xoso', 'che', 'suaxe', null, 'hottoc', 'cafe', 'taphoa', 'pho', null, 'photo'] });
+    if (B.kind === 'hero') genShops(B, R, { maxF: 4, minF: 1, sites: [[55, 56, 8, 8, 2, bitexco()], [38, 46, 10, 10, 2, vincom()]], alley: false, big: 'ducba', corner: 'cafe', cornerLow: true, shops: ['photo', 'com', 'evo', 'karaoke', 'hottoc', 'taphoa', 'pho', 'suaxe', 'dientu', 'evo', 'vang', 'sach', 'bia', null, 'may'] });
+    else if (B.kind === 'mix') genShops(B, R, { maxF: 4, minF: 1, sites: [[38, 87, 8, 8, 3, landmark81()], [39, 99, 6, 5, 3, aptTower(mulberry32(81), 48, 40, 13)], [48, 99, 6, 5, 3, aptTower(mulberry32(82), 48, 40, 9)]], big: 'chungcu', east: 'buudien', alley: false, corner: 'banh', shops: ['xoso', 'evo', 'suaxe', null, 'hottoc', 'cafe', 'taphoa', 'pho', 'evo', 'photo'] });
     else if (B.kind === 'park') genPark(B, R);
     else if (B.kind === 'market') genMarket(B, R);
     else if (B.kind === 'church') genChurch(B, R);
@@ -218,6 +220,8 @@ function planCity() {
   for (const [x, y, lane, p] of [[VX - 150, HY - 4, ['x', -1, HY + 8], VX - 150], [VX + 150, HY - 4, ['x', -1, HY + 8], VX + 150], [VX - 4, HY - 150, ['y', 1, VX + 8], HY - 150], [VX - 130, HY + 36, ['x', 1, HY + 24], VX - 130], [VX + 36, HY - 120, ['y', -1, VX + 24], HY - 120], [VX - 4, HY + 150, ['y', 1, VX + 8], HY + 150]])
     { POI.ride.push({ x, y, lane, p, ped: null, veh: null }); BLK[gi(Math.floor(x / T), Math.floor(y / T))] = 2; }
   for (const B of blocks) furniture(B, mulberry32(B.i * 31 + B.j * 71 + 3));
+  // Tết: mai pots and red lanterns at every shop / landmark door (only drawn while G.tet)
+  for (const d of POI.doors) { const out = DIRV[(d.dir + 2) % 4], pr = [-out[1], out[0]]; addP('maiTet', [d.ix + out[0] * 5 + pr[0] * 11, d.iy + out[1] * 5 + pr[1] * 11], { tet: 1, e0: 0, e1: 3, v: 1 }); if (d.shop) addP('lanterns', [d.ix + out[0] * 1.8, d.iy + out[1] * 1.8], { tet: 1, e0: 0, e1: 3, mirror: out[0] === 1 }); }
   // walk costs
   for (let i = 0; i < N * N; i++) { const t = GT[i]; WALK[i] = BLK[i] === 1 ? 0 : t === G_SIDE || t === G_ALLEY || t === G_PATH || t === G_PLAZA ? 10 : t === G_ZEB ? 12 : t === G_GRASS ? 26 : 0; }
 }
@@ -295,6 +299,7 @@ function buildStatics(season, era) {
   for (const r of CITY.recs) {
     if (r.only && r.only !== season) continue;
     if (r.e0 !== undefined && (era < r.e0 || era > r.e1)) continue;
+    if (r.tet && !G.tet) continue;
     if (r.t === 'b') { const sl = bakeRec(r, era, snow); for (const s of sl) items.push({ c: s.c, e: s.e, x: r.x - r.y - s.ax, y: (r.x + r.y) / 2 - s.ay, w: s.w, h: s.h, key: s.key + r.x + r.y }); }
     else if (r.t === 'p') { const s = propSprite(r.name, season, r.v, r.m); items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y + r.kb }); }
     else if (r.t === 't') { const s = treeSprite(r.spc, season, r.v); r.spr = s; items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y, tree: s, ph: r.ph, wx: r.x, wy: r.y }); }
