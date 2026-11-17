@@ -27,6 +27,7 @@ const ICON_SRC = {
   star: ['...Y....', '...Y....', 'YYYYYYY.', '.YYYYY..', '..YYY...', '.YY.YY..', '.Y...Y..', '........'],
   boat: ['........', '...K....', '..KKK...', '..KKKK..', 'WWWWWWWW', 'BBBBBBBB', '.BBBBBB.', '........'],
   umb: ['..VVVV..', '.VVVVVV.', 'VVVVVVVV', '...K....', '...K....', '...K.K..', '...KK...', '........'],
+  melon: ['........', 'RRRRRRRR', 'RKRRRKRR', '.RRKRRR.', '.gRRRRg.', '..gRRg..', '...GG...', '........'],
   cyclo: ['......K.', '.RR...K.', '.RRR.KK.', 'RRRRSSK.', 'KKSSSKKK', 'K.K..K.K', 'KKK..KKK', '........']
 };
 const BUB = {};
@@ -157,6 +158,7 @@ function drawPerson(L, back, pose) {
   else if (cy === 'bag' && !sit) { set(hx, hy + 1, 0x3a3050); rect(hx - 1, hy + 2, hx + 1, hy + 4, L.bag); rect(hx - 1, hy + 4, hx + 1, hy + 4, dk(L.bag)); }
   else if (cy === 'case' && !sit) { rect(hx - 2, hy + 1, hx + 1, hy + 3, 0x6b4a36); rect(hx - 2, hy + 3, hx + 1, hy + 3, 0x4f3626); set(hx, hy + 1, 0xc9a86a); }
   else if (cy === 'banhmi') { set(hx - 1, hy - 2, 0xd9a55a); set(hx - 1, hy - 1, 0xd9a55a); set(hx - 1, hy, 0xf7f4ec); }
+  else if (cy === 'melon' && !sit) { rect(hx - 3, hy + 1, hx, hy + 4, 0x4a9a4a); rect(hx - 3, hy + 2, hx, hy + 2, 0x2f6a38); rect(hx - 3, hy + 4, hx, hy + 4, 0x2f6a38); set(hx - 2, hy + 1, 0x7ac070); }
   else if (cy === 'shop' && !sit) { rect(hx - 2, hy + 1, hx, hy + 4, 0xf2a0b5); rect(hx - 2, hy + 1, hx, hy + 1, 0xd9534f); set(hx - 1, hy, 0x58994f); }
   // --- slim the figure (drop two body columns), then outline
   { const SQ = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19], G2 = new Int32Array(PW * PH).fill(-1); for (let y = 0; y < PH; y++) for (let i = 0; i < SQ.length; i++) G2[y * PW + i + 1] = G[y * PW + SQ[i]]; G.set(G2); }
@@ -238,8 +240,8 @@ function treeSprite(spc, season, v) {
   const key = spc + season + v; if (_tree[key]) return _tree[key];
   const R = mulberry32(spc.charCodeAt(0) * 131 + spc.charCodeAt(1) * 17 + v * 977 + 5), W = 76, H = 96, bx = 38, by = 92;
   const g = new Int32Array(W * H).fill(-1), set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + x] = c; }, get = (x, y) => x >= 0 && y >= 0 && x < W && y < H ? g[y * W + x] : -1;
-  const winter = season === 'winter', snowy = winter && v % 2 === 0, SN = 0xf4f8fe;
-  const th = { dau: 38, me: 21, bang: 22, mai: 9, cau: 35 }[spc], tw = { dau: 4, me: 4, bang: 3, mai: 2, cau: 2 }[spc];
+  const winter = season === 'winter' && spc !== 'maiL', snowy = winter && v % 2 === 0, SN = 0xf4f8fe;
+  const th = { dau: 38, me: 21, bang: 22, mai: 9, cau: 35, maiL: 20 }[spc], tw = { dau: 4, me: 4, bang: 3, mai: 2, cau: 2, maiL: 3 }[spc];
   const tc = spc === 'dau' ? 0x8f7a66 : spc === 'cau' ? 0x8a7a5a : 0x6b4a3a;
   let tx = bx;
   for (let y = 0; y <= th; y++) { const off = spc === 'cau' ? Math.round(Math.sin(y / th * 1.3) * 4) : 0; tx = bx + off; for (let x = 0; x < tw; x++) set(bx - (tw >> 1) + x + off, by - y, x === tw - 1 ? shade(tc, -0.28) : x === 0 ? shade(tc, 0.14) : (spc === 'cau' && y % 3 === 0 ? shade(tc, -0.12) : tc)); }
@@ -248,8 +250,9 @@ function treeSprite(spc, season, v) {
   if (spc === 'dau') for (let i = 0; i < 6; i++) E.push([tx + sr(R, -9, 9), ty - 5 + sr(R, -9, 5), sr(R, 8, 12), sr(R, 7, 10)]);
   else if (spc === 'me') for (let i = 0; i < 7; i++) E.push([tx + sr(R, -16, 16), ty - 4 + sr(R, -7, 4), sr(R, 9, 13), sr(R, 7, 9)]);
   else if (spc === 'bang') E.push([tx - 8, ty + 4, 13, 5], [tx + 9, ty + 1, 12, 5], [tx - 3, ty - 4, 14, 5], [tx + 8, ty - 8, 9, 4], [tx - 7, ty - 10, 9, 4], [tx + 1, ty - 13, 8, 4]);
+  else if (spc === 'maiL') for (let i = 0; i < 8; i++) E.push([tx + sr(R, -12, 12), ty - 4 + sr(R, -9, 5), sr(R, 8, 12), sr(R, 6, 9)]);
   else if (spc === 'mai') for (let i = 0; i < 5; i++) E.push([tx + sr(R, -7, 7), ty - 3 + sr(R, -5, 3), sr(R, 5, 8), sr(R, 4, 6)]);
-  let pal = season === 'fall' ? LEAFPAL[spc === 'bang' ? 'fallC' : (v + (spc === 'me' ? 1 : 0)) % 2 ? 'fallB' : 'fallA'] : LEAFPAL[season === 'spring' ? 'spring' : 'summer'];
+  let pal = spc === 'maiL' ? LEAFPAL.spring : season === 'fall' ? LEAFPAL[spc === 'bang' ? 'fallC' : (v + (spc === 'me' ? 1 : 0)) % 2 ? 'fallB' : 'fallA'] : LEAFPAL[season === 'spring' ? 'spring' : 'summer'];
   if (spc === 'me' && season !== 'fall') pal = pal.map(c => mixc(c, 0x9ac040, 0.18));
   const line = (x0, y0, x1, y1, c, thick) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0; for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / (n || 1), y = y0 + (y1 - y0) * i / (n || 1); set(x, y, c); if (thick) set(x + 1, y, shade(c, -0.2)); } };
   if (spc === 'cau') {
@@ -263,7 +266,7 @@ function treeSprite(spc, season, v) {
     for (let i = 0; i < n0; i++) br(tx, ty + 2, -Math.PI / 2 + (i - (n0 - 1) / 2) * 0.75 + sr(R, -0.15, 0.15), l0, spc === 'mai' ? 2 : 3);
     if (snowy) for (let y = 1; y < by - 6; y++) for (let x = 0; x < W; x++) { const c = get(x, y); if (c >= 0 && c !== SN && get(x, y - 1) < 0 && hash2(x * 3, y + v) < 0.7) set(x, y - 1, SN); }
   } else {
-    const blossom = season === 'spring' ? (spc === 'mai' ? (v % 2 ? [0xf39abf, 0xfbc4d8, 0.62] : [0xf7d94a, 0xffeb90, 0.62]) : [[0xfbc4d8, 0xf7f4ec, 0.07], [0xf7f4ec, 0xffeb90, 0.06], [0xf2a0b5, 0xfbc4d8, 0.1]][v % 3]) : null;
+    const blossom = spc === 'maiL' ? (v % 2 ? [0xf7d94a, 0xffeb90, 0.7] : [0xf7d94a, 0xffeb90, 0.55]) : season === 'spring' ? (spc === 'mai' ? (v % 2 ? [0xf39abf, 0xfbc4d8, 0.62] : [0xf7d94a, 0xffeb90, 0.62]) : [[0xfbc4d8, 0xf7f4ec, 0.07], [0xf7f4ec, 0xffeb90, 0.06], [0xf2a0b5, 0xfbc4d8, 0.1]][v % 3]) : null;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       let best = -9; for (const e of E) { const nx = (x - e[0]) / e[2], ny = (y - e[1]) / e[3], d = nx * nx + ny * ny; if (d < 1) { const t = -nx * 0.5 - ny * 0.8 + (1 - d) * 0.25; if (t > best) best = t; } }
       if (best < -8) continue;
@@ -274,7 +277,7 @@ function treeSprite(spc, season, v) {
     }
     for (let y = H - 2; y > 0; y--) for (let x = 1; x < W - 1; x++) { const c = get(x, y); if (pal.indexOf(c) > 0 && get(x, y + 1) < 0) set(x, y, pal[0]); }
   }
-  const s = gridCanvas(g, W, H); s.ax = bx; s.ay = by; s.split = Math.round(by - th * 0.55); s.cx = tx - bx; s.cy = -(th + 6); s.rad = { dau: 13, me: 17, bang: 17, mai: 8, cau: 12 }[spc]; s.bare = winter && spc !== 'cau'; s.spc = spc;
+  const s = gridCanvas(g, W, H); s.ax = bx; s.ay = by; s.split = Math.round(by - th * 0.55); s.cx = tx - bx; s.cy = -(th + 6); s.rad = { dau: 13, me: 17, bang: 17, mai: 8, cau: 12, maiL: 14 }[spc]; s.bare = winter && spc !== 'cau'; s.spc = spc;
   return (_tree[key] = s);
 }
 // soft dithered ground shadow

@@ -15,7 +15,7 @@ const blockAt = (wx, wy) => { const x = Math.floor(wx / T), y = Math.floor(wy / 
 const isBlk = (tx, ty) => tx < 0 || ty < 0 || tx >= N || ty >= N || BLK[gi(tx, ty)] === 1;
 // a building record: `g` is a box list, or a function era -> box list for buildings that change with the era. o: {e0, e1} = eras it exists in
 const NOTREE = [];
-function addB(g, tx, ty, tw, td, o) { o = o || {}; if (o.lm) NOTREE.push({ x0: tx - 1, y0: ty - 1, x1: tx + tw + 2, y1: ty + td + 3 }); const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1 }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (!o.keep && x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
+function addB(g, tx, ty, tw, td, o) { o = o || {}; if (o.lm) NOTREE.push({ x0: tx - 1, y0: ty - 1, x1: tx + tw + 2, y1: ty + td + 3 }); const fn = typeof g === 'function'; CITY.recs.push({ t: 'b', boxes: fn ? null : g, gen: fn ? g : null, x: tx * T, y: ty * T, spr: {}, e0: o.e0 || 0, e1: o.e1 === undefined ? 3 : o.e1, lm: o.lm || 0, tw, td, keep: !!o.keep }); for (let y = ty; y < ty + td; y++) for (let x = tx; x < tx + tw; x++) if (!o.keep && x >= 0 && y >= 0 && x < N && y < N) { GT[gi(x, y)] = G_PAD; BLK[gi(x, y)] = 1; } }
 const ERA_SWAP = { parked: [['parked', 0, 1], ['pscooter', 2, 2], ['ebike', 3, 3]], vend: [['tuThuoc', 0, 0], ['vend', 1, 3]], booth: [['booth', 0, 1], ['atm', 2, 3]], tuThuoc: [['tuThuoc', 0, 1], ['pot', 2, 3]] };   // river.js adds rail + rlamp
 function addP(name, p, o) { o = o || {}; const sw = o.e0 === undefined && o.e1 === undefined ? ERA_SWAP[name] : null; for (const q of sw || [[name, o.e0 || 0, o.e1 === undefined ? 3 : o.e1]]) CITY.recs.push({ t: 'p', name: q[0], x: p[0], y: p[1], v: o.v || 0, m: !!o.mirror, kb: o.kb || 0, only: o.only, e0: q[1], e1: q[2], tet: o.tet }); if (o.block) blockAt(p[0], p[1]); if (name === 'cartPho') (CITY.steam || (CITY.steam = [])).push([p[0] - 2.6, p[1]]); if (name === 'lamp' || name === 'pole') CITY.lamps.push(o.mirror ? [p[0] + (name === 'pole' ? 6.8 : 0), p[1], name === 'pole' ? 29 : 23] : [p[0], p[1] + (name === 'pole' ? 6.8 : 0), name === 'pole' ? 29 : 23]); }
 function addT(spc, wx, wy, v) { const r = { t: 't', spc, v: v || 0, x: wx, y: wy, ph: hash2(wx, wy) * 9 }; CITY.recs.push(r); CITY.trees.push(r); blockAt(wx, wy); }
@@ -97,7 +97,7 @@ function genShops(B, R, o) {
   if (o.big === 'nhahat') { fill(ix0, iy1 - 12, ix0 + 11, iy1, G_PLAZA); addB(nhahat(72, 88), ix0 + 1, iy1 - 11, 9, 11, { lm: 1 }); POI.doors.push({ x: (ix0 + 5.5) * T, y: iy1 * T + 12, ix: (ix0 + 5.5) * T, iy: iy1 * T + 1, dir: 3 }); xs = ix0 + 11; }
   if (alley >= 0 && alley > xs + 3) { rowS(R, B, xs, alley, o); rowS(R, B, alley + 2, ix1 - 6, o); } else rowS(R, B, xs, ix1 - 6, o);
   cornerLot(R, B, o.corner || sp(R, SHOP_KEYS), Math.max(2, o.maxF - (o.cornerLow ? 1 : 0)));
-  if (o.east === 'buudien') { fill(ix1 - 9, iy0, ix1, iy0 + 18, G_PLAZA); addB(mirrorBoxes(buudien(112, 64)), ix1 - 8, iy0 + 3, 8, 14, { lm: 1 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 10) * T, ix: ix1 * T + 1, iy: (iy0 + 10) * T, dir: 2 }); addP('mailbox', [ix1 * T + 4, (iy0 + 6) * T], { block: true }); addP('booth', [ix1 * T + 4, (iy0 + 14) * T], { block: true }); addP('flag', [(ix1 - 4) * T, (iy0 + 1) * T + 4], { block: true }); rowE(R, B, iy0 + 18, iy1 - 6, o); }
+  if (o.east === 'buudien') { fill(ix1 - 9, iy0, ix1, iy0 + 18, G_PLAZA); addB(mirrorBoxes(buudien(112, 64)), ix1 - 8, iy0 + 3, 8, 14, { lm: 2 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 10) * T, ix: ix1 * T + 1, iy: (iy0 + 10) * T, dir: 2 }); addP('mailbox', [ix1 * T + 4, (iy0 + 6) * T], { block: true }); addP('booth', [ix1 * T + 4, (iy0 + 14) * T], { block: true }); addP('flag', [(ix1 - 4) * T, (iy0 + 1) * T + 4], { block: true }); rowE(R, B, iy0 + 18, iy1 - 6, o); }
   else rowE(R, B, iy0, iy1 - 6, o);
   for (const t of o.sites || []) towerSite(R, t[0], t[1], t[2], t[3], t[4], t[5]);
   infill(R, B, ix0, iy0, ix1 - 7, iy1 - 8, Math.min(3, o.maxF));
@@ -127,7 +127,7 @@ function genMarket(B, R) {
   fill(ix0, iy0, ix1, iy1, G_PLAZA);
   addB(era => market(160, 112, era), ix0 + 1, iy1 - 14, 20, 14, { lm: 1 });
   for (const a of [28, 60, 100, 132]) { const p = [(ix0 + 1) * T + a, iy1 * T + 12]; POI.doors.push({ x: p[0], y: p[1], ix: p[0], iy: iy1 * T + 1.5, dir: 3, shop: 'cho' }); }
-  addB(mirrorBoxes(ubnd(96, 56)), ix1 - 7, iy0 + 1, 7, 12, { lm: 1 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 7) * T, ix: ix1 * T + 1, iy: (iy0 + 7) * T, dir: 2 });
+  addB(mirrorBoxes(ubnd(96, 56)), ix1 - 7, iy0 + 1, 7, 12, { lm: 2 }); POI.doors.push({ x: ix1 * T + 12, y: (iy0 + 7) * T, ix: ix1 * T + 1, iy: (iy0 + 7) * T, dir: 2 });
   rowE(R, B, iy0 + 14, iy1, { maxF: 3, shops: ['vang', 'may', 'taphoa', 'dientu', 'xoso', 'thuoc'] });
   rowS(R, { y1: iy1 - 22 + SW }, ix0 + 1, ix1 - 8, { maxF: 3, shops: ['com', 'sach', 'photo'] });
   let k = 0; for (const yy of [iy1 - 20, iy1 - 17]) for (let x = ix0 + 2; x < ix1 - 9; x += 3, k++) {
@@ -305,7 +305,7 @@ function buildStatics(season, era) {
     if (r.tet && !G.tet) continue;
     if (r.t === 'b') { const sl = bakeRec(r, era, snow); for (const s of sl) items.push({ c: s.c, e: s.e, x: r.x - r.y - s.ax, y: (r.x + r.y) / 2 - s.ay, w: s.w, h: s.h, key: s.key + r.x + r.y }); }
     else if (r.t === 'p') { const s = propSprite(r.name, season, r.v, r.m); items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y + r.kb }); }
-    else if (r.t === 't') { const s = treeSprite(r.spc, season, r.v); r.spr = s; items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y, tree: s, ph: r.ph, wx: r.x, wy: r.y }); }
+    else if (r.t === 't') { const s = G.tet && r.spc === 'mai' ? treeSprite('mai', 'spring', (r.v | 0) * 2) : treeSprite(r.spc, season, r.v); r.spr = s; items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y, tree: s, ph: r.ph, wx: r.x, wy: r.y }); }
     else if (r.t === 'w') { const s = wireSprite(r.dx, r.dy); items.push({ c: s.c, e: null, x: Math.round(r.x - r.y) - s.ox, y: Math.round((r.x + r.y) / 2) - 38 - s.oy, w: s.c.width, h: s.c.height, key: r.x + r.y + (r.dx + r.dy) / 2 - 2 }); }
   }
   items.sort((a, b) => a.key - b.key);

@@ -34,7 +34,7 @@ function visList() {
   const W = G.world; if (!R.dirty && W.vis) return;
   const v = [], vt = [], vw = R.vw, vh = R.vh, cx = R.cx, cy = R.cy;
   for (const it of W.items) { const x = cx + it.x, y = cy + it.y; if (x < vw + 4 && x + it.w > -4 && y < vh + 4 && y + it.h > -4) { v.push(it); if (it.tree) vt.push(it); } }
-  W.vis = v; W.visTrees = vt; W.visLamps = CITY.lamps.filter(l => G.onScreen(l[0], l[1], 40)); W.visSig = CITY.signals.filter(l => G.onScreen(l[0], l[1], 30)); R.dirty = false;
+  W.vis = v; W.visTrees = vt; W.visLamps = CITY.lamps.filter(l => G.onScreen(l[0], l[1], 40)); W.visSig = CITY.signals.filter(l => G.onScreen(l[0], l[1], 30)); W.visTet = TET.visible(); R.dirty = false;
 }
 function glow(size, r, gg, b, a, sq) { const c = mk(size, sq ? size / 2 : size), g = c.getContext('2d'), id = g.createImageData(c.width, c.height); for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) { const nx = (x + 0.5 - size / 2) / (size / 2), ny = (y + 0.5 - c.height / 2) / (c.height / 2), d = Math.sqrt(nx * nx + ny * ny), k = (y * c.width + x) * 4; if (d < 1) { id.data[k] = r; id.data[k + 1] = gg; id.data[k + 2] = b; id.data[k + 3] = Math.round(a * (1 - d) * (1 - d)); } } g.putImageData(id, 0, 0); return c; }
 const SIGC = ['#ff5a4a', '#5aee8a', '#ffd24a'];
@@ -60,6 +60,7 @@ function draw() {
   for (const b of SIM.boats) if (G.onScreen(b.x, b.y, 60)) dyn.push({ key: b.x + b.y, boat: b });
   for (const s of CITY.stands) if (s.state === 'parked' && G.onScreen(s.x, s.y, 30)) dyn.push({ key: s.x + s.y, stand: s });
   for (const s of W.visSig) dyn.push({ key: s[0] + s[1] + 0.5, sig: s });
+  for (const f of W.visTet) dyn.push({ key: TET.key(f), tet: f });
   dyn.sort((a, b) => a.key - b.key);
   const sway = (0.5 + G.gust * 2.8 + (G.windy ? 0.9 : 0));
   const drawStatic = it => {
@@ -89,6 +90,7 @@ function draw() {
     } else if (d.boat) vehicle(d.boat.kind, d.boat.v, d.boat.dir > 0 ? 1 : 3, [d.boat.x, d.boat.y], d.boat.riders, 1);
     else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, vv.turn ? vv.turn.di : L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
+    else if (d.tet) TET.draw(g, lg, useL, d.tet, cx, cy);
     else if (d.sig) { const st = sigOf(d.sig[2]), s = scn(d.sig[0], d.sig[1], st === 0 ? 31.5 : st === 2 ? 29 : 26.5); g.fillStyle = SIGC[st]; g.fillRect(s[0] - 1, s[1], 2, 2); if (useL) { lg.fillStyle = SIGC[st]; lg.fillRect(s[0] - 1, s[1], 2, 2); } }
   };
   const vis = W.vis; let i = 0, j = 0;
@@ -113,13 +115,13 @@ function draw() {
 function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; $('viewRiver').textContent = nearRiver ? 'Bến sông' : 'Về phố'; if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
 function setTet(on, quiet) {
   if (!G.world || G.busy || on === G.tet) return;
-  snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1;
+  snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync();
   updateUI(); save(); if (!quiet) ticker(on ? 'Tết đến rồi! Hoa mai nở vàng, đèn lồng đỏ khắp phố' : 'Hết Tết, phố trở lại nhịp sống thường ngày', true);
 }
 function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
-  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1;
+  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync();
   eraShift(); updateUI(); save(); if (!quiet) ticker(ERA[e].msg, true);
 }
 // bake the other eras' buildings a few at a time while idle, so the first switch has no hitch
@@ -134,7 +136,7 @@ function tick(dt) {
   if (G.autoTime) G.hour = (G.hour + dt * G.daySpeed) % 24; else { const df = ((G.hourTarget - G.hour + 36) % 24) - 12; G.hour = (G.hour + clamp(df, -dt * 7, dt * 7) + 24) % 24; }
   if (G.autoSeason && !G.busy) { G.seasonT += dt; if (G.seasonT > 150) setSeason(SEASONS[(SEASONS.indexOf(G.season) + 1) % 4]); }
   if (R.xf > 0) R.xf -= dt / 1.1;
-  updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
+  TET.tick(dt); updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
 }
 let _last = 0, _uiT = 0;
 function frame(ts) {
@@ -159,7 +161,7 @@ async function setSeason(s, first) {
   G.season = s; for (const k in OV) delete OV[k]; OVJOB = null; ensureOv(s, G.era); const items = buildStatics(s, G.era); if (first) $('fadeB').style.width = '100%';
   if (!G.world) G.world = { ground: GROUNDS[s], items }; else { G.world.ground = GROUNDS[s]; G.world.items = items; }
   G.world.vis = null; R.dirty = true; visList();
-  if (first) initSim(); else { reseasonPeds(); R.xf = 1; }
+  if (first) { initSim(); TET.sync(); } else { reseasonPeds(); R.xf = 1; }
   _pb = 0; FX.drift.length = 0; if (G.autoWeather && G.weather !== 'clear' && !first) setWeather('clear');
   if (first) { await sleep(200); fade.classList.remove('on'); }
   G.busy = false; updateUI(); save();
@@ -227,7 +229,7 @@ async function boot() {
   if (q.get('zoom')) R.zoom = +q.get('zoom');
   if (q.get('look')) { const t = q.get('look').split(','), wx = t[0] * T + 4, wy = t[1] * T + 4; R.panX = wx - wy; R.panY = (wx + wy) / 2 - WORLD / 2; }
   if (q.get('pan')) { const p = q.get('pan').split(','); R.panX = +p[0]; R.panY = +p[1]; }
-  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); resize();
+  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); planTet(); resize();
   const tm = q.get('time') || st.time; if (tm && tm !== 'auto' && TIMES[tm]) { G.timeKey = tm; G.autoTime = false; G.hour = G.hourTarget = TIMES[tm]; }
   await setSeason(G.season, true);
   const wx = q.get('wx') || st.wx; if (wx && wx !== 'auto') { G.autoWeather = false; setWeather(wx); if (q.get('wx')) { G.rain = G.rainTarget; G.cloud = G.cloudTarget; } }

@@ -28,5 +28,10 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 ## Riverfront (west edge of the map)
 Tiles: far bank 0-5, river 5-20, quay/promenade 20-27, sidewalk 27-30, then the existing riverside road. Edit `genRiverfront()` in `js/river.js`; era variants live in `PROP.railA-D`, `PROP.lampA-D`, `pierBoxes(era)`, `bridgeBoxes(era)`, `BOAT_ERA` and `riverColor()`.
 
+## Tết mode (T key / Tết button)
+`js/tet.js` holds everything Tết-only: waving Vietnamese flags (every house roof, 7 landmark pairs, kerbs, promenade rails, bridge), bunting and banners across streets, big mai / kumquat / chrysanthemum pots, watermelon + flower stalls with vendors, shoppers carrying melons and melon delivery bikes/motos/trucks. All of it is gated on `G.tet` and vanishes when Tết is switched off (no reload).
+
 ## Tests
 `tests/riverfront-turns.mjs` is a headless-browser check of the three riverside junctions (needs Playwright): `python3 -m http.server 8765 &` then `node tests/riverfront-turns.mjs [url] [screenshot-dir]`. It simulates 6 minutes of traffic and fails if a vehicle leaves the road / reaches the promenade, faces the wrong way, or any of the four turns (southbound left, northbound right, westbound left/right) never happens.
+
+`tests/tet.mjs [screenshot-dir]` checks Tết ON/OFF in all four eras (flag per house, 14 landmark flags, 30+ melon stalls, vendors, shoppers, nothing left over when off), NPC path reachability, day/night/rain screenshots and frame time.
