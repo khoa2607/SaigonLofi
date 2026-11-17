@@ -87,7 +87,7 @@ function draw() {
       if (hold) { const fr = UMB[p.look.umbC][p.umb < 0.4 ? 0 : p.umb < 0.8 ? 1 : 2], ux = x + (row >= 2 ? -3 : 6), uy = y + (p.look.kid ? 2 : -2) - (p.moving && (Math.floor(p.an) & 1) ? 1 : 0); g.drawImage(fr.c, ux, uy); if (useL) lg.drawImage(fr.e, ux, uy); }
       if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, y - 11 - (hold ? 5 : 0) + (p.bub.a < 0.1 ? 2 : p.bub.a < 0.2 ? -1 : 0)]);
     } else if (d.boat) vehicle(d.boat.kind, d.boat.v, d.boat.dir > 0 ? 1 : 3, [d.boat.x, d.boat.y], d.boat.riders, 1);
-    else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
+    else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, vv.turn ? vv.turn.di : L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
     else if (d.sig) { const st = sigOf(d.sig[2]), s = scn(d.sig[0], d.sig[1], st === 0 ? 31.5 : st === 2 ? 29 : 26.5); g.fillStyle = SIGC[st]; g.fillRect(s[0] - 1, s[1], 2, 2); if (useL) { lg.fillStyle = SIGC[st]; lg.fillRect(s[0] - 1, s[1], 2, 2); } }
   };
