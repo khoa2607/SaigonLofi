@@ -10,8 +10,8 @@ function freeOf(list, f, r) { const a = list.filter(s => !s.ped && near(s, r) &&
 
 // ---------- lanes & vehicles ----------
 function initLanes() {
-  const mkLane = (axis, dir, c, cs, stops) => { const L = { axis, dir, c, cs, lo: axis === 'x' ? ROADS_V[0] * T : 0, hi: WORLD, vehs: [], spawnT: rr(0, 4), want: null, di: axis === 'x' ? (dir > 0 ? 0 : 2) : (dir > 0 ? 1 : 3) }; L.stops = stops.map(p => dir > 0 ? p - L.lo : L.hi - p).sort((a, b) => a - b); SIM.lanes.push(L); };
-  for (const h of ROADS_H) { mkLane('x', -1, h * T + 8, -1, ROADS_V.map(v => (v + RW + 2) * T + 2)); mkLane('x', 1, h * T + 24, 1, ROADS_V.map(v => (v - 2) * T - 2)); }
+  const mkLane = (axis, dir, c, cs, stops, row) => { const L = { axis, dir, c, cs, row, lo: axis === 'x' ? ROADS_V[0] * T : 0, hi: WORLD, vehs: [], spawnT: rr(0, 4), want: null, di: axis === 'x' ? (dir > 0 ? 0 : 2) : (dir > 0 ? 1 : 3) }; L.stops = stops.map(p => dir > 0 ? p - L.lo : L.hi - p).sort((a, b) => a - b); SIM.lanes.push(L); };
+  for (const h of ROADS_H) { mkLane('x', -1, h * T + 8, -1, ROADS_V.map(v => (v + RW + 2) * T + 2), h); mkLane('x', 1, h * T + 24, 1, ROADS_V.map(v => (v - 2) * T - 2), h); }
   for (const v of ROADS_V) { mkLane('y', 1, v * T + 8, -1, ROADS_H.map(h => (h - 2) * T - 2)); mkLane('y', -1, v * T + 24, 1, ROADS_H.map(h => (h + RW + 2) * T + 2)); }
 }
 const faceLane = L => L.axis === 'x' ? (L.cs > 0 ? 3 : 1) : (L.cs > 0 ? 2 : 0);   // direction a kerbside pedestrian looks to face this lane
@@ -31,7 +31,44 @@ function makeVeh(lane, kind, s) {
   o.sp = o.vmax * 0.8;
   return o;
 }
-function vehPos(v) { const L = v.lane, p = L.dir > 0 ? L.lo + v.s : L.hi - v.s, q = L.c + v.lat * L.cs; return L.axis === 'x' ? [p, q] : [q, p]; }
+// ---------- riverside junctions: the three streets meet the riverside road (ROADS_V[0]) at a T; nothing continues west (promenade) ----------
+// Plan: v.plan = {h, k}: k 'L'/'R' = turn off the river road onto street row h (eastbound), or 'WR'/'WL' = a westbound car turning onto the river road (north / south).
+const RJ = { x0: ROADS_V[0] * T, x1: (ROADS_V[0] + RW) * T, p: 0 };                      // river road x-extent (240..272)
+const rjLane = (axis, dir, c) => findLane([axis, dir, c]);
+const bez = (a, b, c, u) => { const w = 1 - u; return [w * w * a[0] + 2 * w * u * b[0] + u * u * c[0], w * w * a[1] + 2 * w * u * b[1] + u * u * c[1]]; };
+function planTurn(v) {   // returns the trigger s (lane distance where the turn starts) for a planned vehicle, plus its source/target lanes and exit point
+  const L = v.lane, pl = v.plan, hy = pl.h * T;
+  if (pl.k === 'WR' || pl.k === 'WL') { const to = pl.k === 'WR' ? rjLane('y', -1, RJ.x0 + 24) : rjLane('y', 1, RJ.x0 + 8); return { trig: laneS(L, RJ.x1) - 3, to, exit: pl.k === 'WR' ? [to.c, hy] : [to.c, hy + RW * T], P1: [to.c, L.c] }; }
+  const to = rjLane('x', 1, hy + 24), eP = [RJ.x1, to.c];
+  if (pl.k === 'L') return { trig: laneS(L, hy) - 3, to, exit: eP, P1: [L.c, to.c] };                      // southbound, left onto the street
+  return { trig: laneS(L, hy + RW * T) - 3, to, exit: eP, P1: [L.c, to.c] };                               // northbound, right onto the street
+}
+const inBox = (x, y, hy, m) => x > RJ.x0 - m && x < RJ.x1 + m && y > hy - m && y < hy + RW * T + m;
+function turnClear(v, pt) {   // nobody else in the junction box, nobody crossing it, room at the exit of the target lane
+  const hy = v.plan.h * T;
+  for (const o of SIM.vehs) {
+    if (o === v || o.dead) continue;
+    const q = vehPos(o);
+    if (o.turn && (o.turn.to === pt.to || (o.turn.src === v.lane && o.turn.u < 0.6))) return false;   // one turn at a time into a lane / out of a lane
+    if (o.lane !== v.lane && inBox(q[0], q[1], hy, 0)) return false;
+    if (o.lane === pt.to && o.s - o.len / 2 < laneS(pt.to, pt.exit[pt.to.axis === 'x' ? 0 : 1]) + 26 + v.len) return false;
+  }
+  return true;
+}
+function startTurn(v, pt) {
+  const P0 = vehPos(v), L2 = pt.to, s2 = laneS(L2, pt.exit[L2.axis === 'x' ? 0 : 1]);
+  const P2 = L2.axis === 'x' ? [pt.exit[0], L2.c + v.lat * L2.cs] : [L2.c + v.lat * L2.cs, pt.exit[1]];
+  const P1 = v.lane.axis === 'y' ? [P0[0], P2[1]] : [P2[0], P0[1]];   // keeps each vehicle's own lateral offset (two-wheelers ride beside cars)
+  pt.P1 = P1;
+  const len = (Math.hypot(pt.P1[0] - P0[0], pt.P1[1] - P0[1]) + Math.hypot(P2[0] - pt.P1[0], P2[1] - pt.P1[1]) + Math.hypot(P2[0] - P0[0], P2[1] - P0[1])) / 2;
+  v.turn = { P0, P1: pt.P1, P2, len, u: 0, to: L2, s2, di: v.lane.di, src: v.lane, h: v.plan.h };
+  v.plan = null;
+}
+function stepTurn(v, dt, L) {   // advance a turning vehicle along its curve; hand it to the target lane at the end
+  const t = v.turn; t.u = Math.min(1, t.u + v.sp * dt / t.len); t.di = t.u < 0.5 ? L.di : t.to.di;
+  if (t.u >= 1) { const i = L.vehs.indexOf(v); if (i >= 0) L.vehs.splice(i, 1); v.lane = t.to; v.s = t.s2; v.turn = null; t.to.vehs.push(v); }
+}
+function vehPos(v) { if (v.turn) return bez(v.turn.P0, v.turn.P1, v.turn.P2, v.turn.u); const L = v.lane, p = L.dir > 0 ? L.lo + v.s : L.hi - v.s, q = L.c + v.lat * L.cs; return L.axis === 'x' ? [p, q] : [q, p]; }
 const laneS = (L, p) => L.dir > 0 ? p - L.lo : L.hi - p;
 function trafficDensity() { const h = G.hour; let f = h < 5 ? 0.25 : h < 6.5 ? 0.6 : h < 9 ? 1.25 : h < 16 ? 0.9 : h < 19.5 ? 1.3 : h < 22 ? 0.75 : 0.4; if (G.rain > 0.5) f *= 0.8; return f; }
 function updateVehicles(dt) {
@@ -41,7 +78,25 @@ function updateVehicles(dt) {
     vs.sort((a, b) => b.s - a.s);
     for (let i = 0; i < vs.length; i++) {
       const v = vs[i], front = v.s + v.len / 2; let lim = 1e9, byLeader = false;
+      if (v.turn) {   // mid-turn: slow, ignore lane logic, hand over at the end
+        v.sp += clamp(Math.min(v.vmax, 24) - v.sp, -110 * dt, 34 * dt); v.s += v.sp * dt; stepTurn(v, dt, L);
+        if (v.turn === null) i--; continue;
+      }
       for (let j = i - 1; j >= 0; j--) if (vs[j].mask & v.mask) { const g = vs[j].s - vs[j].len / 2 - front - 3; if (g < lim) { lim = g; byLeader = true; } break; }
+      if (!v.plan && L.axis === 'x' && L.dir < 0 && v.s < laneS(L, RJ.x1) - 8) v.plan = { h: L.row, k: chance(0.5) ? 'WR' : 'WL' };   // every westbound car (spawned, seeded, or leaving a kerb stand) must turn at the river road
+      if (!v.plan && L.axis === 'y' && (L.c === RJ.x0 + 8 || L.c === RJ.x0 + 24)) for (const h of ROADS_H) {   // through traffic on the river road waits at the box edge while a car is turning across it
+        const d = laneS(L, L.dir > 0 ? h * T : h * T + RW * T) - 3 - front;
+        if (d > -1 && d < 30) for (const o of SIM.vehs) if (o.turn && o.turn.h === h && o.turn.src !== L && o.turn.to !== L && o.turn.u < 0.85) { if (d < lim) { lim = Math.max(d, 0); byLeader = false; } break; }
+      }
+      if (v.plan) {
+        const pt = v.pt || (v.pt = planTurn(v)), d = pt.trig - v.s;
+        if (d < 45) {   // approaching the junction: wait at the box edge until it is clear (gives up after 7 s so traffic never deadlocks)
+          const ok = turnClear(v, pt) || (d < 1 && (v.wait = (v.wait || 0) + (v.sp < 2 ? dt : 0)) > 7);
+          if (ok && d < 1) { v.pt = null; v.wait = 0; startTurn(v, pt); continue; }
+          if (!ok && d < lim) { lim = Math.max(d, 0); byLeader = false; }
+          if (d < -5) { v.pt = null; startTurn(v, pt); continue; }   // overshot while braking: turn anyway rather than leave the road
+        }
+      }
       if (sg !== 1) for (const st of L.stops) { const d = st - front; if (d > -3) { if (sg === 0 || d > 14) { if (d < lim) { lim = d; byLeader = false; } } break; } }
       for (const p of SIM.xpeds) { const pp = L.axis === 'x' ? p.x : p.y, pq = L.axis === 'x' ? p.y : p.x; if (Math.abs(pq - L.c) > 11) continue; const al = laneS(L, pp) - front; if (al > -3 && al < 22 && al - 5 < lim) { lim = al - 5; byLeader = false; } }
       if (v.stopAt !== null) { const d = v.stopAt - v.s; if (d > -2 && d < lim) { lim = d; byLeader = false; } if (Math.abs(d) < 2 && v.sp < 1.5) { v.dwellT += dt; if (v.dwellT > v.dwell) { const f = v.onStop; v.stopAt = null; v.onStop = null; v.dwellT = 0; if (f) f(v); } } }
@@ -55,8 +110,15 @@ function updateVehicles(dt) {
     for (let i = vs.length - 1; i >= 0; i--) if (vs[i].s > L.hi - L.lo + 50 || (vs[i].obs && vs[i].stopAt === null && !onScreen(vehPos(vs[i]), 60))) { vs[i].dead = true; vs.splice(i, 1); }
     L.spawnT -= dt * dens;
     if (L.spawnT <= 0 || L.want) {
-      let clear = true; for (const o of vs) if (o.s - o.len / 2 < 16) { clear = false; break; }
-      if (clear) { const k = L.want || wpick(ERA[G.era].veh), v = makeVeh(L, k, -24); if (L.want && k === 'cyclo') { v.riders.length = 1; v.busy = false; } L.want = null; vs.push(v); SIM.vehs.push(v); L.spawnT = rr(1.6, 5.2); } else if (L.spawnT <= 0) L.spawnT = 0.4;
+      // streets are fed from the riverside road: eastbound cars arrive by turning off it (they never appear on the promenade); westbound cars must turn onto it
+      const feed = L.axis === 'x' && L.dir > 0, L0 = feed ? (chance(0.5) ? rjLane('y', 1, RJ.x0 + 8) : rjLane('y', -1, RJ.x0 + 24)) : L;
+      let clear = true; for (const o of L0.vehs) if (o.s - o.len / 2 < 16) { clear = false; break; }
+      if (clear) {
+        const k = L.want || wpick(ERA[G.era].veh), v = makeVeh(L0, k, -24); if (L.want && k === 'cyclo') { v.riders.length = 1; v.busy = false; } L.want = null;
+        if (feed) v.plan = { h: L.row, k: L0.dir > 0 ? 'L' : 'R' };
+        else if (L.c === RJ.x0 + 8 || L.c === RJ.x0 + 24) { if (chance(0.4)) v.plan = { h: pick(ROADS_H), k: L.dir > 0 ? 'L' : 'R' }; }
+        L0.vehs.push(v); SIM.vehs.push(v); L.spawnT = rr(1.6, 5.2);
+      } else if (L.spawnT <= 0) L.spawnT = 0.4;
     }
   }
   SIM.vehs = SIM.vehs.filter(v => !v.dead);
@@ -249,7 +311,14 @@ function updateSim(dt) {
 function initSim() {
   initLanes();
   for (const a of CITY.actors) { const L = dressFor(randLook(a.type), G.season); L.carry = null; L.ganh = false; if (a.apron) L.apron = 1; SIM.actors.push({ x: a.x, y: a.y, dir: a.dir, pose: a.pose || 0, sit: a.pose === 5, role: a.role, look: L, sheet: personSheet(L), bub: null, emT: rr(2, 20) }); }
-  for (const L of SIM.lanes) { let s = rr(20, 120); while (s < L.hi - L.lo - 20) { const v = makeVeh(L, wpick(ERA[G.era].veh), s); L.vehs.push(v); SIM.vehs.push(v); s += rr(60, 190); } }
+  for (const L of SIM.lanes) {
+    let s = L.axis === 'x' ? rr(70, 140) : rr(20, 120);                                         // x lanes start east of the junction box (240..272)
+    while (s < L.hi - L.lo - 20) {
+      const wb = L.axis === 'x' && L.dir < 0;
+      if (!(wb && s > L.hi - RJ.x1 - 40)) { const v = makeVeh(L, wpick(ERA[G.era].veh), s); if (L.axis === 'y' && (L.c === RJ.x0 + 8 || L.c === RJ.x0 + 24) && chance(0.4)) { const h = pick(ROADS_H), pl = { h, k: L.dir > 0 ? 'L' : 'R' }; v.plan = pl; if (planTurn(v).trig < v.s + 20) v.plan = null; } L.vehs.push(v); SIM.vehs.push(v); }
+      s += rr(60, 190);
+    }
+  }
   for (let i = 0; i < 3; i++) { const q = portal(), p = new Ped(q[0], q[1]); p.dog = i; p.sp = 17; p.look.rainMode = 'run'; SIM.peds.push(p); }
   const tg = popTarget();
   for (let i = 0; i < tg; i++) { spawnPed(); const p = SIM.peds[SIM.peds.length - 1]; if (p && p.alpha === 1 && chance(0.8)) { const t = nearestWalk(Math.floor((SIM.focus[0] + rr(-380, 380)) / T), Math.floor((SIM.focus[1] + rr(-380, 380)) / T)); if (t) { p.x = tc(t[0]); p.y = tc(t[1]); } } }
