@@ -229,57 +229,63 @@ function planCity() {
 }
 
 // ----- ground painter (ImageData, one pass per season) -----
-const SEASON_GRASS = { spring: [0x86c268, 0x7ab85e, 0x98d078], summer: [0x69a850, 0x5f9c48, 0x78b65a], fall: [0xaaa35a, 0x9c9550, 0xb8ad62], winter: [0xe9eff6, 0xdfe6ef, 0xf4f8fd] };
+const SEASON_GRASS = { spring: [0x7fae5a, 0x709e4e, 0x9cc46e], summer: [0x5e9246, 0x52863e, 0x76a654], fall: [0xae9e50, 0x9e8e46, 0xc4b062], winter: [0xeeeff2, 0xe2e4ea, 0xf8f8fa] };
 function groundColor(t, wx, wy, tx, ty, season) {
   const n = hash2(wx, wy), vn = vnoise(wx / 6, wy / 6), lx = wx - tx * T, ly = wy - ty * T, win = season === 'winter';
   const nb = (dx, dy) => { const x = tx + dx, y = ty + dy; return x < 0 || y < 0 || x >= N || y >= N ? -1 : GT[gi(x, y)]; };
   const isR = v => v === G_ROAD || v === G_ZEB;
   let c;
   if (t === G_ROAD || t === G_ZEB) {
-    c = vn > 0.62 ? 0x5d5a63 : 0x65626b; if (n > 0.94) c = 0x6f6c75; else if (n < 0.04) c = 0x57545d;
+    // warm charcoal asphalt with aggregate specks and worn tyre tracks
+    const n2 = hash2(wx * 2, wy * 2); c = vn > 0.6 ? 0x4c4446 : 0x544b4c; if (n2 > 0.93) c = 0x625858; else if (n2 < 0.05) c = 0x433b3d;
     const h = roadH(ty), v = roadV(tx);
-    if (t === G_ZEB) { const k = h >= 0 && v < 0 ? wy - ROADS_H[h] * T : wx - ROADS_V[v] * T; if ((k + 0.6) % 6.4 < 3.4 && n < 0.9) c = n > 0.8 ? 0xd2cec2 : 0xe6e2d6; }
-    else if (h >= 0 && v < 0) { if (Math.abs(wy - ROADS_H[h] * T - 16) < 0.8 && wx % 22 < 12 && nb(-3, 0) === G_ROAD && nb(3, 0) === G_ROAD && n < 0.92) c = 0xd8c98a; }
-    else if (v >= 0 && h < 0) { if (Math.abs(wx - ROADS_V[v] * T - 16) < 0.8 && wy % 22 < 12 && nb(0, -3) === G_ROAD && nb(0, 3) === G_ROAD && n < 0.92) c = 0xd8c98a; }
-    if ((lx < 1.3 && nb(-1, 0) === G_SIDE) || (ly < 1.3 && nb(0, -1) === G_SIDE) || (lx > T - 1.3 && nb(1, 0) === G_SIDE) || (ly > T - 1.3 && nb(0, 1) === G_SIDE)) c = win ? 0xd6dde8 : shade(c, -0.14);
-    if (win && vnoise(wx / 9 + 5, wy / 9) > 0.66) c = mixc(c, 0xdfe6ef, 0.55);
+    if (h >= 0 && v < 0) { const q = (wy - ROADS_H[h] * T) % 16; if (Math.abs(q - 4.5) < 1.6 || Math.abs(q - 11.5) < 1.6) c = mixc(c, 0x6a5e5c, 0.35); }
+    if (v >= 0 && h < 0) { const q = (wx - ROADS_V[v] * T) % 16; if (Math.abs(q - 4.5) < 1.6 || Math.abs(q - 11.5) < 1.6) c = mixc(c, 0x6a5e5c, 0.35); }
+    if (t === G_ZEB) { const k = h >= 0 && v < 0 ? wy - ROADS_H[h] * T : wx - ROADS_V[v] * T; if ((k + 0.6) % 6.4 < 3.6) c = n2 > 0.88 ? 0xcfc0a4 : n2 < 0.06 ? 0xb8a890 : 0xeee2c8; }
+    else if (h >= 0 && v < 0) { if (Math.abs(wy - ROADS_H[h] * T - 16) < 0.6 && wx % 22 < 12 && nb(-3, 0) === G_ROAD && nb(3, 0) === G_ROAD && n < 0.95) c = 0xe8cc84; }
+    else if (v >= 0 && h < 0) { if (Math.abs(wx - ROADS_V[v] * T - 16) < 0.6 && wy % 22 < 12 && nb(0, -3) === G_ROAD && nb(0, 3) === G_ROAD && n < 0.95) c = 0xe8cc84; }
+    const kerb = (lx < 1 && nb(-1, 0) === G_SIDE) || (ly < 1 && nb(0, -1) === G_SIDE) || (lx > T - 1 && nb(1, 0) === G_SIDE) || (ly > T - 1 && nb(0, 1) === G_SIDE);
+    if (kerb) c = win ? 0xd6dde8 : 0x3a2c2c;                                                      // gutter shadow under the kerb
+    if (win && vnoise(wx / 9 + 5, wy / 9) > 0.66) c = mixc(c, 0xe4e6ee, 0.6);
   } else if (t === G_SIDE) {
     const pv = PAVE[gi(tx, ty)];
-    if (pv === 0) { const h4 = hash2(wx / 4 | 0, wy / 4 | 0); c = (wx % 4 < 0.9 || wy % 4 < 0.9) ? 0xa87a78 : h4 < 0.3 ? 0xd9a08a : h4 < 0.65 ? 0xc99aa0 : 0xd4a8a4; }
-    else if (pv === 1) { const h4 = hash2(wx / 4 | 0, wy / 4 | 0); c = (wx % 4 < 0.8 || wy % 4 < 0.8) ? 0xa88a80 : h4 < 0.5 ? 0xcfa894 : 0xc49c98; }
-    else c = (wx % 4 < 0.8 || (wy + (((wx / 4) | 0) & 1) * 2) % 4 < 0.8) ? 0xb09080 : hash2(wx / 4 | 0, wy / 5 | 0) < 0.4 ? 0xdcb49c : 0xd0a8a0;
-    if (vn > 0.72) c = shade(c, -0.05); if (n > 0.965) c = shade(c, -0.12);
-    if ((lx < 1.5 && isR(nb(-1, 0))) || (ly < 1.5 && isR(nb(0, -1))) || (lx > T - 1.5 && isR(nb(1, 0))) || (ly > T - 1.5 && isR(nb(0, 1)))) c = 0xd8d3c6;
-    if (win && vnoise(wx / 5, wy / 5 + 9) > 0.6 - (n > 0.6 ? 0.1 : 0)) c = n > 0.7 ? 0xe2e9f2 : 0xf0f4fa;
-  } else if (t === G_ALLEY) { c = vn > 0.74 ? 0x8f8d8c : n > 0.95 ? 0x8a857c : 0xa7a196; if (win && vnoise(wx / 6, wy / 6 + 4) > 0.56) c = 0xeaf0f7; }
-  else if (t === G_YARD) { c = vn > 0.6 ? 0xa99f8a : 0xb3a892; if (n > 0.95) c = 0x9a917e; if (win && vnoise(wx / 5 + 2, wy / 5) > 0.56 - (n > 0.6 ? 0.1 : 0)) c = 0xecf1f8; }
-  else if (t === G_PAD) c = 0x8f887c;
+    if (pv === 0) { const gx = wx % 4, gy = wy % 4, h4 = hash2(wx / 4 | 0, wy / 4 | 0); c = (gx < 0.5 || gy < 0.5) ? 0x8e5444 : h4 < 0.33 ? 0xc8735a : h4 < 0.7 ? 0xbc6a52 : 0xd08068; if (gx > 3.3 || gy > 3.3) c = mixc(c, 0x6a3a30, 0.18); }   // gạch tàu: terracotta squares
+    else if (pv === 1) { const gx = wx % 5, gy = wy % 5, ch = ((wx / 5 | 0) + (wy / 5 | 0)) & 1; c = (gx < 0.5 || gy < 0.5) ? 0x9c7a6e : ch ? 0xe6cdb0 : 0xc99a88; if (ch && gx > 1.5 && gx < 3.5 && gy > 1.5 && gy < 3.5) c = 0xd8b496; }         // cream + rose checker tiles
+    else { const row = (wy / 4 | 0), gx = (wx + (row & 1) * 3) % 6, gy = wy % 4; c = (gx < 0.5 || gy < 0.5) ? 0x9a8a78 : hash2((wx + (row & 1) * 3) / 6 | 0, row) < 0.45 ? 0xd8c8ae : 0xcab89e; }                                // offset granite slabs
+    if (vn > 0.74) c = shade(c, -0.06); if (hash2(wx * 2, wy * 2) > 0.975) c = shade(c, -0.14);
+    const edge = (lx < 1.5 && isR(nb(-1, 0))) || (ly < 1.5 && isR(nb(0, -1))) || (lx > T - 1.5 && isR(nb(1, 0))) || (ly > T - 1.5 && isR(nb(0, 1)));
+    if (edge) { const e = Math.min(isR(nb(-1, 0)) ? lx : 9, isR(nb(0, -1)) ? ly : 9, isR(nb(1, 0)) ? T - lx : 9, isR(nb(0, 1)) ? T - ly : 9); c = e < 0.5 ? 0x6a4e44 : e < 1 ? 0xf0e6d2 : 0xd8ccb6; }   // stone kerb with an ink edge
+    if (win && vnoise(wx / 5, wy / 5 + 9) > 0.6 - (n > 0.6 ? 0.1 : 0)) c = n > 0.7 ? 0xe6e8ee : 0xf4f4f4;
+  } else if (t === G_ALLEY) { c = vn > 0.74 ? 0x948676 : n > 0.95 ? 0x86786a : 0xa89a88; if ((wx + wy) % 9 < 0.5) c = shade(c, -0.08); if (win && vnoise(wx / 6, wy / 6 + 4) > 0.56) c = 0xeef0f4; }
+  else if (t === G_YARD) { c = vn > 0.6 ? 0xa8946e : 0xb6a078; if (hash2(wx * 2, wy * 2) > 0.95) c = 0x947e5a; if (win && vnoise(wx / 5 + 2, wy / 5) > 0.56 - (n > 0.6 ? 0.1 : 0)) c = 0xf0f0f2; }
+  else if (t === G_PAD) c = 0x6e5c54;
   else if (t === G_GRASS) {
-    const g = SEASON_GRASS[season]; c = vn > 0.58 ? g[1] : g[0]; if (n > 0.9) c = g[2];
+    const g = SEASON_GRASS[season], n2 = hash2(wx * 2, wy * 2); c = vn > 0.58 ? g[1] : g[0];
+    if (n2 > 0.86 && hash2(wx * 2, wy * 2 + 1) > 0.5) c = g[2]; else if (n2 < 0.08) c = mixc(g[1], 0x2b3a22, 0.3);       // little tufts
     if (win) { if (vnoise(wx / 5 + 7, wy / 5) < 0.27) c = n > 0.5 ? 0x9aa888 : 0xb4c0a8; }
-    else if (season === 'spring' && n < 0.035) c = [0xf39abf, 0xf7d94a, 0xf7f4ec, 0xf39abf][(n * 400 | 0) % 4];
-    else if (season === 'summer' && n < 0.008) c = 0xf7f4ec;
-  } else if (t === G_PATH) { c = n > 0.85 ? 0xcfbe92 : n < 0.1 ? 0xe6d6ac : 0xdccba0; if (win && vnoise(wx / 5, wy / 5) > 0.58 - (n > 0.6 ? 0.1 : 0)) c = 0xeef2f8; }
-  else if (t === G_PLAZA) { c = (lx < 0.8 || ly < 0.8) ? 0xb3ab9b : ((tx + ty) & 1) ? 0xd6cfc0 : 0xc9c1b0; if (vn > 0.7) c = shade(c, -0.04); if (win && vnoise(wx / 5 + 3, wy / 5) > 0.62 - (n > 0.6 ? 0.1 : 0)) c = 0xf0f4fa; }
+    else if (season === 'spring' && n < 0.03) c = [0xf3a0c0, 0xf7d24a, 0xfff4ec, 0xf3a0c0][(n * 400 | 0) % 4];
+    else if (season === 'summer' && n < 0.008) c = 0xfff4ec;
+  } else if (t === G_PATH) { const n2 = hash2(wx * 2, wy * 2); c = n2 > 0.88 ? 0xc4a272 : n2 < 0.08 ? 0xead2a0 : 0xdcc08e; if (n2 > 0.97) c = 0xa88a62; if (win && vnoise(wx / 5, wy / 5) > 0.58 - (n > 0.6 ? 0.1 : 0)) c = 0xf2f2f4; }
+  else if (t === G_PLAZA) { const gx = wx % 8, gy = wy % 8; c = (gx < 0.5 || gy < 0.5) ? 0xa89884 : (gx < 1 || gy < 1) ? 0xeee4d2 : ((tx + ty) & 1) ? 0xdccfb8 : 0xd2c4ac; if (vn > 0.7) c = shade(c, -0.04); if (win && vnoise(wx / 5 + 3, wy / 5) > 0.62 - (n > 0.6 ? 0.1 : 0)) c = 0xf4f4f6; }
   else if (t === G_WATER) {
     const edge = (lx < 2 && nb(-1, 0) !== G_WATER) || (ly < 2 && nb(0, -1) !== G_WATER) || (lx > T - 2 && nb(1, 0) !== G_WATER) || (ly > T - 2 && nb(0, 1) !== G_WATER);
-    if (edge) c = win ? 0xdfe6ef : 0x8f958c; else if (win) c = n > 0.97 ? 0xffffff : vn > 0.6 ? 0xc4dcea : 0xd2e8f3; else c = ((wy + Math.sin(wx / 5) * 2.2) % 7 < 1) ? 0x8fcbe0 : vn > 0.6 ? 0x559cc0 : 0x5fa8c8;
+    if (edge) c = win ? 0xe2e6ee : 0x9a8a78; else if (win) c = n > 0.97 ? 0xffffff : vn > 0.6 ? 0xc4dcea : 0xd2e8f3; else c = ((wy + Math.sin(wx / 5) * 2.2) % 7 < 0.7) ? 0x9ad2dc : vn > 0.6 ? 0x3f8aa0 : 0x4a96aa;
   }
   if (t >= G_RIVER) c = riverColor(t, wx, wy, tx, ty, season);
   if (!win && t !== G_WATER && t !== G_PAD && t < G_RIVER) { if (season === 'fall' && n < (t === G_GRASS ? 0.06 : 0.016)) c = [0xe0853a, 0xf2c14a, 0xc0622a][(n * 1000 | 0) % 3]; else if (season === 'spring' && t !== G_GRASS && n < 0.008) c = n < 0.004 ? 0xf7c4d8 : 0xfbe88a; }
   return c;
 }
 function paintGround(season, progress) {
-  const W = WORLD * 2, H = WORLD, c = mk(W, H), g = c.getContext('2d');
+  const W = WORLD * 2 * K, H = WORLD * K, c = mk(W, H), g = c.getContext('2d');
   return new Promise(res => {
     let py = 0; const BAND = 64;
     const step = () => {
       const id = g.createImageData(W, BAND), d = id.data, end = Math.min(H, py + BAND);
-      for (let y = py; y < end; y++) { const sy = y + 0.5, half = Math.min(sy, H - sy) * 2, xa = Math.max(0, Math.floor(WORLD - half)), xb = Math.min(W, Math.ceil(WORLD + half));
-        for (let x = xa; x < xb; x++) { const sx = x - WORLD + 0.5, wx = sy + sx / 2, wy = sy - sx / 2; if (wx < 0 || wy < 0 || wx >= WORLD || wy >= WORLD) continue; const tx = wx >> 3, ty = wy >> 3, col = groundColor(GT[gi(tx, ty)], wx, wy, tx, ty, season), k = ((y - py) * W + x) * 4; d[k] = col >> 16 & 255; d[k + 1] = col >> 8 & 255; d[k + 2] = col & 255; d[k + 3] = 255; } }
+      for (let y = py; y < end; y++) { const sy = (y + 0.5) / K, half = Math.min(sy, WORLD - sy) * 2, xa = Math.max(0, Math.floor((WORLD - half) * K)), xb = Math.min(W, Math.ceil((WORLD + half) * K));
+        for (let x = xa; x < xb; x++) { const sx = (x + 0.5) / K - WORLD, wx = sy + sx / 2, wy = sy - sx / 2; if (wx < 0 || wy < 0 || wx >= WORLD || wy >= WORLD) continue; const tx = wx >> 3, ty = wy >> 3, col = groundColor(GT[gi(tx, ty)], wx, wy, tx, ty, season), k = ((y - py) * W + x) * 4; d[k] = col >> 16 & 255; d[k + 1] = col >> 8 & 255; d[k + 2] = col & 255; d[k + 3] = 255; } }
       g.putImageData(id, 0, py); py = end; if (progress) progress(py / H);
       if (py < H) setTimeout(step, 0); else {
-        for (const t of CITY.trees) { const s = treeSprite(t.spc, season, t.v); if (s.bare) continue; const sh = shadowSprite(s.bare ? s.rad * 0.55 : s.rad * 0.85); g.drawImage(sh, Math.round(t.x - t.y + WORLD - sh.width / 2 + 3), Math.round((t.x + t.y) / 2 - sh.height / 2 + 1)); }
+        for (const t of CITY.trees) { const s = treeSprite(t.spc, season, t.v); if (s.bare) continue; const sh = shadowSprite(s.bare ? s.rad * 0.55 : s.rad * 0.85); g.drawImage(sh, Math.round((t.x - t.y + WORLD + 3) * K - sh.width / 2), Math.round(((t.x + t.y) / 2 + 1) * K - sh.height / 2)); }
         res(c);
       }
     };
@@ -290,9 +296,9 @@ function paintGround(season, progress) {
 const _wire = {};
 function wireSprite(dx, dy) {
   const k = dx + ',' + dy; if (_wire[k]) return _wire[k];
-  const sx = dx - dy, sy = (dx + dy) / 2, w = Math.abs(sx) + 12, h = Math.abs(sy) + 24, c = mk(w, h), g = c.getContext('2d'), ox = sx < 0 ? -sx + 6 : 6, n = Math.abs(sx);
+  const sx = dx - dy, sy = (dx + dy) / 2, w = Math.abs(sx) + 12, h = Math.abs(sy) + 24, c = mk(w * K, h * K), g = c.getContext('2d'), ox = sx < 0 ? -sx + 6 : 6, n = Math.abs(sx) * K;
   const bar = dy === 0 ? [0, 1] : [1, 0];   // crossbar direction in world
-  [[-3.6, 0, 0x3a3640], [3.6, 0, 0x3a3640], [-2.6, 4, 0x4a4650], [2.6, 4, 0x4a4650], [0, 9, 0x2f2c36]].forEach(([o, zo, col], i) => { g.fillStyle = css(col); const bx = bar[0] * o - bar[1] * o, by = (bar[0] * o + bar[1] * o) / 2; for (let j = 0; j <= n; j++) { const t = j / n; g.fillRect(Math.round(ox + sx * t + bx), Math.round(6 + sy * t + by + zo + (4.5 + i) * 4 * t * (1 - t)), 1, 1); } });
+  [[-3.6, 0, 0x3a2a26], [3.6, 0, 0x3a2a26], [-2.6, 4, 0x4a3632], [2.6, 4, 0x4a3632], [0, 9, 0x2b1a16]].forEach(([o, zo, col], i) => { g.fillStyle = css(col); const bx = bar[0] * o - bar[1] * o, by = (bar[0] * o + bar[1] * o) / 2; for (let j = 0; j <= n; j++) { const t = j / n; g.fillRect(Math.round((ox + sx * t + bx) * K), Math.round((6 + sy * t + by + zo + (4.5 + i) * 4 * t * (1 - t)) * K), 1, 1); } });
   return (_wire[k] = { c, ox, oy: 6 });
 }
 // ----- materialise the static draw list for a season -----
@@ -306,7 +312,7 @@ function buildStatics(season, era) {
     if (r.t === 'b') { const sl = bakeRec(r, era, snow); for (const s of sl) items.push({ c: s.c, e: s.e, x: r.x - r.y - s.ax, y: (r.x + r.y) / 2 - s.ay, w: s.w, h: s.h, key: s.key + r.x + r.y }); }
     else if (r.t === 'p') { const s = propSprite(r.name, season, r.v, r.m); items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y + r.kb }); }
     else if (r.t === 't') { const s = G.tet && r.spc === 'mai' ? treeSprite('mai', 'spring', (r.v | 0) * 2) : treeSprite(r.spc, season, r.v); r.spr = s; items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y, tree: s, ph: r.ph, wx: r.x, wy: r.y }); }
-    else if (r.t === 'w') { const s = wireSprite(r.dx, r.dy); items.push({ c: s.c, e: null, x: Math.round(r.x - r.y) - s.ox, y: Math.round((r.x + r.y) / 2) - 38 - s.oy, w: s.c.width, h: s.c.height, key: r.x + r.y + (r.dx + r.dy) / 2 - 2 }); }
+    else if (r.t === 'w') { const s = wireSprite(r.dx, r.dy); items.push({ c: s.c, e: null, x: Math.round(r.x - r.y) - s.ox, y: Math.round((r.x + r.y) / 2) - 38 - s.oy, w: s.c.width / K, h: s.c.height / K, key: r.x + r.y + (r.dx + r.dy) / 2 - 2 }); }
   }
   items.sort((a, b) => a.key - b.key);
   return items;

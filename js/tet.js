@@ -11,26 +11,27 @@ const NF = 8;
 function starPoly(cx, cy, R) { const p = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? R * 0.382 : R; p.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } return p; }
 function inPoly(p, x, y) { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) if ((p[i][1] > y) !== (p[j][1] > y) && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) c = !c; return c; }
 const _ftex = {};
-function flagTex(size) {
+function flagTex(size) {   // at K resolution: red field + supersampled yellow star
   if (_ftex[size]) return _ftex[size];
-  const { w, h } = FSIZE[size], poly = starPoly(w / 2, h / 2 + 0.2, h * (size === 's' ? 0.36 : 0.34)), t = new Uint8Array(w * h);
+  const w = FSIZE[size].w * K, h = FSIZE[size].h * K, poly = starPoly(w / 2, h / 2 + 0.3, h * 0.34), t = new Uint8Array(w * h);
   for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { let n = 0; for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) if (inPoly(poly, i + (a + 0.5) / 3, j + (b + 0.5) / 3)) n++; t[j * w + i] = n >= 5 ? 1 : 0; }
   return (_ftex[size] = t);
 }
-// cloth projected on the iso grid: ax 'x' flies toward +x (screen right-down), 'y' toward +y (screen left-down); 8 wave frames
+// cloth projected on the iso grid: ax 'x' flies toward +x (screen right-down), 'y' toward +y (screen left-down); 8 wave frames; ink rim
 const _fspr = {};
 function flagSprite(size, ax, fr) {
   const key = size + ax + fr; if (_fspr[key]) return _fspr[key];
-  const { w, h, amp } = FSIZE[size], tex = flagTex(size), pad = Math.ceil(amp) + 1, W = w + 2, H = h + Math.ceil(w / 2) + pad * 2 + 2;
-  const g = new Int32Array(W * H).fill(-1), ph = fr / NF * Math.PI * 2, wave = i => Math.sin(ph - i * 0.55) * amp * (i / (w - 1)), ox = ax === 'x' ? 0 : W - 1;
+  const w = FSIZE[size].w * K, h = FSIZE[size].h * K, amp = FSIZE[size].amp * K, tex = flagTex(size), pad = Math.ceil(amp) + 2, W = w + 4, H = h + Math.ceil(w / 2) + pad * 2 + 2;
+  const g = new Int32Array(W * H).fill(-1), ph = fr / NF * Math.PI * 2, wave = i => Math.sin(ph - i * 0.55 / K) * amp * (i / (w - 1)), ox = ax === 'x' ? 1 : W - 2;
+  const RED = grade(FRED), RED_D = mixc(RED, 0x6a3f45, 0.35), RED_L = mixc(RED, 0xfff1d6, 0.18), YEL = 0xffe04a, YEL_D = 0xe8b830;
   for (let i = 0; i < w; i++) {
-    const wv = wave(i), slope = wave(i + 1) - wv, sh = slope > 0.22 ? FRED_D : slope < -0.22 ? FRED_L : FRED;
+    const wv = wave(i), slope = wave(i + K) - wv, dark = slope > 0.3 * K, lit = slope < -0.3 * K;
     for (let j = 0; j < h; j++) {
       const x = ax === 'x' ? ox + i : ox - i, y = pad + j + Math.round(i * 0.5 + wv); if (x < 0 || x >= W || y < 0 || y >= H) continue;
-      g[y * W + x] = tex[j * w + i] ? (slope > 0.22 ? 0xe0b81e : FYEL) : (j === h - 1 || j === 0) && size !== 's' ? shade(sh, -0.08) : sh;
+      g[y * W + x] = tex[j * w + i] ? (dark ? YEL_D : YEL) : dark ? RED_D : lit ? RED_L : RED;
     }
   }
-  const s = gridCanvas(g, W, H); s.ox = ox; s.oy = pad;
+  const s = gridCanvas(inkGrid(g, W, H, 0.8), W, H, null, K); s.ox = ox / K; s.oy = pad / K;
   return (_fspr[key] = s);
 }
 // bunting items: 9x6 hanging flag with a 5x4 star, and a lantern; baked per span with 4 sway frames
@@ -116,6 +117,28 @@ PROP.pennant = () => [box(0, 0, 22.4, 4.6, 0.6, 0.7, 0x8a6a3a), box(0.4, 0, 12, 
 PROP.lanternPost = () => { const B = [box(-0.5, -0.5, 0, 1, 1, 26, 0x6b4a3a), box(-6, -0.4, 24.6, 12, 0.8, 0.8, 0x6b4a3a)]; for (const x of [-5, 0, 5]) B.push(box(x - 1.4, -1.4, 17.4, 2.8, 2.8, 5, FRED, (f, u, v) => v < 0.9 || v > 4.1 ? GOLD : undefined, { em: 0xff7a3a, nf: 1 }), box(x - 0.2, -0.2, 22.4, 0.5, 0.5, 2.2, GOLD)); return B; };
 PROP.cauDoi = () => { const sc = (x) => box(x, -0.3, 3, 2, 0.6, 13, 0xc8261c, (f, u, v) => v < 0.7 || v > 12.3 || u < 0.4 || u > 1.6 ? GOLD : (((v * 2) | 0) % 3 === 0 && u > 0.6 && u < 1.4 ? FYEL : undefined), { nf: 1 }); return [sc(-10.5), sc(8.5)]; };
 
+// ---------------------------------------------------------------- potted Tết plants as painted sprites (not boxes): glazed pot + puffy canopy
+const PLANTS = { maiBig: { pot: 9, ph: 7, can: 10, tr: 9, kind: 'mai' }, maiTet: { pot: 5.5, ph: 4.5, can: 6, tr: 4, kind: 'mai' }, quat: { pot: 7, ph: 5.5, can: 7, tr: 3, kind: 'quat' }, cucPot: { pot: 6, ph: 4.4, can: 4.6, tr: 0, kind: 'cuc' } };
+function plantSprite(name, season, v) {
+  const P = PLANTS[name], LW = 32, LH = 44, W = LW * K, H = LH * K, ax = LW / 2, ay = LH - 4, R = mulberry32(name.length * 97 + v * 13 + 1);
+  const g = new Int32Array(W * H).fill(-1), set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + x] = c; }, get = (x, y) => x >= 0 && y >= 0 && x < W && y < H ? g[y * W + x] : -1;
+  const cx = ax * K, base = ay * K, pw = P.pot * K, ph = P.ph * K;
+  const potC = P.kind === 'quat' ? 0x3f7a78 : 0xb8563a, potS = mixc(potC, 0x3a221c, 0.35), potH = mixc(potC, 0xfff1d6, 0.25), band = 0xe8b84a;
+  for (let y = 0; y < ph; y++) { const hw = pw / 2 * (0.78 + 0.22 * (y / ph)); for (let x = -hw; x <= hw; x++) { const f = (x + hw) / (2 * hw); set(cx + x, base - ph + y + Math.round(Math.abs(x) * 0.12), f > 0.7 ? potS : f < 0.25 ? potH : (Math.abs(y - ph * 0.45) < K * 0.6 ? band : potC)); } }
+  for (let x = -pw / 2 - 1; x <= pw / 2 + 1; x++) { set(cx + x, base - ph, mixc(potC, 0xfff1d6, 0.15)); set(cx + x, base - ph + 1, 0x4a2e22); }
+  const top = base - ph - P.tr * K;
+  for (let y = base - ph; y > top; y--) { set(cx, y, 0x6e4c3c); set(cx + 1, y, 0x4a3028); if (P.kind === 'mai' && (base - ph - y) % 7 === 3) { for (let i = 1; i < 5; i++) set(cx + ((y & 1) ? i : -i), y - i * 0.6, 0x6e4c3c); } }
+  const leaf = P.kind === 'quat' ? [0x22442c, 0x356a3a, 0x4f8a44, 0x7ab25a] : P.kind === 'cuc' ? [0x2d4f38, 0x4a7d46, 0x6aa04e, 0x9ac46a] : [0x3a5a32, 0x5a8044, 0x86a858, 0xb8cc78];
+  const E = [], r0 = P.can * K;
+  if (P.kind === 'cuc') { for (let i = 0; i < 5; i++) E.push([cx + sr(R, -0.5, 0.5) * r0, base - ph - r0 * 0.25 + sr(R, -0.15, 0.1) * r0, r0 * sr(R, 0.42, 0.6)]); }
+  else for (let i = 0; i < (P.kind === 'quat' ? 6 : 8); i++) E.push([cx + sr(R, -0.6, 0.6) * r0, top - r0 * 0.15 + sr(R, -0.45, 0.35) * r0, r0 * sr(R, 0.38, 0.55)]);
+  E.sort((a, b) => a[1] - b[1]);
+  for (const [ex, ey, er] of E) for (let y = Math.floor(ey - er); y <= ey + er; y++) for (let x = Math.floor(ex - er); x <= ex + er; x++) { const dx = (x - ex) / er, dy = (y - ey) / er, d = dx * dx + dy * dy; if (d > 1 - hash2(x >> 1, y >> 1) * 0.12) continue; const l = -dx * 0.55 - dy * 0.75 + (1 - d) * 0.3; set(x, y, l > 0.55 ? leaf[3] : l > 0.1 ? leaf[2] : l > -0.35 ? leaf[1] : leaf[0]); }
+  const bl = P.kind === 'mai' ? (v === 2 ? [0xf7a8c8, 0xfcd8e6, 0.5] : [0xf7d24a, 0xffeca0, 0.55]) : P.kind === 'quat' ? [0xf08a1a, 0xffb84a, 0.22] : [[0xffd23a, 0xfff0a0], [0xf4f0e6, 0xffffff], [0xf08a2b, 0xffc070], [0xd9528a, 0xf8a0c4]][v % 4].concat([0.62]);
+  for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) { const c = get(x, y); if (c < 0 || !leaf.includes(c)) continue; const h = hash2(x * 7 + v, y * 3); if (h < bl[2]) { const k = h < bl[2] * 0.45 ? bl[1] : bl[0]; set(x, y, k); set(x + 1, y, k); set(x, y + 1, mixc(k, 0x6a3f45, 0.25)); if (P.kind === 'quat') set(x + 1, y + 1, mixc(k, 0x6a3f45, 0.35)); } }
+  if (v === 1 || P.kind === 'quat') for (let i = 0; i < 4; i++) { const x = cx + sr(R, -0.6, 0.6) * r0, y = top + sr(R, -0.1, 0.5) * r0; for (let j = 0; j < 4; j++) { set(x, y + j, 0xd2321e); set(x + 1, y + j, 0xb0261a); } set(x, y + 1, 0xf2c94c); }
+  const s = gridCanvas(inkGrid(g, W, H, 0.8), W, H, null, K); s.ax = ax; s.ay = ay; return s;
+}
 // ---------------------------------------------------------------- delivery vehicles carrying watermelons
 const loadMelons = (B, x0, z0, cols, rows, y0, sz) => { for (let r = 0; r < rows; r++) for (let i = 0; i < cols; i++) B.push(melon(x0 + i * sz, y0, z0 + r * sz * 0.8, sz)); };
 VEH.melonbike = v => { const m = VEH.bike(0); m.boxes.push(box(8.6, 0.2, 1.4, 3.6, 2.6, 2.8, 0xb8863f), melon(8.8, 0.6, 4.2, 2.8), melon(9.2, 1.4, 6.6, 2.6)); m.boxes.push(box(-1.6, 0.3, 3.4, 5, 2.6, 1, 0x8a6a3a), melon(-1.2, 0.5, 4.4, 2.8), melon(1.6, 0.5, 4.4, 2.8), melon(0.2, 1, 6.9, 2.8)); m.melon = 1; return m; };
@@ -256,12 +279,12 @@ TET.key = f => f.k === 'str' ? f.x + f.y + 2 : f.x + f.y + (f.roof ? 5 : 3);
 TET.draw = (g, lg, useL, f, cx, cy) => {
   if (f.k === 'flag') {
     const s = flagSprite(f.size, f.ax, Math.floor(((TET.clock * 0.55 + f.phs) % 1 + 1) % 1 * NF) % NF), b = scn(f.x, f.y, f.z), top = b[1] - f.ph, big = f.size === 'L';
-    g.fillStyle = big ? '#d9d2bf' : '#b9b19c'; g.fillRect(b[0], top, big ? 2 : 1, f.ph); g.fillStyle = '#f2c94c'; g.fillRect(b[0], top - 1, big ? 2 : 1, 1);
-    g.drawImage(s.c, b[0] - s.ox + (f.ax === 'x' ? (big ? 2 : 1) : 0), top - s.oy + 1);
+    g.fillStyle = '#2b1a16'; g.fillRect(b[0] - 0.5, top, big ? 2 : 1.5, f.ph); g.fillStyle = big ? '#e8dcc4' : '#c8b8a0'; g.fillRect(b[0], top, big ? 1 : 0.5, f.ph); g.fillStyle = '#f2c94c'; g.fillRect(b[0] - 0.5, top - 1, big ? 2 : 1.5, 1);
+    g.drawImage(s.c, b[0] - s.ox + (f.ax === 'x' ? (big ? 1 : 0.5) : 0), top - s.oy + 1, s.w, s.h);
   } else {
     const s = bunting(f, Math.floor(((TET.clock * 0.5 + f.phs) % 1 + 1) % 1 * 4) % 4), a = scn(f.A[0], f.A[1], f.A[2]), a0 = scn(f.A[0], f.A[1], 0), b0 = scn(f.B[0], f.B[1], 0), b = scn(f.B[0], f.B[1], f.B[2]);
     g.fillStyle = '#6b4a3a'; g.fillRect(a0[0], a[1] - 1, 1, a0[1] - a[1] + 1); g.fillRect(b0[0], b[1] - 1, 1, b0[1] - b[1] + 1);
-    g.drawImage(s.c, a[0] - s.ox, a[1] - s.oy); if (useL) lg.drawImage(s.e, a[0] - s.ox, a[1] - s.oy);
+    g.drawImage(s.c, a[0] - s.ox, a[1] - s.oy, s.w, s.h); if (useL) lg.drawImage(s.e, a[0] - s.ox, a[1] - s.oy, s.w, s.h);
   }
 };
 

@@ -10,17 +10,18 @@ const $ = id => document.getElementById(id);
 function ticker(text, force) { if (!force && G.t - G.tickT < 5.5) return; G.tickT = G.t; const el = $('ticker'); if (!el) return; el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
 
 // ambient light over the day: [hour, multiply colour]
-const KF = [[0, 0x46508c], [4.6, 0x46508c], [5.5, 0x8676a6], [6.3, 0xf2b9a2], [7.4, 0xffe9cf], [9, 0xfff8ea], [15.6, 0xfff6e2], [17, 0xffe2b4], [18, 0xf6aa7c], [18.8, 0xa97c9c], [19.7, 0x5c5e9a], [21, 0x46508c], [24, 0x46508c]];
+const KF = [[0, 0x4a4c86], [4.6, 0x4a4c86], [5.5, 0x8676a6], [6.3, 0xf2b9a2], [7.4, 0xffe9cf], [9, 0xfff8ea], [15.6, 0xfff6e2], [17, 0xffe2b4], [18, 0xf6aa7c], [18.8, 0xa97c9c], [19.7, 0x5c5e9a], [21, 0x4a4c86], [24, 0x4a4c86]];
 function ambient(h) { let i = 0; while (i < KF.length - 2 && KF[i + 1][0] <= h) i++; const a = KF[i], b = KF[i + 1]; return mixc(a[1], b[1], clamp((h - a[0]) / (b[0] - a[0]), 0, 1)); }
 
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 3), cw = window.innerWidth, ch = window.innerHeight, pw = cw * dpr, ph = ch * dpr;
-  const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (700 * 420)))), sMin = Math.max(1, Math.ceil((pw / (WORLD * 2) + ph / WORLD) / 0.96));
-  const s = clamp(base + R.zoom, sMin, 12); R.zoom = s - base; R.scale = s; R.dpr = dpr;
+  // screen pixels per art pixel (aps) is a whole number so the K-density art stays crisp; one world unit = K art pixels
+  const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K)), sMin = Math.max(1, Math.ceil((pw / (WORLD * 2) + ph / WORLD) / 0.96 / K));
+  const aps = clamp(base + R.zoom, sMin, 6); R.zoom = aps - base; const s = aps * K; R.scale = s; R.dpr = dpr;
   R.vw = Math.ceil(pw / s); R.vh = Math.ceil(ph / s);
-  for (const c of [R.canvas, R.lc]) { c.width = R.vw; c.height = R.vh; }
+  for (const c of [R.canvas, R.lc]) { c.width = R.vw * K; c.height = R.vh * K; }
   R.canvas.style.width = (R.vw * s / dpr) + 'px'; R.canvas.style.height = (R.vh * s / dpr) + 'px';
-  R.ctx.imageSmoothingEnabled = false; R.lctx.imageSmoothingEnabled = false; camera();
+  for (const g of [R.ctx, R.lctx]) { g.setTransform(K, 0, 0, K, 0, 0); g.imageSmoothingEnabled = false; } camera();
 }
 function camera() {
   const hw = R.vw / 2, hh = R.vh / 2, mx = Math.max(0, WORLD * (1 - hh / (WORLD / 2)) - hw) + hw * 0.7; R.panX = clamp(R.panX, -mx, mx);   // a little overscroll so edge landmarks (Dinh Độc Lập) can be centred
@@ -37,23 +38,25 @@ function visList() {
   W.vis = v; W.visTrees = vt; W.visLamps = CITY.lamps.filter(l => G.onScreen(l[0], l[1], 40)); W.visSig = CITY.signals.filter(l => G.onScreen(l[0], l[1], 30)); W.visTet = TET.visible(); R.dirty = false;
 }
 function glow(size, r, gg, b, a, sq) { const c = mk(size, sq ? size / 2 : size), g = c.getContext('2d'), id = g.createImageData(c.width, c.height); for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) { const nx = (x + 0.5 - size / 2) / (size / 2), ny = (y + 0.5 - c.height / 2) / (c.height / 2), d = Math.sqrt(nx * nx + ny * ny), k = (y * c.width + x) * 4; if (d < 1) { id.data[k] = r; id.data[k + 1] = gg; id.data[k + 2] = b; id.data[k + 3] = Math.round(a * (1 - d) * (1 - d)); } } g.putImageData(id, 0, 0); return c; }
-const SIGC = ['#ff5a4a', '#5aee8a', '#ffd24a'];
+const SIGC = ['#ff6a4a', '#7ae8a0', '#ffd46a'];
+let _psh = null;
+function pShadow() { if (_psh) return _psh; const w = 12 * K, h = 5 * K, c = mk(w, h), g = c.getContext('2d'); g.fillStyle = 'rgba(74,38,40,0.26)'; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const nx = (x + 0.5 - w / 2) / (w / 2), ny = (y + 0.5 - h / 2) / (h / 2), d = nx * nx + ny * ny; if (d < 0.62 || (d < 1 && (x + y) % 2 === 0)) g.fillRect(x, y, 1, 1); } return (_psh = c); }
 function draw() {
   const g = R.ctx, lg = R.lctx, W = G.world, vw = R.vw, vh = R.vh, cx = R.cx, cy = R.cy; if (!W) return;
   visList();
   const h = G.hour, lights = Math.max(h > 12 ? sstep(17.5, 19.2, h) : 1 - sstep(5.3, 6.6, h), clamp(G.cloud * 0.9 - 0.5, 0, 0.4)), useL = lights > 0.03; G.lights = lights;
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#34403f'; g.fillRect(0, 0, vw, vh);
   const gx = WORLD - cx, gy = -cy, sx0 = Math.max(0, gx), sy0 = Math.max(0, gy), sx1 = Math.min(WORLD * 2, gx + vw), sy1 = Math.min(WORLD, gy + vh);
-  if (sx1 > sx0 && sy1 > sy0) g.drawImage(W.ground, sx0, sy0, sx1 - sx0, sy1 - sy0, sx0 - gx, sy0 - gy, sx1 - sx0, sy1 - sy0);
+  if (sx1 > sx0 && sy1 > sy0) g.drawImage(W.ground, sx0 * K, sy0 * K, (sx1 - sx0) * K, (sy1 - sy0) * K, sx0 - gx, sy0 - gy, sx1 - sx0, sy1 - sy0);
   const ov = G.era > 0 ? OV[G.season + G.era] : null;
-  if (ov) { const ox1 = Math.min(ov.width, gx + vw), oy1 = Math.min(ov.height, gy + vh); if (ox1 > sx0 && oy1 > sy0) g.drawImage(ov, sx0, sy0, ox1 - sx0, oy1 - sy0, sx0 - gx, sy0 - gy, ox1 - sx0, oy1 - sy0); }
+  if (ov) { const ox1 = Math.min(ov.width / K, gx + vw), oy1 = Math.min(ov.height / K, gy + vh); if (ox1 > sx0 && oy1 > sy0) g.drawImage(ov, sx0 * K, sy0 * K, (ox1 - sx0) * K, (oy1 - sy0) * K, sx0 - gx, sy0 - gy, ox1 - sx0, oy1 - sy0); }
   drawWater(g);
   if (G.wet > 0.02) { g.fillStyle = 'rgba(26,38,74,' + (G.wet * 0.2).toFixed(3) + ')'; g.fillRect(0, 0, vw, vh); }
   if (useL) { lg.globalCompositeOperation = 'source-over'; lg.globalAlpha = 1; lg.clearRect(0, 0, vw, vh); }
   // dynamic things
   const dyn = [], bubbles = [], halos = [];
-  g.fillStyle = 'rgba(38,30,66,0.2)';
-  const shadow = (x, y) => { const s = scn(x, y, 0); g.fillRect(s[0] - 4, s[1] - 1, 8, 2); g.fillRect(s[0] - 3, s[1] - 2, 6, 1); g.fillRect(s[0] - 3, s[1] + 1, 6, 1); };
+  g.fillStyle = 'rgba(74,38,40,0.22)';
+  const psh = pShadow(), shadow = (x, y) => { const s = scn(x, y, 0); g.drawImage(psh, s[0] - 6, s[1] - 2.5, 12, 5); };
   for (const p of SIM.peds) { if (!G.onScreen(p.x, p.y, 24)) continue; const lf = bridgeLift(p.x, p.y); if (p.alpha > 0.5 && !lf) shadow(p.x, p.y); dyn.push({ key: p.x + p.y + (p.sit ? 0.6 : 0) + (lf ? 40 : 0), ped: p }); }
   for (const a of SIM.actors) if (G.onScreen(a.x, a.y, 24)) { shadow(a.x, a.y); dyn.push({ key: a.x + a.y, ped: a }); }
   for (const v of SIM.vehs) { const q = vehPos(v); if (G.onScreen(q[0], q[1], 44)) dyn.push({ key: q[0] + q[1], veh: v, q }); }
@@ -65,28 +68,28 @@ function draw() {
   const sway = (0.5 + G.gust * 2.8 + (G.windy ? 0.9 : 0));
   const drawStatic = it => {
     const x = cx + it.x, y = cy + it.y;
-    if (it.tree) { const sp2 = it.tree, c = it.c, amp = sway * (sp2.bare ? 0.4 : sp2.spc === 'cau' ? 1.2 : 1), sw = Math.sin(G.t * (1.1 + G.gust * 2.4) + it.ph) * amp + G.gust * 1.3, split = sp2.split, bands = 4, bh = Math.ceil(split / bands); for (let i = 0; i < bands; i++) { const sy = i * bh, hh = Math.min(bh, split - sy); if (hh <= 0) break; g.drawImage(c, 0, sy, c.width, hh, x + Math.round(sw * (1 - i / bands)), y + sy, c.width, hh); } g.drawImage(c, 0, split, c.width, c.height - split, x, y + split, c.width, c.height - split); }
-    else g.drawImage(it.c, x, y);
-    if (useL && it.e) lg.drawImage(it.e, x, y);
+    if (it.tree) { const sp2 = it.tree, c = it.c, amp = sway * (sp2.bare ? 0.4 : sp2.spc === 'cau' ? 1.2 : 1), sw = Math.sin(G.t * (1.1 + G.gust * 2.4) + it.ph) * amp + G.gust * 1.3, split = sp2.split, bands = 4, bh = Math.ceil(split / bands); for (let i = 0; i < bands; i++) { const sy = i * bh, hh = Math.min(bh, split - sy); if (hh <= 0) break; g.drawImage(c, 0, sy * K, c.width, hh * K, x + Math.round(sw * (1 - i / bands) * K) / K, y + sy, it.w, hh); } g.drawImage(c, 0, split * K, c.width, c.height - split * K, x, y + split, it.w, it.h - split); }
+    else g.drawImage(it.c, x, y, it.w, it.h);
+    if (useL && it.e) lg.drawImage(it.e, x, y, it.w, it.h);
   };
-  const person = (sheet, col, row, x, y, a, hh) => { hh = hh || PH; if (a < 1) g.globalAlpha = a; g.drawImage(sheet.c, col * PW, row * PH, PW, hh, x, y, PW, hh); if (a < 1) g.globalAlpha = 1; if (useL && a > 0.5) lg.drawImage(sheet.e, col * PW, row * PH, PW, hh, x, y, PW, hh); };
+  const person = (sheet, col, row, x, y, a, hh) => { hh = hh || PH; if (a < 1) g.globalAlpha = a; g.drawImage(sheet.c, col * PW * K, row * PH * K, PW * K, hh * K, x, y, PW, hh); if (a < 1) g.globalAlpha = 1; if (useL && a > 0.5) lg.drawImage(sheet.e, col * PW * K, row * PH * K, PW * K, hh * K, x, y, PW, hh); };
   const vehicle = (kind, vv, di, q, riders, a) => {
     const m = vehModel(kind, vv), s = vehSprite(kind, vv, di), p = scn(q[0], q[1], 0);
-    if (a < 1) g.globalAlpha = a; g.drawImage(s.c, p[0] - s.ax, p[1] - s.ay); if (a < 1) g.globalAlpha = 1; if (useL) lg.drawImage(s.e, p[0] - s.ax, p[1] - s.ay);
+    if (a < 1) g.globalAlpha = a; g.drawImage(s.c, p[0] - s.ax, p[1] - s.ay, s.w, s.h); if (a < 1) g.globalAlpha = 1; if (useL) lg.drawImage(s.e, p[0] - s.ax, p[1] - s.ay, s.w, s.h);
     const n = Math.min(riders.length, m.seats.length), ord = []; for (let i = 0; i < n; i++) ord.push(i); ord.sort((i, j) => (m.seats[i].x - m.seats[j].x) * (di < 2 ? 1 : -1));
-    for (const i of ord) { const o = seatOff(m, m.seats[i], di); person(riders[i].sheet, 5, DIR_ROW[di], p[0] + Math.round(o[0]) - 10, p[1] + Math.round(o[1]) - 18, a, riders[i].look.kid ? 22 : 21); }
+    for (const i of ord) { const o = seatOff(m, m.seats[i], di); person(riders[i].sheet, 5, DIR_ROW[di], p[0] + Math.round(o[0]) - PW / 2, p[1] + Math.round(o[1]) - PSEAT, a, PSEAT + 2); }
     if (useL) { const d = DIRV[di], f = scn(q[0] + d[0] * (m.L / 2 + 5), q[1] + d[1] * (m.L / 2 + 5), 2); halos.push([f[0], f[1], 1]); }
     return p;
   };
   const drawDyn = d => {
     if (d.ped) {
       const p = d.ped, s = scn(p.x, p.y, bridgeLift(p.x, p.y));
-      if (p.dog !== undefined) { const fr = DOGS[p.dog % DOGS.length][p.dir === 1 || p.dir === 2 ? 1 : 0][p.moving ? (Math.floor(p.an * 1.6) & 1) : 0]; g.globalAlpha = p.alpha; g.drawImage(fr.c, s[0] - 5, s[1] - 7); g.globalAlpha = 1; if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, s[1] - 21]); return; }
-      const hold = p.umb > 0.05, row = DIR_ROW[p.dir], x = s[0] - 10, y = s[1] - 23 - (p.sit ? 2 : 0), a = p.alpha === undefined ? 1 : p.alpha;
+      if (p.dog !== undefined) { const fr = DOGS[p.dog % DOGS.length][p.dir === 1 || p.dir === 2 ? 1 : 0][p.moving ? (Math.floor(p.an * 1.6) & 1) : 0]; g.globalAlpha = p.alpha; g.drawImage(fr.c, s[0] - fr.w / 2, s[1] - fr.h + 1, fr.w, fr.h); g.globalAlpha = 1; if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, s[1] - 21]); return; }
+      const hold = p.umb > 0.05, row = DIR_ROW[p.dir], x = s[0] - PW / 2, y = s[1] - PFOOT - (p.sit ? 2 : 0), a = p.alpha === undefined ? 1 : p.alpha;
       let col = p.sit ? 5 : p.moving ? 1 + (Math.floor(p.an) & 3) : p.pose; if (hold && !p.moving && !p.sit && col === 0) col = 6;
       person(p.sheet, col, row, x, y, a);
-      if (hold) { const fr = UMB[p.look.umbC][p.umb < 0.4 ? 0 : p.umb < 0.8 ? 1 : 2], ux = x + (row >= 2 ? -3 : 6), uy = y + (p.look.kid ? 2 : -2) - (p.moving && (Math.floor(p.an) & 1) ? 1 : 0); g.drawImage(fr.c, ux, uy); if (useL) lg.drawImage(fr.e, ux, uy); }
-      if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, y - 11 - (hold ? 5 : 0) + (p.bub.a < 0.1 ? 2 : p.bub.a < 0.2 ? -1 : 0)]);
+      if (hold) { const fr = UMB[p.look.umbC][p.umb < 0.4 ? 0 : p.umb < 0.8 ? 1 : 2], ux = x + PW / 2 - fr.w / 2 + (row >= 2 ? -2 : 2), uy = y + (p.look.kid ? PHEAD + 4 : PHEAD) - fr.h + 9 - (p.moving && (Math.floor(p.an) & 1) ? 0.5 : 0); g.drawImage(fr.c, ux, uy, fr.w, fr.h); if (useL) lg.drawImage(fr.e, ux, uy, fr.w, fr.h); }
+      if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, y + (p.look.kid ? PHEAD + 4 : PHEAD) - 13 - (hold ? 5 : 0) + (p.bub.a < 0.1 ? 2 : p.bub.a < 0.2 ? -1 : 0)]);
     } else if (d.boat) vehicle(d.boat.kind, d.boat.v, d.boat.dir > 0 ? 1 : 3, [d.boat.x, d.boat.y], d.boat.riders, 1);
     else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, vv.turn ? vv.turn.di : L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
@@ -105,11 +108,11 @@ function draw() {
     for (const hl of halos) lg.drawImage(R.pool2, hl[0] - 13, hl[1] - 7);
     drawWaterLights(lg, lights);
     drawFxLights(lg);
-    g.globalCompositeOperation = 'lighter'; g.globalAlpha = lights; g.drawImage(R.lc, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    g.globalCompositeOperation = 'lighter'; g.globalAlpha = lights; g.drawImage(R.lc, 0, 0, vw, vh); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
   if (G.flash > 0.02) { g.fillStyle = 'rgba(240,244,255,' + (G.flash * 0.4).toFixed(3) + ')'; g.fillRect(0, 0, vw, vh); }
-  for (const b of bubbles) g.drawImage(b[0], b[1], b[2]);
-  if (R.xf > 0 && R.snap) { g.globalAlpha = Math.ceil(R.xf * 8) / 8; g.drawImage(R.snap, 0, 0); g.globalAlpha = 1; }
+  for (const b of bubbles) dI(g, b[0], b[1], b[2]);
+  if (R.xf > 0 && R.snap) { g.globalAlpha = Math.ceil(R.xf * 8) / 8; g.drawImage(R.snap, 0, 0, vw, vh); g.globalAlpha = 1; }
 }
 // ----- eras: swap buildings / signs / skyline in place with a short crossfade; people and traffic turn over on their own -----
 function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; $('viewRiver').textContent = nearRiver ? 'Bến sông' : 'Về phố'; if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
@@ -149,7 +152,7 @@ function frame(ts) {
 
 // ----- seasons -----
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-function snapshot() { if (!R.snap || R.snap.width !== R.vw || R.snap.height !== R.vh) R.snap = mk(R.vw, R.vh); const sg = R.snap.getContext('2d'); sg.clearRect(0, 0, R.vw, R.vh); sg.drawImage(R.canvas, 0, 0); }
+function snapshot() { const W = R.canvas.width, H = R.canvas.height; if (!R.snap || R.snap.width !== W || R.snap.height !== H) R.snap = mk(W, H); const sg = R.snap.getContext('2d'); sg.clearRect(0, 0, W, H); sg.drawImage(R.canvas, 0, 0); }
 // first call shows the loading card; later season changes repaint the ground in the background and crossfade in place
 async function setSeason(s, first) {
   if (G.busy && !first) return; G.busy = true; G.seasonT = 0;
@@ -160,6 +163,7 @@ async function setSeason(s, first) {
   if (!first) snapshot();
   G.season = s; for (const k in OV) delete OV[k]; OVJOB = null; ensureOv(s, G.era); const items = buildStatics(s, G.era); if (first) $('fadeB').style.width = '100%';
   if (!G.world) G.world = { ground: GROUNDS[s], items }; else { G.world.ground = GROUNDS[s]; G.world.items = items; }
+  for (const k in GROUNDS) if (k !== s) delete GROUNDS[k];   // the K-density ground is large: keep only the current season
   G.world.vis = null; R.dirty = true; visList();
   if (first) { initSim(); TET.sync(); } else { reseasonPeds(); R.xf = 1; }
   _pb = 0; FX.drift.length = 0; if (G.autoWeather && G.weather !== 'clear' && !first) setWeather('clear');

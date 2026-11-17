@@ -33,17 +33,17 @@ const ICON_SRC = {
 const BUB = {};
 function initIcons() {
   for (const k in ICON_SRC) {
-    const W = 14, H = 14, g = new Int32Array(W * H).fill(-1), ink = 0x2a2140, wh = 0xfffaf0;
-    for (let y = 0; y < 11; y++) for (let x = 0; x < 12; x++) { const edge = x === 0 || y === 0 || x === 11 || y === 10, corner = (x === 0 || x === 11) && (y === 0 || y === 10); if (!corner) g[y * W + x + 1] = edge ? ink : wh; }
-    g[11 * W + 3] = ink; g[11 * W + 4] = wh; g[11 * W + 5] = ink; g[12 * W + 3] = ink; g[12 * W + 4] = ink; g[10 * W + 4] = wh;
-    const src = ICON_SRC[k];
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const ch = src[y][x]; if (ch !== '.') g[(y + 1) * W + x + 3] = ICON_PAL[ch]; }
-    BUB[k] = gridCanvas(g, W, H).c;
+    const W = 14 * K, H = 14 * K, g = new Int32Array(W * H).fill(-1), paper = 0xfff4e2, pS = 0xf2d8b4;
+    for (let y = 1; y < 22; y++) for (let x = 1; x < 25; x++) { const rx = Math.min(x - 1, 24 - x), ry = Math.min(y - 1, 21 - y); if (rx + ry < 3 && rx < 2 && ry < 2) continue; g[y * W + x] = y > 18 ? pS : paper; }
+    for (let j = 0; j < 4; j++) for (let x = 5; x < 10 - j; x++) g[(22 + j) * W + x] = pS;
+    const src = ICON_SRC[k], ig = new Int32Array(64).fill(-1); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const ch = src[y][x]; if (ch !== '.') ig[y * 8 + x] = grade(ICON_PAL[ch]); }
+    const up = scale2x(ig, 8, 8); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (up[y * 16 + x] >= 0) g[(y + 3) * W + x + 5] = up[y * 16 + x];
+    BUB[k] = gridCanvas(inkGrid(g, W, H, 1), W, H, null, K).c;
   }
 }
 
 // ----- people -----
-const PW = 20, PH = 26, NPOSE = 8;   // poses: 0 stand, 1-4 walk, 5 sit, 6 arm up, 7 talk
+const PW = 14, PH = 26, NPOSE = 8, PFOOT = 25, PSEAT = 21, PHEAD = 4;   // logical cell; art is drawn at K x   // poses: 0 stand, 1-4 walk, 5 sit, 6 arm up, 7 talk
 const SKINS = [0xf4cfa6, 0xeab98c, 0xdba676, 0xc98f60, 0xf7dcbc];
 const HAIRS = [0x1d1a24, 0x2b2028, 0x3b2a24, 0x16141a];
 const TOPS = [0xf4f1e8, 0x8fc1e3, 0x9fd8b4, 0xd9685c, 0xf2c94c, 0xb79fd8, 0x9a6b4a, 0x3d4f7a, 0xf2a0b5, 0xf08a4b, 0x4fa3a0, 0xe9dcc0, 0x7c8aa0, 0xc94f6a];
@@ -87,90 +87,121 @@ function dressFor(L, season) {
   else if (season === 'summer') { if (!L.hat && L.r3 < 0.32) L.hat = L.fem ? 'non' : 'cap'; if (L.type === 'youth' && L.r2 < 0.5) L.legs = 'short'; if (L.type === 'youth' || L.type === 'dress') L.sleeve = 'short'; }
   return L;
 }
-function drawPerson(L, back, pose) {
-  const G = new Int32Array(PW * PH).fill(-1);
-  const set = (x, y, c) => { if (x >= 0 && y >= 0 && x < PW && y < PH) G[y * PW + x] = c; };
-  const rect = (xa, ya, xb, yb, c) => { for (let y = ya; y <= yb; y++) for (let x = xa; x <= xb; x++) set(x, y, c); };
-  const dk = c => shade(c, -0.22);
-  const kid = L.kid, sit = pose === 5, th = kid ? 4 : 6, lh = kid ? 4 : 6, pass = pose === 2 || pose === 4;
-  const yL = 22 - lh + (sit ? 2 : 0), yT = yL - th - (pass ? 1 : 0), yH = yT - 6;
-  const skin = L.skin, top = L.poncho ? L.ponchoC : L.top, bot = L.bot, shoe = L.shoe, hair = L.hair;
-  const legC = (j, n) => L.dress === 1 || L.dress === 3 ? skin : (L.legs === 'short' && j >= 2) ? skin : bot;
+// New people: chibi townsfolk drawn at K art pixels per unit — big round heads, cocoa ink outline, two-tone warm shading,
+// faces with eyes + blush (front 3/4 view looks right-down; the sheet mirrors it for the other directions).
+const CW = PW * K, CH = PH * K;
+const skinSh = c => mixc(mixc(c, 0xc8583a, 0.3), 0x3a221c, 0.06), clothSh = c => mixc(mixc(c, 0x6a3f45, 0.34), 0x2b1a16, 0.05), hiOf = c => mixc(c, 0xfff4e2, 0.24);
+function drawPerson(L0, back, pose) {
+  const L = Object.assign({}, L0); L.skin = grade(L.skin); L.top = grade(L.top); L.bot = grade(L.bot); L.shoe = grade(L.shoe); L.hair = grade(L.hair);
+  const W = CW, H = CH, col = new Int32Array(W * H).fill(-1), zz = new Int8Array(W * H).fill(-1);
+  const put = (x, y, c, z) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= H) return; col[y * W + x] = c; zz[y * W + x] = z; };
+  // shaded rect / ellipse: right part in shadow, upper-left lit
+  const rect = (x0, y0, x1, y1, c, z, shX, sc) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) put(x, y, shX !== undefined && x >= shX ? (sc || clothSh(c)) : c, z); };
+  const ell = (cx, cy, rx, ry, c, z, sc, hl, clip) => { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry; if (dx * dx + dy * dy > 1) continue; if (clip && !clip(x, y)) continue; let k = c; if (sc !== undefined && dx > 0.38 - dy * 0.15) k = sc; else if (hl !== undefined && dx < -0.2 && dy < -0.35) k = hl; put(x, y, k, z); } };
+  const kid = L.kid, sit = pose === 5, walk = pose === 1 || pose === 3, pass = pose === 2 || pose === 4, bob = pass ? -1 : 0, cx = 13;
+  const foot = 49, legTop = (kid ? 41 : 37) + (sit ? 5 : 0) + bob, torsoTop = (kid ? 33 : 26) + (sit ? 5 : 0) + bob, headCY = (kid ? 25 : 17) + (sit ? 5 : 0) + bob, hr = kid ? 7.5 : 8;
+  const skin = L.skin, sS = skinSh(skin), top = L.poncho ? grade(L.ponchoC) : L.top, bot = L.bot, shoe = L.shoe, hair = L.hair, hS = mixc(hair, 0x1a100e, 0.35), hH = mixc(hair, 0xb08070, 0.3);
+  const legC = L.dress === 1 || L.dress === 3 ? skin : bot, armRow = j => L.poncho || L.sleeve === 'long' ? top : L.sleeve === 'none' ? skin : j < 4 ? top : skin;
+  // --- hair that hangs behind the body (long / bob seen from the front)
+  if (!back && !L.poncho && (L.hs === 1 || L.hs === 5) && L.hat !== 'helm') { const ln = L.hs === 1 ? torsoTop + (kid ? 6 : 9) : headCY + 7; rect(cx - 9, headCY, cx - 4, ln, hair, 0, cx - 5, hS); rect(cx + 6, headCY + 2, cx + 9, Math.min(ln, torsoTop + 4), hS, 0); }
+  // --- back arm (left on screen)
+  const swing = walk ? (pose === 1 ? 1 : -1) : 0, armLen = kid ? 8 : 11;
+  const arm = (x, z, sw, raise) => { for (let j = 0; j < armLen; j++) { const y = torsoTop + 1 + j, xx = x + Math.round(sw * j / armLen * 2), c = armRow(j); if (raise) continue; for (let i = 0; i < 3; i++) put(xx + i, y, i === 2 ? (c === skin ? sS : clothSh(c)) : c, z); } const hy = torsoTop + 1 + armLen, hx = x + sw * 2; if (!raise) { rect(hx, hy, hx + 2, hy + 1, skin, z, hx + 2, sS); } };
+  if (!L.ganh || sit) arm(cx - 8, 1, -swing);
   // --- legs
-  if (sit) { rect(7, yL, 12, yL + 1, L.dress ? (L.dress === 2 ? top : L.dress === 3 ? top : bot) : bot); for (let y = yL + 2; y <= 21; y++) { set(7, y, legC(3)); set(8, y, legC(3)); set(11, y, dk(legC(3))); set(12, y, dk(legC(3))); } rect(7, 22, 8, 22, shoe); rect(11, 22, 12, 22, dk(shoe)); }
-  else if (pose === 1 || pose === 3) {
-    const a = pose === 1 ? 7 : 11, b = pose === 1 ? 11 : 7;
-    for (let y = yL; y <= 21; y++) { set(a, y, legC(y - yL)); set(a + 1, y, legC(y - yL)); } rect(a, 22, a + 1, 22, shoe);
-    for (let y = yL; y <= 20; y++) { set(b, y, dk(legC(y - yL))); set(b + 1, y, dk(legC(y - yL))); } rect(b, 21, b + 1, 21, dk(shoe));
-    rect(8, yL, 11, yL, legC(0));
-  } else { for (let y = yL - (pass ? 1 : 0); y <= 21; y++) { const j = y - yL; set(8, y, legC(j)); set(9, y, legC(j)); set(10, y, dk(legC(j))); set(11, y, dk(legC(j))); } rect(8, 22, 9, 22, shoe); rect(10, 22, 11, 22, dk(shoe)); }
-  if (!sit) {
-    if (L.dress === 1) { rect(7, yL - (pass ? 1 : 0), 12, yL + (kid ? 1 : 2), bot); for (let y = yL; y <= yL + (kid ? 1 : 2); y++) set(12, y, dk(bot)); }
-    else if (L.dress === 2) { rect(8, yL - (pass ? 1 : 0), 11, yL + 3, top); set(11, yL + 3, dk(top)); set(11, yL + 2, dk(top)); }
-    else if (L.dress === 3) { rect(7, yL - (pass ? 1 : 0), 12, yL + 4, top); for (let y = yL; y <= yL + 4; y++) set(12, y, dk(top)); }
-  }
-  // --- torso
-  rect(7, yT, 12, yT + th - 1, top); for (let y = yT; y < yT + th; y++) set(12, y, dk(top));
-  if (L.pattern && !L.poncho) for (let y = yT; y < yT + th; y++) for (let x = 7; x <= 12; x++) if ((x + y * 2) % 3 === 0) set(x, y, L.pattern);
-  if (!back && !L.poncho) { if (L.tie) { set(9, yT, 0xf7f5ee); set(10, yT, 0xf7f5ee); for (let j = 1; j < 4; j++) set(9, yT + j, L.tie); } else if (L.sleeve !== 'long' || L.type === 'youth') { set(9, yT, skin); set(10, yT, skin); } }
-  if (L.apron && !back) rect(8, yT + 2, 11, yT + th - 1, 0xf7f4ec);
-  // --- arms
-  const armC = (j) => L.poncho ? top : L.sleeve === 'long' ? top : L.sleeve === 'none' ? skin : (j < 2 ? top : skin);
-  const arm = (x, a, b2, hand) => { for (let j = a; j <= b2; j++) set(x, yT + j, j === b2 && hand ? skin : (x > 9 ? dk(armC(j)) : armC(j))); };
-  const al = th - 2;                                                  // last arm row (hand)
-  if (pose === 1) { arm(6, 1, al + 1, 1); arm(13, 0, al - 1, 1); }
-  else if (pose === 3) { arm(6, 0, al - 1, 1); arm(13, 1, al + 1, 1); }
-  else if (pose === 6) { arm(6, 0, al, 1); for (let j = -3; j <= 1; j++) set(13, yT + j, dk(j >= 0 || L.sleeve === 'long' || L.poncho ? top : skin)); set(13, yT - 4, skin); }
-  else if (pose === 7) { arm(6, 0, al, 1); set(13, yT, dk(armC(0))); set(13, yT + 1, dk(armC(1))); set(13, yT + 2, dk(armC(2))); set(14, yT + 2, armC(3)); set(14, yT + 1, skin); }
-  else { arm(6, 0, al, 1); arm(13, 0, al, 1); }
-  // --- head
-  rect(7, yH + 1, 12, yH + 4, skin); rect(8, yH, 11, yH, skin); rect(8, yH + 5, 11, yH + 5, skin); for (let y = yH + 1; y <= yH + 4; y++) set(12, y, shade(skin, -0.1));
-  const hs = L.hs, h2 = shade(hair, -0.2), hl = shade(hair, 0.18);
-  if (hs !== 7) {
-    if (back) { rect(8, yH, 11, yH, hair); rect(7, yH + 1, 12, yH + 3, hair); set(8, yH + 1, hl); set(12, yH + 2, h2); set(12, yH + 3, h2); if (hs === 4) { rect(8, yH, 11, yH + 1, skin); } }
-    else { rect(8, yH, 11, yH, hair); rect(7, yH + 1, 12, yH + 1, hair); set(7, yH + 2, hair); set(12, yH + 2, h2); set(8, yH + 2, hair); set(9, yH + 1, hl); if (hs === 4) { rect(8, yH, 11, yH + 1, skin); set(8, yH + 2, skin); } }
-    if (hs === 1) { if (back) rect(7, yH + 4, 12, yH + 8, hair), set(12, yH + 6, h2), set(9, yH + 5, hl); else { for (let y = yH + 2; y <= yH + 7; y++) { set(6, y, hair); set(13, y, h2); } } }
-    else if (hs === 2) { if (back) { rect(9, yH + 4, 10, yH + 8, hair); set(10, yH + 8, h2); } else { set(13, yH + 2, h2); set(13, yH + 3, h2); set(14, yH + 4, h2); } }
-    else if (hs === 3) { rect(9, yH - 1, 10, yH - 1, hair); if (back) rect(9, yH - 2, 10, yH - 2, h2); }
-    else if (hs === 5) { if (back) rect(7, yH + 4, 12, yH + 5, hair); else { for (let y = yH + 2; y <= yH + 5; y++) { set(6, y, hair); set(13, y, h2); } } }
-    else if (hs === 6) rect(8, yH - 1, 11, yH - 1, hair);
-  }
-  if (!back) { set(9, yH + 3, 0x2a2140); set(12, yH + 3, 0x2a2140); if (L.mask) rect(7, yH + 4, 12, yH + 5, 0xcfe6f2); if (L.blush) set(8, yH + 4, mixc(skin, 0xf07a8a, 0.45)); if (L.glasses) { set(8, yH + 3, 0x3a3050); set(10, yH + 3, 0x3a3050); set(12, yH + 3, 0x3a3050); } }
-  // --- hats
-  const hat = L.poncho ? 0 : L.hat, hc = L.hatC;
-  if (hat === 'non') { const s = 0xecdca6, s2 = 0xcdb87c; rect(9, yH - 2, 10, yH - 2, s); rect(8, yH - 1, 11, yH - 1, s); rect(6, yH, 13, yH, s); rect(5, yH + 1, 14, yH + 1, s); set(11, yH - 1, s2); rect(11, yH, 13, yH, s2); rect(11, yH + 1, 14, yH + 1, s2); }
-  else if (hat === 'coi' || hat === 'beo') { const c = hat === 'coi' ? 0x6f8250 : hc; rect(7, yH - 1, 12, yH, c); rect(6, yH + 1, 13, yH + 1, c); set(12, yH - 1, dk(c)); set(12, yH, dk(c)); set(13, yH + 1, dk(c)); set(8, yH - 1, shade(c, 0.2)); }
-  else if (hat === 'helm') { rect(7, yH - 1, 12, yH + 1, hc); rect(8, yH - 2, 11, yH - 2, hc); set(9, yH - 1, shade(hc, 0.3)); set(12, yH, dk(hc)); set(12, yH + 1, dk(hc)); if (back) rect(7, yH + 2, 12, yH + 2, hc); else { set(7, yH + 2, 0x2a2a30); } }
-  else if (hat === 'cap') { rect(7, yH, 12, yH + 1, hc); rect(8, yH - 1, 11, yH - 1, hc); set(12, yH, dk(hc)); if (!back) { set(12, yH + 2, hc); set(13, yH + 2, hc); set(14, yH + 2, dk(hc)); } }
-  else if (hat === 'len') { rect(7, yH - 1, 12, yH + 1, hc); rect(7, yH + 1, 12, yH + 1, shade(hc, 0.25)); set(12, yH, dk(hc)); rect(9, yH - 2, 10, yH - 2, 0xf7f4ec); }
-  // --- neck things
-  if (L.poncho) { rect(6, yT, 13, yL + 1, top); rect(5, yT + 2, 14, yL, top); for (let y = yT; y <= yL + 1; y++) set(13, y, dk(top)); for (let y = yT + 2; y <= yL; y++) set(14, y, dk(top)); if (back) { rect(7, yH, 12, yH + 5, top); rect(8, yH - 1, 11, yH - 1, top); set(12, yH + 2, dk(top)); } else { rect(8, yH - 1, 11, yH - 1, top); rect(7, yH, 12, yH + 1, top); for (let y = yH + 2; y <= yH + 5; y++) { set(6, y, top); set(13, y, dk(top)); } rect(8, yH + 5, 11, yH + 5, top); set(9, yH + 1, shade(top, 0.3)); } }
+  if (sit) { rect(cx - 3, legTop, cx + 7, legTop + 3, legC, 2, cx + 5); rect(cx + 3, legTop + 4, cx + 7, foot - 2, legC, 2, cx + 6); rect(cx + 3, foot - 1, cx + 8, foot, shoe, 3, cx + 7); }
   else {
-    if (L.scarf) { rect(7, yT, 12, yT, L.scarf); if (back) { set(11, yT + 1, L.scarf); set(11, yT + 2, dk(L.scarf)); } else { set(8, yT + 1, L.scarf); set(8, yT + 2, dk(L.scarf)); } }
-    if (L.kq) { const r = 0xd9281e; if (back) { rect(8, yT, 11, yT, r); set(9, yT + 1, r); set(10, yT + 1, r); } else { rect(8, yT, 11, yT, r); set(9, yT + 1, r); set(10, yT + 2, r); } }
+    const l1 = walk ? (pose === 1 ? -1 : 1) : 0, legEnd = foot - 2;
+    const leg = (x, lift, z) => { rect(x, legTop, x + 3, legEnd - lift, legC === skin ? skin : legC, z, x + 3, legC === skin ? sS : clothSh(legC)); if (L.legs === 'short' && legC !== skin) rect(x, legTop + (kid ? 4 : 6), x + 3, legEnd - lift, skin, z, x + 3, sS); rect(x, legEnd - lift + 1, x + 4, foot - lift, shoe, z + 1, x + 3, clothSh(shoe)); };
+    leg(cx - 4 + l1, walk && pose === 3 ? 1 : 0, 2); leg(cx + 1 - l1, walk && pose === 1 ? 1 : 0, 3);
   }
-  // --- carried things
-  if (L.ganh && !sit) { const bob = pose === 1 ? 1 : pose === 3 ? -1 : 0, pc = 0x8a6a3a, st = 0x5a4a3a, bk = 0xc9a86a; rect(1, yT, 18, yT, pc); for (let j = 1; j <= 4; j++) { set(2, yT + j + (bob > 0 ? 1 : 0), st); set(17, yT + j + (bob < 0 ? 1 : 0), st); } const ya = yT + 5 + (bob > 0 ? 1 : 0), yb = yT + 5 + (bob < 0 ? 1 : 0); rect(0, ya, 4, ya + 2, bk); rect(1, ya - 1, 3, ya - 1, L.goods); rect(0, ya + 2, 4, ya + 2, dk(bk)); rect(15, yb, 19, yb + 2, bk); rect(16, yb - 1, 18, yb - 1, L.goods); rect(15, yb + 2, 19, yb + 2, dk(bk)); }
-  if (L.pack && !L.poncho) { if (back) { rect(8, yT, 11, yT + th - 2, L.pack); rect(8, yT + th - 2, 11, yT + th - 2, dk(L.pack)); set(9, yT + 1, shade(L.pack, 0.25)); } else { for (let j = 0; j < 3; j++) { set(7, yT + j, dk(L.pack)); set(12, yT + j, dk(L.pack)); } } }
-  const hx = 6, hy = yT + al + (pose === 1 ? 1 : pose === 3 ? -1 : 0), cy = L.carry;
-  if (cy === 'phone' && !back) { set(hx - 1, hy - 1, 0x2a2a30); set(hx - 1, hy - 2, 0x9fd8ff); }
-  if (cy === 'cup') { set(hx - 1, hy - 1, 0xcfe3ea); set(hx - 1, hy, 0x8a5a3a); }
-  else if (cy === 'bag' && !sit) { set(hx, hy + 1, 0x3a3050); rect(hx - 1, hy + 2, hx + 1, hy + 4, L.bag); rect(hx - 1, hy + 4, hx + 1, hy + 4, dk(L.bag)); }
-  else if (cy === 'case' && !sit) { rect(hx - 2, hy + 1, hx + 1, hy + 3, 0x6b4a36); rect(hx - 2, hy + 3, hx + 1, hy + 3, 0x4f3626); set(hx, hy + 1, 0xc9a86a); }
-  else if (cy === 'banhmi') { set(hx - 1, hy - 2, 0xd9a55a); set(hx - 1, hy - 1, 0xd9a55a); set(hx - 1, hy, 0xf7f4ec); }
-  else if (cy === 'melon' && !sit) { rect(hx - 3, hy + 1, hx, hy + 4, 0x4a9a4a); rect(hx - 3, hy + 2, hx, hy + 2, 0x2f6a38); rect(hx - 3, hy + 4, hx, hy + 4, 0x2f6a38); set(hx - 2, hy + 1, 0x7ac070); }
-  else if (cy === 'shop' && !sit) { rect(hx - 2, hy + 1, hx, hy + 4, 0xf2a0b5); rect(hx - 2, hy + 1, hx, hy + 1, 0xd9534f); set(hx - 1, hy, 0x58994f); }
-  // --- slim the figure (drop two body columns), then outline
-  { const SQ = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19], G2 = new Int32Array(PW * PH).fill(-1); for (let y = 0; y < PH; y++) for (let i = 0; i < SQ.length; i++) G2[y * PW + i + 1] = G[y * PW + SQ[i]]; G.set(G2); }
-  const out = G.slice();
-  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) { if (G[y * PW + x] >= 0) continue; let n = -1; if (x > 0 && G[y * PW + x - 1] >= 0) n = G[y * PW + x - 1]; else if (x < PW - 1 && G[y * PW + x + 1] >= 0) n = G[y * PW + x + 1]; else if (y > 0 && G[(y - 1) * PW + x] >= 0) n = G[(y - 1) * PW + x]; else if (y < PH - 1 && G[(y + 1) * PW + x] >= 0) n = G[(y + 1) * PW + x]; if (n >= 0) out[y * PW + x] = mixc(n, 0x221a33, 0.74); }
+  // --- skirts / áo dài / robe below the waist
+  if (L.dress === 1 && !sit) rect(cx - 6, legTop - 1, cx + 6, legTop + (kid ? 4 : 6), bot, 4, cx + 3);
+  else if (L.dress === 2 && !sit) { rect(cx - 4, legTop - 1, cx + 4, legTop + 9, top, 4, cx + 2); put(cx - 5, legTop + 2, top, 4); }
+  else if (L.dress === 3) rect(cx - 6, legTop - 1, cx + 6, sit ? legTop + 3 : foot - 2, top, 4, cx + 3);
+  // --- torso
+  for (let y = torsoTop; y < legTop; y++) { const inset = y === torsoTop ? 2 : y === torsoTop + 1 ? 1 : (y > legTop - 3 ? 1 : 0); for (let x = cx - 6 + inset; x <= cx + 6 - inset; x++) put(x, y, x >= cx + 3 ? clothSh(top) : (x < cx - 3 && y < torsoTop + 4 ? hiOf(top) : top), 5); }
+  if (L.pattern && !L.poncho) for (let y = torsoTop + 2; y < legTop; y++) for (let x = cx - 5; x <= cx + 5; x++) if ((x * 2 + y * 3) % 7 === 0) put(x, y, grade(L.pattern), 5);
+  if (!back && !L.poncho) {
+    if (L.tie) { rect(cx - 1, torsoTop, cx + 1, torsoTop, 0xf7f0e2, 6); rect(cx, torsoTop + 1, cx, torsoTop + 7, grade(L.tie), 6); }
+    else if (L.dress === 2) rect(cx - 1, torsoTop - 1, cx + 1, torsoTop, top, 6);
+    else { put(cx, torsoTop, sS, 6); put(cx + 1, torsoTop, sS, 6); for (let j = 3; j < legTop - torsoTop; j += 3) put(cx + 1, torsoTop + j, clothSh(top), 6); }   // collar notch + buttons
+    if (L.apron) rect(cx - 4, torsoTop + 4, cx + 4, legTop + 3, 0xf4ecda, 6, cx + 2, 0xd8ccb4);
+  }
+  if (L.pack && back) rect(cx - 5, torsoTop + 1, cx + 5, torsoTop + 9, grade(L.pack), 7, cx + 3);
+  if (L.pack && !back) { rect(cx - 5, torsoTop, cx - 5, legTop - 2, grade(L.pack), 6); rect(cx + 4, torsoTop, cx + 4, legTop - 2, clothSh(grade(L.pack)), 6); }
+  // --- neck + head
+  rect(cx, torsoTop - 2, cx + 2, torsoTop - 1, sS, 5);
+  ell(cx + 1, headCY, hr, hr, skin, 8, sS, hiOf(skin));
+  if (!back && L.hs !== 7) { put(cx - 6, headCY + 1, skin, 8); put(cx - 6, headCY + 2, sS, 8); }   // ear
+  // --- hair
+  const hs = L.hs, hairOn = !L.poncho && hs !== 7, capOnly = L.hat === 'helm' || L.hat === 'len';
+  if (hairOn && !capOnly) {
+    if (back) ell(cx + 1, headCY - 0.5, hr + 0.8, hr + 0.4, hair, 9, hS, hH);
+    else {
+      const bang = x => headCY - 2 + ((x * 3) % 4 === 0 ? 1 : 0) - (hs === 0 || hs === 6 ? 1 : 0);
+      ell(cx + 1, headCY - 1, hr + 0.8, hr, hair, 9, hS, hH, (x, y) => y < bang(x) || (x < cx - 3 && y < headCY + (hs === 1 || hs === 5 ? 6 : 3)));
+    }
+    if (hs === 1 && back) rect(cx - 7, headCY, cx + 8, torsoTop + (kid ? 6 : 9), hair, 9, cx + 4, hS);
+    if (hs === 5 && back) rect(cx - 7, headCY, cx + 8, headCY + 7, hair, 9, cx + 4, hS);
+    if (hs === 2) { if (back) rect(cx, headCY + 2, cx + 2, torsoTop + 6, hair, 9, cx + 2, hS); else ell(cx - 8, headCY + 2, 2.4, 4, hair, 1, hS); put(cx - 6, headCY - 1, 0xe05a6a, 10); }
+    if (hs === 3) ell(cx, headCY - hr - 1, 3.5, 2.8, hair, 9, hS, hH);
+    if (hs === 4) { const gh = mixc(hair, 0xe8e2da, 0.4); ell(cx + 1, headCY - 1, hr + 0.6, hr, skin, 9, sS, hiOf(skin), (x, y) => y < headCY - 2); ell(cx + 1, headCY - 1, hr + 0.8, hr, gh, 9, mixc(gh, 0x6a5a58, 0.3), undefined, (x, y) => back ? y > headCY - 3 : x < cx - 2 && y > headCY - 3 && y < headCY + 3); }
+    if (hs === 6) for (let x = cx - 5; x <= cx + 6; x += 3) { put(x, headCY - hr - 1, hair, 9); put(x + 1, headCY - hr - 2, hH, 9); }
+  }
+  if (hs === 7 && !L.poncho) ell(cx + 1, headCY - 1, hr, hr, mixc(skin, 0x6a5040, 0.18), 9, sS, undefined, (x, y) => y < headCY - 2);
+  // --- face (front)
+  if (!back) {
+    const ey = headCY + (kid ? 0 : 1), ex1 = cx - 1, ex2 = cx + 4, eh = kid ? 3 : 3;
+    if (L.type === 'oldman' || L.type === 'oldlady') { rect(ex1, ey + 1, ex1 + 1, ey + 1, INK, 10); rect(ex2, ey + 1, ex2 + 1, ey + 1, INK, 10); }
+    else { rect(ex1, ey, ex1 + 1, ey + eh - 1, INK, 10); rect(ex2, ey, ex2 + 1, ey + eh - 1, INK, 10); put(ex1, ey, 0x6a4a44, 10); put(ex2, ey, 0x6a4a44, 10); }
+    if (L.blush || L.fem || kid) { put(ex1 - 2, ey + eh, mixc(skin, 0xf06a6a, 0.45), 10); put(ex1 - 1, ey + eh, mixc(skin, 0xf06a6a, 0.45), 10); put(ex2 + 2, ey + eh, mixc(sS, 0xf06a6a, 0.4), 10); }
+    put(cx + 2, ey + eh + 2, 0x8a3a32, 10); put(cx + 3, ey + eh + 2, 0x8a3a32, 10);
+    if (L.glasses) { rect(ex1 - 1, ey, ex2 + 2, ey, 0x3a2a30, 11); rect(ex1 - 1, ey + 2, ex1 + 2, ey + 2, 0x3a2a30, 11); rect(ex2 - 1, ey + 2, ex2 + 2, ey + 2, 0x3a2a30, 11); }
+    if (L.mask) rect(cx - 3, ey + eh + 1, cx + 7, ey + eh + 4, 0xd8ecf2, 11, cx + 5, 0xb4cad6);
+  }
+  // --- hats
+  const hat = L.poncho ? 0 : L.hat, hc = grade(L.hatC || 0x6f8250);
+  if (hat === 'non') { const s1 = 0xead7a2, s2 = 0xc4a46a, ap = headCY - hr - 8, bs = headCY - 2; for (let y = ap; y <= bs; y++) { const hw = (y - ap) / (bs - ap) * 12.5 + 0.5; for (let x = Math.round(cx + 1 - hw); x <= Math.round(cx + 1 + hw); x++) put(x, y, x > cx + 1 + hw * 0.3 ? s2 : (y - ap) % 3 === 2 ? mixc(s1, s2, 0.4) : s1, 12); } rect(cx - 11, bs + 1, cx + 13, bs + 1, s2, 12); }
+  else if (hat === 'coi' || hat === 'beo') { const c = hat === 'coi' ? grade(0x6f8250) : hc; ell(cx + 1, headCY - 4, hr + 0.5, 6, c, 12, clothSh(c), hiOf(c), (x, y) => y < headCY - 2); rect(cx - 9, headCY - 2, cx + 11, headCY - 1, c, 12, cx + 6); }
+  else if (hat === 'helm') { ell(cx + 1, headCY - 1.5, hr + 1.4, hr + 0.6, hc, 12, clothSh(hc), hiOf(hc), (x, y) => back || y < headCY + 1 || x < cx - 3); if (!back) rect(cx - 2, headCY, cx + 9, headCY + 1, 0x3a3436, 12); }
+  else if (hat === 'cap') { ell(cx + 1, headCY - 3, hr + 0.4, 6, hc, 12, clothSh(hc), hiOf(hc), (x, y) => y < headCY - 1); if (!back) rect(cx + 5, headCY - 2, cx + 12, headCY - 1, clothSh(hc), 12); }
+  else if (hat === 'len') { ell(cx + 1, headCY - 2, hr + 1, hr - 0.5, hc, 12, clothSh(hc), hiOf(hc), (x, y) => y < headCY + (back ? 4 : 0)); rect(cx - 7, headCY - 1, cx + 9, headCY, hiOf(hc), 12); ell(cx + 1, headCY - hr - 2.5, 2.2, 2, 0xf4ece0, 12); }
+  // --- rain poncho: a glossy cape + hood
+  if (L.poncho) { for (let y = torsoTop - 1; y < legTop + 6; y++) { const hw = 6 + (y - torsoTop) * 0.35; for (let x = Math.round(cx - hw); x <= Math.round(cx + hw); x++) put(x, y, x > cx + hw * 0.35 ? clothSh(top) : (x - cx + y) % 9 === 0 ? hiOf(top) : top, 13); } ell(cx + 1, headCY - 1, hr + 1.5, hr + 1, top, 13, clothSh(top), hiOf(top), (x, y) => back || !(x > cx - 4 && y > headCY - 3)); }
+  // --- neck things
+  if (!L.poncho) {
+    if (L.scarf) { rect(cx - 4, torsoTop - 1, cx + 5, torsoTop + 1, grade(L.scarf), 13, cx + 3); rect(cx - 4, torsoTop + 2, cx - 2, torsoTop + 6, grade(L.scarf), 13); }
+    if (L.kq) { rect(cx - 4, torsoTop, cx + 4, torsoTop + 1, 0xd2321e, 13); rect(cx - 1, torsoTop + 2, cx + 1, torsoTop + 3, 0xd2321e, 13); put(cx, torsoTop + 4, 0xd2321e, 13); }
+  }
+  // --- front arm + things in the hand
+  const cy0 = L.carry, raise = pose === 6, talk = pose === 7, ax = cx + 5;
+  if (L.ganh && !sit) { const py = torsoTop - 1; rect(0, py, W - 1, py, 0x8a6a3a, 14); for (const bx of [1, W - 7]) { for (let j = 1; j < 7; j++) put(bx + 3, py + j, 0x6a4a2a, 14); rect(bx, py + 7, bx + 6, py + 11, 0xc49a5a, 14, bx + 5, 0x9a7442); rect(bx + 1, py + 6, bx + 5, py + 6, grade(L.goods || 0xf2c94c), 14); } }
+  if (raise) { for (let j = 0; j < (kid ? 8 : 10); j++) for (let i = 0; i < 3; i++) put(ax + 1 + i, torsoTop + 1 - j, i === 2 ? clothSh(armRow(9 - j)) : armRow(9 - j), 14); rect(ax + 1, torsoTop - (kid ? 9 : 11), ax + 3, torsoTop - (kid ? 8 : 10), skin, 14, ax + 3, sS); }
+  else if (talk) { arm(ax, 14, 0, true); for (let j = 0; j < 5; j++) for (let i = 0; i < 3; i++) put(ax + i, torsoTop + 1 + j, i === 2 ? clothSh(armRow(j)) : armRow(j), 14); rect(ax + 2, torsoTop + 5, ax + 6, torsoTop + 6, armRow(6), 14); rect(ax + 6, torsoTop + 3, ax + 7, torsoTop + 5, skin, 14); }
+  else if (!L.ganh || sit) arm(ax, 14, swing);
+  const hx = ax + swing * 2, hy = torsoTop + 1 + armLen;
+  if (cy0 === 'bag' && !sit) { for (let j = 0; j < legTop - torsoTop; j++) put(cx - 4 + Math.round(j * 10 / (legTop - torsoTop)), torsoTop + j, 0x6a3a2a, 15); const bc = grade(L.bag); rect(cx + 3, legTop - 4, cx + 9, legTop + 1, bc, 15, cx + 8, clothSh(bc)); rect(cx + 3, legTop - 4, cx + 9, legTop - 3, hiOf(bc), 15); put(cx + 6, legTop - 2, 0xf4e6c4, 15); }
+  else if (cy0 === 'case' && !sit) { rect(hx - 1, hy + 2, hx + 4, hy + 5, 0x6b4a36, 15, hx + 3, 0x4f3626); put(hx + 1, hy + 1, 0x4f3626, 15); put(hx + 2, hy + 1, 0x4f3626, 15); }
+  else if (cy0 === 'phone' && !back) { rect(hx, hy - 3, hx + 1, hy - 1, 0x2a2428, 15); put(hx, hy - 3, 0x9fd8ff, 15); }
+  else if (cy0 === 'cup') { rect(hx, hy - 3, hx + 2, hy, 0xf2f0ea, 15, hx + 2, 0xc8c4bc); rect(hx, hy - 2, hx + 2, hy - 2, 0x8a5a3a, 15); }
+  else if (cy0 === 'banhmi') { rect(hx - 1, hy - 1, hx + 4, hy, 0xd9a55a, 15, hx + 3, 0xb5803a); put(hx + 1, hy - 2, 0x6ab04a, 15); }
+  else if (cy0 === 'shop' && !sit) { rect(hx - 1, hy + 1, hx + 3, hy + 6, 0xf2b0c0, 15, hx + 2, 0xd88a9a); rect(hx - 1, hy + 1, hx + 3, hy + 1, 0xd9534f, 15); put(hx + 1, hy, 0x58994f, 15); }
+  else if (cy0 === 'melon' && !sit) { ell(cx + 3, legTop - 2, 4.5, 3.8, 0x4a9a4a, 15, 0x2f6a38, 0x7ac070); for (let x = cx; x <= cx + 6; x += 3) for (let y = legTop - 5; y <= legTop + 1; y++) if (col[y * W + x] === 0x4a9a4a) put(x, y, 0x2f6a38, 15); }
+  // --- ink: cocoa outline around the figure + lines where a nearer part overlaps a farther one
+  const out = col.slice();
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x;
+    if (col[i] < 0) { if ((x > 0 && col[i - 1] >= 0) || (x < W - 1 && col[i + 1] >= 0) || (y > 0 && col[i - W] >= 0) || (y < H - 1 && col[i + W] >= 0)) out[i] = INK; continue; }
+    const z = zz[i]; for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) if (j >= 0 && col[j] >= 0 && zz[j] < z - 1 && zz[j] !== 9 && !(z === 10 || z === 11)) { out[i] = mixc(col[i], INK, 0.72); break; }
+  }
   return out;
 }
 // sheet: columns = poses, rows = front, back, front flipped, back flipped
 function personSheet(L) {
-  const W = PW * NPOSE, H = PH * 4, g = new Int32Array(W * H).fill(-1);
-  for (let b = 0; b < 2; b++) for (let p = 0; p < NPOSE; p++) { const s = drawPerson(L, b === 1, p); for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) { const c = s[y * PW + x]; if (c < 0) continue; g[(b * PH + y) * W + p * PW + x] = c; g[((b + 2) * PH + y) * W + p * PW + PW - 1 - x] = c; } }
-  return gridCanvas(g, W, H);
+  const Wd = CW * NPOSE, Hd = CH * 4, g = new Int32Array(Wd * Hd).fill(-1);
+  for (let b = 0; b < 2; b++) for (let p = 0; p < NPOSE; p++) { const s = drawPerson(L, b === 1, p); for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) { const c = s[y * CW + x]; if (c < 0) continue; g[(b * CH + y) * Wd + p * CW + x] = c; g[((b + 2) * CH + y) * Wd + p * CW + CW - 1 - x] = c; } }
+  return gridCanvas(g, Wd, Hd, null, K);
 }
 const DIR_ROW = [0, 2, 3, 1];       // dir 0:+x 1:+y 2:-x 3:-y -> sheet row
 const DIRV = [[1, 0], [0, 1], [-1, 0], [0, -1]];
@@ -178,15 +209,24 @@ const DIRV = [[1, 0], [0, 1], [-1, 0], [0, -1]];
 // ----- umbrellas (3 frames: closed, half, open) -----
 const UMB = [];
 function initUmbrellas() {
-  for (const c of UMBC) {
-    const fr = [], c2 = shade(c, -0.2), c3 = shade(c, 0.25), ink = 0x2a2140;
+  // drawn at K: a furled / half-open / open canopy with panel seams, scalloped hem and an ink rim
+  for (const c0 of UMBC) {
+    const c = grade(c0), fr = [], c2 = mixc(c, 0x6a3f45, 0.32), c3 = mixc(c, 0xfff4e2, 0.3), W = 20 * K, H = 16 * K, ax = W / 2;
     for (let f = 0; f < 3; f++) {
-      const W = 17, H = 12, g = new Int32Array(W * H).fill(-1), set = (x, y, v) => { if (x >= 0 && x < W && y >= 0 && y < H) g[y * W + x] = v; };
-      for (let y = 5; y <= 10; y++) set(8, y, 0x5a5560);
-      if (f === 0) { for (let y = 1; y <= 7; y++) { set(8, y, c); set(7, y, c2); } set(8, 0, ink); }
-      else { const rows = f === 1 ? [[7, 9], [5, 11], [4, 12], [4, 12]] : [[6, 10], [3, 13], [1, 15], [0, 16], [0, 16]]; rows.forEach((r, y) => { for (let x = r[0]; x <= r[1]; x++) { const last = y === rows.length - 1; if (last && f === 2 && x % 4 === 2) continue; set(x, y, last ? c2 : ((x + 2) >> 2) % 2 ? c : c3); } }); set(8, 0, c3); }
-      const o = g.slice(); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (g[y * W + x] < 0 && y < 6 && ((x > 0 && g[y * W + x - 1] >= 0) || (x < W - 1 && g[y * W + x + 1] >= 0) || (y > 0 && g[(y - 1) * W + x] >= 0 && g[(y - 1) * W + x] !== 0x5a5560))) o[y * W + x] = mixc(c, ink, 0.7);
-      fr.push(gridCanvas(o, W, H));
+      const g = new Int32Array(W * H).fill(-1), set = (x, y, v) => { if (x >= 0 && x < W && y >= 0 && y < H) g[y * W + x] = v; };
+      for (let y = 8; y < H - 1; y++) set(ax, y, 0x5a4a44); set(ax - 1, H - 2, 0x5a4a44); set(ax - 2, H - 3, 0x5a4a44);
+      if (f === 0) { for (let y = 2; y < 21; y++) { const hw = y < 6 ? (y - 2) * 0.6 : Math.max(0.6, 2.4 - (y - 6) * 0.13); for (let x = Math.round(ax - hw); x <= Math.round(ax + hw); x++) set(x, y, x > ax ? c2 : c); } set(ax, 1, 0x5a4a44); }
+      else {
+        const rx = f === 1 ? 11 : 18.5, ry = f === 1 ? 10 : 8.5, cy = f === 1 ? 11 : 10, bottom = f === 1 ? 17 : 13;
+        for (let y = 1; y <= bottom + 1; y++) for (let x = 0; x < W; x++) {
+          const dx = (x + 0.5 - ax) / rx, dy = (y + 0.5 - cy) / ry; if (dx * dx + dy * dy > 1 || y < cy - ry) continue;
+          const seg = Math.floor((Math.atan2(y - cy - 6, x - ax) + Math.PI) / (Math.PI / 4)) & 1, hem = y >= bottom - 1 + (Math.abs(((x - ax) % 6 + 6) % 6 - 3) < 1.5 ? 1 : 0);
+          if (y > bottom - 1 + (Math.abs(((x - ax) % 6 + 6) % 6 - 3) < 1.5 ? 1 : 0) + 1) continue;
+          set(x, y, hem ? c2 : dx > 0.45 ? c2 : seg ? c : (dx < -0.3 && dy < -0.2 ? c3 : mixc(c, c3, 0.4)));
+        }
+        set(ax, Math.round(cy - ry) - 1, 0x5a4a44);
+      }
+      fr.push(gridCanvas(inkGrid(g, W, H, 0.85), W, H, null, K));
     }
     UMB.push(fr);
   }
@@ -232,57 +272,64 @@ function seatOff(m, s, dir) { const lx = s.x - m.L / 2, d = DIRV[dir], dx = d[0]
 // ----- trees -----
 const TREE_SP = ['dau', 'me', 'bang', 'mai', 'cau'];
 const LEAFPAL = {
-  summer: [0x2a5c3a, 0x3f8a3e, 0x6fb03c, 0xb4d848], spring: [0x357a44, 0x55a048, 0x8cc84a, 0xcfe668],
-  fallA: [0x9a6a20, 0xc98a2a, 0xe6b03a, 0xf5d05a], fallB: [0x8a4a1c, 0xc0622a, 0xe0853a, 0xf2a94e], fallC: [0x7a2f24, 0xa8402c, 0xcc5a34, 0xe58a4a]
+  spring: [0x2d4f38, 0x4a7d46, 0x76a852, 0xb9d272], summer: [0x22422e, 0x3a6a3a, 0x5c9044, 0x93bc5a],
+  fallA: [0x6e4422, 0xa8662a, 0xd4963c, 0xf0c466], fallB: [0x5e301e, 0x9c4c28, 0xc66c36, 0xe49c4e], fallC: [0x52261e, 0x86382a, 0xb05232, 0xd27e46]
 };
 const _tree = {};
+// Trees: soft clustered canopies (each puff lit from the upper left), cocoa ink rim, trunks with bark shading.
 function treeSprite(spc, season, v) {
   const key = spc + season + v; if (_tree[key]) return _tree[key];
-  const R = mulberry32(spc.charCodeAt(0) * 131 + spc.charCodeAt(1) * 17 + v * 977 + 5), W = 76, H = 96, bx = 38, by = 92;
+  const R = mulberry32(spc.charCodeAt(0) * 131 + spc.charCodeAt(1) * 17 + v * 977 + 5), LW = 76, LH = 96, bx = 38, by = 92, W = LW * K, H = LH * K;
   const g = new Int32Array(W * H).fill(-1), set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + x] = c; }, get = (x, y) => x >= 0 && y >= 0 && x < W && y < H ? g[y * W + x] : -1;
-  const winter = season === 'winter' && spc !== 'maiL', snowy = winter && v % 2 === 0, SN = 0xf4f8fe;
-  const th = { dau: 38, me: 21, bang: 22, mai: 9, cau: 35, maiL: 20 }[spc], tw = { dau: 4, me: 4, bang: 3, mai: 2, cau: 2, maiL: 3 }[spc];
-  const tc = spc === 'dau' ? 0x8f7a66 : spc === 'cau' ? 0x8a7a5a : 0x6b4a3a;
-  let tx = bx;
-  for (let y = 0; y <= th; y++) { const off = spc === 'cau' ? Math.round(Math.sin(y / th * 1.3) * 4) : 0; tx = bx + off; for (let x = 0; x < tw; x++) set(bx - (tw >> 1) + x + off, by - y, x === tw - 1 ? shade(tc, -0.28) : x === 0 ? shade(tc, 0.14) : (spc === 'cau' && y % 3 === 0 ? shade(tc, -0.12) : tc)); }
-  set(bx - (tw >> 1) - 1, by, shade(tc, -0.1)); set(bx - (tw >> 1) + tw, by, shade(tc, -0.3));
-  const ty = by - th, E = [];
-  if (spc === 'dau') for (let i = 0; i < 6; i++) E.push([tx + sr(R, -9, 9), ty - 5 + sr(R, -9, 5), sr(R, 8, 12), sr(R, 7, 10)]);
-  else if (spc === 'me') for (let i = 0; i < 7; i++) E.push([tx + sr(R, -16, 16), ty - 4 + sr(R, -7, 4), sr(R, 9, 13), sr(R, 7, 9)]);
-  else if (spc === 'bang') E.push([tx - 8, ty + 4, 13, 5], [tx + 9, ty + 1, 12, 5], [tx - 3, ty - 4, 14, 5], [tx + 8, ty - 8, 9, 4], [tx - 7, ty - 10, 9, 4], [tx + 1, ty - 13, 8, 4]);
-  else if (spc === 'maiL') for (let i = 0; i < 8; i++) E.push([tx + sr(R, -12, 12), ty - 4 + sr(R, -9, 5), sr(R, 8, 12), sr(R, 6, 9)]);
-  else if (spc === 'mai') for (let i = 0; i < 5; i++) E.push([tx + sr(R, -7, 7), ty - 3 + sr(R, -5, 3), sr(R, 5, 8), sr(R, 4, 6)]);
-  let pal = spc === 'maiL' ? LEAFPAL.spring : season === 'fall' ? LEAFPAL[spc === 'bang' ? 'fallC' : (v + (spc === 'me' ? 1 : 0)) % 2 ? 'fallB' : 'fallA'] : LEAFPAL[season === 'spring' ? 'spring' : 'summer'];
-  if (spc === 'me' && season !== 'fall') pal = pal.map(c => mixc(c, 0x9ac040, 0.18));
-  const line = (x0, y0, x1, y1, c, thick) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0; for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / (n || 1), y = y0 + (y1 - y0) * i / (n || 1); set(x, y, c); if (thick) set(x + 1, y, shade(c, -0.2)); } };
+  const winter = season === 'winter' && spc !== 'maiL', SN = 0xf6f4f2;
+  const th = { dau: 38, me: 21, bang: 22, mai: 9, cau: 35, maiL: 18 }[spc], tw = { dau: 3.5, me: 3.5, bang: 3, mai: 2, cau: 2, maiL: 2.6 }[spc];
+  const bark = spc === 'dau' ? 0x9a826c : spc === 'cau' ? 0x958866 : 0x6e4c3c, barkS = mixc(bark, 0x3a221c, 0.38), barkH = mixc(bark, 0xfff1d6, 0.2);
+  // trunk (with a slight lean for the palm)
+  let tx = bx * K;
+  for (let y = 0; y <= th * K; y++) { const t = y / (th * K), off = spc === 'cau' ? Math.sin(t * 1.3) * 4 * K : 0, wdt = tw * K * (1 - t * 0.25); tx = bx * K + off; for (let x = -wdt / 2; x < wdt / 2; x++) { const f = (x + wdt / 2) / wdt; set(tx + x, by * K - y, f > 0.66 ? barkS : f < 0.3 ? barkH : (spc === 'cau' && (y >> 2) % 3 === 0 ? barkS : hash2(x + 3, y >> 1) < 0.08 ? barkS : bark)); } }
+  const ty = by * K - th * K;
+  const fall = season === 'fall', pal = spc === 'maiL' ? LEAFPAL.spring : fall ? LEAFPAL[spc === 'bang' ? 'fallC' : (v + (spc === 'me' ? 1 : 0)) % 2 ? 'fallB' : 'fallA'] : LEAFPAL[season === 'spring' ? 'spring' : 'summer'];
+  const P = spc === 'me' && !fall ? pal.map(c => mixc(c, 0x9ab844, 0.15)) : pal;
+  const blossom = spc === 'maiL' ? [0xf7d24a, 0xffeca0, 0.36] : season === 'spring' ? (spc === 'mai' ? (v % 2 ? [0xf3a0c0, 0xfcd4e2, 0.4] : [0xf7d24a, 0xffeca0, 0.4]) : [[0xfbc4d8, 0xfff4ec, 0.05], [0xfff4ec, 0xffeca0, 0.04], [0xf2a0b5, 0xfbc4d8, 0.07]][v % 3]) : null;
   if (spc === 'cau') {
-    const fc = winter ? [0x58705a, 0x7a927a] : season === 'fall' ? [0x5a7a3a, 0x8aa04a] : [0x2f6a3c, 0x58a04f];
-    for (let i = 0; i < 9; i++) { const a = -Math.PI * (0.08 + 0.84 * i / 8), len = sr(R, 13, 17); let px = tx, py = ty; for (let s = 0; s < len; s++) { const nx = tx + Math.cos(a) * s, ny = ty + Math.sin(a) * s * 0.75 + s * s * 0.035; set(nx, ny, fc[1]); set(nx, ny + 1, fc[0]); if (s > 3 && s % 2 === 0) set(nx, ny + 2, fc[0]); px = nx; py = ny; } }
-    set(tx - 1, ty + 2, 0x7a5a3a); set(tx + 1, ty + 2, 0x6a4a2a); set(tx, ty + 3, 0x7a5a3a);
-    if (snowy) for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) if (get(x, y) === fc[1] && get(x, y - 1) < 0 && hash2(x, y + v) < 0.6) set(x, y - 1, SN);
+    const fc = winter ? [0x4a6050, 0x6c8a70, 0x9ab49a] : fall ? [0x4e6a34, 0x7a9440, 0xa4b65a] : [0x24502e, 0x3e7a3c, 0x6aa24a];
+    for (let i = 0; i < 11; i++) { const a = -Math.PI * (0.06 + 0.88 * i / 10), len = sr(R, 13, 18) * K; for (let s2 = 0; s2 < len; s2++) { const nx = tx + Math.cos(a) * s2, ny = ty + Math.sin(a) * s2 * 0.72 + s2 * s2 * 0.018 / K; set(nx, ny, fc[2]); set(nx, ny + 1, fc[1]); if (s2 > 4 && s2 % 3 === 0) { set(nx - 1, ny + 2, fc[0]); set(nx + 1, ny + 3, fc[0]); set(nx, ny + 2, fc[1]); } } }
+    for (let i = 0; i < 4; i++) set(tx - 2 + i, ty + 3, 0x7a5a3a);
+    if (season === 'winter' && v % 2 === 0) for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) if (get(x, y) === fc[2] && get(x, y - 1) < 0 && hash2(x, y + v) < 0.6) set(x, y - 1, SN);
   } else if (winter) {
-    const br = (x, y, a, len, dep) => { const x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len; line(x, y, x1, y1, dep > 1 ? tc : shade(tc, -0.12), dep > 2); if (dep > 0) { const n = dep > 2 ? 3 : 2; for (let i = 0; i < n; i++) br(x1, y1, a + sr(R, -0.75, 0.75), len * sr(R, 0.6, 0.8), dep - 1); } };
-    const n0 = spc === 'mai' ? 2 : 3, l0 = { dau: 9, me: 10, bang: 9, mai: 5 }[spc];
-    for (let i = 0; i < n0; i++) br(tx, ty + 2, -Math.PI / 2 + (i - (n0 - 1) / 2) * 0.75 + sr(R, -0.15, 0.15), l0, spc === 'mai' ? 2 : 3);
-    if (snowy) for (let y = 1; y < by - 6; y++) for (let x = 0; x < W; x++) { const c = get(x, y); if (c >= 0 && c !== SN && get(x, y - 1) < 0 && hash2(x * 3, y + v) < 0.7) set(x, y - 1, SN); }
+    const line = (x0, y0, x1, y1, c, thick) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0; for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / (n || 1), y = y0 + (y1 - y0) * i / (n || 1); for (let t = 0; t < thick; t++) set(x + t, y, t === thick - 1 && thick > 1 ? barkS : c); } };
+    const br = (x, y, a, len, dep) => { const x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len; line(x, y, x1, y1, bark, Math.max(1, dep)); if (dep > 0) for (let i = 0; i < (dep > 2 ? 3 : 2); i++) br(x1, y1, a + sr(R, -0.7, 0.7), len * sr(R, 0.6, 0.78), dep - 1); };
+    const n0 = spc === 'mai' ? 2 : 3, l0 = { dau: 9, me: 10, bang: 9, mai: 5 }[spc] * K;
+    for (let i = 0; i < n0; i++) br(tx, ty + 3, -Math.PI / 2 + (i - (n0 - 1) / 2) * 0.75 + sr(R, -0.15, 0.15), l0, spc === 'mai' ? 2 : 3);
+    if (v % 2 === 0) for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) { const c = get(x, y); if (c >= 0 && c !== SN && get(x, y - 1) < 0 && hash2(x * 3, y + v) < 0.7) set(x, y - 1, SN); }
   } else {
-    const blossom = spc === 'maiL' ? (v % 2 ? [0xf7d94a, 0xffeb90, 0.7] : [0xf7d94a, 0xffeb90, 0.55]) : season === 'spring' ? (spc === 'mai' ? (v % 2 ? [0xf39abf, 0xfbc4d8, 0.62] : [0xf7d94a, 0xffeb90, 0.62]) : [[0xfbc4d8, 0xf7f4ec, 0.07], [0xf7f4ec, 0xffeb90, 0.06], [0xf2a0b5, 0xfbc4d8, 0.1]][v % 3]) : null;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      let best = -9; for (const e of E) { const nx = (x - e[0]) / e[2], ny = (y - e[1]) / e[3], d = nx * nx + ny * ny; if (d < 1) { const t = -nx * 0.5 - ny * 0.8 + (1 - d) * 0.25; if (t > best) best = t; } }
-      if (best < -8) continue;
-      if (season === 'fall' && hash2(x + v * 31, y) < 0.13) continue;
-      const t = best + (hash2(x, y + v * 13) - 0.5) * 0.42; let c = t > 0.55 ? pal[3] : t > 0.12 ? pal[2] : t > -0.32 ? pal[1] : pal[0];
-      if (blossom && hash2(x * 7 + v, y * 3) < blossom[2]) c = hash2(x, y) < 0.5 ? blossom[0] : blossom[1];
+    // canopy puffs: [x, y, r] in art px, drawn back (top) to front (bottom)
+    const E = [];
+    const pf = (n, sx, sy, r0, r1, oy) => { for (let i = 0; i < n; i++) E.push([tx + sr(R, -sx, sx) * K, ty + (oy + sr(R, -sy, sy)) * K, sr(R, r0, r1) * K]); };
+    if (spc === 'dau') pf(7, 9, 7, 6, 8.5, -6);
+    else if (spc === 'me') pf(9, 16, 5, 6, 8.5, -3);
+    else if (spc === 'bang') for (const [oy, sx] of [[4, 13], [-3, 11], [-9, 8], [-14, 5]]) pf(4, sx, 1.5, 4.2, 5.6, oy);
+    else if (spc === 'mai') pf(5, 6, 4, 3.6, 5.2, -3);
+    else pf(9, 11, 7, 5.5, 8, -5);
+    E.sort((a, b) => a[1] - b[1]);
+    for (const [ex, ey, er] of E) for (let y = Math.floor(ey - er); y <= ey + er; y++) for (let x = Math.floor(ex - er); x <= ex + er; x++) {
+      const dx = (x - ex) / er, dy = (y - ey) / er, d = dx * dx + dy * dy, edge = 1 - (hash2(x >> 1, y >> 1) * 0.14);
+      if (d > edge) continue;
+      const l = -dx * 0.55 - dy * 0.75 + (1 - d) * 0.3 + (hash2(x >> 1, (y >> 1) + 7) - 0.5) * 0.3;
+      let c = l > 0.55 ? P[3] : l > 0.1 ? P[2] : l > -0.35 ? P[1] : P[0];
+      if (d > edge - 0.12 && get(x, y) >= 0 && get(x, y) !== c) c = mixc(P[0], INK, 0.25);       // dark crease where a puff overlaps the one behind it
+      if (fall && hash2(x >> 1, y >> 1) < 0.08) continue;
       set(x, y, c);
     }
-    for (let y = H - 2; y > 0; y--) for (let x = 1; x < W - 1; x++) { const c = get(x, y); if (pal.indexOf(c) > 0 && get(x, y + 1) < 0) set(x, y, pal[0]); }
+    if (blossom) for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) { if (get(x, y) < 0 || get(x, y) === bark) continue; const h = hash2(x * 7 + v, y * 3); if (h < blossom[2]) { const c = h < blossom[2] * 0.5 ? blossom[0] : blossom[1]; set(x, y, c); set(x + 1, y, c); set(x, y + 1, mixc(c, 0x6a3f45, 0.2)); } }
   }
-  const s = gridCanvas(g, W, H); s.ax = bx; s.ay = by; s.split = Math.round(by - th * 0.55); s.cx = tx - bx; s.cy = -(th + 6); s.rad = { dau: 13, me: 17, bang: 17, mai: 8, cau: 12, maiL: 14 }[spc]; s.bare = winter && spc !== 'cau'; s.spc = spc;
+  const out = inkGrid(g, W, H, 0.8);
+  const s = gridCanvas(out, W, H, null, K); s.ax = bx; s.ay = by; s.split = Math.round(by - th * 0.55); s.cx = tx / K - bx; s.cy = -(th + 6); s.rad = { dau: 13, me: 17, bang: 17, mai: 8, cau: 12, maiL: 14 }[spc]; s.bare = winter && spc !== 'cau'; s.spc = spc;
   return (_tree[key] = s);
 }
 // soft dithered ground shadow
 const _shadow = {};
-function shadowSprite(r) { r = Math.round(r); if (_shadow[r]) return _shadow[r]; const w = r * 4 + 2, h = r * 2 + 2, c = mk(w, h), g = c.getContext('2d'); g.fillStyle = 'rgba(38,30,66,0.2)'; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const nx = (x - w / 2 + 0.5) / (r * 2), ny = (y - h / 2 + 0.5) / r, d = nx * nx + ny * ny; if (d < 0.6 || (d < 1 && (x + y) % 2 === 0)) g.fillRect(x, y, 1, 1); } return (_shadow[r] = c); }
+function shadowSprite(r) { r = Math.round(r * K); if (_shadow[r]) return _shadow[r]; const w = r * 4 + 2, h = r * 2 + 2, c = mk(w, h), g = c.getContext('2d'); g.fillStyle = 'rgba(74,38,40,0.22)'; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const nx = (x - w / 2 + 0.5) / (r * 2), ny = (y - h / 2 + 0.5) / r, d = nx * nx + ny * ny; if (d < 0.6 || (d < 1 && (x + y) % 2 === 0)) g.fillRect(x, y, 1, 1); } return (_shadow[r] = c); }
 
 // ----- props (boxes centred on their tile; facing +y unless mirrored) -----
 const stripe = (a, b, n) => (f, u, v) => f === 0 ? (((u / n) | 0) % 2 ? a : b) : undefined;
@@ -333,6 +380,7 @@ const _prop = {};
 function propSprite(name, season, v, mirror) {
   const snow = season === 'winter', k = name + '|' + (SEASONAL_PROPS[name] ? season : snow ? 'w' : '') + '|' + (v || 0) + (mirror ? 'm' : '');
   if (_prop[k]) return _prop[k];
+  if (typeof PLANTS !== 'undefined' && PLANTS[name]) return (_prop[k] = plantSprite(name, season, v || 0));
   let b = PROP[name](season, v || 0); if (mirror) b = mirrorBoxes(b);
   return (_prop[k] = bake(b, { snow: snow && name !== 'parked' && name !== 'parkedBike' }));
 }

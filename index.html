@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Sài Gòn qua năm tháng — lofi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
 /* look: enamel street-name plates (blue + white) for the eras, a cream "radio" card for the music */
 :root {
@@ -79,6 +79,36 @@ body.clean #hud, body.clean #dock { display: none; }
 @media (min-width: 900px) { #dock { width: min(600px, calc(100% - 480px)); min-width: 520px; } }
 @media (max-width: 700px) { #ytbox { bottom: auto; top: 14px; } .lab { width: 100%; } .wrap { flex-wrap: wrap; } #eras button { min-width: 50px; font-size: 15px; } #prev { display: none; } .seg.two { flex-wrap: wrap; } .seg.two button { flex: 1 1 40%; } }
 @media (prefers-reduced-motion: reduce) { #hint { animation: none; } #fade { transition: none; } }
+
+/* ===== art redesign: cocoa-ink outlines, cream paper, wooden era sign, chunky pixel shadows (matches the new sprites) ===== */
+:root { --ink: #2b1a16; --cream: #fbead0; --paper: #f7d9af; --peach: #f9b574; --clay: #c8734f; --brown: #513733; --wood: #8a5a3e; --jade: #4f8e8a; --soft: #7a5a48;
+  --tile: #c8734f; --leaf: #4f8e8a; --sun: #f9b574; --white: #fff6e6; --plate: #6e4430; --plate-2: #8a5a3e; --shadow: #2b1a16;
+  --font: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+html, body { background: #2b1a16; }
+#eras { background: repeating-linear-gradient(180deg, #8a5a3e 0 9px, #7c4f36 9px 11px); border: 3px solid var(--ink); outline: 0; border-radius: 6px; box-shadow: inset 0 2px 0 #b07a54, 0 4px 0 var(--ink); padding: 6px 8px 8px; }
+#eras .cap { color: var(--cream); letter-spacing: 1.6px; font-size: 12px; font-weight: 800; text-shadow: 0 2px 0 var(--ink); opacity: 1; }
+#eras button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 -3px 0 #e2b884, 0 2px 0 var(--ink); font-weight: 800; }
+#eras button:hover { border-color: var(--ink); background: #fde6c2; }
+#eras button[aria-pressed="true"] { background: var(--peach); color: var(--ink); box-shadow: inset 0 3px 0 #d98f52; transform: translateY(2px); }
+#info { background: var(--cream); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 2px 0 #fff6e6, 0 3px 0 var(--ink); }
+#eraSub { font-weight: 800; color: var(--brown); }
+#ticker { background: var(--brown); color: var(--cream); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 3px 0 var(--ink); font-weight: 700; }
+#dock { background: var(--cream); border: 3px solid var(--ink); border-top: 3px solid var(--ink); border-radius: 6px; box-shadow: inset 0 3px 0 #fff6e6, inset 0 -4px 0 #ecc894, 0 5px 0 var(--ink); }
+#dock button { background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 -3px 0 #e2b884, 0 2px 0 var(--ink); font-weight: 700; }
+#dock button:hover { background: #fde6c2; }
+#dock button[aria-pressed="true"] { background: var(--jade); color: var(--cream); box-shadow: inset 0 3px 0 #3a6e6a; transform: translateY(2px); }
+#play { background: var(--clay) !important; border: 3px solid var(--ink) !important; box-shadow: inset 0 -4px 0 #95523e, 0 3px 0 var(--ink) !important; }
+#hint { background: var(--peach); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 2px 0 var(--ink); }
+#tname { color: var(--brown); }
+#panel { border-top: 2px dashed #c49a6c; }
+.lab { color: var(--soft); }
+#ytUrl { border: 2px solid var(--ink); border-radius: 4px; background: #fff6e6; }
+#ytbox { background: var(--cream); border: 3px solid var(--ink); border-top: 3px solid var(--ink); border-radius: 6px; box-shadow: 0 5px 0 var(--ink); }
+#ytOff { border: 2px solid var(--ink); background: var(--paper); }
+#fade { background: radial-gradient(circle at 50% 42%, #fbead0, #f2cf9c); }
+#fadeT { color: var(--brown); font-weight: 800; text-shadow: 0 3px 0 #e8b47a; }
+#fadeBar { height: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #f2d6aa; }
+#fadeB { background: repeating-linear-gradient(90deg, var(--clay) 0 6px, #b05f40 6px 8px); }
 </style>
 </head>
 <body>
