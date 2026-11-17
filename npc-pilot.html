@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NPC Pilot Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --ink: #2b1a16; --cream: #fbead0; --paper: #f7d9af; --brown: #513733; --soft: #7a5a48; --bg: #efe2cc; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #2a211d; --cream: #3a2e28; --paper: #4a3a32; --brown: #f7d9af; --soft: #c8a88c; } }
+:root[data-theme="dark"] { --bg: #2a211d; --cream: #3a2e28; --paper: #4a3a32; --brown: #f7d9af; --soft: #c8a88c; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--brown); font-family: 'Baloo 2', system-ui, sans-serif; padding: 20px 16px 40px; }
+h1 { margin: 0 0 4px; font-size: 28px; } p { margin: 0 0 12px; color: var(--soft); max-width: 760px; }
+.card { background: var(--cream); border: 3px solid var(--ink); border-radius: 6px; box-shadow: 0 4px 0 var(--ink); padding: 12px; margin: 16px 0; max-width: 1120px; overflow-x: auto; }
+.card h2 { margin: 0 0 8px; font-size: 19px; }
+canvas { image-rendering: pixelated; display: block; }
+.grid { display: grid; grid-template-columns: 52px auto; gap: 0; align-items: center; }
+.cols { display: flex; padding-left: 52px; font-size: 12px; color: var(--soft); }
+.cols span, .rows span { display: block; }
+.rows { display: flex; flex-direction: column; font-size: 12px; color: var(--soft); }
+.anim { display: flex; gap: 14px; flex-wrap: wrap; }
+.anim figure { margin: 0; text-align: center; font-size: 12px; color: var(--soft); }
+.checker { background: #b9a891; }
+</style>
+</head>
+<body>
+<h1>NPC pilot — big-head chibi townsfolk</h1>
+<p>Review sheet for six pilot characters only. Nothing here is wired into the game yet. Each sprite is 32×56 art pixels, about half head, facing right; the game mirrors it for the other directions. Rows show front, three-quarter, side and back views. Columns show idle, a four-frame walk, sit, arm up (hail or umbrella) and talk.</p>
+<div id="sheets"></div>
+<div class="card"><h2>Walk cycle, animated (4× scale)</h2><div class="anim" id="anim"></div></div>
+<div class="card"><h2>In-game readability: pilot vs current NPCs at real game size</h2><p>Left: one art pixel per screen pixel (smallest zoom). Right: two screen pixels per art pixel (default zoom on a 1080p screen). In each group the current NPC is first, then the pilot.</p><canvas id="scale"></canvas></div>
+<script src="js/core.js"></script>
+<script src="js/art.js"></script>
+<script src="js/npc_pilot.js"></script>
+<script>
+const POSE_NAMES = ['idle', 'walk 1', 'walk 2', 'walk 3', 'walk 4', 'sit', 'arm up', 'talk'], VIEW_NAMES = ['front', '3/4', 'side', 'back'], Z = 4;
+const sheets = PILOT.map(C => chibiSheet(C));
+const host = document.getElementById('sheets');
+PILOT.forEach((C, i) => {
+  const card = document.createElement('div'); card.className = 'card';
+  card.innerHTML = `<h2>${C.name}</h2>`;
+  const cols = document.createElement('div'); cols.className = 'cols'; POSE_NAMES.forEach(n => { const s = document.createElement('span'); s.style.width = CP.W * Z + 'px'; s.textContent = n; cols.appendChild(s); }); card.appendChild(cols);
+  const grid = document.createElement('div'); grid.className = 'grid';
+  const rows = document.createElement('div'); rows.className = 'rows'; VIEW_NAMES.forEach(n => { const s = document.createElement('span'); s.style.height = CP.H * Z + 'px'; s.style.lineHeight = CP.H * Z + 'px'; s.textContent = n; rows.appendChild(s); });
+  const cv = document.createElement('canvas'); cv.width = sheets[i].width; cv.height = sheets[i].height; cv.className = 'checker'; cv.style.width = sheets[i].width * Z + 'px'; cv.style.height = sheets[i].height * Z + 'px'; cv.getContext('2d').drawImage(sheets[i], 0, 0);
+  grid.appendChild(rows); grid.appendChild(cv); card.appendChild(grid); host.appendChild(card);
+});
+// animated walk: each character, front / side / back
+const anim = document.getElementById('anim'), A = [];
+PILOT.forEach((C, i) => [0, 2, 3].forEach(r => { const f = document.createElement('figure'), c = document.createElement('canvas'); c.width = CP.W; c.height = CP.H; c.className = 'checker'; c.style.width = CP.W * Z + 'px'; c.style.height = CP.H * Z + 'px'; f.appendChild(c); const t = document.createElement('figcaption'); t.textContent = C.id + ' · ' + VIEW_NAMES[r]; f.appendChild(t); anim.appendChild(f); A.push([c, i, r]); }));
+let fr = 0; const tickA = () => { fr = (fr + 1) % 4; for (const [c, i, r] of A) { const g = c.getContext('2d'); g.clearRect(0, 0, CP.W, CP.H); g.drawImage(sheets[i], (1 + fr) * CP.W, r * CP.H, CP.W, CP.H, 0, 0, CP.W, CP.H); } }; tickA(); setInterval(tickA, 170);
+// real-size comparison on a pavement swatch
+const sc = document.getElementById('scale'), SW = 1080, SH = 150; sc.width = SW; sc.height = SH; sc.style.width = SW + 'px'; sc.style.height = SH + 'px';
+const g = sc.getContext('2d'); g.imageSmoothingEnabled = false;
+for (let y = 0; y < SH; y++) for (let x = 0; x < SW; x++) { const t = ((x >> 3) + (y >> 3)) & 1; g.fillStyle = (x % 8 === 0 || y % 8 === 0) ? '#8e5444' : t ? '#c8735a' : '#bc6a52'; g.fillRect(x, y, 1, 1); }
+const oldTypes = ['dress', 'youth', 'kid', 'aodai', 'hawker', 'monk'];
+[1, 2].forEach((z, k) => {
+  let x = 10 + (k ? 330 : 0); const base = k ? 140 : 75;
+  PILOT.forEach((C, i) => {
+    const L = dressFor(randLook(oldTypes[i]), 'spring'), os = personSheet(L);
+    g.drawImage(os.c, 0, 0, CW, CH, x, base - CH * z, CW * z, CH * z); x += CW * z - 2 * z;
+    g.drawImage(sheets[i], CP.W, 0, CP.W, CP.H, x, base - CP.H * z, CP.W * z, CP.H * z); x += CP.W * z - 2 * z + (k ? 2 : 6);
+  });
+});
+</script>
+</body>
+</html>
