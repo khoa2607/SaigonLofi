@@ -22,9 +22,9 @@ const inGap = y => (y >= 33 && y <= 36) || (y >= 43 && y <= 52);   // openings i
 function riverColor(t, wx, wy, tx, ty, season) {
   const n = hash2(wx, wy), vn = vnoise(wx / 6, wy / 6), win = season === 'winter', e = GEN_ERA, lx = wx - tx * T, ly = wy - ty * T;
   if (t === G_RIVER || t === G_BRIDGE) {
-    let c = vn > 0.58 ? 0x6a9a96 : vn > 0.34 ? 0x5f8f8e : 0x588888;
+    let c = vn > 0.58 ? 0x4f8e8a : vn > 0.34 ? 0x468482 : 0x3e7a7a;
     if (e === 3) c = mixc(c, 0x6aa4c0, 0.25); else if (e === 2) c = mixc(c, 0x6aa0b4, 0.12);
-    if (((wy + Math.sin(wx / 6) * 2.4) % 9) < 0.9) c = shade(c, 0.1); else if (n > 0.97) c = shade(c, 0.18);
+    if (((wy + Math.sin(wx / 6) * 2.4) % 9) < 0.6) c = mixc(c, 0x9ad0c8, 0.35); else if (hash2(wx * 2, wy * 2) > 0.97) c = mixc(c, 0xdff0e4, 0.4);
     const dx = wx / T; if (dx > 19.2) c = mixc(c, 0x3a5a5a, (dx - 19.2) * 0.5); if (dx < 5.8) c = mixc(c, 0x4a5a40, (5.8 - dx) * 0.4);
     return win ? mixc(c, 0xaec4d8, 0.3) : c;
   }
@@ -138,23 +138,23 @@ function genRiverfront() {
 function bridgeLift(x, y) { if (y < 270 || y > 290 || x < 36 || x > 184) return 0; return x < 160 ? 12 : 12 * (184 - x) / 24; }
 
 // ---------------------------------------------------------------- ground overlay for the era-dependent paving (x tiles 20-26)
-function ovStart(season, era) { return { season, era, c: mk(WORLD + 240, 760), v: 0 }; }
+function ovStart(season, era) { return { season, era, c: mk((WORLD + 240) * K, 760 * K), v: 0 }; }
 function ovStep(job, ms) {
-  const t0 = performance.now(), g = job.c.getContext('2d'), W = job.c.width, old = GEN_ERA; GEN_ERA = job.era;
-  while (job.v < 760 && performance.now() - t0 < ms) {
-    const v0 = job.v, v1 = Math.min(760, v0 + 6), id = g.createImageData(W, v1 - v0), d = id.data;
+  const t0 = performance.now(), g = job.c.getContext('2d'), W = job.c.width, HH = 760 * K, old = GEN_ERA; GEN_ERA = job.era;
+  while (job.v < HH && performance.now() - t0 < ms) {
+    const v0 = job.v, v1 = Math.min(HH, v0 + 12), id = g.createImageData(W, v1 - v0), d = id.data;
     for (let v = v0; v < v1; v++) {
-      const sy = v + 0.5, a = Math.max(2 * (160 - sy), 2 * (sy - WORLD)), b = Math.min(2 * (216 - sy), 2 * sy);
-      for (let sx = Math.floor(a); sx < b; sx++) {
-        const u = sx + WORLD; if (u < 0 || u >= W) continue; const sxc = sx + 0.5, wx = sy + sxc / 2, wy = sy - sxc / 2;
+      const sy = (v + 0.5) / K, a = Math.max(2 * (160 - sy), 2 * (sy - WORLD)), b = Math.min(2 * (216 - sy), 2 * sy);
+      for (let U = Math.floor((a + WORLD) * K); U < (b + WORLD) * K; U++) {
+        if (U < 0 || U >= W) continue; const sxc = (U + 0.5) / K - WORLD, wx = sy + sxc / 2, wy = sy - sxc / 2;
         if (wx < 160 || wx >= 216 || wy < 0 || wy >= WORLD) continue;
-        const tx = wx >> 3, ty = wy >> 3, col = groundColor(GT[gi(tx, ty)], wx, wy, tx, ty, job.season), k = ((v - v0) * W + u) * 4;
+        const tx = wx >> 3, ty = wy >> 3, col = groundColor(GT[gi(tx, ty)], wx, wy, tx, ty, job.season), k = ((v - v0) * W + U) * 4;
         d[k] = col >> 16 & 255; d[k + 1] = col >> 8 & 255; d[k + 2] = col & 255; d[k + 3] = 255;
       }
     }
     g.putImageData(id, 0, v0); job.v = v1;
   }
-  GEN_ERA = old; return job.v >= 760;
+  GEN_ERA = old; return job.v >= HH;
 }
 function ensureOv(season, era) {
   if (era === 0 || OV[season + era]) return;
@@ -218,8 +218,8 @@ function drawWater(g) {
     const h = hash2(gx * 3 + 1, gy * 7 + 2); if (h > 0.3) continue;
     const off = (t * 1.3 + h * 70) % C, a = Math.sin(off / C * Math.PI); if (a < 0.3) continue;
     const s = scn(gx * C + hash2(gx, gy + 9) * C, gy * C + off, 0);
-    g.fillStyle = 'rgba(' + cr + ',' + (a * 0.4).toFixed(2) + ')'; g.fillRect(s[0], s[1], 3 + (h * 13 & 1), 1);
-    if (a > 0.75) { g.fillStyle = 'rgba(30,64,74,0.22)'; g.fillRect(s[0] + 1, s[1] + 1, 2, 1); }
+    g.fillStyle = 'rgba(' + cr + ',' + (a * 0.4).toFixed(2) + ')'; g.fillRect(s[0], s[1], 3 + (h * 13 & 1), 0.5);
+    if (a > 0.75) { g.fillStyle = 'rgba(30,64,74,0.22)'; g.fillRect(s[0] + 1, s[1] + 0.5, 2, 0.5); }
   }
   for (const b of SIM.boats) if (b.sp > 1.5) { const k = Math.min(1, b.sp / 10); for (let i = 0; i < 11; i++) { const wy = b.y - b.dir * (b.len / 2 + 1 + i * 2.6), sp2 = 1.4 + i * 0.75, a = 0.5 * k * (1 - i / 11); g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; for (const sd of [-1, 1]) { const s = scn(b.x + sd * sp2, wy, 0); g.fillRect(s[0], s[1], 2, 1); } } }
   g.fillStyle = 'rgba(235,245,255,0.5)';

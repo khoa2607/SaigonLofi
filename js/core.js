@@ -20,18 +20,49 @@ const si = (R, a, b) => Math.floor(a + R() * (b - a + 1));
 
 // ----- colours are 0xRRGGBB ints -----
 function mixc(a, b, t) { const ar = a >> 16 & 255, ag = a >> 8 & 255, ab = a & 255; return (Math.round(ar + ((b >> 16 & 255) - ar) * t) << 16) | (Math.round(ag + ((b >> 8 & 255) - ag) * t) << 8) | Math.round(ab + ((b & 255) - ab) * t); }
-const C_LIGHT = 0xfff2cf, C_DARK = 0x2a2140;
+// art direction "Sài Gòn chiều": warm cream light, cocoa-brown ink, plum-brown shadows (from the reference sprite)
+const C_LIGHT = 0xfff1d6, C_DARK = 0x3a221c, INK = 0x2b1a16, SHADOW = 0x6a3f45;
 function shade(c, f) { return f > 0 ? mixc(c, C_LIGHT, f) : f < 0 ? mixc(c, C_DARK, -f) : c; }
+// colour grade: pull every flat colour toward the warm reference ramp (keeps the hue, softens neon, warms greys)
+const RAMP = [0x281a15, 0x48302c, 0x6e463a, 0x95523e, 0xc9845a, 0xe8b07a, 0xf7d9af, 0xfff4e2];
+const _grade = new Map();
+function grade(c) {
+  let g = _grade.get(c); if (g !== undefined) return g;
+  const r = c >> 16 & 255, gg = c >> 8 & 255, b = c & 255, l = (r * 0.3 + gg * 0.55 + b * 0.15) / 255, mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), sat = mx ? (mx - mn) / mx : 0;
+  const f = l * (RAMP.length - 1), i = Math.min(RAMP.length - 2, Math.floor(f)), warm = mixc(RAMP[i], RAMP[i + 1], f - i);
+  g = mixc(c, warm, 0.2 + (1 - sat) * 0.18); _grade.set(c, g); return g;
+}
 function css(c) { return '#' + (0x1000000 | c).toString(16).slice(1); }
 function rgba(c, a) { return 'rgba(' + (c >> 16 & 255) + ',' + (c >> 8 & 255) + ',' + (c & 255) + ',' + a + ')'; }
 
+// ----- art resolution: every sprite is drawn at K art pixels per world unit; logic stays in world units -----
+const K = 2;
 function mk(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
-// int grid (-1 = empty) -> canvas (+ black silhouette for the light pass)
-function gridCanvas(grid, w, h, emis) {
+// Scale2x (EPX) for the few hand-drawn 1x bitmaps (icons, dogs): keeps diagonals smooth at the new density
+function scale2x(g, w, h) {
+  const o = new Int32Array(w * h * 4), at = (x, y) => g[clamp(y, 0, h - 1) * w + clamp(x, 0, w - 1)];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), D = at(x, y + 1); let p1 = P, p2 = P, p3 = P, p4 = P;
+    if (C === A && C !== D && A !== B) p1 = A; if (A === B && A !== C && B !== D) p2 = B; if (D === C && D !== B && C !== A) p3 = C; if (B === D && B !== A && D !== C) p4 = D;
+    const W = w * 2, i = y * 2 * W + x * 2; o[i] = p1; o[i + 1] = p2; o[i + W] = p3; o[i + W + 1] = p4;
+  }
+  return o;
+}
+// int grid (-1 = empty) -> canvas (+ black silhouette for the light pass). k = art pixels per world unit of the grid.
+// returned w / h are in world units (canvas pixels / K), so callers draw with drawImage(c, x, y, w, h).
+function gridCanvas(grid, w, h, emis, k) {
+  if ((k || 1) === 1) { grid = scale2x(grid, w, h); if (emis) emis = scale2x(emis, w, h); w *= 2; h *= 2; }
   const c = mk(w, h), e = mk(w, h), id = new ImageData(w, h), ie = new ImageData(w, h), a = id.data, b = ie.data;
   for (let i = 0; i < w * h; i++) { const v = grid[i]; if (v < 0) continue; const k = i * 4; a[k] = v >> 16 & 255; a[k + 1] = v >> 8 & 255; a[k + 2] = v & 255; a[k + 3] = 255; b[k + 3] = 255; const m = emis ? emis[i] : 0; if (m) { b[k] = m >> 16 & 255; b[k + 1] = m >> 8 & 255; b[k + 2] = m & 255; } }
-  c.getContext('2d').putImageData(id, 0, 0); e.getContext('2d').putImageData(ie, 0, 0); return { c, e, w, h };
+  c.getContext('2d').putImageData(id, 0, 0); e.getContext('2d').putImageData(ie, 0, 0); return { c, e, w: w / K, h: h / K };
 }
+// ink a grid: 1px cocoa outline around the silhouette (grid must have a 1px empty margin)
+function inkGrid(g, w, h, amt) {
+  const o = g.slice(); amt = amt === undefined ? 0.82 : amt;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (g[y * w + x] >= 0) continue; let n = -1; if (x > 0 && g[y * w + x - 1] >= 0) n = g[y * w + x - 1]; else if (x < w - 1 && g[y * w + x + 1] >= 0) n = g[y * w + x + 1]; else if (y > 0 && g[(y - 1) * w + x] >= 0) n = g[(y - 1) * w + x]; else if (y < h - 1 && g[(y + 1) * w + x] >= 0) n = g[(y + 1) * w + x]; if (n >= 0) o[y * w + x] = mixc(n, INK, amt); }
+  return o;
+}
+const dI = (g, c, x, y) => g.drawImage(c, x, y, c.width / K, c.height / K);   // draw a K-resolution canvas at world-unit coordinates
 // bitmap from text rows + palette {char: int}
 function bmpGrid(rows, pal) { const h = rows.length, w = rows[0].length, g = new Int32Array(w * h).fill(-1); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const ch = rows[y][x]; if (ch !== '.' && pal[ch] !== undefined) g[y * w + x] = pal[ch]; } return gridCanvas(g, w, h); }
 
@@ -66,33 +97,53 @@ function bake(boxes, o) {
     y0 = Math.min(y0, (b.x + b.y) / 2 - b.z - b.h); y1 = Math.max(y1, (b.x + b.w + b.y + b.d) / 2 - b.z);
     if (!b.nf) { fx0 = Math.min(fx0, b.x); fy0 = Math.min(fy0, b.y); fx1 = Math.max(fx1, b.x + b.w); fy1 = Math.max(fy1, b.y + b.d); }
   }
-  x0 = Math.floor(x0); y0 = Math.floor(y0);
-  const w = Math.ceil(x1) - x0, h = Math.ceil(y1) - y0, n = w * h;
-  const col = new Int32Array(n).fill(-1), dep = new Float32Array(n).fill(-1e9), em = new Int32Array(n);
+  // work in art pixels (K per world unit) with a 2px margin for the ink outline
+  const X0 = Math.floor(x0 * K) - 2, Y0 = Math.floor(y0 * K) - 2, w = Math.ceil(x1 * K) - X0 + 2, h = Math.ceil(y1 * K) - Y0 + 2, n = w * h;
+  const col = new Int32Array(n).fill(-1), dep = new Float32Array(n).fill(-1e9), em = new Int32Array(n), fid = new Int32Array(n).fill(-1);
   const nx = o.slice ? Math.max(1, Math.round((fx1 - fx0) / o.slice)) : 1, ny = o.slice ? Math.max(1, Math.round((fy1 - fy0) / o.slice)) : 1;
   const cw = (fx1 - fx0) / nx, cd = (fy1 - fy0) / ny, cell = nx * ny > 1 ? new Uint8Array(n) : null;
   const snow = o.snow, sox = o.ox || 0, soy = o.oy || 0;
-  for (const b of boxes) {
-    const X1 = b.x + b.w, Y1 = b.y + b.d, Z1 = b.z + b.h, p = b.p, bc = b.c;
+  for (let bi = 0; bi < boxes.length; bi++) {
+    const b = boxes[bi], X1 = b.x + b.w, Y1 = b.y + b.d, Z1 = b.z + b.h, p = b.p, bc = b.c;
     for (let f = 0; f < 3; f++) {
       let pa, pb, qa, qb;
       if (f === 0) { pa = b.x - Y1; pb = X1 - b.y; qa = (b.x + b.y) / 2 - Z1; qb = (X1 + Y1) / 2 - Z1; }
       else if (f === 1) { pa = b.x - Y1; pb = X1 - Y1; qa = (b.x + Y1) / 2 - Z1; qb = (X1 + Y1) / 2 - b.z; }
       else { pa = X1 - Y1; pb = X1 - b.y; qa = (X1 + b.y) / 2 - Z1; qb = (X1 + Y1) / 2 - b.z; }
-      const px0 = Math.max(0, Math.floor(pa) - x0), px1 = Math.min(w, Math.ceil(pb) - x0), py0 = Math.max(0, Math.floor(qa) - y0), py1 = Math.min(h, Math.ceil(qb) - y0);
+      const px0 = Math.max(0, Math.floor(pa * K) - X0), px1 = Math.min(w, Math.ceil(pb * K) - X0), py0 = Math.max(0, Math.floor(qa * K) - Y0), py1 = Math.min(h, Math.ceil(qb * K) - Y0);
       for (let py = py0; py < py1; py++) for (let px = px0; px < px1; px++) {
-        const sx = px + x0 + 0.5, sy = py + y0 + 0.5; let wx, wy, wz, u, v;
+        const sx = (px + X0 + 0.5) / K, sy = (py + Y0 + 0.5) / K; let wx, wy, wz, u, v;
         if (f === 0) { const s = 2 * (sy + Z1); wx = (s + sx) / 2; wy = (s - sx) / 2; if (wx < b.x || wx >= X1 || wy < b.y || wy >= Y1) continue; wz = Z1; u = wx - b.x; v = wy - b.y; }
         else if (f === 1) { wx = sx + Y1; wy = Y1; wz = (wx + Y1) / 2 - sy; if (wx < b.x || wx >= X1 || wz < b.z || wz >= Z1) continue; u = wx - b.x; v = wz - b.z; }
         else { wy = X1 - sx; wx = X1; wz = (X1 + wy) / 2 - sy; if (wy < b.y || wy >= Y1 || wz < b.z || wz >= Z1) continue; u = Y1 - wy; v = wz - b.z; }
         const i = py * w + px, d = wx + wy + wz; if (d <= dep[i]) continue;
         EM = b.em || 0; let c = p ? p(f, u, v, b, wx, wy) : bc; if (c === undefined) c = bc; if (c < 0) continue;
-        if (f === 0 && snow && !b.ns && snowAt(wx + sox, wy + soy)) { c = hash2(wx + sox, wy + soy) > 0.72 ? 0xdde7f4 : 0xf4f8fe; EM = 0; }
-        else if (!b.raw) c = shade(c, f === 0 ? 0.13 : f === 1 ? (v >= b.h - 1 ? 0.08 : 0) : (v >= b.h - 1 ? -0.09 : -0.17));
-        dep[i] = d; col[i] = c; em[i] = EM;
+        if (f === 0 && snow && !b.ns && snowAt(wx + sox, wy + soy)) { c = hash2(wx + sox, wy + soy) > 0.72 ? 0xdde4f0 : 0xf6f4f2; EM = 0; }
+        else if (!b.raw) {
+          c = grade(c);
+          if (f === 0) c = mixc(c, C_LIGHT, 0.16);                                                       // sunlit tops
+          else if (f === 2) c = mixc(c, SHADOW, 0.3);                                                    // plum-brown shade side
+          if (f !== 0 && v < 1.2 && b.z < 0.5) c = mixc(c, SHADOW, 0.18 * (1.2 - v));                   // contact shadow at the ground
+          if (f !== 0 && v >= b.h - 0.5 && b.h > 1.5) c = mixc(c, C_LIGHT, f === 1 ? 0.18 : 0.08);        // lit top lip
+        }
+        dep[i] = d; col[i] = c; em[i] = EM; fid[i] = bi * 3 + f;
         if (cell) cell[i] = clamp(Math.floor((wx - 1e-3 - fx0) / cw), 0, nx - 1) + nx * clamp(Math.floor((wy - 1e-3 - fy0) / cd), 0, ny - 1);
       }
     }
+  }
+  // hand-drawn look: crease lines where boxes meet, and a cocoa outline around the whole silhouette
+  if (!o.noInk) {
+    const c2 = col.slice();
+    for (let y = 1; y < h; y++) for (let x = 1; x < w; x++) {
+      const i = y * w + x; if (col[i] < 0) continue;
+      for (const j of [i - 1, i - w]) { if (col[j] < 0 || fid[j] === fid[i]) continue; const sameBox = (fid[j] / 3 | 0) === (fid[i] / 3 | 0); if (sameBox) { if (fid[i] % 3 === 0 || fid[j] % 3 === 0) c2[i] = mixc(col[i], INK, 0.18); } else if (Math.abs(dep[j] - dep[i]) > 1.6) c2[i] = mixc(col[i], INK, dep[j] > dep[i] ? 0.62 : 0.4); }
+    }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = y * w + x; if (col[i] >= 0) continue; let j = -1;
+      if (x > 0 && col[i - 1] >= 0) j = i - 1; else if (x < w - 1 && col[i + 1] >= 0) j = i + 1; else if (y > 0 && col[i - w] >= 0) j = i - w; else if (y < h - 1 && col[i + w] >= 0) j = i + w;
+      if (j >= 0) { c2[i] = mixc(col[j], INK, 0.85); dep[i] = dep[j]; em[i] = 0; if (cell) cell[i] = cell[j]; }
+    }
+    col.set(c2);
   }
   const out = [];
   for (let k = 0; k < nx * ny; k++) {
@@ -101,8 +152,8 @@ function bake(boxes, o) {
     if (ax1 < 0) continue;
     const sw = ax1 - ax0 + 1, sh = ay1 - ay0 + 1, g = new Int32Array(sw * sh).fill(-1), ge = new Int32Array(sw * sh);
     for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) { const i = (y + ay0) * w + x + ax0; if (col[i] >= 0 && (!cell || cell[i] === k)) { g[y * sw + x] = col[i]; ge[y * sw + x] = em[i]; } }
-    const s = gridCanvas(g, sw, sh, ge);
-    s.ax = -x0 - ax0; s.ay = -y0 - ay0; s.key = fx0 + (k % nx) * cw + fy0 + Math.floor(k / nx) * cd + (cw + cd) / 2;
+    const s = gridCanvas(g, sw, sh, ge, K);
+    s.ax = -(X0 + ax0) / K; s.ay = -(Y0 + ay0) / K; s.key = fx0 + (k % nx) * cw + fy0 + Math.floor(k / nx) * cd + (cw + cd) / 2;
     out.push(s);
   }
   return o.slice ? out : out[0];

@@ -6,6 +6,12 @@ An isometric Saigon street corner that changes through four eras (199x, 200x, 20
 - For YouTube playlists run `serve.bat` (or `python -m http.server 8765`) and open http://localhost:8765/ because YouTube refuses embeds on `file://` pages.
 - All art is drawn by code at load time. Style reference: `web-lofi3.png`.
 
+## Art style (2026 redesign)
+Everything is drawn by code in one style taken from the reference sprite: chibi townsfolk with big heads and faces, cocoa-brown ink outlines, warm cream / peach light and plum-brown shade, at **2 art pixels per world unit** (`K` in `js/core.js`).
+- `js/core.js` `bake()` renders every box model (buildings, landmarks, vehicles, boats, props) at K with the warm grade (`grade()`), cel shading, crease lines and an ink outline. `gridCanvas(..., K)` sprites report their size in world units; 1x bitmaps are upscaled with Scale2x.
+- `js/art.js` `drawPerson()` / `treeSprite()` / umbrellas / speech bubbles; `js/tet.js` `plantSprite()` for mai / kumquat / chrysanthemum pots and the waving flags.
+- `js/city.js` `groundColor()` paints roads, gạch tàu pavements, grass and plazas at K; `index.html` holds the UI theme (wooden era sign, cream paper panels, Baloo 2).
+
 ## Controls
 - Era plate (top left) or keys `[` `]`: 199x / 200x / 201x / 202x. The switch crossfades in place.
 - Play / Space, prev / next, seasons (keys 1-4), "Tự đổi" auto seasons.

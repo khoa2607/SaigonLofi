@@ -50,7 +50,7 @@ const flowerP = (pink) => (f, u, v, b, wx, wy) => { const h = hash2(u * 5 + f * 
 // pitched terracotta roof, ridge parallel to the street
 function tileRoof(B, w, d, Z, wearK, seed) {
   const n = Math.max(3, Math.min(6, Math.floor(d / 9))), s = (d + 3) / (2 * n);
-  for (let k = 0; k < n; k++) B.push(box(-1.5, -1.5 + k * s, Z + k * 2.4, w + 3, d + 3 - 2 * k * s, 2.4, TILE, (f, u, v, b, wx, wy) => { if (f !== 0) return f === 1 ? shade(TILE2, -0.05) : TILE2; const t = hash2((u / 2 | 0) + seed, (v | 0) + k * 9); let c = (v | 0) % 2 ? TILE : shade(TILE, -0.1); if (t < 0.12) c = 0xd9744a; else if (t > 0.9) c = TILE2; if (wearK > 0.5 && vnoise(u / 4 + seed, v / 3 + k) > 0.7) c = mixc(c, 0x6a6a4a, 0.4); return c; }));
+  for (let k = 0; k < n; k++) B.push(box(-1.5, -1.5 + k * s, Z + k * 2.4, w + 3, d + 3 - 2 * k * s, 2.4, TILE, (f, u, v, b, wx, wy) => { if (f !== 0) { const sc = Math.abs(((u % 2) + 2) % 2 - 1); return v < 0.6 + sc * 0.5 ? 0x7a3424 : f === 1 ? (sc > 0.5 ? 0xd26a48 : TILE) : TILE2; } const lane = ((u + 0.5) % 2 + 2) % 2, ridge = lane < 0.6 ? 0xd8784e : lane > 1.5 ? 0x9a4430 : TILE; let c = (v % 1.6) < 0.35 ? 0x8e3e2c : ridge; const t = hash2((u / 2 | 0) + seed, (v / 1.6 | 0) + k * 9); if (t < 0.06) c = 0xe08c5a; if (wearK > 0.5 && vnoise(u / 4 + seed, v / 3 + k) > 0.7) c = mixc(c, 0x5e6a44, 0.4); if (k === n - 1 && Math.abs(v - b.d / 2) < 0.8) c = 0xe6d2b4; return c; }));
 }
 function roofStuff(R, B, x0, y0, w, d, Z, era) {
   const st = ESTYLE[era];
@@ -104,13 +104,26 @@ function shophouse(R, w, d, o) {
     if (vv < 1.2) return trim;
     if (front) {
       const nb = Math.max(1, Math.round((W - 2) / 12)), bw = W / nb, bi = Math.floor(u / bw), a = Math.abs(u - bi * bw - bw / 2), ws = hash2(seed * 3 + fl * 5 + f, bi), hw = glassy ? 4.6 : 3;
-      if (a < hw + 1 && vv > 3 && vv < 13) {
-        if (a > hw || vv < 4 || vv > 12) return glassy ? 0x3a3f48 : trim;
-        if (!glassy) { if (ws < 0.38) return a < 0.5 ? shade(shut, -0.3) : (vv | 0) % 2 ? shut : shade(shut, -0.14); if (ws < 0.72 && a > 2) return shut; }
+      if (glassy && a < hw + 1 && vv > 3 && vv < 13) {
+        if (a > hw || vv < 4 || vv > 12) return 0x3a3f48;
         const l = hash2(seed + fl * 13.7 + f, bi * 7.3 + 2); if (l < 0.55) EM = l < 0.07 ? 0x9fd0ff : 0xffd98a;
-        return glassy ? (a < 0.4 ? 0x3a3f48 : vv > 9 ? 0x8fb8cc : 0x6f9cb6) : vv > 9 && a < 2 ? 0x5c7890 : 0x3f566e;
+        return a < 0.4 ? 0x3a3f48 : (vv - a * 0.6) % 5 < 1 ? 0xb8d4e0 : vv > 9 ? 0x8fb8cc : 0x6f9cb6;
       }
-      if (!glassy && a < 4.6 && vv > 2.2 && vv <= 3) return shade(trim, -0.12);
+      if (!glassy) {
+        const arch = 12.2 - (a / hw) * (a / hw) * 1.6, sill = vv > 2.6 && vv <= 3.6 && a < hw + 1.4;
+        if (sill) return vv < 3 ? 0x8a6a58 : 0xfff0d8;                                                   // stone sill + its shadow
+        if (vv > 3.6 && vv < arch + 0.8 && a < hw + 0.7) {
+          if (a > hw || vv > arch) return 0xf4e6cc;                                                        // cream frame + arched head
+          if (ws < 0.38) return (vv * 2 | 0) % 2 ? shut : mixc(shut, 0x2b1a16, 0.3);                      // louvred shutters, closed
+          if (Math.abs(a - hw / 2) < 0.3 && vv < arch - 0.5) return 0xf4e6cc;                             // glazing bar
+          const l = hash2(seed + fl * 13.7 + f, bi * 7.3 + 2); if (l < 0.55) EM = l < 0.07 ? 0x9fd0ff : 0xffd98a;
+          if (l < 0.55 && a > hw - 1.2) return [0xe8a0a0, 0xf2d488, 0xa8c8a0][(bi + fl) % 3];             // curtains when lit
+          return (vv + a * 0.8) % 6 < 1.2 ? 0x7a8ca0 : vv > 9 ? 0x4a5468 : 0x3a3a50;
+        }
+        if (ws >= 0.38 && ws < 0.72 && a >= hw + 0.7 && a < hw + 3 && vv > 3.6 && vv < 11.6) return (vv * 2 | 0) % 2 ? shut : mixc(shut, 0x2b1a16, 0.3);   // shutters folded open
+        if (ws > 0.8 && a < hw + 0.5 && vv > 1.6 && vv <= 2.6) return hash2(u * 3, vv * 5) < 0.4 ? 0xf08aa0 : 0x4f8a44;                                // flower box
+      }
+      if (vv > FH - 1.4) return vv > FH - 0.6 ? mixc(trim, 0xfff1d6, 0.3) : mixc(trim, 0x2b1a16, 0.25);                                                // cornice
     } else {
       const q = u % 17; if (o.sideWin && q > 7 && q < 11 && vv > 6 && vv < 11) { if (hash2(seed + fl, u / 17 | 0) < 0.4) EM = 0xffd98a; return 0x3f566e; }
       if (o.ad && era < 2 && fl === 1 && textAt(o.ad, u - 3, vv - 5)) return shade(wall, -0.3);
