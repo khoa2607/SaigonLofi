@@ -22,7 +22,8 @@ function resize() {
   const sMin = (pw / (WORLD * 2) + ph / WORLD) / 0.96 / K;   // fit-the-world scale; a little blank corner is tolerated at 0.5
   let lo = 0; while (lo < LV.length - 1 && LV[lo] < sMin * (LV[lo] === 0.5 ? 0.55 : 1)) lo++;
   let def = 0; for (let i = 0; i < LV.length; i++) if (LV[i] <= want) def = i;
-  def = Math.max(def, lo); const idx = clamp(def + R.zoom, lo, LV.length - 1); R.zoom = idx - def;
+  def = Math.min(Math.max(def, lo) + 1, LV.length - 1);   // default = one zoom-in step above the 0.5x level
+  const idx = clamp(def + R.zoom, lo, LV.length - 1); R.zoom = idx - def;
   const aps = LV[idx], s = aps * K; R.scale = s; R.dpr = dpr;
   R.vw = Math.ceil(pw / s); R.vh = Math.ceil(ph / s);
   for (const c of [R.canvas, R.lc]) { c.width = R.vw * K; c.height = R.vh * K; }
@@ -186,7 +187,7 @@ async function setSeason(s, first) {
 }
 
 // ----- UI -----
-function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, ev: EV.sel, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom, zv: 2 })); } catch (e) { } }
+function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, ev: EV.sel, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom, zv: 3 })); } catch (e) { } }
 function load() { try { return JSON.parse(localStorage.getItem('saigonlofi') || '{}'); } catch (e) { return {}; } }
 const TIMES = { morning: 7.5, noon: 12.5, dusk: 17.9, night: 21.5 };
 function setTime(k) { G.timeKey = k; if (k === 'auto') G.autoTime = true; else { G.autoTime = false; G.hourTarget = TIMES[k]; } updateUI(); save(); }
@@ -214,7 +215,7 @@ function initUI() {
   const st = load();
   ytRender();
   document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => setLang(b.dataset.lang));
-  if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom && st.zv === 2) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
+  if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom && st.zv === 3) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
   if (st.streetOn === false) AU.streetOn = false; $('vStreet').value = AU.vol.street * 100; $('vMusic').value = AU.vol.music * 100; $('vAmb').value = AU.vol.amb * 100; $('vVinyl').value = AU.vol.vinyl * 100;
   $('play').onclick = () => { $('hint').classList.add('gone'); if (YTS.on) { ytToggle(); return; } if (AU.playing) audioPause(); else audioPlay(); updateUI(); };
   $('prev').onclick = () => { if (YTS.on) ytNext(-1); else nextTrack(-1); updateUI(); save(); }; $('next').onclick = () => { if (YTS.on) ytNext(1); else nextTrack(1); updateUI(); save(); };
