@@ -163,7 +163,7 @@ function hsThink(p) {
   const meal = (h >= 11.8 && h < 12.9) || (h >= 18.3 && h < 19.2);
   const sleep = (h >= 21.6 || h < 5.4) && !(p.role === 'fisher' && p.id % 4 === 0);
   if (sleep) return setTask(p, { k: 'sleep', x: p.home.x, y: p.home.y });
-  if (meal && p.role !== 'cook' && R() < 0.85) { const s = hsPickSpot('seat'); return setTask(p, { k: 'eat', spot: s, x: s.x, y: s.y, dur: rr2(20, 40) }); }
+  if (meal && p.role !== 'cook' && R() < 0.85) { const r = R(), s = hsPickSpot(r < 0.35 ? 'seat' : r < 0.6 ? 'green' : r < 0.85 ? 'porch' : 'bench'); return setTask(p, { k: 'eat', spot: s, x: s.x + rr2(-3, 3), y: s.y + rr2(-2, 2), dur: rr2(20, 40) }); }
   const rain = HS.weather === 'rain';
   if (p.tier === 2) return ambientThink(p, rain);
   switch (p.role) {

@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>probe</title></head>
+<body>
+<!-- Headless probe for tests/holdfast-browser.mjs: loads pages in same-origin frames and reports their state into #out. -->
+<pre id="out">running</pre>
+<script>
+const Q = new URLSearchParams(location.search), out = {}, wait = ms => new Promise(r => setTimeout(r, ms));
+function frame(src, w, h) { const f = document.createElement('iframe'); f.style.cssText = `width:${w || 1280}px;height:${h || 720}px;border:0`; f.src = src; document.body.appendChild(f); return f; }
+function painted(cv) { try { const g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4 * 97) if (d[i] + d[i + 1] + d[i + 2] > 120) n++; return n; } catch (e) { return -1; } }
+async function gallery() {
+  const f = frame('../index.html'); await wait(4000);
+  const w = f.contentWindow, d = w.document, r = {};
+  r.cards = d.querySelectorAll('.mcard').length; r.live = [...d.querySelectorAll('.mcard.live')].map(c => c.dataset.world);
+  r.menuVisible = !d.getElementById('menu').hidden; r.bridge = !!(w.LW && w.LW.AU);
+  const hc = d.querySelector('.mcard[data-world="holdfast"]'); if (hc) hc.click();
+  await wait(9000);
+  const hf = d.getElementById('hfFrame'); r.frameOpen = !!hf;
+  if (hf) { const hw = hf.contentWindow; r.hfBooted = !!(hw.HFAPI && hw.HFAPI.HFG.booted); r.hfErrors = hw.HFAPI ? hw.HFAPI.HFG.errs : ['no HFAPI']; r.hfPainted = painted(hw.document.getElementById('c')); r.saigonAsleep = true; r.sharedRadio = hw.HFAPI ? 'LW' : null; try { hw.HFAPI.exit(); } catch (e) { r.exitErr = String(e); } }
+  await wait(1500);
+  r.frameClosed = !d.getElementById('hfFrame'); r.menuBack = !d.getElementById('menu').hidden;
+  f.remove(); return r;
+}
+async function saigon() {
+  const f = frame('../index.html?era=1&time=noon&wx=clear&clean=1'); await wait(3000);
+  const w = f.contentWindow, d = w.document, r = {};
+  for (let i = 0; i < 90 && painted(d.getElementById('cv')) < 50; i++) await wait(1000);   // Saigon bakes its city first
+  r.booted = typeof w.boot === 'function'; r.painted = painted(d.getElementById('cv')); r.menuHidden = d.getElementById('menu').hidden;
+  f.remove(); return r;
+}
+(async () => {
+  try { if (Q.get('gallery') !== '0') out.gallery = await gallery(); } catch (e) { out.galleryErr = String(e.stack || e); }
+  try { if (Q.get('saigon') !== '0') out.saigon = await saigon(); } catch (e) { out.saigonErr = String(e.stack || e); }
+  document.getElementById('out').textContent = JSON.stringify(out); document.title = 'PROBE done';
+})();
+</script>
+</body></html>

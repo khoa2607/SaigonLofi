@@ -15,6 +15,13 @@ Everything is drawn by code in one style taken from the reference sprite: chibi 
 ## Lofi Worlds menu
 The site now opens on the **Lofi Worlds** gallery (`js/menu.js`, styles at the end of `index.html`). Saigon only boots when you enter it, the lofi radio keeps playing between the menu and the world, and **Esc** or the *Lofi Worlds* button in the world returns to the gallery. Any URL with a query string (for example `?era=2&time=night`, as used by the tests) or `#saigon` skips the menu and opens Saigon directly.
 
+## Holdfast — Edge of Survival (second world, branch `design/holdfast-world`)
+A walled settlement in a river bend living through the zombie years: ~120 autonomous settlers, roaming and attacking infected, snipers, breaches and repairs, scavenger expeditions, rescues, arrivals, day/night, weather and seasons. Only the **Current** era is built; Past and Future show as "soon".
+- Gallery: the **Holdfast** card opens it in a frame over the gallery (the radio keeps playing). Direct: `holdfast/index.html` (e.g. `http://localhost:8765/holdfast/?cam=gate`).
+- Code: `holdfast/` (`hf-map.js` valley + nav, `hf-art.js` models/looks, `hf-sim.js` simulation, `hf-render.js`, `hf-audio.js`, `hf-main.js`). It reuses `js/core.js`, `js/art.js`, `js/audio.js`, `js/yt.js`, `js/i18n.js` read-only.
+- Tests: `node tests/holdfast-sim.mjs` (simulation, Node only), `node tests/holdfast-browser.mjs --shots` (headless Chrome), `node tests/holdfast-bench.mjs` (fps).
+- Status, limits and measurements: `docs/holdfast/STATUS.md`. Design: `docs/holdfast/HOLDFAST-DESIGN.md`, art rules: `docs/holdfast/art-pilot/README.md`.
+
 ## Controls
 - Era plate (top left) or keys `[` `]`: 199x / 200x / 201x / 202x. The switch crossfades in place.
 - Play / Space, prev / next, seasons (keys 1-4), "Tự đổi" auto seasons.

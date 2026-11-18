@@ -74,10 +74,13 @@ async function hfBoot() {
   if (Q.get('exp')) hsStartExpedition();
   for (let i = 0; i < warp * 10; i++) hsTick(0.1);
   if (Q.get('cam') === 'exp') { const e = HS.exps[0]; if (e && e.team[0]) HFG.follow = e.team[0]; }
-  HR.bakeAll = true; hrFrame(1, performance.now()); HR.bakeAll = false; await prog(1);
+  HR.bakeAll = true; hrFrame(1, performance.now()); HR.bakeAll = false;
+  if (Q.get('warp') || Q.get('test') || Q.get('bench')) $('load').hidden = true;
+  await prog(1);
   hfUIBuild(); if (Q.get('clean')) document.body.classList.add('clean');
   $('load').classList.add('done'); if (Q.get('warp') || Q.get('test') || Q.get('bench')) $('load').hidden = true; else setTimeout(() => $('load').hidden = true, 700);
   HFG.booted = true; HFG.last = performance.now(); requestAnimationFrame(hfLoop);
+  setInterval(hfIdleBake, 120);
   if (MW !== LOCAL_LW && MW.AU.playing) haStart(MW);
   if (Q.get('test')) hfSelfTest(); if (Q.get('bench')) hfBench();
 }
@@ -102,6 +105,12 @@ function hfLoop(now) {
   const ft = performance.now() - t0; HR.ft.push(ft); if (HR.ft.length > 120) HR.ft.shift();
   if (now - HFG.ui > 500) { HFG.ui = now; hfStatus(); hfMusicUI(); }
   haFrame(dt, hfView());
+}
+// idle-time ground baking: the chunks in a ring around the camera, nearest first, so panning never stalls on a bake
+function hfIdleBake() {
+  if (document.hidden || _seasonBusy) return; const ci0 = Math.floor((HR.cx + HW) / CHU), cj0 = Math.floor(HR.cy / CHU); let best = null, bd = 1e9;
+  for (let dj = -2; dj <= 2; dj++) for (let di = -3; di <= 3; di++) { const ci = ci0 + di, cj = cj0 + dj; if (ci < 0 || cj < 0 || ci >= Math.ceil(2 * HW / CHU) || cj >= Math.ceil(HW / CHU) || HR.chunks.has(ci + ',' + cj + ',' + HR.season)) continue; const d = di * di + dj * dj * 2; if (d < bd) { bd = d; best = [ci, cj]; } }
+  if (best) hrBakeChunk(best[0], best[1]);
 }
 function hfView() {   // what the camera sees, for audio beds
   const x0 = HR.cx - HR.vw / K / 2, y0 = HR.cy - HR.vh / K / 2, uw = HR.vw / K, uh = HR.vh / K; let people = 0, zombies = 0, water = 0, river = 0;
@@ -214,7 +223,9 @@ function hfBench() {
   for (let i = 0; i < N; i++) { const t0 = performance.now(); hsTick(0.1); const t1 = performance.now(); hrFrame(0.5, t1); const t2 = performance.now(); sim.push(t1 - t0); ren.push(t2 - t1); if (i % 30 === 0) { HR.cx += 30; hrClampCam(); } }
   const st = a => { a.sort((x, y) => x - y); return { median: +a[a.length >> 1].toFixed(2), p95: +a[Math.floor(a.length * 0.95)].toFixed(2) }; };
   const R = { frames: N, sim: st(sim), render: st(ren), canvas: [HR.vw, HR.vh], aps: HR.aps, people: HS.people.length, zombies: HS.zombies.filter(z => z.st !== 'dead').length, drawn: HR.drawn, statics: HR.statics.length };
-  $('hfTest').textContent = JSON.stringify(R); document.title = 'HFBENCH done';
+  const iv = []; let lt = performance.now(); const t0 = lt;
+  const tick = (ts) => { iv.push(ts - lt); lt = ts; if (ts - t0 < 5000) requestAnimationFrame(tick); else { const a = iv.slice(2).sort((x, y) => x - y); R.raf = { frames: a.length, fps: +(1000 / (a.reduce((s, v) => s + v, 0) / a.length)).toFixed(1), medianMs: +a[a.length >> 1].toFixed(1), p95Ms: +a[Math.floor(a.length * 0.95)].toFixed(1), loopJs: hfFps() }; $('hfTest').textContent = JSON.stringify(R); document.title = 'HFBENCH done'; } };
+  requestAnimationFrame(tick);
 }
-window.HFAPI = { HS, HF, HR, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition };
+window.HFAPI = { HS, HF, HR, HFG, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition, exit: hfExit };
 hfBoot().catch(e => { HFG.errs.push(String(e.stack || e).slice(0, 300)); const el = $('hfTest'); el.textContent = JSON.stringify({ ok: false, boot: String(e.stack || e).slice(0, 600) }); document.title = 'HFTEST FAIL boot'; $('loadT').textContent = 'Error: ' + e.message; });
