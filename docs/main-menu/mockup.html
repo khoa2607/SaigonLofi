@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lofi Worlds Menu Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* DESIGN MOCKUP ONLY: not part of the app. ?view=desktop | mobile | cards | thumbs */
+:root {
+  --night: #1d1520; --night-2: #2a1d26; --plum: #3a2733; --ink: #2b1a16; --cream: #fbead0; --paper: #f7d9af;
+  --peach: #f9b574; --clay: #c8734f; --jade: #6fb3a8; --dim: #b49d8c; --soft: #d9c0a4; --glow: rgba(249, 181, 116, .45);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-variant-ligatures: none; background: var(--night); color: var(--cream); font-family: 'Baloo 2', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+canvas { image-rendering: pixelated; display: block; }
+.stage { position: relative; min-height: 100vh; overflow: hidden; background: radial-gradient(120% 70% at 50% -10%, #4a3040 0%, #2a1d26 45%, #1d1520 80%); }
+#dust { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .9; }
+/* header */
+.hdr { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 48px; }
+.mark { white-space: nowrap; display: flex; align-items: center; gap: 12px; font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: 26px; letter-spacing: .5px; color: var(--cream); }
+.mark i { width: 22px; height: 22px; display: inline-block; background: var(--peach); box-shadow: inset -4px -4px 0 #d98f52, 0 0 18px var(--glow); border-radius: 50%; }
+.ctrl { display: flex; gap: 10px; align-items: center; }
+.pill { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px 0 6px; border-radius: 20px; background: rgba(251, 234, 208, .08); border: 1px solid rgba(251, 234, 208, .16); font-size: 14px; color: var(--soft); }
+.pill b { color: var(--cream); font-weight: 600; }
+.pbtn { width: 30px; height: 30px; border-radius: 50%; background: var(--peach); color: var(--ink); display: grid; place-items: center; font-size: 12px; }
+.bars { display: flex; gap: 2px; align-items: flex-end; height: 14px; } .bars span { width: 3px; background: var(--jade); }
+.lang { display: flex; height: 40px; border-radius: 20px; border: 1px solid rgba(251, 234, 208, .16); overflow: hidden; font-weight: 700; font-size: 13px; }
+.lang span { padding: 0 12px; display: grid; place-items: center; color: var(--dim); } .lang .on { background: var(--cream); color: var(--ink); }
+/* intro */
+.intro { position: relative; z-index: 2; text-align: center; padding: 40px 24px 8px; }
+.intro h1 { margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 54px; letter-spacing: -.5px; line-height: 1; color: var(--cream); text-shadow: 0 4px 0 #120c12, 0 0 40px rgba(249, 181, 116, .25); }
+.intro p { margin: 14px auto 0; max-width: 520px; font-size: 18px; color: var(--soft); }
+.cont { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; height: 42px; padding: 0 8px 0 16px; border-radius: 21px; background: rgba(111, 179, 168, .14); border: 1px solid rgba(111, 179, 168, .45); color: var(--cream); font-size: 15px; }
+.cont small { color: var(--jade); font-weight: 700; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; }
+.cont em { font-style: normal; background: var(--jade); color: var(--ink); border-radius: 15px; padding: 2px 12px; font-weight: 700; }
+/* gallery */
+.gal { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 300px); gap: 40px 36px; justify-content: center; padding: 44px 24px 64px; }
+.card { position: relative; text-align: left; }
+.art { position: relative; width: 300px; height: 300px; border-radius: 10px; padding: 6px; background: #120c12; border: 2px solid rgba(251, 234, 208, .14); box-shadow: 0 10px 0 rgba(0, 0, 0, .28); transition: transform .25s ease, box-shadow .25s ease; }
+.art canvas { width: 284px; height: 284px; border-radius: 5px; }
+.card .t { margin: 14px 2px 0; font-weight: 700; font-size: 20px; line-height: 1.1; color: var(--cream); }
+.card .d { margin: 4px 2px 0; font-size: 14.5px; color: var(--dim); line-height: 1.35; }
+.badge { position: absolute; top: 16px; left: 16px; z-index: 3; font-size: 12px; font-weight: 700; letter-spacing: .6px; padding: 3px 10px; border-radius: 12px; }
+.badge.live { background: var(--peach); color: var(--ink); box-shadow: 0 2px 0 #9a5a32; }
+.badge.live::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3a8a5a; margin-right: 6px; vertical-align: 1px; box-shadow: 0 0 0 2px rgba(58, 138, 90, .25); }
+.badge.soon { background: rgba(29, 21, 32, .82); color: var(--soft); border: 1px solid rgba(251, 234, 208, .2); }
+.card.soon canvas { filter: saturate(.35) brightness(.62) contrast(.95); }
+.card.soon .t { color: var(--soft); } .card.soon .d { color: #8f7a6c; }
+.card.live .art { border-color: rgba(249, 181, 116, .55); }
+/* states */
+.card.hover .art { transform: translateY(-6px); box-shadow: 0 16px 0 rgba(0, 0, 0, .3), 0 0 0 2px var(--peach), 0 0 48px var(--glow); }
+.card.focus .art { outline: 3px solid var(--cream); outline-offset: 5px; }
+.card.press .art { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0, 0, 0, .3), 0 0 0 2px var(--peach); }
+.card.soonhover .art { transform: translateY(-2px); }
+.card.soonhover .tip { display: block; }
+.tip { display: none; position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 3; background: rgba(29, 21, 32, .92); border: 1px solid rgba(251, 234, 208, .2); border-radius: 8px; padding: 8px 12px; font-size: 13.5px; color: var(--soft); }
+.enter { position: absolute; right: 16px; bottom: 16px; z-index: 3; background: var(--cream); color: var(--ink); font-weight: 800; font-size: 14px; padding: 6px 14px; border-radius: 16px; box-shadow: 0 3px 0 var(--ink); display: none; }
+.card.hover .enter, .card.focus .enter { display: block; }
+.foot { position: relative; z-index: 2; text-align: center; padding: 0 0 36px; font-size: 13px; color: #8f7a6c; }
+/* mobile */
+.m .hdr { padding: 14px 16px; position: sticky; top: 0; background: rgba(29, 21, 32, .86); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(251, 234, 208, .08); }
+.m .mark { font-size: 19px; gap: 8px; } .m .mark i { width: 16px; height: 16px; }
+.m .pill { height: 34px; padding: 0 10px 0 4px; font-size: 12px; } .m .pill .tt { display: none; } .m .pbtn { width: 26px; height: 26px; } .m .lang { height: 34px; } .m .lang span { padding: 0 9px; }
+.m .intro { padding: 22px 16px 0; } .m .intro h1 { font-size: 30px; line-height: 1.15; } .m .intro p { font-size: 15px; }
+.m .cont { font-size: 13px; height: 38px; margin-top: 16px; }
+.m .gal { grid-template-columns: repeat(2, 1fr); gap: 22px 14px; padding: 24px 16px 40px; }
+.m .art { width: 100%; height: auto; aspect-ratio: 1; padding: 4px; } .m .art canvas { width: 100%; height: 100%; }
+.m .card .t { font-size: 15.5px; margin-top: 9px; } .m .card .d { font-size: 12.5px; }
+.m .badge { top: 10px; left: 10px; font-size: 10.5px; padding: 2px 8px; }
+.m .card.feature { grid-column: 1 / -1; } .m .card.feature .t { font-size: 19px; } .m .card.feature .d { font-size: 14px; }
+.m .card.feature .enter { display: block; right: 12px; bottom: 12px; }
+/* thumbs sheet */
+.sheet { display: grid; grid-template-columns: repeat(3, 384px); gap: 28px; padding: 32px; }
+.sheet figure { margin: 0; } .sheet canvas { width: 384px; height: 384px; border-radius: 6px; } .sheet figcaption { margin-top: 8px; color: var(--soft); font-size: 15px; }
+.states { display: grid; grid-template-columns: repeat(4, 300px); gap: 44px 36px; padding: 44px 48px; }
+.states .lab { margin-bottom: 14px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--jade); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ===================== pixel-art thumbnails (96 x 96 art px each, shared palette + light) =====================
+const S = 96, INK = '#2b1a16';
+const PAL = { ink: '#2b1a16', cream: '#fbead0', peach: '#f9b574', clay: '#c8734f', brick: '#95523e', plum: '#5a3a4e', lilac: '#a47ea0', rose: '#e89aa0', gold: '#f2c94c', jade: '#6fb3a8', teal: '#3f7f86', deep: '#24485a', navy: '#22304a', snow: '#eef0f4', ice: '#b8d2e4', pine: '#2f5a44', leaf: '#5c9044', grass: '#c4a454', sand: '#e0c088', grey: '#7a7078', dark: '#3a2e36' };
+const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+function px(g, x, y, c) { g.fillStyle = c; g.fillRect(x | 0, y | 0, 1, 1); }
+function rect(g, x, y, w, h, c) { g.fillStyle = c; g.fillRect(x | 0, y | 0, w | 0, h | 0); }
+function sky(g, y0, y1, stops) { for (let y = y0; y < y1; y++) for (let x = 0; x < S; x++) { const t = (y - y0) / (y1 - y0) * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(t)), f = t - i; px(g, x, y, f * 16 > BAY[(y & 3) * 4 + (x & 3)] ? stops[i + 1] : stops[i]); } }
+function ell(g, cx, cy, rx, ry, c) { for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++) if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) px(g, cx + x, cy + y, c); }
+function tri(g, x0, yb, w, h, c) { for (let y = 0; y < h; y++) { const hw = (y + 1) / h * w / 2; rect(g, x0 - hw, yb - h + y, hw * 2, 1, c); } }
+function hash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+function stars(g, y1, n, seed) { for (let i = 0; i < n; i++) { const x = hash(i, seed) * S | 0, y = hash(seed, i) * y1 | 0; px(g, x, y, i % 4 ? '#fff2dc' : PAL.peach); } }
+function windows(g, x, y, w, h, lit, seed) { for (let j = 0; j < h; j += 4) for (let i = 0; i < w; i += 3) if (hash(x + i + seed, y + j) < lit) rect(g, x + i, y + j, 1, 2, hash(i, j + seed) < 0.3 ? PAL.cream : PAL.gold); }
+function outline(g) { const d = g.getImageData(0, 0, S, S), a = d.data, o = new Uint8ClampedArray(a); return d; }
+
+const SCENES = {
+  saigon(g, t) {   // dusk riverfront corner: Notre-Dame spires, shophouses, Bitexco, river, motorbike headlight, lanterns
+    sky(g, 0, 56, ['#3a2a4a', '#7a4a6a', '#d8806a', '#f9b574']); stars(g, 20, 10, 3);
+    ell(g, 70, 44, 7, 7, '#ffd9a0');
+    rect(g, 14, 18, 5, 40, '#5a3a4e'); tri(g, 16.5, 18, 6, 9, '#5a3a4e'); rect(g, 15, 22, 3, 30, '#4a2e40'); px(g, 16, 7, PAL.gold);    // Bitexco-ish tower
+    rect(g, 28, 30, 22, 28, '#a85a42'); tri(g, 31, 30, 6, 12, '#8e4636'); tri(g, 47, 30, 6, 12, '#8e4636'); rect(g, 29, 30, 4, 28, '#95523e'); rect(g, 45, 30, 4, 28, '#95523e'); ell(g, 39, 38, 2, 2, '#f2c94c'); rect(g, 37, 48, 4, 10, '#3a221c'); for (let y = 34; y < 54; y += 5) { px(g, 31, y, PAL.gold); px(g, 47, y, PAL.gold); }   // cathedral
+    const shop = (x, w, h, c, roof) => { rect(g, x, 58 - h, w, h, c); rect(g, x - 1, 58 - h - 2, w + 2, 2, roof); windows(g, x + 1, 58 - h + 2, w - 2, h - 8, 0.55, x); rect(g, x, 54, w, 4, '#3a2a30'); };
+    shop(52, 12, 22, '#e8c88a', '#c8734f'); shop(64, 10, 16, '#c9d8b8', '#95523e'); shop(74, 13, 26, '#f2c0b0', '#c8734f'); shop(87, 9, 18, '#e0d0a0', '#95523e');
+    for (let x = 53; x < 96; x += 7) { px(g, x, 56, '#e8402e'); px(g, x, 57, '#ff7a4a'); }                                                          // lanterns
+    rect(g, 0, 58, S, 8, '#5a4c50'); for (let x = 0; x < S; x += 6) rect(g, x, 61, 3, 1, '#e8cc84');                                                // street
+    const mx = (t * 18) % 130 - 20; rect(g, mx, 61, 7, 3, '#c9384c'); rect(g, mx + 2, 57, 3, 4, '#3a2a30'); px(g, mx + 3, 56, '#f9b574'); for (let i = 1; i < 8; i++) px(g, mx + 7 + i, 62, i < 4 ? '#fff2c0' : '#e8cc84');   // motorbike
+    rect(g, 0, 66, S, 3, '#d8ccb6'); sky(g, 69, 96, ['#4f8e8a', '#3e7a7a', '#2c5a62']);                                                               // kerb + river
+    for (let i = 0; i < 14; i++) { const x = (hash(i, 9) * S + t * 4 * (i % 3 + 1)) % S, y = 72 + (hash(9, i) * 22 | 0); rect(g, x, y, 3, 1, '#7ab8b0'); }
+    for (let x = 52; x < 96; x += 3) if (hash(x, 1) < 0.7) rect(g, x, 70, 1, 3 + (hash(x, 2) * 3 | 0), 'rgba(242,201,76,.55)');                     // reflections
+    const bx = 18 + Math.sin(t * 0.6) * 3; rect(g, bx, 82, 18, 3, '#6e4c3c'); rect(g, bx + 2, 85, 14, 2, '#4a3028'); rect(g, bx + 6, 77, 7, 5, '#f4e6cc'); px(g, bx + 8, 79, PAL.gold);   // sampan
+  },
+  snow(g, t) {   // night ski slope: moonlit peaks, chalet window glow, chairlift, pines, drifting snow
+    sky(g, 0, 60, ['#1a2240', '#2a3a64', '#4a5a8a', '#7a7aa8']); stars(g, 40, 24, 7); ell(g, 20, 16, 6, 6, '#eef0f4'); ell(g, 22, 15, 5, 5, '#2a3a64');
+    for (let x = 0; x < S; x++) { const h1 = 34 + Math.abs(((x * 1.3) % 40) - 20) * 0.9, h2 = 44 + Math.abs(((x * 1.7 + 13) % 34) - 17) * 0.7; for (let y = h1 | 0; y < 96; y++) px(g, x, y, y < h1 + 4 ? PAL.snow : '#8a9ac0'); for (let y = h2 | 0; y < 96; y++) px(g, x, y, y < h2 + 3 ? '#f6f6fa' : '#b8c8e0'); }
+    for (let x = 0; x < S; x++) { const h = 64 + x * 0.22; for (let y = h | 0; y < 96; y++) px(g, x, y, (x + y) % 9 === 0 ? '#dfe6f2' : PAL.snow); }
+    rect(g, 60, 0, 1, 0, PAL.ink); for (let i = 0; i < 96; i++) px(g, 96 - i, 18 + i * 0.5, '#2a2a3a');                                               // lift cable
+    for (let k = 0; k < 4; k++) { const p = ((t * 6 + k * 26) % 104) - 4, x = 96 - p, y = 18 + p * 0.5; rect(g, x, y, 1, 4, '#2a2a3a'); rect(g, x - 2, y + 4, 5, 2, '#c9384c'); }
+    rect(g, 14, 66, 22, 14, '#6e4c3c'); tri(g, 25, 66, 28, 10, '#f6f6fa'); rect(g, 19, 70, 4, 4, '#ffd27a'); rect(g, 28, 70, 4, 4, '#ffd27a'); rect(g, 23, 74, 4, 6, '#3a2420'); rect(g, 31, 54, 2, 6, '#5a4a48');
+    for (let y = 58; y < 66; y++) px(g, 32 + Math.sin(y + t * 2) * 0.6, y - 4, 'rgba(220,220,230,.6)');                                               // chimney smoke
+    for (const [x, y, h] of [[6, 84, 14], [44, 82, 12], [52, 88, 16], [80, 90, 13], [90, 86, 10]]) { tri(g, x, y, 9, h, PAL.pine); for (let j = 3; j < h; j += 4) rect(g, x - (j / h) * 4, y - h + j, (j / h) * 8, 1, '#eef0f4'); }
+    for (let i = 0; i < 40; i++) { const x = (hash(i, 3) * S + Math.sin(t + i) * 2) % S, y = (hash(3, i) * S + t * 8 * (1 + i % 3)) % S; px(g, x, y, '#ffffff'); }
+  },
+  wild(g, t) {   // golden-hour savanna miniature: acacia, elephant + calf, giraffe, waterhole with flamingos, birds
+    sky(g, 0, 58, ['#f2a070', '#f9c48a', '#fbe0a8']); ell(g, 48, 52, 12, 12, '#fff0c0');
+    for (let x = 0; x < S; x++) { const h = 50 + Math.sin(x / 9) * 3; for (let y = h | 0; y < 62; y++) px(g, x, y, '#c08a6a'); }
+    rect(g, 0, 60, S, 36, PAL.grass); for (let i = 0; i < 160; i++) { const x = hash(i, 5) * S | 0, y = 60 + (hash(5, i) * 36 | 0); rect(g, x, y, 1, 2, i % 3 ? '#a8883e' : '#dcc070'); }
+    ell(g, 62, 80, 18, 6, '#4f8e8a'); ell(g, 62, 79, 15, 4, '#6fb3a8'); rect(g, 52, 78, 6, 1, '#a8d8d0');
+    for (const [x, y] of [[56, 74], [64, 73]]) { rect(g, x, y - 6, 1, 6, '#e87a8a'); rect(g, x - 1, y - 9, 4, 3, '#f2a0b0'); px(g, x + 3, y - 10, '#2b1a16'); }
+    rect(g, 18, 34, 3, 26, '#5a3a2a'); ell(g, 20, 32, 16, 4, '#3a5a2e'); ell(g, 14, 29, 8, 3, '#4a6a34');                                             // acacia
+    const ex = 22 + Math.sin(t * 0.4) * 1; ell(g, ex, 66, 9, 6, '#7a7078'); rect(g, ex - 7, 69, 3, 6, '#6a6068'); rect(g, ex + 4, 69, 3, 6, '#6a6068'); ell(g, ex + 9, 63, 4, 4, '#7a7078'); rect(g, ex + 12, 64, 2, 9, '#6a6068'); px(g, ex + 10, 62, INK);
+    ell(g, ex - 13, 71, 4, 3, '#8a8088'); rect(g, ex - 16, 73, 2, 3, '#7a7078'); rect(g, ex - 11, 73, 2, 3, '#7a7078');
+    const gx = 84; rect(g, gx, 56, 6, 5, '#e0a050'); rect(g, gx + 4, 40, 2, 16, '#e0a050'); rect(g, gx + 3, 38, 4, 3, '#e0a050'); rect(g, gx, 61, 1, 9, '#c08040'); rect(g, gx + 5, 61, 1, 9, '#c08040'); for (const [a, b] of [[1, 57], [3, 59], [5, 46], [4, 50]]) px(g, gx + a, b, '#9a5a2a');
+    for (let i = 0; i < 4; i++) { const x = (t * 10 + i * 9) % 110 - 10, y = 18 + i * 3 + Math.sin(t * 3 + i) * 1.5; px(g, x, y, INK); px(g, x - 1, y - 1, INK); px(g, x + 1, y - 1, INK); }
+  },
+  clean(g, t) {   // little robots restoring a city block: half grey rubble, half fresh green, sunrise breaking through
+    sky(g, 0, 60, ['#8a9aa8', '#c8b8a8', '#f9d0a0']); for (let i = 0; i < 3; i++) for (let y = 0; y < 40; y++) px(g, 70 + i * 6 - y * 0.6, y, 'rgba(255,240,200,.35)');
+    rect(g, 4, 26, 18, 36, '#8a8288'); rect(g, 22, 34, 12, 28, '#9a9298'); windows(g, 6, 30, 14, 26, 0.15, 2); for (let y = 30; y < 60; y += 4) rect(g, 23, y, 10, 1, '#7a7278');      // grey ruined
+    rect(g, 58, 30, 16, 32, '#e8d0a8'); rect(g, 74, 22, 18, 40, '#c8e0c0'); windows(g, 60, 34, 12, 24, 0.6, 5); windows(g, 76, 26, 14, 32, 0.6, 9); for (let x = 74; x < 92; x += 3) ell(g, x, 22, 2, 2, PAL.leaf);   // restored + roof garden
+    rect(g, 0, 62, S, 34, '#7a7078'); for (let x = 48; x < S; x++) for (let y = 62; y < 96; y++) if (hash(x, y) < 0.85 - (60 - x) * 0.02) px(g, x, y, hash(y, x) < 0.2 ? '#7ab25a' : PAL.leaf);   // grass spreading
+    for (let i = 0; i < 18; i++) { const x = hash(i, 8) * 44 | 0, y = 66 + (hash(8, i) * 26 | 0); rect(g, x, y, 2 + (i % 3), 2, i % 2 ? '#5a5258' : '#a89a8a'); }               // rubble
+    for (const [x, y] of [[54, 74], [70, 84], [86, 70]]) { rect(g, x, y - 4, 1, 4, PAL.leaf); px(g, x - 1, y - 5, '#8ac86a'); px(g, x + 1, y - 5, '#8ac86a'); }                         // sprouts
+    const robot = (x, y, c, k) => { const b = Math.sin(t * 4 + k) > 0 ? 0 : -1; rect(g, x, y + b, 7, 6, c); rect(g, x + 1, y + 1 + b, 5, 2, '#24303a'); px(g, x + 2, y + 2 + b, '#7aff9a'); px(g, x + 4, y + 2 + b, '#7aff9a'); rect(g, x + 3, y - 2 + b, 1, 2, '#5a5a62'); px(g, x + 3, y - 3 + b, '#ffd27a'); rect(g, x + 1, y + 6, 2, 2, '#3a3a42'); rect(g, x + 4, y + 6, 2, 2, '#3a3a42'); };
+    robot(26, 72, '#f2c94c', 0); robot(44, 80, '#6fb3a8', 1); rect(g, 52, 82, 5, 4, '#95523e'); robot(12, 84, '#e8a0a0', 2);
+    const bx = (t * 8) % 20; for (let i = 0; i < 3; i++) px(g, 35 + i * 2, 74 - ((bx + i * 5) % 12), 'rgba(122,255,154,.8)');
+  },
+  ocean(g, t) {   // underwater glow: light shafts, coral garden, jellyfish, fish school, sea turtle
+    sky(g, 0, 96, ['#4fa8b8', '#2f7a92', '#1e4e6e', '#142a48']);
+    for (let i = 0; i < 4; i++) for (let y = 0; y < 70; y++) { const x = 12 + i * 22 + y * 0.35 + Math.sin(t * 0.5 + i) * 2; if (y % 2 || i % 2) px(g, x, y, 'rgba(220,250,255,.18)'); px(g, x + 1, y, 'rgba(220,250,255,.12)'); }
+    for (let x = 0; x < S; x++) { const h = 84 + Math.sin(x / 7) * 3; for (let y = h | 0; y < 96; y++) px(g, x, y, (x + y) % 7 ? '#c8a878' : '#a88a5a'); }
+    for (const [x, c, h] of [[10, '#e86a7a', 14], [22, '#f2a03a', 10], [70, '#c87ad8', 16], [84, '#e86a7a', 11], [46, '#f2c94c', 8]]) { for (let k = -2; k <= 2; k++) rect(g, x + k * 2, 86 - h + Math.abs(k) * 3, 1, h - Math.abs(k) * 3, c); ell(g, x, 86 - h, 2, 2, c); }
+    for (let k = 0; k < 3; k++) { const x = 30 + k * 22, y = 26 + k * 9 + Math.sin(t * 1.4 + k) * 3; ell(g, x, y, 5, 4, k === 1 ? '#f7b8e8' : '#b8f0ff'); rect(g, x - 5, y, 11, 1, 'rgba(20,40,70,.0)'); for (let i = -3; i <= 3; i += 2) for (let j = 0; j < 7; j++) px(g, x + i + Math.sin(t * 2 + j + i) * 0.6, y + 3 + j, k === 1 ? 'rgba(247,184,232,.7)' : 'rgba(184,240,255,.7)'); ell(g, x - 1, y - 1, 2, 1, '#ffffff'); }
+    for (let i = 0; i < 12; i++) { const x = (t * 12 + i * 7 + (i % 3) * 3) % 120 - 12, y = 58 + Math.sin(i * 1.7) * 5 + Math.sin(t * 2 + i) * 1; rect(g, x, y, 3, 1, '#f2c94c'); px(g, x - 1, y, '#e08a2c'); }
+    const tx = 60 + Math.sin(t * 0.4) * 6, ty = 46; ell(g, tx, ty, 8, 5, '#5a8a4a'); ell(g, tx, ty - 1, 6, 3, '#7aa85a'); ell(g, tx + 9, ty, 3, 2, '#8ab86a'); rect(g, tx - 6, ty + 4, 4, 2, '#7aa85a'); rect(g, tx + 3, ty + 4, 4, 2, '#7aa85a'); px(g, tx + 10, ty - 1, INK);
+    for (let i = 0; i < 8; i++) px(g, 20 + i * 9, (90 - t * 10 * (1 + i % 2) + i * 13) % 96, 'rgba(255,255,255,.6)');
+  },
+  fall(g, t) {   // after the fall: dusk ruins, barricade of crates + car, campfire, string lights, tent, a dog — calm, not scary
+    sky(g, 0, 60, ['#2a2236', '#5a3a4e', '#a85a5a', '#d8865a']); stars(g, 24, 8, 11);
+    for (const [x, w, h, b] of [[2, 12, 30, 1], [16, 10, 40, 0], [28, 14, 24, 1], [70, 12, 34, 1], [84, 12, 28, 0]]) { rect(g, x, 58 - h, w, h, '#3a2a3a'); if (b) for (let k = 0; k < 4; k++) rect(g, x + k * 3, 58 - h - (k % 2) * 2, 2, 2, '#3a2a3a'); windows(g, x + 1, 60 - h, w - 2, h - 6, 0.06, x); }
+    rect(g, 0, 58, S, 38, '#4a3a3a'); for (let i = 0; i < 60; i++) px(g, hash(i, 2) * S, 60 + hash(2, i) * 36, '#5a4848');
+    rect(g, 4, 66, 26, 10, '#6a4e3a'); for (let x = 4; x < 30; x += 5) rect(g, x, 66, 1, 10, '#4a3428'); rect(g, 8, 60, 14, 6, '#7a5a42');                       // crate barricade
+    rect(g, 66, 64, 26, 9, '#5a6a7a'); rect(g, 71, 59, 14, 5, '#4a5a6a'); rect(g, 72, 60, 5, 3, '#2a3440'); ell(g, 70, 73, 3, 3, '#2a2a30'); ell(g, 87, 73, 3, 3, '#2a2a30');   // old car
+    tri(g, 50, 74, 18, 12, '#6f8a5a'); rect(g, 48, 68, 3, 6, '#2a2a20');                                                                                     // tent
+    for (let i = 0; i < 40; i++) { const x = 6 + i * 2.2, y = 50 + Math.sin(i / 40 * Math.PI) * 6; px(g, x, y, '#3a2a2a'); if (i % 4 === 0) px(g, x, y + 1, (Math.sin(t * 3 + i) > -0.4) ? '#ffd27a' : '#c89a4a'); }      // string lights
+    const f = Math.sin(t * 9) > 0 ? 1 : 0; ell(g, 38, 84, 5, 2, '#3a2a28'); tri(g, 38, 84, 7, 7 + f, '#f08a2c'); tri(g, 38, 84, 4, 5 + f, '#ffd27a');           // campfire
+    for (let r = 14; r > 6; r -= 4) for (let a = 0; a < 40; a++) { const x = 38 + Math.cos(a) * r, y = 82 + Math.sin(a) * r * 0.45; if (hash(a, r) < 0.4) px(g, x, y, 'rgba(255,190,110,.25)'); }
+    rect(g, 22, 82, 7, 4, '#a87a5a'); rect(g, 27, 80, 3, 3, '#a87a5a'); px(g, 29, 79, '#a87a5a'); rect(g, 22, 86, 1, 2, '#8a6044'); rect(g, 27, 86, 1, 2, '#8a6044');   // dog
+    for (const [x, c] of [[44, '#3a5a8a'], [33, '#8a3a3a']]) { rect(g, x, 82, 4, 6, c); ell(g, x + 2, 79, 2, 2, '#e8b48a'); rect(g, x, 77, 4, 1, '#2a2020'); }        // two survivors by the fire
+    for (let i = 0; i < 6; i++) px(g, 38 + Math.sin(t * 2 + i) * 2, 76 - ((t * 6 + i * 4) % 20), 'rgba(255,200,120,.7)');
+  }
+};
+const WORLDS = [
+  { id: 'saigon', t: 'Sài Gòn qua năm tháng', en: 'Saigon Through Time', d: 'Bốn thập kỷ, một góc phố: mưa chiều, cà phê và tiếng xe.', live: true },
+  { id: 'snow', t: 'Núi Tuyết', en: 'Snow Mountain', d: 'Cáp treo, nhà gỗ ấm và tuyết rơi chậm.' },
+  { id: 'wild', t: 'Thế Giới Hoang Dã', en: 'Wildlife World', d: 'Những khu sinh thái nhỏ, ai cũng có nhà.' },
+  { id: 'clean', t: 'Thành Phố Xanh Lại', en: 'Clean-Up World', d: 'Robot nhỏ dọn dẹp, cây xanh mọc lại.' },
+  { id: 'ocean', t: 'Đại Dương', en: 'Ocean Life', d: 'Ánh sáng xuyên nước, sứa phát quang.' },
+  { id: 'fall', t: 'Sau Cơn Sụp Đổ', en: 'After The Fall', d: 'Một vùng an toàn, đống lửa và dây đèn.' }
+];
+const cvs = [];
+function thumb(w, live) { const c = document.createElement('canvas'); c.width = S; c.height = S; cvs.push([c, w.id, live]); SCENES[w.id](c.getContext('2d'), 2); return c; }
+function card(w, extra, mobileFeature) {
+  const el = document.createElement('div'); el.className = 'card ' + (w.live ? 'live' : 'soon') + ' ' + (extra || '') + (mobileFeature ? ' feature' : '');
+  const art = document.createElement('div'); art.className = 'art'; art.appendChild(thumb(w, w.live));
+  art.insertAdjacentHTML('beforeend', w.live ? '<span class="badge live">Đang mở</span><span class="enter">Vào thế giới →</span>' : '<span class="badge soon">☾ Sắp ra mắt</span><span class="tip">Đang được vẽ từng pixel. Hẹn bạn sớm thôi.</span>');
+  el.appendChild(art); el.insertAdjacentHTML('beforeend', `<div class="t">${w.t}</div><div class="d">${w.d}</div>`); return el;
+}
+const header = () => `<header class="hdr"><div class="mark"><i></i>Lofi Worlds</div><div class="ctrl"><div class="pill"><span class="pbtn">❚❚</span><span class="bars"><span style="height:6px"></span><span style="height:12px"></span><span style="height:9px"></span><span style="height:13px"></span></span><span class="tt"><b>Cà phê sữa đá</b> · lofi radio</span></div><div class="lang"><span class="on">VI</span><span>EN</span></div></div></header>`;
+const intro = (m) => `<section class="intro"><h1>Hôm nay bạn muốn ở đâu?</h1><p>Chọn một thế giới nhỏ. Ngồi lại, nghe nhạc, để thời gian trôi chậm.</p><div class="cont"><small>Tiếp tục</small>Sài Gòn · 200x · đêm mưa <em>Vào lại</em></div></section>`;
+const view = new URLSearchParams(location.search).get('view') || 'desktop', root = document.getElementById('root');
+if (view === 'thumbs') { const sh = document.createElement('div'); sh.className = 'sheet'; for (const w of WORLDS) { const f = document.createElement('figure'), c = thumb(w, true); f.appendChild(c); f.insertAdjacentHTML('beforeend', `<figcaption>${w.en}</figcaption>`); sh.appendChild(f); } root.appendChild(sh); }
+else if (view === 'cards') { const s = document.createElement('div'); s.className = 'states'; [['Mặc định · default', '', WORLDS[0]], ['Hover / chạm · hover', 'hover', WORLDS[0]], ['Focus bàn phím · focus', 'focus', WORLDS[0]], ['Nhấn · pressed', 'press', WORLDS[0]], ['Sắp ra mắt · default', '', WORLDS[4]], ['Sắp ra mắt · hover', 'soonhover', WORLDS[4]], ['Sắp ra mắt · focus', 'focus', WORLDS[5]], ['Sắp ra mắt', '', WORLDS[1]]].forEach(([lab, st, w]) => { const wrap = document.createElement('div'); wrap.innerHTML = `<div class="lab">${lab}</div>`; wrap.appendChild(card(w, st)); s.appendChild(wrap); }); root.className = 'stage'; root.appendChild(s); }
+else {
+  const m = view === 'mobile'; root.className = 'stage' + (m ? ' m' : ''); root.innerHTML = '<canvas id="dust"></canvas>' + header() + intro(m);
+  const gal = document.createElement('section'); gal.className = 'gal'; WORLDS.forEach((w, i) => gal.appendChild(card(w, !m && i === 0 && new URLSearchParams(location.search).get('hover') ? 'hover' : '', m && i === 0))); root.appendChild(gal);
+  root.insertAdjacentHTML('beforeend', '<footer class="foot">Thêm thế giới mới sẽ được thắp sáng dần · More worlds light up over time</footer>');
+  const d = document.getElementById('dust'), g = d.getContext('2d'); d.width = 480; d.height = 300; for (let i = 0; i < 70; i++) { g.fillStyle = i % 5 ? 'rgba(251,234,208,.35)' : 'rgba(249,181,116,.7)'; g.fillRect(hash(i, 1) * 480 | 0, hash(1, i) * 300 | 0, 1, 1); }
+}
+// gentle life: only the playable world animates; coming-soon thumbnails stay still
+let T = 2; setInterval(() => { T += 0.08; for (const [c, id, live] of cvs) if (live) { const g = c.getContext('2d'); g.clearRect(0, 0, S, S); SCENES[id](g, T); } }, 80);
+</script>
+</body>
+</html>
