@@ -12,6 +12,9 @@ Everything is drawn by code in one style taken from the reference sprite: chibi 
 - `js/art.js` `drawPerson()` / `treeSprite()` / umbrellas / speech bubbles; `js/tet.js` `plantSprite()` for mai / kumquat / chrysanthemum pots and the waving flags.
 - `js/city.js` `groundColor()` paints roads, gạch tàu pavements, grass and plazas at K; `index.html` holds the UI theme (wooden era sign, cream paper panels, Baloo 2).
 
+## Lofi Worlds menu
+The site now opens on the **Lofi Worlds** gallery (`js/menu.js`, styles at the end of `index.html`). Saigon only boots when you enter it, the lofi radio keeps playing between the menu and the world, and **Esc** or the *Lofi Worlds* button in the world returns to the gallery. Any URL with a query string (for example `?era=2&time=night`, as used by the tests) or `#saigon` skips the menu and opens Saigon directly.
+
 ## Controls
 - Era plate (top left) or keys `[` `]`: 199x / 200x / 201x / 202x. The switch crossfades in place.
 - Play / Space, prev / next, seasons (keys 1-4), "Tự đổi" auto seasons.

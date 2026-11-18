@@ -152,7 +152,7 @@ let _last = 0, _uiT = 0;
 function frame(ts) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (ts - _last) / 1000 || 0.016); _last = ts;
-  if (!G.world || document.hidden) return;
+  if (!G.world || document.hidden || G.menu) return;                       // world sleeps while the Lofi Worlds menu is open
   tick(dt); draw(); prebake();
   _uiT -= dt; if (_uiT <= 0) { _uiT = 0.25; updateStatus(); drawViz(); }
 }
@@ -200,6 +200,7 @@ function updateUI() {
 function viewLabel() { const b = $('viewRiver'); b.textContent = t(G.riverOn ? 'view.back' : 'view.river'); b.title = t(G.riverOn ? 'view.back.t' : 'view.river.t'); }
 // called by setLang(): re-renders every dynamic string in the new language; no game state is touched
 function refreshDynamicText() {
+  if (!G.world) return;
   updateUI(); ytRender(); viewLabel();
   const tk = $('ticker'); if (tk && G.tickRaw) tk.textContent = tm(G.tickRaw);
 }
@@ -262,4 +263,4 @@ async function boot() {
   if (q.get('toseason')) { await setSeason(q.get('toseason')); for (let i = 0; i < 40; i++) tick(0.05); }
   updateUI(); requestAnimationFrame(frame);
 }
-window.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('DOMContentLoaded', () => typeof menuStart === 'function' ? menuStart() : boot());   // js/menu.js shows the Lofi Worlds gallery first
