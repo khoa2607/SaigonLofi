@@ -1,7 +1,10 @@
 'use strict';
 // ===== Sài Gòn Lofi — optional YouTube playlist music (official IFrame Player API; the player stays visible at 200x200) =====
 const YTS = { on: false, player: null, apiP: null, title: '', playing: false, errs: 0, watch: null };
-const ytMsg = (t, bad) => { const el = document.getElementById('ytMsg'); if (el) { el.textContent = t; el.classList.toggle('bad', !!bad); } };
+// status line: keeps the Vietnamese source sentence and renders it in the current UI language (see tm() in js/i18n.js)
+let _ytRaw = null, _ytBad = false;
+const ytRender = () => { const el = document.getElementById('ytMsg'); if (el) { el.textContent = _ytRaw === null ? t('yt.default') : tm(_ytRaw); el.classList.toggle('bad', _ytBad); } };
+const ytMsg = (text, bad) => { _ytRaw = text; _ytBad = !!bad; ytRender(); };
 // accepts a playlist URL (youtube.com / youtu.be / music.youtube.com with ?list=...) or a bare playlist id
 function ytParse(text) {
   text = (text || '').trim(); if (!text) return null;

@@ -41,3 +41,6 @@ Tiles: far bank 0-5, river 5-20, quay/promenade 20-27, sidewalk 27-30, then the 
 `tests/riverfront-turns.mjs` is a headless-browser check of the three riverside junctions (needs Playwright): `python3 -m http.server 8765 &` then `node tests/riverfront-turns.mjs [url] [screenshot-dir]`. It simulates 6 minutes of traffic and fails if a vehicle leaves the road / reaches the promenade, faces the wrong way, or any of the four turns (southbound left, northbound right, westbound left/right) never happens.
 
 `tests/tet.mjs [screenshot-dir]` checks Tết ON/OFF in all four eras (flag per house, 14 landmark flags, 30+ melon stalls, vendors, shoppers, nothing left over when off), NPC path reachability, day/night/rain screenshots and frame time.
+
+## UI language (VI / EN)
+The VI / EN toggle (top right) switches all interface text instantly, defaults to Vietnamese and is saved in `localStorage` (`saigonlofi-lang`). `js/i18n.js` holds the dictionaries: `UI` (keyed `[vi, en]` strings used by `data-i18n` / `data-i18n-attr` in `index.html` and by `t(key)`), and `MSG` (ticker and YouTube-status sentences, looked up by their Vietnamese source text via `tm()`). In-world text (shop signs, banners, landmarks) is never translated.

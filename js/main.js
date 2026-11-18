@@ -3,11 +3,10 @@
 const G = { tet: false, era: 0, season: 'spring', hour: 7.5, hourTarget: 7.5, t: 0, daySpeed: 24 / 600, autoTime: true, autoSeason: false, autoWeather: true, seasonT: 0, weather: 'clear', weatherT: 45, rain: 0, rainTarget: 0, cloud: 0, cloudTarget: 0, gust: 0, gustT: 6, gustP: 0, windy: false, wet: 0, flash: 0, lights: 0, hot: false, snowAmt: 0, world: null, busy: true, tickT: -9 };
 const R = { canvas: null, ctx: null, lc: null, lctx: null, vw: 640, vh: 360, scale: 3, zoom: 0, panX: -110, panY: -120, cx: 0, cy: 0, dirty: true, dpr: 1 };
 const GROUNDS = {}, SEASONS = ['spring', 'summer', 'fall', 'winter'];
-const SNAME = { spring: 'Xuân', summer: 'Hạ', fall: 'Thu', winter: 'Đông' };
-const SSUB = { spring: 'mai vàng nở, bướm ong về phố', summer: 'nắng gắt, me xanh rợp bóng', fall: 'lá vàng rơi đầy vỉa hè', winter: 'một Sài Gòn có tuyết, chỉ trong mơ' };
+const SNAME = new Proxy({}, { get: (_, k) => t('season.' + k) });   // season display names follow the UI language (js/i18n.js)
 const SCARD = { spring: '#f8c6d8', summer: '#bfe6a8', fall: '#f4c98a', winter: '#dbe8f6' };
 const $ = id => document.getElementById(id);
-function ticker(text, force) { if (!force && G.t - G.tickT < 5.5) return; G.tickT = G.t; const el = $('ticker'); if (!el) return; el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
+function ticker(text, force) { if (!force && G.t - G.tickT < 5.5) return; G.tickT = G.t; const el = $('ticker'); if (!el) return; G.tickRaw = text; el.textContent = tm(text); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
 
 // ambient light over the day: [hour, multiply colour]
 const KF = [[0, 0x4a4c86], [4.6, 0x4a4c86], [5.5, 0x8676a6], [6.3, 0xf2b9a2], [7.4, 0xffe9cf], [9, 0xfff8ea], [15.6, 0xfff6e2], [17, 0xffe2b4], [18, 0xf6aa7c], [18.8, 0xa97c9c], [19.7, 0x5c5e9a], [21, 0x4a4c86], [24, 0x4a4c86]];
@@ -115,7 +114,7 @@ function draw() {
   if (R.xf > 0 && R.snap) { g.globalAlpha = Math.ceil(R.xf * 8) / 8; g.drawImage(R.snap, 0, 0, vw, vh); g.globalAlpha = 1; }
 }
 // ----- eras: swap buildings / signs / skyline in place with a short crossfade; people and traffic turn over on their own -----
-function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; $('viewRiver').textContent = nearRiver ? 'Bến sông' : 'Về phố'; if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
+function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; G.riverOn = !nearRiver; viewLabel(); if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
 function setTet(on, quiet) {
   if (!G.world || G.busy || on === G.tet) return;
   snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync();
@@ -125,7 +124,7 @@ function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
   G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync();
-  eraShift(); updateUI(); save(); if (!quiet) ticker(ERA[e].msg, true);
+  eraShift(); updateUI(); save(); if (!quiet) ticker(UI['era.' + e + '.msg'][0], true);
 }
 // bake the other eras' buildings a few at a time while idle, so the first switch has no hitch
 let _pb = 0;
@@ -157,7 +156,7 @@ function snapshot() { const W = R.canvas.width, H = R.canvas.height; if (!R.snap
 async function setSeason(s, first) {
   if (G.busy && !first) return; G.busy = true; G.seasonT = 0;
   const fade = $('fade');
-  if (first) { $('fadeB').style.width = '0%'; fade.classList.add('on'); await sleep(30); } else ticker('Đang sang mùa ' + SNAME[s].toLowerCase() + '…', true);
+  if (first) { $('fadeB').style.width = '0%'; fade.classList.add('on'); await sleep(30); } else ticker('Đang sang mùa ' + UI['season.' + s][0].toLowerCase() + '…', true);
   if (!GROUNDS[s]) GROUNDS[s] = await paintGround(s, p => { if (first) $('fadeB').style.width = Math.round(p * 70) + '%'; });
   await sleep(20);
   if (!first) snapshot();
@@ -178,21 +177,29 @@ function load() { try { return JSON.parse(localStorage.getItem('saigonlofi') || 
 const TIMES = { morning: 7.5, noon: 12.5, dusk: 17.9, night: 21.5 };
 function setTime(k) { G.timeKey = k; if (k === 'auto') G.autoTime = true; else { G.autoTime = false; G.hourTarget = TIMES[k]; } updateUI(); save(); }
 function setWx(k) { if (k === 'auto') { G.autoWeather = true; G.weatherT = Math.min(G.weatherT, 20); } else { G.autoWeather = false; setWeather(k); } updateUI(); save(); }
-function wxLabel() { return G.season === 'winter' ? (G.rain > 0.3 ? 'tuyết dày' : 'tuyết nhẹ') : G.rain > 0.3 ? 'mưa' : G.windy ? 'gió' : G.cloud > 0.5 ? 'nhiều mây' : G.hot ? 'nắng gắt' : 'trời quang'; }
+function wxLabel() { return t('wx.status.' + (G.season === 'winter' ? (G.rain > 0.3 ? 'snow2' : 'snow1') : G.rain > 0.3 ? 'rain' : G.windy ? 'wind' : G.cloud > 0.5 ? 'cloud' : G.hot ? 'hot' : 'clear')); }
 function updateStatus() { const h = Math.floor(G.hour), m = Math.floor((G.hour - h) * 60); $('status').textContent = SNAME[G.season] + ' · ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' · ' + wxLabel(); }
 function updateUI() {
-  document.querySelectorAll('[data-era]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.era === G.era)); $('eraSub').textContent = ERA[G.era].sub;
+  document.querySelectorAll('[data-era]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.era === G.era)); $('eraSub').textContent = t('era.' + G.era + '.sub');
   document.querySelectorAll('[data-season]').forEach(b => b.setAttribute('aria-pressed', b.dataset.season === G.season));
-  $('autoSeason').setAttribute('aria-pressed', G.autoSeason); $('tetBtn').setAttribute('aria-pressed', !!G.tet); $('streetOn').setAttribute('aria-pressed', AU.streetOn); $('streetOn').textContent = AU.streetOn ? 'Bật' : 'Tắt';
+  $('autoSeason').setAttribute('aria-pressed', G.autoSeason); $('tetBtn').setAttribute('aria-pressed', !!G.tet); $('streetOn').setAttribute('aria-pressed', AU.streetOn); $('streetOn').textContent = t(AU.streetOn ? 'street.on' : 'street.off');
   document.querySelectorAll('[data-time]').forEach(b => b.setAttribute('aria-pressed', b.dataset.time === (G.autoTime ? 'auto' : G.timeKey)));
   document.querySelectorAll('[data-wx]').forEach(b => b.setAttribute('aria-pressed', b.dataset.wx === (G.autoWeather ? 'auto' : G.weather)));
-  $('wxRainL').textContent = G.season === 'winter' ? 'Tuyết dày' : 'Mưa';
-  $('tname').textContent = YTS.on ? (YTS.title || 'YouTube') : TRACKS[AU.track].name; $('tnum').textContent = YTS.on ? 'playlist YouTube' : 'bản ' + (AU.track + 1) + '/' + TRACKS.length;
+  $('wxRainL').textContent = t(G.season === 'winter' ? 'wx.snow' : 'wx.rain'); viewLabel();
+  $('tname').textContent = YTS.on ? (YTS.title || 'YouTube') : t('track.' + AU.track); $('tnum').textContent = YTS.on ? t('ytTrack') : t('tnum', { n: AU.track + 1, total: TRACKS.length });
   $('play').classList.toggle('playing', YTS.on ? YTS.playing : AU.playing); updateStatus();
+}
+function viewLabel() { const b = $('viewRiver'); b.textContent = t(G.riverOn ? 'view.back' : 'view.river'); b.title = t(G.riverOn ? 'view.back.t' : 'view.river.t'); }
+// called by setLang(): re-renders every dynamic string in the new language; no game state is touched
+function refreshDynamicText() {
+  updateUI(); ytRender(); viewLabel();
+  const tk = $('ticker'); if (tk && G.tickRaw) tk.textContent = tm(G.tickRaw);
 }
 function drawViz() { const c = $('viz'), g = c.getContext('2d'), a = vizLevel(); g.clearRect(0, 0, c.width, c.height); g.fillStyle = '#c4583a'; for (let i = 0; i < 10; i++) { const v = a ? a[i + 1] / 255 : 0.06, hh = Math.max(1, Math.round(v * 13)); g.fillRect(i * 4, 14 - hh, 3, hh); } }
 function initUI() {
   const st = load();
+  ytRender();
+  document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => setLang(b.dataset.lang));
   if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
   if (st.streetOn === false) AU.streetOn = false; $('vStreet').value = AU.vol.street * 100; $('vMusic').value = AU.vol.music * 100; $('vAmb').value = AU.vol.amb * 100; $('vVinyl').value = AU.vol.vinyl * 100;
   $('play').onclick = () => { $('hint').classList.add('gone'); if (YTS.on) { ytToggle(); return; } if (AU.playing) audioPause(); else audioPlay(); updateUI(); };
