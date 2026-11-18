@@ -158,9 +158,11 @@ html, body { background: #2b1a16; }
     <div class="row"><div class="lab"></div><div id="ytMsg">Dán playlist rồi bấm Phát. Nhạc lofi của game vẫn giữ nguyên.</div></div>
     <div class="row wrap"><div class="lab" data-i18n="time.lab">Giờ</div><div class="seg" role="group" aria-label="Thời gian trong ngày" data-i18n-attr="aria-label:time.group">
       <button data-time="auto" data-i18n="time.auto">Tự chạy</button><button data-time="morning" data-i18n="time.morning">Sáng</button><button data-time="noon" data-i18n="time.noon">Trưa</button><button data-time="dusk" data-i18n="time.dusk">Chiều tà</button><button data-time="night" data-i18n="time.night">Đêm</button></div></div>
+    <div class="row wrap"><div class="lab" data-i18n="ev.lab">Sự kiện</div><div class="seg" role="group" aria-label="Sự kiện lễ hội" data-i18n-attr="aria-label:ev.group">
+      <button data-ev="none" aria-pressed="true" title="Ngày thường, không trang trí" data-i18n-attr="title:ev.none.t" data-i18n="ev.none">Thường</button><button id="tetBtn" data-ev="tet" aria-pressed="false" title="Hoa mai và đèn lồng (phím T)" data-i18n-attr="title:tet.t" data-i18n="tet">Tết</button><button data-ev="qk" aria-pressed="false" title="Quốc khánh 2/9: cờ và pháo hoa, chỉ ban đêm (phím Q)" data-i18n-attr="title:ev.qk.t" data-i18n="ev.qk">2/9</button><button data-ev="hw" aria-pressed="false" title="Halloween: hoá trang và bí ngô, chỉ ban đêm (phím O)" data-i18n-attr="title:ev.hw.t" data-i18n="ev.hw">Halloween</button><button data-ev="xm" aria-pressed="false" title="Giáng sinh: cây thông và đèn, chỉ ban đêm (phím X)" data-i18n-attr="title:ev.xm.t" data-i18n="ev.xm">Noel</button></div></div>
     <div class="row wrap"><div class="lab" data-i18n="wx.lab">Thời tiết</div><div class="seg" role="group" aria-label="Thời tiết" data-i18n-attr="aria-label:wx.group">
       <button data-wx="auto" data-i18n="wx.auto">Tự nhiên</button><button data-wx="clear" data-i18n="wx.clear">Quang</button><button data-wx="rain"><span id="wxRainL" data-i18n="wx.rain">Mưa</span></button><button data-wx="wind" data-i18n="wx.wind">Gió</button></div></div>
-    <div class="row wrap"><div class="lab" data-i18n="street.lab">Âm phố</div><button id="streetOn" aria-pressed="true" title="Tiếng chuông, còi xe, tiếng rao… tách riêng khỏi nhạc" data-i18n-attr="title:street.t">Bật</button><label class="sl" for="vStreet"><span data-i18n="street.vol">Tiếng đường phố</span><input id="vStreet" type="range" min="0" max="100"></label><button id="tetBtn" aria-pressed="false" title="Hoa mai và đèn lồng (phím T)" data-i18n-attr="title:tet.t" data-i18n="tet">Tết</button></div>
+    <div class="row wrap"><div class="lab" data-i18n="street.lab">Âm phố</div><button id="streetOn" aria-pressed="true" title="Tiếng chuông, còi xe, tiếng rao… tách riêng khỏi nhạc" data-i18n-attr="title:street.t">Bật</button><label class="sl" for="vStreet"><span data-i18n="street.vol">Tiếng đường phố</span><input id="vStreet" type="range" min="0" max="100"></label></div>
     <div class="row wrap"><div class="lab" data-i18n="vol.lab">Âm lượng</div>
       <label class="sl" for="vMusic"><span data-i18n="vol.music">Nhạc</span><input id="vMusic" type="range" min="0" max="100"></label>
       <label class="sl" for="vAmb"><span data-i18n="vol.amb">Âm nền</span><input id="vAmb" type="range" min="0" max="100"></label>
@@ -174,6 +176,7 @@ html, body { background: #2b1a16; }
 <script src="js/i18n.js"></script>
 <script src="js/core.js"></script>
 <script src="js/art.js"></script>
+<script src="js/costumes.js"></script>
 <script src="js/build.js"></script>
 <script src="js/landmarks.js"></script>
 <script src="js/eras.js"></script>
@@ -181,6 +184,7 @@ html, body { background: #2b1a16; }
 <script src="js/sim.js"></script>
 <script src="js/river.js"></script>
 <script src="js/tet.js"></script>
+<script src="js/events.js"></script>
 <script src="js/fx.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/yt.js"></script>

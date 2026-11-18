@@ -18,7 +18,7 @@ const faceLane = L => L.axis === 'x' ? (L.cs > 0 ? 3 : 1) : (L.cs > 0 ? 2 : 0); 
 const findLane = l => SIM.lanes.find(L => L.axis === l[0] && L.dir === l[1] && L.c === l[2]);
 const VSPEED = { moto: [44, 58], cub: [36, 48], wave: [46, 62], scooter: [44, 58], sh: [46, 60], airblade: [50, 66], vision: [42, 54], vfscooter: [44, 56], grab: [46, 60], ship: [50, 66], bike: [19, 25], melonbike: [19, 24], melonmoto: [34, 44], melontruck: [30, 36], cyclo: [15, 19], taxi: [42, 52], vinasun: [46, 56], mailinh: [46, 56], xanhsm: [46, 56], car: [46, 56], suv: [46, 56], lam: [32, 38], truck: [36, 42], bus: [34, 40], ebus: [34, 40] };
 const isTaxi = k => !!TAXIS[k];
-function riderSheet(type) { const L = dressFor(randLook(type), G.season); L.carry = null; L.ganh = false; L.pack = 0; if (L.type !== 'monk' && L.hat !== 'helm' && Math.random() < ERA[G.era].helmet) { L.hat = 'helm'; L.b.hat = 'helm'; L.hatC = pick([0x2a2a30, 0xf2f2f0, 0xd9534f, 0x3d6fb5, 0xf2c94c, 0xf2a0b5, 0x8a8f98]); } if (G.rain > 0.3 && L.type !== 'monk') L.poncho = 1; return { look: L, sheet: personSheet(L) }; }
+function riderSheet(type) { const L = dressFor(randLook(type), G.season); L.carry = null; L.ganh = false; L.pack = 0; if (L.type !== 'monk' && L.hat !== 'helm' && Math.random() < ERA[G.era].helmet) { L.hat = 'helm'; L.b.hat = 'helm'; L.hatC = pick([0x2a2a30, 0xf2f2f0, 0xd9534f, 0x3d6fb5, 0xf2c94c, 0xf2a0b5, 0x8a8f98]); } if (G.rain > 0.3 && L.type !== 'monk') L.poncho = 1; EV.dress(L, 'rider'); return { look: L, sheet: personSheet(L) }; }
 function makeVeh(lane, kind, s) {
   const v = ri(0, 7), m = vehModel(kind, v), sp = VSPEED[kind], tw = TWO_WHEEL[kind], small = tw || kind === 'bike' || kind === 'melonbike' || kind === 'cyclo';
   const o = { kind, v, lane, s, sp: 0, vmax: rr(sp[0], sp[1]), len: m.L, era: G.era, mask: small ? (tw && chance(0.5) ? 2 : 1) : 3, lat: 0, riders: [], stopAt: null, dwell: 0, dwellT: 0, onStop: null, busy: false, lc: 0, honk: rr(5, 40) };
@@ -70,7 +70,7 @@ function stepTurn(v, dt, L) {   // advance a turning vehicle along its curve; ha
 }
 function vehPos(v) { if (v.turn) return bez(v.turn.P0, v.turn.P1, v.turn.P2, v.turn.u); const L = v.lane, p = L.dir > 0 ? L.lo + v.s : L.hi - v.s, q = L.c + v.lat * L.cs; return L.axis === 'x' ? [p, q] : [q, p]; }
 const laneS = (L, p) => L.dir > 0 ? p - L.lo : L.hi - p;
-function trafficDensity() { const h = G.hour; let f = h < 5 ? 0.25 : h < 6.5 ? 0.6 : h < 9 ? 1.25 : h < 16 ? 0.9 : h < 19.5 ? 1.3 : h < 22 ? 0.75 : 0.4; if (G.rain > 0.5) f *= 0.8; return f; }
+function trafficDensity() { const h = G.hour; let f = h < 5 ? 0.25 : h < 6.5 ? 0.6 : h < 9 ? 1.25 : h < 16 ? 0.9 : h < 19.5 ? 1.3 : h < 22 ? 0.75 : 0.4; if (G.rain > 0.5) f *= 0.8; return f * EV.trafMul(); }
 function updateVehicles(dt) {
   const dens = trafficDensity();
   if (G.tet) { SIM.melonT -= dt; if (SIM.melonT < 0) { SIM.melonT = rr(9, 22); const L = pick(SIM.lanes); if (!L.want) L.want = G.era >= 1 && chance(0.2) ? 'melontruck' : G.era === 0 || chance(0.35) ? 'melonbike' : 'melonmoto'; } }
@@ -151,7 +151,7 @@ const CHAT = ['smile', 'laugh', 'heart', 'note', 'q', 'ex', 'cup', 'pho', 'money
 function onScreen(p, m) { return G.onScreen ? G.onScreen(p[0], p[1], m) : true; }
 class Ped {
   constructor(x, y, look) {
-    this.x = x; this.y = y; this.look = look || dressFor(randLook(), G.season); this.resheet();
+    this.x = x; this.y = y; this.look = look || dressFor(randLook(), G.season); EV.dress(this.look, 'ped'); this.resheet();
     this.dir = ri(0, 3); this.sp = rr(10.5, 14.5) * (this.look.kid ? 1.12 : this.look.type === 'oldman' || this.look.type === 'oldlady' ? 0.72 : this.look.ganh ? 0.8 : 1);
     this.ox = rr(-2.6, 2.6); this.oy = rr(-2.6, 2.6); this.steps = []; this.path = null; this.pi = 0; this.st = 'idle'; this.cur = null;
     this.an = Math.random() * 4; this.pose = 0; this.alpha = 0; this.fade = 1; this.bub = null; this.umb = 0; this.umbT = 0; this.cc = rr(3, 18); this.wt = 0; this.sit = false; this.dead = false; this.res = null; this.chat = null; this.run = false; this.moving = false;
@@ -222,6 +222,7 @@ function makePlan(p) {
   if (p.dog !== undefined) { for (let i = 0; i < 4; i++) { const t = nearestWalk(Math.floor((p.x + rr(-110, 110)) / T), Math.floor((p.y + rr(-110, 110)) / T)); if (t) st.push(goStep(tc(t[0]), tc(t[1])), { t: 'wait', dur: rr(2, 9), pose: 0 }); } if (!near(p, 700)) st.push({ t: 'exit' }); return; }
   if (L.ganh) { for (let i = 0; i < 4; i++) { const d = freeOfDoor(p, 260); if (d) st.push(goStep(d.x, d.y), { t: 'wait', dur: rr(3, 6), dir: (d.dir + 2) % 4, em: pick(['banhmi', 'pho', 'cup', 'note']) }); } st.push(...exitSteps(p)); return; }
   if (L.type === 'monk') { st.push(...exitSteps(p)); return; }
+  if (EV.cur && !p.again && EV.outing(p)) return;                                  // event outings: watch the fireworks, trick-or-treat, photos at the Christmas tree
   const kidAM = L.kid && h > 6 && h < 8;
   const k = wpick([['pass', 2.4], ['cafe', day && !kidAM ? (h < 10 ? 3 : 2) : 0.2], ['eat', h > 5.5 && h < 22 ? 2.2 : 0.3], ['drink', S === 'summer' ? 3 : 1.4], ['barber', day && !L.fem && !L.kid ? 1.1 : 0], ['xeom', 1.5], ['taxi', L.kid ? 0 : 1], ['cyclo', L.kid || G.era >= 2 ? 0 : 0.9], ['door', (h > 6 && h < 9) || (h > 16.5 && h < 19) ? 3.2 : 1.6], ['market', day ? 1.8 : 0], ['melon', G.tet && h > 6 && h < 21.5 ? 4 : 0], ['park', wet ? 0.2 : (h > 5 && h < 8) || (h > 16 && h < 20) ? 2.6 : 1.4], ['school', kidAM ? 6 : 0], ['river', day ? [1.2, 1.7, 2.1, 2.1][G.era] : 0.3], ['boat', G.era >= 2 ? 1 : 0.4]]);
   let s;
@@ -255,7 +256,7 @@ function spawnPed() {
   else { const a = POI.doors.filter(d => near(d, 520)); if (!a.length) return; const d = pick(a); p = new Ped(d.ix, d.iy); p.dir = (d.dir + 2) % 4; p.steps.push({ t: 'to', x: d.x, y: d.y }); if (d.shop && chance(0.5)) { p.look.carry = d.shop === 'banh' ? 'banhmi' : d.shop === 'cafe' || d.shop === 'che' ? 'cup' : d.shop === 'cho' || d.shop === 'taphoa' ? 'shop' : p.look.carry; p.resheet(); } }
   makePlan(p); SIM.peds.push(p);
 }
-function popTarget() { const h = G.hour; let f = h < 4.5 ? 0.2 : h < 6 ? 0.55 : h < 9 ? 1.15 : h < 16.5 ? 0.95 : h < 20 ? 1.2 : h < 22.5 ? 0.7 : 0.32; if (G.rain > 0.5) f *= 0.72; if (G.season === 'winter') f *= 0.9; return Math.round(74 * f); }
+function popTarget() { const h = G.hour; let f = h < 4.5 ? 0.2 : h < 6 ? 0.55 : h < 9 ? 1.15 : h < 16.5 ? 0.95 : h < 20 ? 1.2 : h < 22.5 ? 0.7 : 0.32; if (G.rain > 0.5) f *= 0.72; if (G.season === 'winter') f *= 0.9; return Math.round(74 * f * EV.popMul()); }
 // rain: umbrellas open, ponchos go on, some people run for the nearest awning
 function rainReact(p, instant) {
   const L = p.look; if (p.dog !== undefined || L.type === 'monk' && false) return;

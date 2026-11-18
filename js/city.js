@@ -309,6 +309,7 @@ function buildStatics(season, era) {
     if (r.only && r.only !== season) continue;
     if (r.e0 !== undefined && (era < r.e0 || era > r.e1)) continue;
     if (r.tet && !G.tet) continue;
+    if (r.ev && r.ev !== EV.cur) continue; if (r.noev && r.noev === EV.cur) continue;   // night-event decorations (js/events.js)
     if (r.t === 'b') { const sl = bakeRec(r, era, snow); for (const s of sl) items.push({ c: s.c, e: s.e, x: r.x - r.y - s.ax, y: (r.x + r.y) / 2 - s.ay, w: s.w, h: s.h, key: s.key + r.x + r.y }); }
     else if (r.t === 'p') { const s = propSprite(r.name, season, r.v, r.m); items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y + r.kb }); }
     else if (r.t === 't') { const s = G.tet && r.spc === 'mai' ? treeSprite('mai', 'spring', (r.v | 0) * 2) : treeSprite(r.spc, season, r.v); r.spr = s; items.push({ c: s.c, e: s.e, x: Math.round(r.x - r.y) - s.ax, y: Math.round((r.x + r.y) / 2) - s.ay, w: s.w, h: s.h, key: r.x + r.y, tree: s, ph: r.ph, wx: r.x, wy: r.y }); }

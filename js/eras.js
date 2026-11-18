@@ -83,6 +83,7 @@ function bitexco() {
   const N = 13; for (let k = 0; k < N; k++) { const t = k / (N - 1), wd = 30 + Math.sin(t * Math.PI * 0.9 + 0.35) * 16 - t * 12, dp = wd * 0.82; B.push(box(cx - wd / 2, cy - dp / 2 + t * 5, 22 + k * 18, wd, dp, 18, G1, curtain(G1, 5 + k, 0))); }
   B.push(box(cx - 4, cy + 4, 22 + 9 * 18, 26, 26, 2.4, 0xe8ecef, (f, u, v) => f === 0 ? (Math.hypot(u - 13, v - 13) < 8 && Math.hypot(u - 13, v - 13) > 6.4 ? 0xf2c94c : 0x7a858f) : 0xc8ced4, { nf: 1 }));
   B.push(box(cx - 1, cy + 3, 22 + N * 18, 2, 2, 22, 0xc8ced4));
+  const tiers = [4, 5, 6, 7, 8, 9, 10, 11]; B.led = [{ face: 1, boxes: tiers, z0: 76, z1: 220, fit: 1 }, { face: 2, boxes: tiers, z0: 76, z1: 220, fit: 1 }];   // holiday LED facade (js/events.js)
   return B;
 }
 // Landmark 81 (2018): a bundle of square tubes stepping up to the spire
@@ -91,6 +92,7 @@ function landmark81() {
   B.push(box(0, 0, 0, 64, 64, 24, 0xdcd8d0, (f, u, v, b) => { if (f === 0) return 0xb8b4ac; if (v > 21) return 0xf2f0ea; if (f === 1 && v > 15 && textAt('LANDMARK 81', u - 10, v - 15.6)) { EM = 0xffffff; return 0x3a3020; } EM = 0x50482a; return (u % 8 < 0.8) ? 0x4a5560 : v < 13 ? 0xa8cad8 : 0xdcd8d0; }));
   for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) B.push(box(8 + i * 16, 8 + j * 16, 24, 16, 16, hs[j][i] - 24, G1, curtain(G1, i * 7 + j * 3, 13)));
   B.push(box(29, 29, 330, 6, 6, 14, 0xc8ced4), box(31.2, 31.2, 344, 1.6, 1.6, 30, 0xe8ecef, null, { em: 0x603030 }));
+  B.led = [{ face: 1, boxes: [7, 8, 9], z0: 110, z1: 178 }, { face: 2, boxes: [3, 6, 9], z0: 100, z1: 164 }];
   return B;
 }
 // Vinhomes-style apartment tower
@@ -99,6 +101,7 @@ function aptTower(R, w, d, floors) {
   B.push(box(0, 0, 0, w, d, 16, 0xd8d2c8, (f, u, v) => { if (f === 0) return 0xb0aaa0; EM = 0x50482a; return v > 13 ? 0xf2f0ea : u % 8 < 0.8 ? 0x4a5560 : 0xa8cad8; }));
   B.push(box(3, 3, 16, w - 6, d - 6, H, wall, (f, u, v, b) => { if (f === 0) return 0xb8b4ac; const fl = Math.floor(v / 11), vv = v - fl * 11, W = f === 1 ? b.w : b.d, q = u % 10; if (u < 1.6 || u > W - 1.6) return acc; if (vv < 1.2) return shade(wall, -0.12); if (q < 1) return wall; if (vv < 4.4 && q > 5) return 0xb4d0dc; const l = hash2((u / 10 | 0) + seed + f * 9, fl); if (vv > 4.4 && vv < 9.6) { if (l < 0.38) EM = l < 0.05 ? 0x9fd0ff : 0xffe2a0; return q > 5 ? 0x6f9cb6 : 0x86b0c6; } return wall; }));
   B.push(box(6, 6, 16 + H, w - 12, d - 12, 8, acc), box(w / 2 - 4, d / 2 - 4, 24 + H, 8, 8, 5, 0xc9d4dc));
+  B.led = [{ face: 1, boxes: [1], z0: 16 + H * 0.42, z1: 16 + H * 0.88 }, { face: 2, boxes: [1], z0: 16 + H * 0.42, z1: 16 + H * 0.88 }];
   return B;
 }
 // Vincom Center (2010): glass mall podium with twin towers
@@ -106,6 +109,7 @@ function vincom() {
   const B = [], G1 = 0x5f9cc0;
   B.push(box(0, 0, 0, 80, 80, 44, 0xe4e8ec, (f, u, v, b) => { if (f === 0) return 0xb8bec4; const W = f === 1 ? b.w : b.d; if (v > 40) return 0xf4f6f8; if (f === 1 && v > 30 && v < 37 && textAt('VINCOM', u - (W / 2 - 11), v - 31)) { EM = 0xff5a4a; return 0xd9281e; } if (v % 11 < 1.2 || u % 10 < 0.9) return 0xc4cad0; EM = 0x605830; return v < 11 && hash2(u / 10 | 0, f) < 0.6 ? GOODS[(u / 10 | 0) % GOODS.length] : 0x9cc6da; }));
   for (const x of [6, 46]) { B.push(box(x, 10, 44, 28, 52, 150, G1, curtain(G1, x, 0))); B.push(box(x + 4, 16, 194, 20, 40, 8, 0xdfe6ea)); }
+  B.led = [{ face: 1, boxes: [1, 3], z0: 92, z1: 176 }, { face: 2, boxes: [3], z0: 92, z1: 176 }];
   return B;
 }
 PROP.metro = () => [box(-8, -5, 0, 1, 1, 12, 0x8a9098), box(7, -5, 0, 1, 1, 12, 0x8a9098), box(-8, 4, 0, 1, 1, 12, 0x8a9098), box(7, 4, 0, 1, 1, 12, 0x8a9098), box(-7, -4, 0, 14, 8, 1.2, 0x3a3a44, (f, u, v) => f === 0 ? ((u | 0) % 2 ? 0x55555f : 0x2f2f38) : undefined), box(-9, -6, 12, 18, 12, 1.6, 0xb8dcea, (f, u, v) => f === 0 ? ((u | 0) % 6 === 0 || (v | 0) % 6 === 0 ? 0xe8f0f4 : 0x9ccbe0) : 0xe8f0f4), box(-9, 5, 13.6, 18, 1, 5, 0x1f5fa8, (f, u, v) => { if (f !== 1) return undefined; EM = 0x103060; if (textAt('METRO', u - 0.5, v - 0.2)) { EM = 0xffffff; return 0xf7f4ec; } }, { nf: 1 })];

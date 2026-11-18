@@ -28,6 +28,14 @@ const ICON_SRC = {
   boat: ['........', '...K....', '..KKK...', '..KKKK..', 'WWWWWWWW', 'BBBBBBBB', '.BBBBBB.', '........'],
   umb: ['..VVVV..', '.VVVVVV.', 'VVVVVVVV', '...K....', '...K....', '...K.K..', '...KK...', '........'],
   melon: ['........', 'RRRRRRRR', 'RKRRRKRR', '.RRKRRR.', '.gRRRRg.', '..gRRg..', '...GG...', '........'],
+  flag: ['K.......', 'KRRRRRR.', 'KRRYRRR.', 'KRYYYRR.', 'KRRYRRR.', 'KRRRRRR.', 'K.......', 'K.......'],
+  fw: ['Y..R..Y.', '.Y.R.Y..', '..YYY...', 'RRYWYRR.', '..YYY...', '.B.R.B..', 'B..R..B.', '........'],
+  pumpkin: ['....G...', '...G....', '.OOOOOO.', 'OYOOOYOO', 'OOOOOOOO', 'OYOYOYOO', '.OOOOOO.', '........'],
+  ghost: ['..WWWW..', '.WWWWWW.', 'WWKWWKWW', 'WWKWWKWW', 'WWWWWWWW', 'WWWKKWWW', 'WWWWWWWW', 'W.WW.WW.'],
+  candy: ['........', 'P.....P.', 'PP.RR.PP', 'PPRRRRPP', 'PPRWRRPP', 'P..RR..P', '........', '........'],
+  gift: ['..R.R...', '...R....', 'GGGRGGG.', 'GGGRGGG.', 'RRRRRRR.', 'GGGRGGG.', 'GGGRGGG.', '........'],
+  xtree: ['...Y....', '...G....', '..GRG...', '..GGG...', '.GYGBG..', '.GGGGG..', 'GRGGGYG.', '...t....'],
+  bell: ['...Y....', '..YYY...', '.YYYYY..', '.YYYYY..', '.YYYYY..', 'YYYYYYY.', '...R....', '........'],
   cyclo: ['......K.', '.RR...K.', '.RRR.KK.', 'RRRRSSK.', 'KKSSSKKK', 'K.K..K.K', 'KKK..KKK', '........']
 };
 const BUB = {};
@@ -102,8 +110,10 @@ function drawPerson(L0, back, pose) {
   const foot = 49, legTop = (kid ? 41 : 37) + (sit ? 5 : 0) + bob, torsoTop = (kid ? 33 : 26) + (sit ? 5 : 0) + bob, headCY = (kid ? 25 : 17) + (sit ? 5 : 0) + bob, hr = kid ? 7.5 : 8;
   const skin = L.skin, sS = skinSh(skin), top = L.poncho ? grade(L.ponchoC) : L.top, bot = L.bot, shoe = L.shoe, hair = L.hair, hS = mixc(hair, 0x1a100e, 0.35), hH = mixc(hair, 0xb08070, 0.3);
   const legC = L.dress === 1 || L.dress === 3 ? skin : bot, armRow = j => L.poncho || L.sleeve === 'long' ? top : L.sleeve === 'none' ? skin : j < 4 ? top : skin;
+  const X = L.ev ? { L, back, pose, put, rect, ell, col, zz, W, H, cx, kid, sit, walk, foot, legTop, torsoTop, headCY, hr, skin, sS, top, bot, hair } : null;   // event costumes (js/costumes.js)
   // --- hair that hangs behind the body (long / bob seen from the front)
   if (!back && !L.poncho && (L.hs === 1 || L.hs === 5) && L.hat !== 'helm') { const ln = L.hs === 1 ? torsoTop + (kid ? 6 : 9) : headCY + 7; rect(cx - 9, headCY, cx - 4, ln, hair, 0, cx - 5, hS); rect(cx + 6, headCY + 2, cx + 9, Math.min(ln, torsoTop + 4), hS, 0); }
+  if (X && !L.poncho) evBehind(X);
   // --- back arm (left on screen)
   const swing = walk ? (pose === 1 ? 1 : -1) : 0, armLen = kid ? 8 : 11;
   const arm = (x, z, sw, raise) => { for (let j = 0; j < armLen; j++) { const y = torsoTop + 1 + j, xx = x + Math.round(sw * j / armLen * 2), c = armRow(j); if (raise) continue; for (let i = 0; i < 3; i++) put(xx + i, y, i === 2 ? (c === skin ? sS : clothSh(c)) : c, z); } const hy = torsoTop + 1 + armLen, hx = x + sw * 2; if (!raise) { rect(hx, hy, hx + 2, hy + 1, skin, z, hx + 2, sS); } };
@@ -121,6 +131,7 @@ function drawPerson(L0, back, pose) {
   else if (L.dress === 3) rect(cx - 6, legTop - 1, cx + 6, sit ? legTop + 3 : foot - 2, top, 4, cx + 3);
   // --- torso
   for (let y = torsoTop; y < legTop; y++) { const inset = y === torsoTop ? 2 : y === torsoTop + 1 ? 1 : (y > legTop - 3 ? 1 : 0); for (let x = cx - 6 + inset; x <= cx + 6 - inset; x++) put(x, y, x >= cx + 3 ? clothSh(top) : (x < cx - 3 && y < torsoTop + 4 ? hiOf(top) : top), 5); }
+  if (X && !L.poncho) evTorso(X);
   if (L.pattern && !L.poncho) for (let y = torsoTop + 2; y < legTop; y++) for (let x = cx - 5; x <= cx + 5; x++) if ((x * 2 + y * 3) % 7 === 0) put(x, y, grade(L.pattern), 5);
   if (!back && !L.poncho) {
     if (L.tie) { rect(cx - 1, torsoTop, cx + 1, torsoTop, 0xf7f0e2, 6); rect(cx, torsoTop + 1, cx, torsoTop + 7, grade(L.tie), 6); }
@@ -159,6 +170,7 @@ function drawPerson(L0, back, pose) {
     put(cx + 2, ey + eh + 2, 0x8a3a32, 10); put(cx + 3, ey + eh + 2, 0x8a3a32, 10);
     if (L.glasses) { rect(ex1 - 1, ey, ex2 + 2, ey, 0x3a2a30, 11); rect(ex1 - 1, ey + 2, ex1 + 2, ey + 2, 0x3a2a30, 11); rect(ex2 - 1, ey + 2, ex2 + 2, ey + 2, 0x3a2a30, 11); }
     if (L.mask) rect(cx - 3, ey + eh + 1, cx + 7, ey + eh + 4, 0xd8ecf2, 11, cx + 5, 0xb4cad6);
+    if (X) evFace(X, ex1, ex2, ey, eh);
   }
   // --- hats
   const hat = L.poncho ? 0 : L.hat, hc = grade(L.hatC || 0x6f8250);
@@ -167,6 +179,7 @@ function drawPerson(L0, back, pose) {
   else if (hat === 'helm') { ell(cx + 1, headCY - 1.5, hr + 1.4, hr + 0.6, hc, 12, clothSh(hc), hiOf(hc), (x, y) => back || y < headCY + 1 || x < cx - 3); if (!back) rect(cx - 2, headCY, cx + 9, headCY + 1, 0x3a3436, 12); }
   else if (hat === 'cap') { ell(cx + 1, headCY - 3, hr + 0.4, 6, hc, 12, clothSh(hc), hiOf(hc), (x, y) => y < headCY - 1); if (!back) rect(cx + 5, headCY - 2, cx + 12, headCY - 1, clothSh(hc), 12); }
   else if (hat === 'len') { ell(cx + 1, headCY - 2, hr + 1, hr - 0.5, hc, 12, clothSh(hc), hiOf(hc), (x, y) => y < headCY + (back ? 4 : 0)); rect(cx - 7, headCY - 1, cx + 9, headCY, hiOf(hc), 12); ell(cx + 1, headCY - hr - 2.5, 2.2, 2, 0xf4ece0, 12); }
+  else if (hat && X) evHat(hat, X);
   // --- rain poncho: a glossy cape + hood
   if (L.poncho) { for (let y = torsoTop - 1; y < legTop + 6; y++) { const hw = 6 + (y - torsoTop) * 0.35; for (let x = Math.round(cx - hw); x <= Math.round(cx + hw); x++) put(x, y, x > cx + hw * 0.35 ? clothSh(top) : (x - cx + y) % 9 === 0 ? hiOf(top) : top, 13); } ell(cx + 1, headCY - 1, hr + 1.5, hr + 1, top, 13, clothSh(top), hiOf(top), (x, y) => back || !(x > cx - 4 && y > headCY - 3)); }
   // --- neck things
@@ -188,6 +201,8 @@ function drawPerson(L0, back, pose) {
   else if (cy0 === 'banhmi') { rect(hx - 1, hy - 1, hx + 4, hy, 0xd9a55a, 15, hx + 3, 0xb5803a); put(hx + 1, hy - 2, 0x6ab04a, 15); }
   else if (cy0 === 'shop' && !sit) { rect(hx - 1, hy + 1, hx + 3, hy + 6, 0xf2b0c0, 15, hx + 2, 0xd88a9a); rect(hx - 1, hy + 1, hx + 3, hy + 1, 0xd9534f, 15); put(hx + 1, hy, 0x58994f, 15); }
   else if (cy0 === 'melon' && !sit) { ell(cx + 3, legTop - 2, 4.5, 3.8, 0x4a9a4a, 15, 0x2f6a38, 0x7ac070); for (let x = cx; x <= cx + 6; x += 3) for (let y = legTop - 5; y <= legTop + 1; y++) if (col[y * W + x] === 0x4a9a4a) put(x, y, 0x2f6a38, 15); }
+  else if (cy0 && X) evCarry(cy0, X, hx, hy, raise);
+  if (X) evOver(X, hx, hy, raise);
   // --- ink: cocoa outline around the figure + lines where a nearer part overlaps a farther one
   const out = col.slice();
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {

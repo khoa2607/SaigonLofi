@@ -34,7 +34,7 @@ function visList() {
   const W = G.world; if (!R.dirty && W.vis) return;
   const v = [], vt = [], vw = R.vw, vh = R.vh, cx = R.cx, cy = R.cy;
   for (const it of W.items) { const x = cx + it.x, y = cy + it.y; if (x < vw + 4 && x + it.w > -4 && y < vh + 4 && y + it.h > -4) { v.push(it); if (it.tree) vt.push(it); } }
-  W.vis = v; W.visTrees = vt; W.visLamps = CITY.lamps.filter(l => G.onScreen(l[0], l[1], 40)); W.visSig = CITY.signals.filter(l => G.onScreen(l[0], l[1], 30)); W.visTet = TET.visible(); R.dirty = false;
+  W.vis = v; W.visTrees = vt; W.visLamps = CITY.lamps.filter(l => G.onScreen(l[0], l[1], 40)); W.visSig = CITY.signals.filter(l => G.onScreen(l[0], l[1], 30)); W.visTet = TET.visible(); W.visEv = EV.visible(); R.dirty = false;
 }
 function glow(size, r, gg, b, a, sq) { const c = mk(size, sq ? size / 2 : size), g = c.getContext('2d'), id = g.createImageData(c.width, c.height); for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) { const nx = (x + 0.5 - size / 2) / (size / 2), ny = (y + 0.5 - c.height / 2) / (c.height / 2), d = Math.sqrt(nx * nx + ny * ny), k = (y * c.width + x) * 4; if (d < 1) { id.data[k] = r; id.data[k + 1] = gg; id.data[k + 2] = b; id.data[k + 3] = Math.round(a * (1 - d) * (1 - d)); } } g.putImageData(id, 0, 0); return c; }
 const SIGC = ['#ff6a4a', '#7ae8a0', '#ffd46a'];
@@ -63,6 +63,7 @@ function draw() {
   for (const s of CITY.stands) if (s.state === 'parked' && G.onScreen(s.x, s.y, 30)) dyn.push({ key: s.x + s.y, stand: s });
   for (const s of W.visSig) dyn.push({ key: s[0] + s[1] + 0.5, sig: s });
   for (const f of W.visTet) dyn.push({ key: TET.key(f), tet: f });
+  for (const f of W.visEv) dyn.push({ key: f.key, ev: f }); EV.pushDyn(dyn, shadow);   // night events: decorations, crowds, boat flags
   dyn.sort((a, b) => a.key - b.key);
   const sway = (0.5 + G.gust * 2.8 + (G.windy ? 0.9 : 0));
   const drawStatic = it => {
@@ -70,6 +71,7 @@ function draw() {
     if (it.tree) { const sp2 = it.tree, c = it.c, amp = sway * (sp2.bare ? 0.4 : sp2.spc === 'cau' ? 1.2 : 1), sw = Math.sin(G.t * (1.1 + G.gust * 2.4) + it.ph) * amp + G.gust * 1.3, split = sp2.split, bands = 4, bh = Math.ceil(split / bands); for (let i = 0; i < bands; i++) { const sy = i * bh, hh = Math.min(bh, split - sy); if (hh <= 0) break; g.drawImage(c, 0, sy * K, c.width, hh * K, x + Math.round(sw * (1 - i / bands) * K) / K, y + sy, it.w, hh); } g.drawImage(c, 0, split * K, c.width, c.height - split * K, x, y + split, it.w, it.h - split); }
     else g.drawImage(it.c, x, y, it.w, it.h);
     if (useL && it.e) lg.drawImage(it.e, x, y, it.w, it.h);
+    if (it.tree && EV.treeLit) EV.treeDeco(g, lg, useL, it, x, y);
   };
   const person = (sheet, col, row, x, y, a, hh) => { hh = hh || PH; if (a < 1) g.globalAlpha = a; g.drawImage(sheet.c, col * PW * K, row * PH * K, PW * K, hh * K, x, y, PW, hh); if (a < 1) g.globalAlpha = 1; if (useL && a > 0.5) lg.drawImage(sheet.e, col * PW * K, row * PH * K, PW * K, hh * K, x, y, PW, hh); };
   const vehicle = (kind, vv, di, q, riders, a) => {
@@ -87,26 +89,29 @@ function draw() {
       const hold = p.umb > 0.05, row = DIR_ROW[p.dir], x = s[0] - PW / 2, y = s[1] - PFOOT - (p.sit ? 2 : 0), a = p.alpha === undefined ? 1 : p.alpha;
       let col = p.sit ? 5 : p.moving ? 1 + (Math.floor(p.an) & 3) : p.pose; if (hold && !p.moving && !p.sit && col === 0) col = 6;
       person(p.sheet, col, row, x, y, a);
+      if (useL && p.look.glowC) EV.pedGlow(lg, p, x, y);
       if (hold) { const fr = UMB[p.look.umbC][p.umb < 0.4 ? 0 : p.umb < 0.8 ? 1 : 2], ux = x + PW / 2 - fr.w / 2 + (row >= 2 ? -2 : 2), uy = y + (p.look.kid ? PHEAD + 4 : PHEAD) - fr.h + 9 - (p.moving && (Math.floor(p.an) & 1) ? 0.5 : 0); g.drawImage(fr.c, ux, uy, fr.w, fr.h); if (useL) lg.drawImage(fr.e, ux, uy, fr.w, fr.h); }
       if (p.bub) bubbles.push([BUB[p.bub.k], s[0] - 3, y + (p.look.kid ? PHEAD + 4 : PHEAD) - 13 - (hold ? 5 : 0) + (p.bub.a < 0.1 ? 2 : p.bub.a < 0.2 ? -1 : 0)]);
     } else if (d.boat) vehicle(d.boat.kind, d.boat.v, d.boat.dir > 0 ? 1 : 3, [d.boat.x, d.boat.y], d.boat.riders, 1);
     else if (d.veh) { const vv = d.veh, L = vv.lane; vehicle(vv.kind, vv.v, vv.turn ? vv.turn.di : L.di, d.q, vv.riders, L.axis === 'x' ? clamp(Math.min(vv.s + 24, L.hi - L.lo + 40 - vv.s) / 36, 0, 1) : 1); }
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
     else if (d.tet) TET.draw(g, lg, useL, d.tet, cx, cy);
+    else if (d.ev) EV.draw(g, lg, useL, d.ev);
     else if (d.sig) { const st = sigOf(d.sig[2]), s = scn(d.sig[0], d.sig[1], st === 0 ? 31.5 : st === 2 ? 29 : 26.5); g.fillStyle = SIGC[st]; g.fillRect(s[0] - 1, s[1], 2, 2); if (useL) { lg.fillStyle = SIGC[st]; lg.fillRect(s[0] - 1, s[1], 2, 2); } }
   };
   const vis = W.vis; let i = 0, j = 0;
   while (i < vis.length || j < dyn.length) { if (j >= dyn.length || (i < vis.length && vis[i].key <= dyn[j].key)) drawStatic(vis[i++]); else drawDyn(dyn[j++]); }
-  drawFxWorld(g); drawFxSky(g);
+  drawFxWorld(g); drawFxSky(g); EV.drawSky(g);
   // time-of-day tint, then additive lights
   let amb = ambient(h); if (G.cloud > 0.02) amb = mixc(amb, mixc(amb, 0x7f8cb0, 0.6), G.cloud * 0.7); if (G.season === 'winter') amb = mixc(amb, mixc(amb, 0xdfe9ff, 0.5), 0.3); else if (G.season === 'fall') amb = mixc(amb, mixc(amb, 0xffe2b8, 0.5), 0.3); else if (G.hot) amb = mixc(amb, 0xfff2c8, 0.5);
+  amb = EV.grade(amb);
   if (amb !== 0xffffff) { g.globalCompositeOperation = 'multiply'; g.fillStyle = css(amb); g.fillRect(0, 0, vw, vh); g.globalCompositeOperation = 'source-over'; }
   if (useL) {
     lg.globalCompositeOperation = 'lighter';
     for (const l of W.visLamps) { const a = scn(l[0], l[1], l[2]), b = scn(l[0], l[1], 0); lg.drawImage(R.halo, a[0] - 22, a[1] - 22); lg.drawImage(R.pool, b[0] - 30, b[1] - 15); }
     for (const hl of halos) lg.drawImage(R.pool2, hl[0] - 13, hl[1] - 7);
     drawWaterLights(lg, lights);
-    drawFxLights(lg);
+    drawFxLights(lg); EV.drawLights(lg, lights);
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = lights; g.drawImage(R.lc, 0, 0, vw, vh); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
   if (G.flash > 0.02) { g.fillStyle = 'rgba(240,244,255,' + (G.flash * 0.4).toFixed(3) + ')'; g.fillRect(0, 0, vw, vh); }
@@ -117,13 +122,14 @@ function draw() {
 function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) < 60 && Math.abs(R.panY - RIVER_VIEW.py) < 60; R.tween = nearRiver ? HOME_VIEW : RIVER_VIEW; G.riverOn = !nearRiver; viewLabel(); if (!nearRiver) ticker('Bến Bạch Đằng: nước chảy chậm, gió sông mát rượi', true); }
 function setTet(on, quiet) {
   if (!G.world || G.busy || on === G.tet) return;
-  snapshot(); G.tet = on; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync();
+  if (on) EV.clear(true);                                                  // Tết and the night events never overlap
+  snapshot(); G.tet = on; EV.sel = on ? 'tet' : EV.sel === 'tet' ? 'none' : EV.sel; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync();
   updateUI(); save(); if (!quiet) ticker(on ? 'Tết đến rồi! Hoa mai nở vàng, đèn lồng đỏ khắp phố' : 'Hết Tết, phố trở lại nhịp sống thường ngày', true);
 }
 function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
-  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync();
+  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync(); EV.onEra();
   eraShift(); updateUI(); save(); if (!quiet) ticker(UI['era.' + e + '.msg'][0], true);
 }
 // bake the other eras' buildings a few at a time while idle, so the first switch has no hitch
@@ -138,7 +144,7 @@ function tick(dt) {
   if (G.autoTime) G.hour = (G.hour + dt * G.daySpeed) % 24; else { const df = ((G.hourTarget - G.hour + 36) % 24) - 12; G.hour = (G.hour + clamp(df, -dt * 7, dt * 7) + 24) % 24; }
   if (G.autoSeason && !G.busy) { G.seasonT += dt; if (G.seasonT > 150) setSeason(SEASONS[(SEASONS.indexOf(G.season) + 1) % 4]); }
   if (R.xf > 0) R.xf -= dt / 1.1;
-  TET.tick(dt); updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
+  TET.tick(dt); EV.tick(dt); updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
 }
 let _last = 0, _uiT = 0;
 function frame(ts) {
@@ -164,7 +170,7 @@ async function setSeason(s, first) {
   if (!G.world) G.world = { ground: GROUNDS[s], items }; else { G.world.ground = GROUNDS[s]; G.world.items = items; }
   for (const k in GROUNDS) if (k !== s) delete GROUNDS[k];   // the K-density ground is large: keep only the current season
   G.world.vis = null; R.dirty = true; visList();
-  if (first) { initSim(); TET.sync(); } else { reseasonPeds(); R.xf = 1; }
+  if (first) { initSim(); TET.sync(); EV.sync('boot'); } else { reseasonPeds(); EV.onSeason(); R.xf = 1; }
   _pb = 0; FX.drift.length = 0; if (G.autoWeather && G.weather !== 'clear' && !first) setWeather('clear');
   if (first) { await sleep(200); fade.classList.remove('on'); }
   G.busy = false; updateUI(); save();
@@ -172,17 +178,17 @@ async function setSeason(s, first) {
 }
 
 // ----- UI -----
-function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom })); } catch (e) { } }
+function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, ev: EV.sel, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom })); } catch (e) { } }
 function load() { try { return JSON.parse(localStorage.getItem('saigonlofi') || '{}'); } catch (e) { return {}; } }
 const TIMES = { morning: 7.5, noon: 12.5, dusk: 17.9, night: 21.5 };
 function setTime(k) { G.timeKey = k; if (k === 'auto') G.autoTime = true; else { G.autoTime = false; G.hourTarget = TIMES[k]; } updateUI(); save(); }
 function setWx(k) { if (k === 'auto') { G.autoWeather = true; G.weatherT = Math.min(G.weatherT, 20); } else { G.autoWeather = false; setWeather(k); } updateUI(); save(); }
 function wxLabel() { return t('wx.status.' + (G.season === 'winter' ? (G.rain > 0.3 ? 'snow2' : 'snow1') : G.rain > 0.3 ? 'rain' : G.windy ? 'wind' : G.cloud > 0.5 ? 'cloud' : G.hot ? 'hot' : 'clear')); }
-function updateStatus() { const h = Math.floor(G.hour), m = Math.floor((G.hour - h) * 60); $('status').textContent = SNAME[G.season] + ' · ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' · ' + wxLabel(); }
+function updateStatus() { const h = Math.floor(G.hour), m = Math.floor((G.hour - h) * 60); $('status').textContent = SNAME[G.season] + ' · ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' · ' + wxLabel() + EV.statusText(); }
 function updateUI() {
   document.querySelectorAll('[data-era]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.era === G.era)); $('eraSub').textContent = t('era.' + G.era + '.sub');
   document.querySelectorAll('[data-season]').forEach(b => b.setAttribute('aria-pressed', b.dataset.season === G.season));
-  $('autoSeason').setAttribute('aria-pressed', G.autoSeason); $('tetBtn').setAttribute('aria-pressed', !!G.tet); $('streetOn').setAttribute('aria-pressed', AU.streetOn); $('streetOn').textContent = t(AU.streetOn ? 'street.on' : 'street.off');
+  $('autoSeason').setAttribute('aria-pressed', G.autoSeason); document.querySelectorAll('[data-ev]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ev === EV.sel)); $('streetOn').setAttribute('aria-pressed', AU.streetOn); $('streetOn').textContent = t(AU.streetOn ? 'street.on' : 'street.off');
   document.querySelectorAll('[data-time]').forEach(b => b.setAttribute('aria-pressed', b.dataset.time === (G.autoTime ? 'auto' : G.timeKey)));
   document.querySelectorAll('[data-wx]').forEach(b => b.setAttribute('aria-pressed', b.dataset.wx === (G.autoWeather ? 'auto' : G.weather)));
   $('wxRainL').textContent = t(G.season === 'winter' ? 'wx.snow' : 'wx.rain'); viewLabel();
@@ -209,7 +215,8 @@ function initUI() {
   $('more').onclick = () => { const p = $('panel'); p.hidden = !p.hidden; $('more').setAttribute('aria-expanded', !p.hidden); };
   document.querySelectorAll('[data-season]').forEach(b => b.onclick = () => { if (b.dataset.season !== G.season) setSeason(b.dataset.season); });
   document.querySelectorAll('[data-era]').forEach(b => b.onclick = () => setEra(+b.dataset.era));
-  $('tetBtn').onclick = () => setTet(!G.tet); $('streetOn').onclick = () => { AU.streetOn = !AU.streetOn; setVol(); updateUI(); save(); };
+  document.querySelectorAll('[data-ev]').forEach(b => b.onclick = () => setEvent(b.dataset.ev !== 'none' && b.dataset.ev === EV.sel ? 'none' : b.dataset.ev));
+  $('streetOn').onclick = () => { AU.streetOn = !AU.streetOn; setVol(); updateUI(); save(); };
   $('vStreet').oninput = e => { AU.vol.street = e.target.value / 100; setVol(); save(); };
   $('viewRiver').onclick = toggleRiverView;
   $('autoSeason').onclick = () => { G.autoSeason = !G.autoSeason; G.seasonT = 0; updateUI(); save(); };
@@ -219,7 +226,7 @@ function initUI() {
   $('zin').onclick = () => { R.zoom++; resize(); save(); }; $('zout').onclick = () => { R.zoom--; resize(); save(); };
   $('full').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); };
   $('hide').onclick = () => { document.body.classList.add('clean'); ticker('Bấm phím H hoặc chạm 2 lần để hiện lại bảng', true); };
-  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setTet(!G.tet); else if (k === 'b') toggleRiverView(); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
+  window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setEvent(G.tet ? 'none' : 'tet'); else if (k === 'q' || k === 'o' || k === 'x') { const e = { q: 'qk', o: 'hw', x: 'xm' }[k]; setEvent(EV.sel === e ? 'none' : e); } else if (k === 'b') toggleRiverView(); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
   // drag to pan, wheel to zoom
   const cv = R.canvas; let drag = null;
   cv.addEventListener('pointerdown', e => { R.tween = null; drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY }; cv.setPointerCapture(e.pointerId); });
@@ -240,8 +247,9 @@ async function boot() {
   if (q.get('zoom')) R.zoom = +q.get('zoom');
   if (q.get('look')) { const t = q.get('look').split(','), wx = t[0] * T + 4, wy = t[1] * T + 4; R.panX = wx - wy; R.panY = (wx + wy) / 2 - WORLD / 2; }
   if (q.get('pan')) { const p = q.get('pan').split(','); R.panX = +p[0]; R.panY = +p[1]; }
-  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); planTet(); resize();
+  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); planTet(); EV.plan(); resize();
   const tm = q.get('time') || st.time; if (tm && tm !== 'auto' && TIMES[tm]) { G.timeKey = tm; G.autoTime = false; G.hour = G.hourTarget = TIMES[tm]; }
+  EV.boot(q.get('ev') || st.ev);                                           // night events start at night, before the world is built
   await setSeason(G.season, true);
   const wx = q.get('wx') || st.wx; if (wx && wx !== 'auto') { G.autoWeather = false; setWeather(wx); if (q.get('wx')) { G.rain = G.rainTarget; G.cloud = G.cloudTarget; } }
   if (q.get('yt')) { $('panel').hidden = false; $('ytUrl').value = q.get('yt'); ytLoad(q.get('yt')); }

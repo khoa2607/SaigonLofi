@@ -62,7 +62,7 @@ function updateFx(dt) {
 }
 function spawnFlyer() {
   const vw = R.vw, vh = R.vh, S = G.season, day = G.hour > 5.5 && G.hour < 19, wet = G.rain > 0.3;
-  const k = wpick([['birds', day && !wet ? 4 : 0.3], ['swallow', S === 'spring' && day && !wet ? 3 : 0], ['plane', 1], ['balloon', day && !wet ? 1.2 : 0], ['bag', G.windy || G.gust > 0.3 ? 4 : 0.4], ['gust', S === 'fall' || S === 'winter' ? 2.5 : 0], ['dragon', S === 'summer' && day ? 2 : 0], ['bats', !day ? 1.4 : 0]]);
+  const k = wpick([['birds', day && !wet ? 4 : 0.3], ['swallow', S === 'spring' && day && !wet ? 3 : 0], ['plane', 1], ['balloon', day && !wet ? 1.2 : 0], ['bag', G.windy || G.gust > 0.3 ? 4 : 0.4], ['gust', S === 'fall' || S === 'winter' ? 2.5 : 0], ['dragon', S === 'summer' && day ? 2 : 0], ['bats', !day ? (EV.cur === 'hw' ? 6 : 1.4) : 0]]);
   const ltr = chance(0.5), y0 = rr(vh * 0.1, vh * 0.7);
   if (k === 'birds' || k === 'bats') { const n = k === 'bats' ? ri(3, 5) : ri(4, 9), vx = (ltr ? 1 : -1) * rr(46, 64), vy = -rr(8, 20); for (let i = 0; i < n; i++) { const row = Math.ceil(i / 2), side = i % 2 ? 1 : -1; FX.flyers.push({ kind: k, x: (ltr ? -20 : vw + 20) - (ltr ? 1 : -1) * row * 9, y: y0 + side * row * 5 + rr(-2, 2), vx, vy, t: rr(0, 1) }); } ticker(k === 'bats' ? 'Mấy con dơi chập choạng bay qua' : pick(['Một đàn chim sẻ vừa bay ngang góc phố', 'Bầy bồ câu lượn một vòng trên mái chợ'])); }
   else if (k === 'swallow') { for (let i = 0; i < 3; i++) FX.flyers.push({ kind: 'swallow', x: ltr ? -20 - i * 22 : vw + 20 + i * 22, y: y0 + i * 9, vx: (ltr ? 1 : -1) * 96, vy: -22, t: i * 0.3 }); ticker('Chim én về — mùa xuân tới rồi'); }
