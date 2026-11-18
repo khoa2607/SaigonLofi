@@ -1,502 +1,377 @@
 # HOLDFAST: Edge of Survival
-### Lofi Worlds, World 2: Creative Direction & Design Document (v0.2)
+### Lofi Worlds, World 2: Creative Direction & Design Document (v0.3)
 
-> Status: **concept / design only.** Nothing here is implemented. Mockups 1–2 are ready for review. Mockups 3–7 are on hold until they are approved.
+> Status: **concept / design only.** Nothing here is implemented. Revised mockups 1–2 are ready for review. Mockups 3–7 (Past, Future, Attack, UI, gallery) are on hold until the new camera, density and threat visibility are approved.
 >
-> The heart of Holdfast is not fighting. It's a small, believable community living peacefully while danger exists just beyond its walls. **Peace must be as engaging to watch as combat.**
+> **v0.3 direction:** Holdfast is a **busy, living survival world, not a quiet village.** Something meaningful is always moving, there's frequent small-scale danger, and big battles are occasional. Individual encounters can go badly, people can die, and the settlement always endures.
 
 | Mockup | File |
 |---|---|
-| 1. World Overview (Current era, day, annotated) | [`mockups/01-world-overview.png`](mockups/01-world-overview.png) |
-| 2. Current era, default 1920×1080 frame at dusk | [`mockups/02-current-era-dusk.png`](mockups/02-current-era-dusk.png) |
-| 3–7. Past, Future, Attack, UI, Gallery thumbnail | *after approval* |
+| 1. World Overview: planning diagram, whole 144 × 144 map, day | [`mockups/01-world-overview.png`](mockups/01-world-overview.png) |
+| 2. Current era: **the actual default 1920 × 1080 view** at dusk (3×) | [`mockups/02-current-era-dusk.png`](mockups/02-current-era-dusk.png) |
 
-The mockups are rendered by [`tools/mockgen.py`](tools/mockgen.py). It's a design tool, not game code. It draws the valley procedurally at true game resolution, so the overview and the 1080p frame come from **the same map, at the same scale**.
+Both images are cropped from **one** procedurally rendered map at true game resolution by [`tools/mockgen.py`](tools/mockgen.py). That script is a design tool, not game code.
+
+### What changed from v0.2
+
+| v0.2 rule | v0.3 rule | Why |
+|---|---|---|
+| Default zoom 2×, whole valley visible | **3× default**: frontier + nearby wilderness + part of the town | Matches SaigonLofi's on-screen character size (about 40 px). Users zoom out for the overview. |
+| Non-integer zooms (1.25×, 1.5×) | **Integer device-pixel scaling only** | Pixel Art Studio's #1 rule, and what Saigon's `resize()` already does. |
+| 28 settlers | **About 120 residents on desktop** (70 on mobile) in 3 simulation tiers | Continuous visible activity. |
+| No human deaths, guaranteed safe chases | **Humans can die.** Expeditions have real outcomes, and the population replenishes. | Real stakes. The settlement endures, but encounters are not scripted wins. |
+| Dinosaurs never killed | Killed, injured or driven off | Per brief. Still no gore. |
+| 65/15/7/13 four-phase director | **Two directors:** a continuous *Activity Director* (traffic-style quotas) plus an *Encounter Director* (frequent small, rare large) | No dead periods. |
+| Solid forest | **Groves, meadows, trails, rocky ground, ruins** | Threats must be readable. |
+| Threats from the top only | **Six approach routes** (R1–R6) | Variety that stays geographically believable. |
+| 128 × 128 map | **144 × 144**, valley 1.44× larger | Room for a town of about 60 homes and a real wilderness. |
 
 ---
 
-## Part 1: Locked foundation (approved in v0.1)
+## Part 1: Locked foundation (still true)
 
-- **Title:** *Holdfast: Edge of Survival*.
-- **One valley, three ages.** The same river bend, wall line, great tree, rock outcrop (main tower) and gate in Past, Current and Future.
-- **Defensive geography.** The settlement sits inside a river meander. The river guards three sides, and a curved wall closes the **neck** of the bend. *(Correction to v0.1: the wall reads as a gentle **∩ arch**, not a smile. Its middle bulges toward the wilderness, where the gate sits, and its ends meet the river.)*
+- **One valley, three ages.** The same river bend, curved wall, great oak, rock-outcrop main tower, gate and creek in Past, Current and Future.
+- **Defensive geography.** The town sits inside a river meander. The river guards three sides, and a ∩-arched wall closes the neck.
 - **Threat senses.** Past = scent and territory, Current = sound, Future = sight and signal.
-- **Pacing Director.** About 65% Peace, 15% Suspense, 7% Attack, 13% Recovery. At most one major attack per in-game day, and about one day in four with none.
-- **No permanent victory or defeat.** No deaths on camera. Injuries are nonfatal and the community always recovers.
-- **Recovery is content:** repair, treatment, salvage, the shared meal.
-- **20–30 settlers** with roles, schedules and relationships.
-- **Scavenger expeditions**, which sometimes end in a chase home.
-- **Current (zombie) era is built first.**
+- **Everyday routines, recovery and rebuilding, scavenger expeditions,** and distinct era architecture and lighting.
+- **Shared Lofi Worlds controls** plus a single world control: `PAST | CURRENT | FUTURE`.
+- **The settlement never falls.** No game over, no victory screen, and it runs indefinitely.
 
 ---
 
-## A. Map layout & scale
+## A. Camera and scale (SaigonLofi as the reference)
 
-### A1. Grid and units
+**What Saigon does today** (from `js/main.js` `resize()` and `js/core.js`): art is drawn at `K = 2` art px per world unit, and the screen scale is a **whole number of device pixels per art pixel**, picked from the viewport size. At 1920 × 1080, Saigon draws its walkers at about 40 screen px tall.
 
-| Item | Value | Notes |
-|---|---|---|
-| Projection | 2:1 isometric | Tile = **16 × 8 art px**. Every architectural edge is at 2:1 (26.57°), vertical, or horizontal. |
-| Map | **128 × 128 tiles** = 2048 × 1024 art px | Simulated core about 80 × 80 tiles. The outer ring is baked, decorative forest. |
-| Height unit | 1 art px of z | Lifts a sprite 1 px up the screen. |
-| Real-world feel | 1 tile ≈ 1.5 m | Chibi people are deliberately oversized, as in Saigon. |
-| Default zoom | **2×** (1 art px = 2 CSS px) | 1920 × 1080 shows 960 × 540 art px. |
+**Holdfast uses the same philosophy:**
 
-### A2. Zones (default 1080p frame, by screen area)
-
-The layout follows [mockup 1](mockups/01-world-overview.png):
-
-| Zone | Share | Contents |
-|---|---|---|
-| **Threat wilderness** (top) | ~38% | Old road to the gate, school-bus wreck, ruined gas station (W), collapsed house (E), forest thickening into fog, creek, wandering threats, deer and rabbits. Off-frame: old town ruins (where the horde gathers), farmstead, radio hill. |
-| **Frontier** (upper middle) | ~14% | **Cleared ground** about 60 art px deep: stumps, rebar hedgehogs, wrecked cars pushed out as obstacles, burn marks. Then **the wall arch** with six towers and the gate. Then the **inner yard** with the gate plaza, alarm bell, staging crates and expedition pickup. |
-| **Settlement** (lower) | ~48% | Main street from the gate to **the green and the great oak**, which hold the commons: fire pit, long tables, string lights. Homes ring the green. Church/bell (W), infirmary (by the gate, for a short carry), workshop (E, by the gate), town hall, RV and tents (newcomers), playground (centre, *away* from the wall). Fields fill the bottom of the bend, with a greenhouse, water tower, DIY wind turbine and the fishing dock at the very bottom. |
-| **River and far bank** | frame edges | The river is the rear wall. On the far bank, deer drink and big wildlife passes by peacefully. |
-
-**Wall geometry:** chord about 880 art px (about 70 tiles across the neck), apex at the gate. Wall line: `y = 212 + 55·((x−480)/440)²` in view px. Towers: main tower on the outcrop beside the gate, one opposite, two mid-wall, and two where the wall meets the river.
-
-**The creek** enters from the forest, passes through a **culvert grate** under the wall, and crosses the settlement to the river. It gives the settlement fresh water and a second fishing spot, and it is the wall's one known weak point, which drives a rare incident (§J).
-
-**Safe-space logic:** distance from the gate equals safety. Kids, elders, the playground and the commons sit deepest. Workshops and the infirmary sit near the gate because that's where the work is.
-
-### A3. Entity scale (art px, W × H)
-
-| Entity | Size | | Entity | Size |
-|---|---|---|---|---|
-| Adult settler | 7 × 12 | | Zombie (hunched) | 7 × 11 |
-| Child | 7 × 9 | | Raptor-type | 14 × 10 |
-| Dog | 7 × 6 | | Horned grazer | 28 × 18 |
-| Deer | 9 × 8 | | Apex predator (rare) | 40 × 30 |
-| Chicken / rabbit | 3 × 3 | | Long-neck herbivore (far bank) | 64 × 48 |
-| House (2 storey) | 3.4 × 2.8 tiles, walls 16–17 + roof 8 | | Scout drone (hovers +10) | 7 × 5 |
-| Workshop | 6 × 4 tiles, h 15 | | Robot quadruped | 14 × 10 |
-| Church steeple | h 42 | | Spider unit | 18 × 10 |
-| Watchtower | 1.7-tile platform at h 22–30, roof +13 | | Heavy walker (siege only) | 28 × 34 |
-| **Wall panels** | **h 9–10** + wire | | Car / bus | 2.4 × 1.2 / 7 × 1.6 tiles |
-
-**Wall height is a readability rule.** The camera sees the *inner* face of the wall. A wall taller than a person (12 px) would hide every threat at its foot. Keep panels at 9–10 px. Spikes and wire add silhouette without adding occlusion. Add **cutaway dither**: wall pixels within about 8 px of a threat become 50% checker-transparent.
-
-### A4. Camera framing and screen adaptation
-
-The default frame (mockup 2) shows the wilderness band, the whole wall, and the settlement down to the dock, with no camera movement needed.
-
-**Auto-fit rule:** pick the largest zoom from {1, 1.25, 1.5, 2, 3} at which the **wall chord + 40 px** fits the viewport width and the **span from the bus wreck to the dock** (about 470 art px) fits its height. Pan and zoom remain available, and the choice is remembered per world.
-
-| Screen | Zoom | Result |
-|---|---|---|
-| 1920 × 1080 | 2× | The reference frame. |
-| 2560 × 1440 | 2× plus a wider look | Shows more forest and the far bank, or the viewer can choose 3× for detail. |
-| 1366 × 768 / 1440 × 900 | 1.5× | Practically the same framing as the reference. |
-| iPhone landscape (844 × 390) | 1× | Wall plus settlement. The fields are cropped, so start the pan 40 px up. |
-| iPhone portrait (390 × 844) | 1.25× | **A vertical slice: forest → gate → oak → dock.** The story axis of the world is vertical, so portrait works unusually well. The camera drifts slowly toward the active event (gate during chases, wall during attacks) and comes back afterwards. |
-
-**Mobile camera assist** (an opt-out option, *not* a control): during Suspense or an attack, the camera eases toward the event over 2 seconds, and it returns 10 seconds into Recovery.
-
----
-
-## B. NPC behaviour and daily routines
-
-### B1. The rule: purposeful, never random
-
-Every NPC is always **going somewhere, for a reason, usually carrying something**. There is no random wandering. "Idle" means *resting at a rest spot*: a porch, a bench, under the oak, the dock, a tower rail.
-
-Each NPC is a small **schedule-driven state machine**:
-
-```
-Schedule slot → Task (goto, work loop, carry, rest, social)
-                ↑ interrupts: ALARM, MEAL BELL, RAIN, NIGHT, INJURY, EXPEDITION
-```
-
-- **Schedule:** a per-role timetable of hour blocks.
-- **Tasks** are tiny scripts, for example `goto(field_3) → work(hoe, 40–90 s) → carry(basket → kitchen)`.
-- **Interrupts** come from the Director or the environment. When one ends, the NPC returns to its schedule slot.
-- **Social beats** are short two-person scripts, triggered when two NPCs with a relationship pass within 2 tiles and both are on low-priority tasks: wave, chat with speech-bubble icons, hand over an item, hug, or walk together.
-
-### B2. Roster (28 settlers + dog + animals)
-
-The roster is the same 28 people in every era: same names, roles and relationships, with era-appropriate clothes and tools (§I).
-
-| Role | # | Role colour cue | Signature props |
-|---|---|---|---|
-| Farmer | 4 | straw hat / mustard | hoe, basket, watering can |
-| Fisher | 2 | blue | rod, bucket, net |
-| Cook | 2 | white apron | pot, ladle, tray |
-| Builder | 2 | yellow vest | hammer, plank, panel |
-| Guard (tower and gate) | 6 | olive | rifle or bow (Past: spear) |
-| Medic + assistant | 2 | white with green cross | satchel |
-| Scavenger | 3 | backpack, dark utility | crowbar, pack, map |
-| Teacher | 1 | red cardigan | book, chalkboard |
-| Children | 4 | bright mixed | ball, kite, toy |
-| Elders | 2 | grey hair | cane, rocking chair, pipe |
-| **Pet** | dog "Ổi" | — | follows kids, barks first at threats |
-| Animals | 6 chickens, 1 goat | — | coop and pen |
-
-**Relationships** (examples): Farmer Lan is married to builder Minh, and their kid Bi runs to Minh after every alarm. Elder Ba taught the scavenger lead. Two guards are rivals over who keeps the best tower. Relationships decide **who meets whom** in social beats and **who greets whom at the gate**.
-
-### B3. Day schedule (in-game day ≈ 12 real minutes, 1 game hour ≈ 30 s)
-
-| Time | Farmers | Fishers | Cooks | Builders | Guards | Medic | Scavengers | Kids | Elders |
-|---|---|---|---|---|---|---|---|---|---|
-| **Dawn 5–7** | wake, water beds | to dock, first cast | light fire, kettle | inspect wall | night→day shift handoff | rounds | prep at yard | asleep → breakfast | porch, tea |
-| **Morning 7–12** | field rows, hoeing | fishing, net mending | prep lunch, carry water | repair queue | 4 towers + gate pair | infirmary | **expedition window** | lessons under the oak | teach and whittle |
-| **Noon 12–14** | **all eat at the commons**, with tables full | | serve | | 2 towers stay manned, the rest rotate to eat | | | | |
-| **Afternoon 14–18** | harvest and carry | fishing (the kids join) | wash and preserve | workshop builds | patrols on the walk | treat and restock | **return window** | play, chores, garden | nap, then the porch |
-| **Dusk 18–20** | wash up at the creek | bring catch to the kitchen | supper, string lights on | tools away | **6 towers staffed**, lamps lit | | debrief at the fire | fireflies, catch-me | stories at the fire |
-| **Night 20–5** | asleep (lit windows go off one by one) | 1 night-fisher, sometimes | banked fire | asleep | night shift: 2 snipers + 2 patrol + gate | on call | asleep | asleep | 1 elder can't sleep: porch, lantern |
-
-**Seasons modify the table:** planting (spring), long evenings and swimming (summer), harvest festival (autumn), indoors and more firewood runs (winter).
-
-### B4. Role behaviours in detail
-
-- **Farmers** work in *row passes*: walk down a furrow, do a 2-frame action every 2 tiles, then turn at the end. Full baskets go to the kitchen, which visibly links field and kitchen. In rain they cover seedlings with tarps.
-- **Fishers** cast with a 4-frame cast and a line arc, wait 20–60 s, then either a splash and catch (fish sprite, bucket) or nothing. Sometimes a kid sits beside one. The night-fisher has a lantern on the dock.
-- **Cooks** have a station loop: chop, stir, carry tray. The **meal bell** at 12:00 and 18:30 is the most important routine in the game, because the whole town converges on the commons. It's peace's set-piece.
-- **Builders** keep a *repair queue*, filled by attacks and weather. With nothing queued they do workshop builds, such as a new raised bed or a shed roof patch. They carry the material first and then work on site, so the viewer reads cause and effect.
-- **Guards** hold *posts*. Tower guard idle cycle: scan left → scan right → lean → stretch, about every 6 s. Wall patrol walks the inner wall between towers. **Shift change** gets a handshake animation and the relieved guard walks home. The dog checks in with the gate guards.
-- **Snipers** (the main and opposite towers) use a scope pose when the Director raises Suspense, and are otherwise relaxed.
-- **Medics** do rounds at dawn. After attacks they **walk to the injured**, kneel and bandage (a 3-frame loop), then walk them to the infirmary. In peace they hang sheets, sort herbs and check on the elders.
-- **Kids** play tag, kite, ball and hopscotch, *only* in the safe ring (the green, the playground, the dock with an adult). **Rule: kids never go within 6 tiles of the wall.** If a ball rolls toward the wall, an adult fetches it (§J). On ALARM they run to the church, the shelter in every era, with a teacher.
-- **Elders** move slowly between the porch, the commons and the garden. They're the "anchor" sprites: whenever you look at the commons, an elder is probably there.
-- **Dog:** follows kids. At dusk it visits the gate. It **barks before Suspense is announced** (an early cue for attentive viewers). On ALARM it goes under a porch.
-- **Wildlife** is outside the wall only, except birds. Deer graze at the forest edge and bolt when a threat comes within 8 tiles, which is a free tension cue. Crows gather on wrecks. Fish jump in the river. Fireflies come out at summer dusk. Past and Future equivalents are in §I.
-
-### B5. Movement
-
-- Walking speed 0.9 tiles/s, run 2.2, zombie 0.45–0.6, raptor 2.6 (but it gives up), robot quad 1.4.
-- NPCs **slow down and turn** before arriving (one ease-out step), never sliding into position.
-- Two NPCs on a collision course: the lower-priority one sidesteps half a tile and waits for one frame. Kids yield to nobody, and adults step aside for them. It's a small touch that reads as human.
-
----
-
-## C. Scavenger expedition simulation
-
-### C1. Sequence
-
-| # | Phase | Duration (real) | What you see |
-|---|---|---|---|
-| 1 | **Preparation** | 30–60 s | Three scavengers converge on the yard. One checks a map board, the others load packs. The pickup stays (Current era). The lead hugs a relative. |
-| 2 | **Gate opens** | 4 s | The gate guard waves to the tower, the tower guard scans and gives a thumbs-up, and the gate slides open (6-frame roll). |
-| 3 | **Departure** | 10–20 s | Single file up the old road. The gate closes behind them, and a gate guard watches for a while. |
-| 4 | **Exploration** | 60–180 s | Walk to the POI by road, then along a forest trail. They pause at junctions ("look" pose), and crouch-walk past a known threat 6–10 tiles away. |
-| 5 | **Discovery** | 20–40 s | At the POI: search loops (open trunk, rummage, crowbar door). The result shows as an icon bubble: 🥫 canned food, ⚙ parts, 💊 medicine, 🌱 seeds, 📻 radio, or rarely 🐾 a stray animal they bring home. |
-| 6a | **Return (80%)** | 60–120 s | Same route, slower, packs visibly bulging. |
-| 6b | **Chase (20%)** | 30–50 s | An incident (C3) alerts threats, and they run home. Tower snipers cover them and the gate opens at the last moment. |
-| 7 | **Gate closes** | 4 s | With a slam. A guard leans on it and exhales (a 2-frame puff). |
-| 8 | **Recovery** | 60–120 s | They unload at the kitchen, workshop or infirmary according to the loot. Family greets them. In the evening they tell the story at the fire, and the Chronicle records it. |
-
-**Frequency:** 1–2 expeditions per in-game day, departing in the morning window. No expedition leaves on attack days until Recovery has finished. Fog days have no expeditions, a quiet bit of world logic.
-
-### C2. Simple AI
-
-- **Routes are authored splines** (mockup 1, dashed lines): gate → waypoint chain → POI → back. Expeditions never do free pathfinding outside the wall. A route has 6–10 waypoints, with jitter of ±0.5 tile per member so the file doesn't look like a train.
-- **Formation:** a leader on the spline, followers trailing at 1.2 tiles with a slight sway.
-- **Detection is a cone check, not tactics.** Every threat has a `sense` value per era:
-  - Current: noise events have a radius (gunshot 30 tiles, glass 12, footstep 2). Any zombie in the radius goes to *Investigate* and walks to the noise point.
-  - Past: scent drifts downwind. A carry-meat flag raises the scent radius.
-  - Future: a visible **scan cone**. A party member inside it for 1.5 s raises *Alert*.
-- **States:** `Idle/Wander → Investigate (?) → Pursue (!) → Lost → Wander`. Pursuers have speed < party run speed, and pursuit times out after 25 s without sight. **A chase always ends safely**, while still feeling close.
-- **Chase tuning:** the Director spawns pursuers behind the party at a distance that guarantees arrival with a **2–4 s margin**. That margin is the "last-second gate" moment.
-
-### C3. Incidents and variations (weighted pick, about one per trip)
-
-| Incident | Effect |
+| Item | Value |
 |---|---|
-| Nothing happens | The most common outcome. A calm trip is fine. |
-| Find a stray dog/goat/horse | It follows them home, and the settlement gains a temporary pet. |
-| Mis-step: car alarm or glass (Current), snapped branch near a nest (Past), stepping into a scan cone (Future) | Starts a chase. |
-| A member twists an ankle | The others carry them back slowly, and the medic meets them at the gate. |
-| A threat blocks the road | The party detours via a forest trail, which is an authored alternate route. |
-| Weather turns (rain) | They shelter at the POI for 30 s, then continue. |
-| Find a survivor (rare, once a week) | The survivor comes home and **joins the roster**, replacing a "moved away" settler so the count holds at 28. It's the only roster change, a long-term story beat. |
-| Radio contact | A 📻 bubble, and that night the town listens around the radio. Flavour only. |
+| Tile | 16 × 8 art px, strict 2:1 |
+| Adult sprite | 8 × 13 art px (head 6 rows = 46%, chibi) |
+| **Default scale** | **3 device px per art px at 1080p** → people about 39 px tall, like Saigon's walkers |
+| Default view at 1080p | 640 × 360 art px: about **half the wall**, the gate in the upper middle, about 100 px of wilderness above, and the market, barracks, infirmary, workshop and the oak below |
+| Zoom | Wheel / pinch / buttons step through **integer scales**: 1 → 2 → 3 → 4 → 6 (desktop). Drag to pan. Remembered per world. |
 
-### C4. Gate behaviour (one shared state machine)
+**Auto-pick rule** (same spirit as Saigon's `base`): choose the largest integer **N** (device px per art px) such that the view is at least **560 × 300 art px** on desktop, or at least **230 art px on the short side** on phones.
 
-```
-CLOSED ──request(open)──► CHECK ──clear──► OPENING (6 fr) ──► OPEN ──► CLOSING (6 fr) ──► CLOSED
-                            │ threat within 10 tiles of gate
-                            └──► HOLD (guards ready, snipers fire)  ─ clear ─► OPENING
-```
+| Screen (device px) | N | Art px visible |
+|---|---|---|
+| 1920 × 1080 | 3 | 640 × 360 (**reference**) |
+| 2560 × 1440 | 4 | 640 × 360 (identical framing) |
+| 3840 × 2160 | 6 | 640 × 360 |
+| 1366 × 768 | 2 | 683 × 384 |
+| MacBook 2880 × 1800 | 5 | 576 × 360 |
+| iPhone portrait 1170 × 2532 | 5 | 234 × 506: a vertical slice (forest → gate → market → oak) |
+| iPhone landscape | 5 | 506 × 234 |
 
-- **Open requests** come from a departing party, a returning party within 8 tiles, or a cleanup crew in Recovery.
-- **During a chase**, CHECK ignores threats that are *behind* the party by more than 6 tiles. Guards step outside to cover.
-- The gate closes automatically 3 s after the last member is inside.
+**Off-screen awareness without UI:** events outside the frame announce themselves *diegetically*. Flank-tower bells ring, a flare arcs into view, gunfire comes from the left or right in stereo, and a soft warm glow builds at that screen edge. There are no arrows or minimap. On mobile, **camera assist** (an option, on by default) eases toward major events.
 
 ---
 
-## D. Defense and combat animation
+## B. Map layout (144 × 144 tiles)
 
-### D1. Principles
+See [mockup 1](mockups/01-world-overview.png).
 
-1. **Readable at 2×:** one clear action per actor, with a strong anticipation frame.
-2. **Restrained:** no blood, no dismemberment. Defeats become dust, retreat or wreckage.
-3. **Short:** the attack phase lasts 60–90 s, with a cap of 40 threats on screen.
-4. **Telegraphed:** Suspense *always* comes first, through the dog bark, deer bolting, the tower guard leaning, and the music.
+### B1. Zones
 
-### D2. Defender actions
+| Zone | Contents |
+|---|---|
+| **Wilderness** (upper third of the map) | Groves (clustered woods), dry meadows, the **hunting meadow** with its deer herd, **rocky ground**, worn **west and east trails**, the **old road** with a bus wreck and power poles, **abandoned houses** (scavenger site, in the default frame), **gas station** (in the frame), collapsed house, farmstead, radio hill, and the **old town ruins** where hordes gather. |
+| **Frontier** | Cleared kill-zone about 72 art px deep: stumps, rebar hedgehogs, wrecks pushed out as obstacles, temporary corpses, dust. The **wall arch** with **10 towers** (main tower on the rock outcrop) and the gate. The **culvert** where the creek passes under the wall is the known weak point. |
+| **Settlement** | A **gridded town of about 60 homes** on the map axes (streets read as 2:1 diagonals, like Saigon's blocks), plus a civic core along the main street (below). |
+| **Fields** | 5 crop types in patches along the bottom of the bend. Barn, greenhouses, water tower, two wind turbines. |
+| **River** | 3 docks, a smokehouse, rowboats. The far bank has wildlife. |
 
-| Actor | Animation | Frames |
+### B2. Civic core (gate → river), all in or near the default frame
+
+1. **Gate yard:** scavenger staging, two trucks, crates, alarm bell, 4 gate guards.
+2. **Barracks + drill yard:** guard shift changes, weapon rack.
+3. **Market (6 stalls):** trading, carrying, gossip. The busiest square in the world.
+4. **Infirmary + triage tent:** medics and patients.
+5. **Workshop / motor pool:** technicians on vehicles, scrap, smoke.
+6. **Church** (alarm shelter for kids and elders), **school**, **town hall**.
+7. **The green and the great oak:** commons fire, long tables, string lights.
+8. **Kitchen / mess tent:** cooks, smoke, carriers from fields and docks.
+9. **Memorial stones:** candles added when someone dies (see §F).
+10. Playground, chicken coop, goat pen, beehives, laundry lines, gardens, rain barrels.
+
+### B3. Threat approach routes (all believable, none spawn inside)
+
+| Route | Path | Typical use |
 |---|---|---|
-| Tower sniper | aim (rifle up, 0.6 s hold) → **muzzle flash** (1 frame, 3×3 px emissive) → recoil → chamber | 2 aim + 1 fire + 3 recover |
-| Projectile | Current: a 2-frame tracer line, faint. Past: a visible arrow arc (8–12 frames). Future: a cyan pulse bolt (6 frames). | — |
-| Miss | A dust puff (3 frames) at the target's feet. About 25% of shots miss, which keeps it tense and believable. | 3 |
-| Gate defenders | brace stance, push with a pole or spear through the gate gap, step back | 3 + 2 |
-| Wall patrol | runs to the threatened panel and braces it with their back | 4 run + 2 brace |
-| Builder in combat | hammers a temporary brace behind a damaged panel | 3-frame loop |
-| Medic | kneels by an injured defender and helps them up | 3 + 4 |
-| Bell ringer | bell swing with a "DONG" ring ripple (1 px ring expanding outward) | 4 |
+| **R1 Main road** | old town → road → gate | Hordes, patrols, the classic set-piece |
+| **R2 West trail** | farmstead → meadow → west wall | Gathering packs, ambush on scavengers |
+| **R3 East trail** | radio hill → rocky ground → **culvert** | Probing the weak point |
+| **R4 / R5 Riverbanks** | along the inner banks → wall ends | Flank attacks on the end towers |
+| **R6 River** (rare) | drifting downstream → bank or dock | Current: floaters. Past: a swimming predator. Future: an amphibious drone. |
 
-**Injuries:** a hit defender kneels (2 frames) with a small ✚ above them, and a medic comes. There is no death state.
+Threats spawn only **at the map edge or at a POI** (ruins, farmstead) and must walk in. Era-specific route preferences are in §G.
 
-### D3. Threat behaviour by era (the differences matter)
+---
+
+## C. Population system: about 120 residents, 3 tiers
+
+Not everyone needs a brain. Three tiers, like Saigon's mix of "important" and "ambient" walkers:
+
+| Tier | Desktop | Mobile | Brain | Examples |
+|---|---|---|---|---|
+| **A: Named** | 16 | 12 | Full schedule, relationships, memory, Chronicle entries | Scavenger leads, sniper captain, head medic, builder chief, the elder, the teacher |
+| **B: Role agents** | 74 | 40 | Role timetable + task scripts (goto / work loop / carry / rest), 4 Hz updates | Farmers, guards, cooks, fishers, techs, builders, medics, market traders |
+| **C: Ambient** | 30 | 18 | Saigon-style looping walkers and sitters on authored paths, with no identity. Recycled. | Passers-by, porch sitters, kids in yards, people at tables |
+| **Total** | **120** | **70** | | |
+
+**Role mix at 120** (desktop): guards 30 (towers 10, wall patrol 8, gate 4, reserve/drill 8) · farmers 16 · builders and repair 8 · techs 5 · medics 4 · cooks 4 · fishers 6 · scavengers 9 (3 teams) · traders 6 · teacher 1 · elders 8 · children 14 · general adults 9.
+
+**The mockup** renders 124 settlers. The default frame alone shows **50 residents and 20 threats**.
+
+**Making it look alive rather than synchronized:**
+- **Phase offsets:** every agent starts its animation at a random frame and gets a ±15% speed jitter. Work loops have random holds of 0.5–2 s.
+- **Schedule jitter:** each agent's timetable is shifted ±20 game minutes, so shifts and meals ripple rather than snap.
+- **Purpose:** every Tier A/B walk has a destination and usually a carried item. Tier C walkers use looped paths with varied pauses.
+- **Camera-weighted ambient spawning:** Tier C agents are placed **inside or near the current view**. Wherever the user looks stays dense, without simulating 120 brains everywhere. This is the key to keeping mobile busy on a smaller budget.
+
+**Daily rhythm** (one in-game day ≈ 20 real minutes): dawn shift change → morning work, market and expeditions out → noon meal bell (the whole town converges on the commons) → afternoon work, harvest, returns and repairs → dusk with full tower crews, lights and supper → night watch, the night fisher, lit windows going out. The per-role timetable from v0.2 §B3 (commit `2a9bfc6`) still applies, scaled up to the larger crews.
+
+**Interactions (social beats):** waves, chats with icon bubbles, hand-offs (food to a guard, ammo to a tower), hugs at the gate, kids tagging adults, trading at stalls, a medic checking on a patrol. These are triggered by proximity plus relationship.
+
+---
+
+## D. Directors: always alive, sometimes dramatic
+
+### D1. Activity Director (continuous, traffic-style quotas)
+
+Like Saigon keeps a steady stream of traffic and pedestrians, Holdfast keeps **minimum concurrent activity per zone**. Every 2 s the director tops up any deficit by starting a task, sending a walker or spawning an ambient threat at an edge.
+
+| Zone | Quota (desktop, day) |
+|---|---|
+| Settlement | ≥ 25 people walking · ≥ 30 in work loops · 4–8 social clusters · 6–10 carriers |
+| Market / commons | 8–16 people at all times, rising toward noon and dusk |
+| Wall | 10 towers staffed at dusk and night (6–8 by day) · 6–10 patrol walkers · 2–4 gate |
+| Wilderness within ±1 screen of the view | **8–20 wandering threats** · 6–12 wildlife · 2–4 bird flocks |
+| Outside the wall | **at least 1 expedition** out for most of the day |
+
+### D2. Encounter Director (frequent small, rare large)
+
+| Tier | Example (Current era) | Frequency (Standard danger) |
+|---|---|---|
+| **Micro** | A sniper drops a lone infected. Zombies chase a deer. A walker rattles the fence. A guard spots something and calls it in. | **Every 45–120 s** |
+| **Minor** | A group of 3–6 gathers at a trail mouth and is thinned at the cleared ground. Expedition contact. A culvert probe. | Every 4–8 min |
+| **Medium** | A pack hits a flank tower, a panel is damaged and the repair crew is deployed. A rescue sortie. | Every 12–20 min |
+| **Major attack** | A coordinated push on 2 routes: gate fight, flank breach attempt, all towers firing. 2–4 min long. | Every 30–45 min |
+| **Siege** | A horde from the ruins, a breach, and defenders holding the gap. 4–6 min. | About every 2 hours |
+
+**Tension model:** the director tracks `tension (0–1)`. Micro events nudge it up, quiet time decays it, and large events require high tension plus a cooldown since the last large event. After a Major or Siege, **Recovery** (repairs, infirmary, cleanup, burn pile, memorial, shared meal) runs *on top of* normal life. It doesn't replace it.
+
+**Approximate share of time:** busy peace (micro events only) 55% · tension/minor 25% · medium 10% · major/siege 4% · heavy recovery 6%. **No phase is ever still.**
+
+### D3. Danger level (one option inside "···", not a primary control)
+
+`Calm · Standard · Grim` scales death and injury probabilities and the encounter cadence. **Standard** targets about **1–2 settler deaths per real hour**, about 6 injuries, and about 60 threats killed. Calm targets about 0.3 deaths per hour. Grim targets 3–4. This lets the same world serve "leave it on while working" and "watch the drama".
+
+---
+
+## E. Scavenger expeditions (revised: real outcomes)
+
+**Sequence** (unchanged from v0.2): Preparation → Gate opens → Departure → Exploration → Discovery → Return or Chase → Gate closes → Recovery. Now there are **3 teams of 3** and 3–5 expeditions per in-game day.
+
+**Outcome table** (Current, Standard danger, a 3-person team at a mid-risk POI):
+
+| Outcome | Base % | What you see |
+|---|---|---|
+| Clean return | 48 | Bulging packs, family greets them at the gate |
+| Turned back early (blocked or weather) | 6 | Detour, empty packs, a shrug at the gate |
+| Return with injuries | 18 | A limping member is carried and the medic meets them |
+| **Fighting retreat**, all safe | 13 | Members walk backwards firing (aim frames + tracers), tower snipers cover, last-second gate |
+| **One member killed** | 10 | They fall during contact. The others pull back. A rescue sortie may recover the body. |
+| Two killed | 3 | Same, with heavier grief at the fire that night |
+| **Team lost** | 2 | No return. At dusk a guard lights an extra lamp on the wall, and a stone is added. |
+
+**Modifiers:** night ×1.6 risk · rain ×0.8 (masks sound) · fog ×1.3 · horde gathering at the ruins ×2 (on that route) · experienced Tier A lead ×0.7 · team of 4 ×0.8.
+
+**Rescue sorties:** when a team is in trouble within about 25 tiles of the wall, there's a 40% chance a 4-guard squad sallies out through the gate. It succeeds about 75% of the time. A rescue can turn a loss into an injury, and occasionally a rescuer is hurt instead. This is the brief's "occasional successful rescue".
+
+**Simple AI** (still no tactical planner):
+- Authored route splines with jitter. Formation = leader plus followers.
+- Detection uses the era sense (§G), with states `Idle → Investigate (?) → Pursue (!) → Lost`.
+- Combat is a **range check plus dice**: each shot every 0.6–1.2 s with a hit chance by range, light and shooter tier. Melee contact is a per-second damage roll. Members have 2–3 "hits" (injured at 1, down at 0).
+- There is **no guaranteed safe margin** any more. The director only guarantees that *the settlement* survives, not the team.
+
+---
+
+## F. Combat and consequences
+
+### F1. Deaths, handled with restraint
+
+- **Who can die:** adults outside the wall (scavengers, rescue squads) and defenders at the wall, gate or towers. **Children and elders never die and are never placed in danger zones**: they shelter in the church on any alarm. This is a hard tone rule.
+- **Death animation:** hit flash → stagger → **fall (4 frames) → still**. There is **no blood, no gore sprite and no dismemberment**. A teammate kneels beside them for 1–2 s if safe.
+- **Aftermath:** in Recovery, two settlers bring a stretcher, cover the body with a sheet, and carry it to the **memorial stones**. A candle is added that night, and the Chronicle names them. No body is left lying inside the walls.
+- **Named (Tier A) characters can die,** but rarely (×0.3 risk). A Tier B agent is **promoted** to take over the role, so story continuity survives.
+- *Rejected for tone:* fallen settlers coming back as zombies.
+
+### F2. Replenishment (an endless simulation)
+
+- **Population floor 90 / target 120 / cap 130** (mobile: 50 / 70 / 76).
+- **Arrivals:** refugee groups of 1–4 walk up a route to the gate. Guards check them and the gate opens. Probability rises the further the population is below target. Expected rate at Standard is about 2 per real hour, balancing deaths.
+- **Other sources:** a scavenger team rescues a survivor (rare), or a trader caravan stays (Current: a truck, Past: a canoe, Future: a shuttle drone).
+- New arrivals spend their first in-game day at the RV/tent row, then get a role and a house.
+
+### F3. Threat defeat per era
 
 | | Zombies (Current) | Dinosaurs (Past) | Robots (Future) |
 |---|---|---|---|
-| Approach | A shambling 4-frame walk with uneven timing (hold frame 2 for an extra tick). They come in **loose clumps that thicken**. | Predators *stalk* in low-crouch frames, pause and sniff (a nostril-puff particle), then sprint. | **Rigid, synchronized gaits.** The scan cone sweeps before they move. Formation: drone → quads → heavy. |
-| At the wall | Press against the wall (lean frames), slap (2 frames), pile up. A panel shakes 1 px. | Test the wall, claw the palisade, flinch at **fire and noise**, circle round. | Cut or ram: a spark shower at the contact point, and the heavy walker telegraphs with a red glow for 1 s. |
-| Hit reaction | A 1-frame stagger and a white flash. | Flinch and roar (open-mouth frame). | Sparks and a 1-frame flicker of lights. |
-| **Defeat** | Falls forward (4 frames) → lies still → **after 20–40 s turns into a dust silhouette and fades**. A cleanup crew covers the remains with a tarp and carts them to the burn pit in Recovery. | **Retreats wounded.** It limps away (a slower walk with head low) and leaves the map. Dinosaurs are never killed on screen. | Collapses: legs fold, one spark, a lingering smoke wisp. **The wreck stays** until salvage. |
-| Remains | Dust stains in the cleared ground fade over about 2 game days. | Claw marks on posts, broken spears, scattered thatch. | Husks that the salvage crew cuts up and carts to the workshop. Later the parts show up as plating on a turret. |
+| Killed | Fall forward → **temporary corpse** (2–4 game h) → the cleanup crew drags them to a **burn pit** (smoke column) | **Killed** (large ones are rare and need several spears or arrows), **injured** (limp away), or **driven off** by fire and noise | **Destroyed:** sparks → small explosion puff → collapse → **salvageable wreck** |
+| Remains | Corpses with dust stains (fade over 1 game day) | Carcass is butchered over time and becomes food (smokehouse busy) | The salvage crew cuts wrecks up for parts, which appear later as turret plating |
+| Hit reaction | 1-frame white flash + stagger | Flinch + roar | Sparks + light flicker |
 
-### D4. Wall damage and repair
+### F4. Defense animation (unchanged from v0.2, scaled up)
 
-- **Panel states:** `intact → dented (sprite swap, a lean of 1 px) → breached (gap, panel on the ground)`. A breach is only allowed during a siege-tier attack, and at most 2 per attack.
-- **A breach is a mini-event:** two gate defenders hold the gap. Threats in the gap make a slow, readable fight. It's always held.
-- **Repair sequence (Recovery):** a builder carries a new panel (era material) → holds it up → hammers (3-frame loop, small "tok" sparks) → steps back and nods. A broken tower takes a multi-hour job with scaffold sprites.
-- **Recovery checklist** (the Director won't advance to Peace until it's done): repairs, injured treated, remains cleared or salvaged, a meal at the commons.
+- Tower snipers aim (0.6 s hold) → muzzle flash (1 frame) → faint tracer (2 frames) → recoil. **About 25–35% miss** with a dust puff.
+- Gate defenders brace and push. The wall patrol runs to a threatened panel. Builders brace panels mid-fight.
+- **Defenders can be hurt or killed** at the wall when a breach happens or a tower is climbed (Past) or cut (Future).
+- **Structural damage:** panel `intact → dented → breached`, tower `ok → damaged → burned/cut`. Repairs run as visible jobs (carry → hold → hammer), and big repairs get scaffolding. The mockup shows a **breached panel with timber braces** and a 4-person crew.
 
 ---
 
-## E. Sprite art and animation specifications
+## G. Threat behaviour per era (busy but distinct)
 
-### E1. Resolution and projection rules
-
-- **Art resolution:** world art at 1 art px. Default display 2×, integer or 1.25/1.5 nearest-neighbour scaling only.
-- **Strict 2:1 rules:**
-  - Ground edges are lines of 2 px across per 1 px down. There are no 30° "true iso" lines.
-  - Verticals are perfectly vertical. Building heights snap to whole art px.
-  - Box models are drawn the way `bake()` draws them in Saigon: top / left (×0.86) / right (×0.68) shading, with a cocoa-brown ink outline `#3B2A24`.
-  - Light comes from the **upper left**. Shadows fall **right-down**, as a 28% multiply onto the ground layer only.
-- **Outline:** 1 px ink on all world sprites. Inside the settlement the outline is slightly warmer, and outside the wall the ink stays neutral.
-
-### E2. Proportions (chibi, shared with Saigon)
-
-- **Adult 12 px tall: head 5 px, body 4, legs 3. Head = 40%.** Eyes are 1 px dots. There's no mouth except for expression frames.
-- Child 9 px (same head size, shorter body), elder 12 px with a cane column.
-- Role is told by **colour block and prop silhouette**, never by facial detail. At 2× a shirt colour plus a hat or tool is all you get.
-- Threats keep human-adjacent scale where they're humanoid (zombies), and **exceed human scale only when the era demands it** (dinosaurs, heavy robots). Big creatures always have a **dark readable silhouette with 1–2 light accents**: eye glint, scan light, horn tip.
-
-### E3. Directions
-
-- People and small threats: **2 drawn facings (SE, NE), mirrored for SW and NW**. That gives the four iso diagonals for half the art.
-- Large dinosaurs and robots: 2 drawn facings, mirrored. They move mostly along the vertical story axis, so this is enough.
-- Static props: one view, which works because the camera is fixed.
-
-### E4. Animation frame counts
-
-| Action | Frames | fps | Notes |
+| | **Past: scent and territory** | **Current: sound** | **Future: sight and signal** |
 |---|---|---|---|
-| Idle (breathe/blink) | 2 | 2 | blink every 3–5 s |
-| Walk | 4 | 8 | 1 px head bob |
-| Run | 6 | 12 | lean forward 1 px |
-| Work loops (hoe, hammer, stir, cast) | 3–4 | 6 | key pose held 2× |
-| Sit / eat | 2 | 3 | |
-| Kid play (jump, tag) | 4 | 10 | |
-| Zombie shamble | 4 | 5 | irregular hold |
-| Raptor run / stalk | 6 / 4 | 12 / 6 | |
-| Big dinosaur walk | 6 | 6 | 1 px ground-shake on frame 3 |
-| Robot quad / spider gait | 4 | 10 | perfectly even timing |
-| Drone hover | 2 | 6 | plus a 1 px bob on a sine |
-| Gate roll | 6 | 8 | |
-| Defeat (fall / collapse) | 4 | 8 | |
-
-### E5. Buildings and environment
-
-- Buildings are **box models** as in Saigon (`bake()`): walls, gable or flat roofs, windows and doors as face inserts, era palettes. Footprints snap to half-tiles.
-- **Wear layers** are overlays: rust streaks, boarded windows, moss, scorch, so one model serves several states.
-- Trees use blob canopies (3–4 lobes) with 3 tones plus highlight pixels, and **one species set per era** (Past: tree-ferns and cycads, Current: oak, birch and pine, Future: sparse, scorched, plus hydro-garden plants inside).
-- Ground is painted per pixel with a **4×4 Bayer dither** between 3 tones per material, as in the mockups.
-
-### E6. Lighting
-
-- **Time-of-day grade:** a multiply LUT per time slot. Dusk uses **two grades**: warm `(1.0, 0.80, 0.64)` inside the wall and cool `(0.62, 0.64, 0.86)` outside, blended across the wall with about a 10 px soft edge. **The light line is the "edge" in "Edge of Survival".**
-- **Emissives** are drawn *after* the grade: windows, fires, string lights, muzzle flashes, robot eyes.
-- **Light pool** is an additive pass of elliptical (2:1) gaussians: fire r 46, drum fire 22, window 9, tower lamp 16. Searchlight cones are soft polygons, 40–80 alpha.
-- **Height fog** toward the top edge of the map hides the map edge and pushes the wilderness back.
-
-### E7. Consistency across the three eras
-
-- **One shared skeleton per creature class.** All humans share the same 12-px template and pose frames, and eras swap only clothes and prop layers. Robots are drawn on dinosaur-sized bases (quad ≈ raptor, heavy ≈ apex) so threat scale lines up across eras.
-- **One shared house size scale.** A Past longhouse, a Current two-storey house and a Future habitat module all fit a footprint of 3–4 × 3 tiles and 16–20 px walls.
-- **Fixed geography anchors:** river, outcrop, oak position, gate position, creek and dock never move.
-- **Palette discipline:** each era has a 32-colour world palette plus a shared 8-colour UI/ink set.
+| Always-visible ambient | Grazing herds, small raptor pairs hunting rabbits, pterosaurs overhead | Lone shamblers, groups of 3–6 drifting toward noise, zombies chasing deer, crows on wrecks | Scout drones sweeping cones, quadruped patrols on the road, a spider unit on the rocks |
+| Preferred routes | R2/R3 trails (follow game paths), R4/R5 banks (to drink) | **R1 road** (noise funnels down it) plus anything the guns attract | R1 in formation, R3 culvert (signal leak), rare R6 amphibious |
+| Escalation | Smell of the smokehouse or a fresh kill pulls predators. Rival packs fight each other. | Gunshots raise the noise map, so **sniping too much draws more**, a nice self-balancing loop. | A drone that sees a light leak calls a squad, and a squad that's lost calls a heavy walker. Blackout drills reduce it. |
+| Major attack | A predator pack plus an apex on the west trail at dusk, with the palisade torched by a lightning fire | A horde from the ruins down R1, a flank group on R3 | A drone swarm plus quads, a heavy walker at the gate, an EMP counter |
 
 ---
 
-## F. Interface and controls
+## H. Sprite and animation specification (updated)
 
-**Functional reference: SaigonLofi.** The controls and the "…" menu structure are the same, so users already know them. **Visual identity: "field notebook and stencil."** In place of Saigon's wooden sign and cream paper: canvas-tape labels, stencilled type and hand-stitched edges. Palette: charcoal canvas `#2B2A28`, paper `#EDE4CF`, signal amber `#E8A33C`, olive `#6F7A4F`.
+**Pixel Art Studio status.** The skill is on this machine at `.agents/skills/pixel-art-studio/` (untracked, recorded in `skills-lock.json`), but it **isn't registered as a callable skill in this Claude Code session**, so I couldn't invoke it. I read its `SKILL.md` and its references (`patterns`, `techniques`, `animation`, `validations`, `sharp_edges`) and applied the rules by hand. I didn't run its scripts. The rules adopted:
+- **Integer-only, nearest-neighbour scaling** (its #1 sharp edge). This is why v0.2's 1.25×/1.5× zooms are gone.
+- **Chibi head = 40–50% of height**: 6 of 13 rows.
+- **Silhouette first:** weapons and tools break the outline (rifle barrel, hoe, crate overhead). They read more than internal detail.
+- **Hue-shifted ramps:** shadows shift toward plum, highlights toward warm cream. One light source (upper left). No pillow shading.
+- **Fewer, better frames:** walk 4 (contact–passing), death 4–6 (impact → collapse → settle), and the same pivot for all frames.
 
-```
-┌───────────────────────────────────────────────────────────────────────────┐
-│ ▐HOLDFAST▌  [ PAST | ■CURRENT■ | FUTURE ]                       ⛶  ⌂ Worlds │
-│                                                                           │
-│                              ( the world )                                │
-│                                                                           │
-│ ▶ ❚❚  ◀◀ ▶▶  "Rainy Porch Tapes" — lofi radio                  📓  ···     │
-└───────────────────────────────────────────────────────────────────────────┘
-```
-
-- **Top left:** a stencilled **HOLDFAST** plate, then the **Timeline** switch (the one new control). Three tape tabs with tiny era glyphs (fern / chain-link / circuit). Keys `[` `]` as in Saigon.
-- **Top right:** fullscreen and **⌂ Lofi Worlds** (Esc).
-- **Bottom left:** music bar with play/pause, prev/next and track name.
-- **Bottom right:** 📓 **Day Chronicle** and **···**.
-- **"···" menu** (same as Saigon): YouTube playlist URL · Time (Morning / Noon / Dusk / Night / Auto) · Weather (Auto / Clear / Rain / Wind) · Season (Spring / Summer / Autumn / Winter / Auto) · Music volume · Ambient volume + mute · Zoom · Camera assist (mobile) · VI / EN · Hide panel (H).
-- **Day Chronicle:** a collapsed notebook icon. Opening it shows **one torn page** with today's 3–6 entries (*"Day 214 · 09:40, Lan's team left for the gas station. 11:15, back with seeds and a dog."*). It never shows numbers, meters or tasks. A tiny dot on the icon means "new entry". It auto-hides after 10 s.
-- **Not allowed:** health bars, resource counters, alerts, minimaps, inventories or build menus. Threat state is communicated **only diegetically** (bell, dog, music, lights).
-- **Mobile:** the plate shrinks to an "H" badge, the timeline becomes a 3-dot segmented control, and the music bar collapses to ▶ plus the track name. Everything else lives in "···".
-
-Mockup 6 will show this.
-
----
-
-## G. Audio and music direction
-
-### G1. Layering (per era, 4 stems + one-shots)
-
-| Layer | Past | Current | Future |
+| Sprite | Size (art px) | Drawn facings | Frames |
 |---|---|---|---|
-| **Bed** (always) | warm wind, cicadas, distant waterfall | breeze in leaves, birds (day) / crickets (night) | low wind through metal, faint power hum |
-| **Settlement** (near the camera centre) | crackling fire, wooden knocks, stone grinding, bone flute | hammering, chickens, kids, guitar at dusk, screen door | generator thrum, hydro pumps, soft UI chirps, holo-synth at dusk |
-| **Water** (positional) | river, creek | river, creek, dock creaks | river, filtered pump outflow |
-| **Wilderness** (distant) | herbivore calls, pterosaur cries, far roar *(rare)* | crows, a far moan *(rare)*, car alarm *(very rare)* | drone whine passes, servo clicks, scanning sweep tone |
-| **Event one-shots** | horn of alarm, drums, torch whoosh, spear thud | church bell, gate roll, suppressed shots, a few rifle cracks | siren pulse, gate servo, pulse bolts, EMP thump |
+| Adult | 8 × 13 (16 tall with an overhead load) | front, side (mirrored) → 4 diagonals | idle 2 · walk 4 · run 6 · work 3–4 · aim 2 + fire 1 · kneel 2 · sit 2 · hurt 2 · death 4 |
+| Child | 8 × 10 | front, side | idle 2 · run 4 · play 4 |
+| Zombie | 8 × 13, hunched | front, side | shamble 4 (irregular hold) · attack 2 · hit 1 · death 4 · corpse 1 (13 × 3) |
+| Raptor / grazer / apex / long-neck | 14 × 10 / 28 × 18 / 40 × 30 / 64 × 48 | side (mirrored) | walk 6 · run 6 · attack 3 · hurt 2 · death 5 |
+| Drone / quad / spider / heavy | 7 × 5 / 14 × 10 / 18 × 10 / 28 × 34 | side | hover 2 · gait 4 (even timing) · fire 2 · explode 5 |
+| Deer, dog, goat, chicken, crow | 11 × 9, 9 × 5, 7 × 4, 3 × 3, 3 × 2 | side | 2–4 |
 
-### G2. Rules
+**Animation LOD** (performance and readability): agents more than 1 screen from the view update at 1 Hz and aren't drawn. Threats more than half a screen beyond the frame edge use 2-frame cycles. Crowds in the horde core share an animation clock with per-agent phase offsets.
 
-- **Distance attenuation:** sources are positioned in world px, with gain `1 / (1 + d/180)` from the camera centre and a gentle stereo pan by screen x. Zooming in raises the settlement layer, which makes zoom-in feel like leaning closer.
-- **Day/night:** each stem crossfades its day and night variant over 20 game minutes around dawn and dusk.
-- **Music continuity:** **the music never pauses or ducks below −3 dB.** During Attack the music bus gets a low-pass sweep (18 kHz → 6 kHz over 4 s) and a slight extra saturation. Recovery opens it back up over 8 s, the most satisfying moment. With YouTube, which can't be filtered, the ambience simply dips the event layer.
-- **Attack intensity caps:** at most 4 simultaneous combat voices. The combat bus is limited to −14 LUFS-short below the music. Gunshots use soft, low-passed recordings ("through a window"), at most 6 per 10 s, with no stacking within 120 ms. Screams and roars only play beyond 20 tiles and quietly.
-- **Long-session fatigue:** each one-shot has a cooldown and 4–6 variants played without repeating. A random "silence gap" of 20–40 s on the wilderness layer every few minutes keeps the soundscape breathing.
-- **Volume and mute:** separate *Music* and *Ambient* sliders, as in Saigon's "Âm phố". Ambient mute leaves the visual alarm cues intact. A tab hidden for more than 30 s fades ambience out, and music follows the user's play state.
-- **Era switch:** a 2.5 s equal-power crossfade of all ambient stems, synced to the visual crossfade. The music track keeps playing.
+**Buildings and environment:** Saigon-style box models (`bake()` approach): walls, gable or flat roofs, window and door inserts, era palettes, and wear overlays (boarded, rust, moss, scorch). **Tower platforms are open** (only a back tarp), so snipers are always readable. This was fixed after the first v0.3 render, where a roof hid them. **Wall panels stay at 9–10 px** (shorter than a person), with a **lattice cutaway** where a threat presses against the wall. Both are shown at the culvert in mockup 2.
+
+**Lighting:** dusk grade warm inside `(1.0, .80, .64)` and cool outside `(.66, .68, .88)`, blended at the wall. Emissives (windows, fires, string lights, muzzle flashes, tracers) are drawn after the grade, plus soft searchlight cones from the towers.
 
 ---
 
-## H. Performance and technical feasibility (browser JS, Canvas 2D)
+## I. Interface (as v0.2, two changes)
 
-| Budget | Desktop | Mobile |
-|---|---|---|
-| Map | 128 × 128 tiles, active simulation inside about 80 × 80 | same, with the outer ring baked at 1× |
-| Settlers | 28 (+ up to 2 guests) | 28 |
-| Threats active / on screen | 60 / **40** | 30 / 20 |
-| Wildlife | 16 agents + bird/fish/firefly particles (≤ 200) | 8 + ≤ 80 particles |
-| Animated sprites drawn per frame | ≤ 250 | ≤ 140 |
-| Light sources | ≤ 64 (pre-blurred sprite stamps) | ≤ 24 |
-| Frame rate | 60 fps, sim at 10 Hz with interpolation | 30 fps |
+The functional reference is Saigon's UI, with a "field notebook and stencil" identity. Controls: timeline tabs `PAST | CURRENT | FUTURE`, music bar, YouTube, time, weather, seasons, volumes, VI/EN, fullscreen, Lofi Worlds home, and the Day Chronicle (collapsed notebook).
 
-**Architecture:**
-- **Static world baking:** ground, buildings and static trees are rendered once per *era × season* into **chunk canvases** (512 × 256 art px). Day, dusk and night grades are applied in a final pass via `globalCompositeOperation` multiply (or 3 pre-graded chunk sets on low-end devices). This mirrors Saigon's `bake()` cache.
-- **Dynamic layer:** only moving sprites are re-sorted each frame. They use **bucket sort by iso depth row**, which is O(n), and are drawn between the static occluders that share their row. Tall static objects (towers, trees, houses) are kept as separate "occluder sprites", so depth works without re-drawing the ground.
-- **Sprite cache:** each pose × frame × palette is built once at load into an `OffscreenCanvas` atlas. Era change rebuilds only the era palette set (≈ 200 ms behind the crossfade).
-- **Navigation:**
-  - **Inside the wall:** a navmesh-free **tile grid with precomputed flow fields** to about 20 destinations (each home, work site, the commons, the gate, the shelter). Each field is 128 × 128 bytes. NPCs just read the next step.
-  - **Outside the wall:** authored splines for expeditions. Threats either wander or follow a flow field toward the gate or a noise point.
-  - **Collision:** soft separation only, with a sidestep rule. There's no physics.
-- **State machines:** each NPC is `{role, scheduleSlot, task, taskStep, target, timer, carry, mood}`, about 100 bytes. Updated at 10 Hz, and at 2 Hz when offscreen. There's no per-frame pathfinding.
-- **Wave scheduling (Director):** a single object with `phase`, `tension (0–1)`, `cooldown` and `dayPlan`. At dawn it plans the day: whether there's an attack, its tier, an approximate time, and expedition slots. Small random offsets keep it from feeling scheduled.
-- **Culling:** offscreen dynamic sprites skip drawing, and their animation advances only by clock. Off-screen particles aren't simulated.
-- **Background and idle:** a hidden tab runs the simulation at 1 Hz with no rendering. On return it fast-forwards at most 60 game seconds, then resumes. The "Hide panel" mode and long idle drop to 30 fps after 2 min without input.
-- **Memory target:** ≤ 150 MB desktop and ≤ 90 MB mobile. The baked chunks for one era and season at 1× are about 8 MB, and three grades add about 24 MB.
-- **Mobile:** DPR capped at 2, chunks baked at 1×, scaled by CSS. 30 fps. Half the lights. Rain uses a screen-space overlay rather than particles.
+1. **Zoom steps are integers** (see §A).
+2. **"···" gains "Danger: Calm / Standard / Grim"** (§D3).
 
-**Tests** (same style as Saigon's URL parameters): `?world=holdfast&era=1&time=dusk&phase=attack&seed=42&warp=60`.
+Still not allowed: health bars, resource counters, minimaps, alerts or control of anyone.
+
+## J. Audio (as v0.2, with density budgets)
+
+The v0.2 layering, attenuation, day/night variants, era crossfades and the **"music never stops"** rule all stand. For a busier world:
+- **Voice budget:** at most 10 simultaneous ambience one-shots (hammering, chatter, chickens…) and at most 4 combat voices. Combat bus 14 dB below the music, at most 6 shots per 10 s.
+- **Crowd bed:** a looped murmur stem whose gain follows the number of visible residents, so a busy market *sounds* busy without dozens of voices.
+- **Deaths are never sonified with screams.** A muffled impact, then silence on that layer for 3 s. Grief is heard later, at the fire (a soft guitar or song).
 
 ---
 
-## I. Timeline switching
+## K. Technical feasibility (browser, Canvas 2D, vanilla JS)
 
-### I1. What changes and what stays
+| Budget | Desktop target | Mobile target | Notes |
+|---|---|---|---|
+| Residents | 120 (16 A / 74 B / 30 C) | 70 | Tier C is camera-weighted, so density in view stays high on mobile |
+| Threats active | 80 (60 on screen max) | 35 (25 on screen) | Hordes beyond the view are simulated as a single "blob" token that splits into agents on approach |
+| Wildlife | 30 | 12 | |
+| Sprites drawn per frame | ≤ 400 | ≤ 220 | Each is an atlas `drawImage`, frustum-culled |
+| Particles / tracers | ≤ 300 | ≤ 100 | Pooled |
+| Light stamps | ≤ 96 | ≤ 32 | Pre-blurred sprites, additive pass |
+| Frame rate | 60 fps render, 10 Hz sim | 30 fps render, 5–10 Hz sim | Interpolated movement |
+| Memory | ≤ 200 MB | ≤ 110 MB | Baked chunks for 1 era × 1 season |
 
-| Stays (anchors) | Changes |
-|---|---|
-| River bend and creek, rock outcrop, oak position, gate position, wall line, dock, field area, roster identities | Architecture, wall material, towers, trees and plants, wildlife, threats, clothing and props, light colour, ambient audio |
+**Architecture choices:**
+1. **Bake everything static** (ground, buildings, trees, wall) into 512 × 256 chunk canvases per era and season, as Saigon's `bake()` caches do. The time-of-day grade is a multiply pass.
+2. **Dynamic sprites only** are depth-sorted each frame with a **bucket sort by iso row** (O(n)), interleaved with tall static occluders kept as separate sprites.
+3. **Navigation:** precomputed **flow fields** on the 144 × 144 grid (about 20 KB each) to about 30 destinations (homes are grouped by block). That's about 600 KB and about 30 ms to build at load. Outside the wall, threats use per-route fields and expeditions use splines. Noise and scent maps run on a coarse 36 × 36 grid updated at 2 Hz.
+4. **Agents** are structs in typed arrays (position, tier, role, task, timer, frame, phase), about 64 B each. 120 + 80 + 30 agents update in well under 1 ms per sim tick on desktop.
+5. **Hidden tab:** the simulation drops to 1 Hz with no render. On return it catches up at most 60 game seconds. Deaths can't happen while the tab is hidden: the Encounter Director pauses, so users don't come back to unexplained losses.
 
-The **oak through time:** a sapling ringed by stones (Past), a great oak (Current), the preserved trunk under a glass canopy with planters (Future).
-
-The **people through time:** "Ba" is the elder in every era, in hide wrap, then knitted cardigan, then a soft thermal coat. Persistent identities make era switching feel like a time-lapse of *one* community.
-
-### I2. How a switch works (no glitches)
-
-1. **Freeze** the simulation (0 ms).
-2. **Snapshot** the new era world at the **same clock time, season, weather and camera**.
-3. **Resolve the agent state:**
-   - **Settlers:** each keeps its position and task if the equivalent target exists in the new era (every work site has an equivalent). Otherwise it snaps to the nearest equivalent.
-   - **Active attack:** it is *not carried over*. The new era begins at **Recovery** if the previous era was in Attack or Recovery, so the viewer sees a plausible aftermath. Otherwise it begins at the same Director phase minus Attack.
-   - **Expedition outside:** the party is kept outside on the new era's version of the same route, in the "return" state. Pursuers are dropped.
-   - **Threats:** all despawn under the crossfade. The new era spawns its wanderers at their usual wilderness distances.
-   - **Wreckage and corpses** are era-specific and are removed. Wall damage carries over *as* damage in the new material, so builders keep their jobs.
-4. **Crossfade** for 1.2 s: dissolve from old frame to new, as in Saigon's era crossfade, with the 2.5 s audio crossfade.
-5. **Unfreeze.**
-
-Rapid switching (more than 3 in 10 s) is debounced. The last pick wins and only one crossfade plays.
+**Feasibility verdict:** 120 residents and 60 on-screen threats are **plausible but unproven** in Canvas 2D at 60 fps on desktop. The sprite count is within normal 2D canvas throughput, and simulation cost is small. **Mobile at 70 + 25 is the risky target.** I recommend a throwaway **stress-test prototype first** (static baked map plus N dummy animated sprites, no gameplay), measuring fps and memory at 120/60, 160/80 (desktop) and 70/25 (iPhone 12-class) before any real implementation. If the full target misses, reduce Tier C first, which is invisible to the design because it's camera-weighted.
 
 ---
 
-## J. Special ambient moments
+## L. Timeline switching (updated for persistent consequences)
 
-These are discoverable and rare, and the Chronicle records most of them. Rarities assume about an hour of viewing.
-
-| Era | Moment | Frequency |
-|---|---|---|
-| Past | **Herbivore migration** along the far bank. Long-necks and horned grazers cross the ford at dusk, and settlers line the bank to watch. | 1 per hour |
-| Past | **Night fire dance** after a predator is driven off. Drums, silhouettes around the bonfire. | after major defenses |
-| Past | A baby grazer wanders up to the palisade, and kids peek through the gaps until its mother calls. | rare |
-| Current | **The last-second gate**: scavengers sprint home, snipers cover, the gate slams. | ~1 per hour |
-| Current | **Movie night**: a bedsheet screen on the town hall wall, a generator, everyone on blankets. | 1 per in-game week |
-| Current | **The ball:** a kid's ball rolls toward the wall, an adult jogs to fetch it, and a single zombie hand appears through a gap. A guard taps it away, everyone laughs, and the ball goes back. | rare |
-| Current | **Floaters:** a zombie drifts down the river and a fisher pushes it off with a pole. This is the only threat from the river side, and it's harmless. | rare |
-| Current | **Fireflies over the fields** on summer dusks, with a kid chasing them and a jar glowing. | summer |
-| Future | **Night drone patrol**: a line of drones sweeps scan cones over the forest. The settlement does a **blackout drill**: windows go dark one by one and the camo nets go over the solar field. | 1–2 per night |
-| Future | **Salvage day**: a crew takes apart a downed heavy walker, and its arm becomes a new crane. | after sieges |
-| Future | **First bird**: a single songbird returns and lands on the dead oak. Everyone stops. | 1 per in-game month |
-| Any | **The fire after the fight**: the whole community at the commons, a quiet song, the guard who held the gate gets a cup first. | after every major attack |
-| Any | **New survivor** arrives with the scavengers and is welcomed at the gate. | rare |
-| Any | **Lantern evening / harvest festival**: lanterns floated on the river from the dock. | autumn |
-| Any | **First snow**: kids make a snow figure, and guards get scarves. | winter |
-| Any | **Thunderstorm**: lightning briefly reveals the whole wilderness, threats included, for one frame. | storms |
+- **Each era keeps its own saved community state** (roster, deaths, wall damage, memorial). They are parallel versions of the same people: a death in Current does not remove that person in Past.
+- **Only one era simulates at a time.** When you leave an era, it freezes and snapshots. When you return, it resumes.
+- **If an attack is running when you switch,** the snapshot is taken but **resumes at Recovery** on return, so no stale half-battle appears.
+- **Expeditions outside** are snapshotted in place. On return they continue, and pursuers are re-seeded at a safe distance.
+- **Crossfade:** 1.2 s visual dissolve plus 2.5 s ambient audio crossfade, with camera, zoom, time, weather, season and music all preserved. Rapid switching is debounced.
+- **Geography anchors** never move: river, creek, outcrop, oak, gate, wall line, docks, field area.
 
 ---
 
-## K. Mockup notes
+## M. Signature moments (v0.2 list kept, plus density-era additions)
 
-**1. World Overview** ([png](mockups/01-world-overview.png)) shows the full 128 × 128 map at native 1× in daylight. It labels the zones, POIs and **scavenger routes** (dashed), and draws the camera frames for 1080p, laptop and iPhone portrait. Note how much of the map's lower diamond is decorative far bank: the playable story sits in the upper-middle.
-
-**2. Current era, dusk** ([png](mockups/02-current-era-dusk.png)) is exactly the default 1920 × 1080 frame: 960 × 540 art px at 2×, cropped from the same map. Visible stories: a scavenger trio coming home down the old road; a zombie in the cleared ground with a **"?"** (it heard something); towers lit with searchlights sweeping; builders at a repaired panel; the meal around the fire under the oak; kids and the dog at the swings; farmers finishing in the fields; a fisher and a child on the dock; newcomers' tents and RV; the warm-inside / cool-outside light line.
-
-**Known mockup limits:** sprites are front-facing only and static, the art is procedurally generated rather than hand-polished, and labels and props are placeholders. Final art should hand-tune the templates in the same proportions.
-
----
-
-## L. Design critique: remaining weaknesses and fixes
-
-1. **Wall occlusion.** The camera sees the inner side of the wall, so any wall taller than a person hides the fight. **Fix:** 9–10 px panels, cutaway dither, and most combat staged in the cleared ground and at the gate. *Must be prototyped first.*
-2. **People read as dots at 2×.** In mockup 2 the settlers are legible but small. **Fix:** a stronger colour-block per role, 1 px bigger heads for adults (13 px total) if tests show it's needed, and *motion* (work loops) doing most of the readability work. Consider a default of 2.25× on 1080p if the wall still fits.
-3. **The middle of the settlement can look empty.** Mockup 2 has big plain lawns at the sides. **Fix:** more mid-scale clutter (sheds, washing, carts, compost, beehives, a goat pen), paths worn into grass by real NPC traffic (a heat-map texture that grows over days), and seasonal ground (flowers, leaves, snow).
-4. **Threats only come from the top.** That's readable but could get monotonous over an hour. **Fix:** keep the main vector, and add rare *harmless* side events (river floaters, a drone over the river, a dinosaur on the far bank) that don't break the safe-rear logic.
-5. **Peace has to carry 65% of the time.** **Fix:** the meal bell, social beats, the Chronicle, weather routines and the moments in §J. Also playtest *with combat disabled*. If that build isn't pleasant to leave open, combat won't save it.
-6. **One geography for three eras risks sameness.** **Fix:** vegetation, palette and **night-light character** must differ strongly. Fire (Past), sodium and string lights (Current), and cold floods with blackout drills (Future) make three different night silhouettes.
-7. **Tone and violence.** Even stylised, zombies and kids together are delicate. **Fix:** kids are never within 6 tiles of the wall, alarms send them to the shelter first, defeats turn to dust, and no gore sprites exist at all. Consider a *Gentle mode* option that makes zombies turn and wander off instead of falling.
-8. **Night readability.** Dark wilderness can swallow threats. **Fix:** each threat gets one rim-light or emissive pixel (a dim eye glint for zombies, an eye shine for dinosaurs, built-in lights on robots), and towers keep a sweeping searchlight.
-9. **The map is larger than it needs to be.** The lower third is decorative. **Fix (open question):** either shrink to 112 × 112 and shift the valley up, or use the far bank for the Past-era migration and Future-era drone lines so the space earns its keep.
-10. **Name.** "Holdfast" is a common word and the name of other products. Do a quick trademark search before it goes on the gallery card.
-11. **Scope.** Three eras times full content is large. **Fix:** Current era **without combat** → add expeditions → add attacks → Recovery polish. Then Past and Future reuse all the systems, so only content changes.
+Additions for the busier world:
+- **Market morning:** 15+ people trading, a cart arriving from the fields, kids weaving through.
+- **Shift change wave:** a ripple of guards walking the wall as the night crew climbs the towers one by one, each lamp lighting as they arrive.
+- **The burn pile at dusk** after a big day: a smoke column over the cleared ground and a guard leaning on a shovel.
+- **Rescue sortie:** the gate opens, four guards run out, and the snipers lay down cover. It doesn't always work.
+- **Candle night** after a death: the town gathers at the memorial, then drifts back to the fire.
+- **Zombies chasing deer** across the meadow while a sniper watches but doesn't waste the shot (noise draws more).
+- **Arrivals at the gate:** a ragged family walks up R1, the guards hesitate, then the gate opens.
 
 ---
 
-## M. Next steps (on approval)
+## N. Mockup notes
 
-1. Feedback on mockups 1–2: layout, scale, mood.
-2. Mockups 3–7: Past, Future, Attack scene, UI, gallery thumbnail.
-3. Only after that, an implementation plan for the Current-era pilot.
+**1. World Overview** ([png](mockups/01-world-overview.png)) is a planning diagram, deliberately zoomed out (1×):
+- Whole 144 × 144 map, gridded town of 62 homes, wilderness of groves, meadows, trails and ruins.
+- Red = threat routes R1–R5, blue = rare river route R6, yellow = scavenger routes.
+- Camera frames: default 3× (gold), 2× zoom-out (blue), iPhone portrait (pink).
+
+**2. Current era, dusk** ([png](mockups/02-current-era-dusk.png)) is exactly the default 1920 × 1080 view (640 × 360 art px at 3×). In one frame:
+- **50 residents, 20 threats.**
+- A sniper on the outcrop tower **dropping a zombie** on the road (tracer, white hit-flash), with **corpses** from earlier shots in the kill-zone.
+- **Scavengers retreating while shooting** from two infected at the abandoned houses ("!" bubble).
+- **Zombies chasing deer**, a group gathering on the west trail (one "?" hears something), and three infected pressing on the **culvert**, shown with the wall cutaway.
+- Wall patrol, open-platform tower guards and gate guards; barracks drill; **6-stall market** with traders and carriers; infirmary triage (kneeling medic, patient with "+"); workshop techs on a truck.
+- The oak and the commons fire, drum fires and searchlights.
+
+**Limits:** static frame, no motion. Procedural art (hand-polish later). Some stalls and props are placeholders. The left and right flanks of the wall are off-frame by design.
+
+---
+
+## O. Critique: weaknesses and fixes
+
+1. **Readability at this density.** 50 people plus 20 threats is near the limit of one frame. **Fix:** strict colour coding (guards olive, medics white, builders yellow, zombies grey-green and *never* used for settlers), and a slight desaturation on threats more than 1 screen from the action.
+2. **Death and lofi tone.** **Fix:** restraint rules (§F1), no screams, mourning instead of shock, children and elders never at risk, the Danger option, and deaths paused while the tab is hidden. *It should be tested with real viewers before committing.*
+3. **Performance is unproven.** **Fix:** do the stress-test prototype (§K) before any gameplay code. The fallback order: Tier C, then off-screen threats, then light stamps.
+4. **Wall occlusion** still matters at 3×. **Fix:** 9–10 px panels plus the lattice cutaway, as shown.
+5. **The town grid looks repetitive** (procedural repeats in mockup 1). **Fix:** hand-authored lot variants (burned house being rebuilt, walled courtyard, chicken yard, ruined lot used as a garden) and irregular blocks near the river.
+6. **Half the wall is off-screen by default.** Flank fights could be missed. **Fix:** diegetic off-screen cues (§A) and mobile camera assist. Also ensure about 60% of encounters use R1–R3, which reach the central frame.
+7. **The cleared ground is shallow at 3×** (about 72 art px). Fights near the wall may feel cramped. **Fix:** consider 85–90 px depth and verify in the Attack mockup.
+8. **Night density vs darkness.** More lights help, but threats still need a 1-px rim or eye glint in the dark (unchanged from v0.2).
+9. **Expedition fatalities vs Chronicle fatigue.** About 1–2 deaths per hour, all announced, could feel heavy. **Fix:** Chronicle entries for deaths are factual and brief, and Standard can be tuned after playtesting.
+10. **Name check** for "Holdfast" is still pending.
+
+---
+
+## P. Next decision (for you)
+
+1. Approve or adjust the **3× default camera**, the **density** (50 + 20 in frame) and the **threat visibility** in mockup 2.
+2. Confirm the **death and replenishment rules** and the **Danger option**.
+3. Then: Past, Future, Attack, UI and gallery mockups, followed by the performance stress-test prototype.
