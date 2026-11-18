@@ -18,9 +18,10 @@ Object.assign(UI, {
   'w.wild': ['Thế Giới Hoang Dã', 'Wildlife World'], 'w.wild.d': ['Những khu sinh thái nhỏ, ai cũng có nhà.', 'Tiny habitats where everyone has a home.'],
   'w.clean': ['Thành Phố Xanh Lại', 'Clean-Up World'], 'w.clean.d': ['Robot nhỏ dọn dẹp, cây xanh mọc lại.', 'Little robots tidy up; the green grows back.'],
   'w.ocean': ['Đại Dương', 'Ocean Life'], 'w.ocean.d': ['Ánh sáng xuyên nước, sứa phát quang.', 'Sunbeams through water, glowing jellyfish.'],
+  'w.holdfast': ['Holdfast — Bên bờ sinh tồn', 'Holdfast — Edge of Survival'], 'w.holdfast.d': ['Một khu định cư có tường bao, sống sót giữa đại dịch xác sống.', 'A walled settlement holding out through the zombie years.'],
   'w.fall': ['Sau Cơn Sụp Đổ', 'After The Fall'], 'w.fall.d': ['Một vùng an toàn, đống lửa và dây đèn.', 'A safe zone, a campfire and string lights.']
 });
-const WORLDS = [{ id: 'saigon', live: true }, { id: 'snow' }, { id: 'wild' }, { id: 'clean' }, { id: 'ocean' }, { id: 'fall' }];
+const WORLDS = [{ id: 'saigon', live: true }, { id: 'snow' }, { id: 'wild' }, { id: 'clean' }, { id: 'ocean' }, { id: 'holdfast', live: true }];
 
 // ---------------------------------------------------------------- pixel-art thumbnails: 96x96 postcards, shared palette, light from the left
 const MS = 96, MINK = '#2b1a16', BAY4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
@@ -101,6 +102,8 @@ const SCENES = {
   }
 };
 
+SCENES.holdfast = SCENES.fall;
+
 // ---------------------------------------------------------------- DOM
 const $m = id => document.getElementById(id);
 function menuBuild() {
@@ -151,6 +154,7 @@ function menuEnter(card) {
   art.style.transform = `translate(${vw / 2 - (r.left + r.width / 2)}px, ${vh / 2 - (r.top + r.height / 2)}px) scale(${sc})`; card.classList.add('zoom');
   if (!AU.playing && !(typeof YTS !== 'undefined' && YTS.on)) { try { audioPlay(); } catch (e) { } }              // entering is a user gesture: start the radio if it was silent
   setTimeout(() => {
+    if (card.dataset.world === 'holdfast') { $m('menu').classList.add('leaving'); hfOpen(); setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520); return; }
     $m('menu').classList.add('leaving'); document.body.classList.remove('menu'); G.menu = false; document.title = t('title');
     if (!MENU.entered) { MENU.entered = true; boot().then(() => { if (typeof updateUI === 'function') updateUI(); }); } else if (typeof updateUI === 'function') updateUI();
     setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520);
@@ -173,3 +177,18 @@ function menuStart() {
   menuShow();
   $m('fade').classList.remove('on');
 }
+
+// ---------------------------------------------------------------- Holdfast: a separate world in its own frame, sharing this page's radio
+// Only one world simulates at a time: Saigon sleeps (G.menu stays true) while Holdfast is open; closing the frame disposes Holdfast.
+window.LW = { AU, YTS, TRACKS, audioInit, audioPlay, audioPause, nextTrack, setVol, ytLoad, ytOff, ytToggle, ytNext, ytVolume, setLang };
+function hfOpen() {
+  let f = $m('hfFrame'); if (!f) { f = document.createElement('iframe'); f.id = 'hfFrame'; f.title = 'Holdfast'; f.allow = 'autoplay; fullscreen'; f.src = 'holdfast/index.html?embed=1'; document.body.appendChild(f); }
+  G.menu = true; document.body.classList.remove('menu'); document.body.classList.add('hfopen'); document.title = t('w.holdfast'); setTimeout(() => { try { f.focus(); } catch (e) { } }, 600);
+}
+function hfClose(lang) {
+  const f = $m('hfFrame'); if (f) f.remove(); document.body.classList.remove('hfopen');
+  if (lang && lang !== LANG.cur) setLang(lang);
+  menuShow(true);
+}
+window.addEventListener('message', e => { if (e.data && e.data.hf === 'exit') hfClose(e.data.lang); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('hfopen')) hfClose(); });

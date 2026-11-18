@@ -1,7 +1,7 @@
 'use strict';
 // ===== Holdfast — autonomous simulation: settlers, infected, wildlife, combat, expeditions, director (no DOM, no canvas) =====
 const DAY_SEC = 1200;                                   // one in-game day = 20 real minutes
-const DANGER = { calm: { n: 0.55, die: 0.12, iv: 1.4 }, standard: { n: 1, die: 0.35, iv: 1 }, grim: { n: 1.6, die: 0.6, iv: 0.75 } };
+const DANGER = { calm: { n: 0.55, die: 0.06, iv: 1.4 }, standard: { n: 1, die: 0.2, iv: 1 }, grim: { n: 1.6, die: 0.5, iv: 0.75 } };
 const FIXED_H = { morning: 8, noon: 12.5, dusk: 18.6, night: 22.5 };
 const HS = {
   t: 0, day: 1, hour: 6.5, life: 6.5, timeMode: 'auto', wxMode: 'auto', weather: 'clear', seasonMode: 'auto', season: 'summer', danger: 'standard',
@@ -142,6 +142,7 @@ function hsHurt(p, z) {
 }
 function hsKill(p) {
   p.alive = false; p.st = 'dead'; p.deadT = 60; p.path = null; p.task = null; HS.stats.deaths++;
+  if (p.post && p.post.k !== 'reserve') (HS.vacant = HS.vacant || []).push(p.post);
   hsLog('died', { n: hsName(p), r: p.role }, true); hsSound('loss', p.x, p.y, 0.5);
   for (const e of HS.exps) e.team = e.team.filter(q => q !== p);
 }
@@ -195,10 +196,11 @@ function setTask(p, t) {
   p.task = t; t.t = 0; t.ph = 'go'; if (t.spot) claim(t.spot, 1);
   if (p.vis === false && t.k !== 'sleep' && t.k !== 'shelter') { p.vis = true; }
   p.variant = t.tool || (p.carry || ''); p.act = '';
-  if (!hsGo(p, t.x, t.y, p.role === 'scav' || p.exp || p.rescue ? 'all' : 'in', t.run)) { t.ph = 'do'; }
+  if (!hsGo(p, t.x, t.y, p.exp || p.rescue ? 'all' : 'in', t.run)) { t.ph = 'do'; }
 }
 function hsBed(p) { const s = hsPickSpot('bed'); setTask(p, { k: 'bed', x: s.x, y: s.y, spot: s, dur: 1e9 }); }
 function guardThink(p) {
+  if (!p.post) { p.post = (HS.vacant && HS.vacant.shift()) || { k: 'reserve' }; p.shift = p.id % 2; }
   const P = p.post, alarm = HS.alarm > 0;
   if (!onShift(p) && !alarm) {
     const h = HS.life, meal = (h >= 11.8 && h < 12.9) || (h >= 18.3 && h < 19.2);
@@ -230,9 +232,9 @@ function hsPerson(p, dt) {
   if (p.onTower) return towerGuard(p, dt);
   // danger response for anyone inside: infected within reach -> fight (guards) or flee
   if (HS.zInside > 0 && isInside(p.x, p.y)) {
-    const z = nearestZ(p.x, p.y, p.role === 'guard' ? 140 : 46, q => isInside(q.x, q.y) || dist(q, p) < 14);
+    const z = (p.noFight || 0) > HS.t ? null : nearestZ(p.x, p.y, p.role === 'guard' ? 140 : 46, q => hfPass(tileOfW(q.x, q.y), 'in') || dist(q, p) < 12);
     if (z) {
-      if (p.role === 'guard' || p.role === 'builder' || (p.role === 'adult' && p.id % 2)) { if (dist(z, p) < 11) { melee(p, z); return; } if (!p.path || p.task?.k !== 'fight') { p.task = { k: 'fight', t: 0, ph: 'go', tool: 'spear' }; p.variant = 'spear'; hsGo(p, z.x, z.y, 'in', true); } }
+      if (p.role === 'guard' || p.role === 'builder' || (p.role === 'adult' && p.id % 2)) { if (dist(z, p) < 11) { melee(p, z); return; } if (!p.path || p.task?.k !== 'fight') { if (p.task?.k === 'fight' && p.task.zid === z.id && tileOfW(p.x, p.y) === hfNearPass(z.x, z.y, 'in', 4)) { p.noFight = HS.t + 8; p.task = null; } else { p.task = { k: 'fight', t: 0, ph: 'go', tool: 'spear', zid: z.id }; p.variant = 'spear'; hsGo(p, z.x, z.y, 'in', true); } } }
       else if (p.task?.k !== 'shelter') { const s = HF.spots.shelter[0]; setTask(p, { k: 'shelter', x: s.x, y: s.y, run: 1 }); }
     }
   }
@@ -250,7 +252,7 @@ function hsPerson(p, dt) {
     case 'defend': { const s = HF.walls[T.seg]; p.act = 'stand'; const z = nearestZ(s.x, s.y, 22); if (z) { faceTo(p, z); if (p.cool <= 0) { p.cool = 1.3; p.act = 'stab'; if (HS.R() < 0.6) hsHitZ(z, p, 1); hsSound('stab', p.x, p.y, 0.4); } } if (T.t > T.dur && !z) p.task = null; return; }
     case 'gatepost': { p.act = 'stand'; p.dir = 3; const z = nearestZ(HF.gate.x, HF.gate.y, 20); if (z) { faceTo(p, z); if (p.cool <= 0) { p.cool = 1.2; p.act = 'stab'; if (HS.R() < 0.65) hsHitZ(z, p, 1); hsSound('stab', p.x, p.y, 0.4); } } if (T.t > T.dur) p.task = null; return; }
     case 'patrol': { p.act = 'look'; const z = nearestZ(p.x, p.y, 70, q => !isInside(q.x, q.y)); if (z && p.cool <= 0) { p.cool = 2.2; faceTo(p, z); hsShoot(p, z, { x: p.x, y: p.y, z: 14 }, 70, 0.5); } if (T.t > T.dur) p.task = null; return; }
-    case 'fight': { p.task = null; return; }
+    case 'fight': { if (T.t > 0.5) p.task = null; return; }
     case 'eat': case 'sit': p.act = 'sit'; if (T.k === 'eat' && T.t > 3 && !p.bub && HS.R() < 0.01) bubble(p, pickR(['cup', 'heart', 'note', 'dots'])); if (T.t > (T.dur || 20)) p.task = null; return;
     case 'play': if (T.t > (T.dur || 8)) { if (HS.R() < 0.6) { const s = spotXY('play', 4); hsGo(p, s.x, s.y, 'in', true); T.t = 0; T.dur = rr2(3, 7); T.n = (T.n || 0) + 1; if (T.n > 4) p.task = null; } else p.task = null; } else p.act = 'jump'; return;
     case 'drop': p.act = 'stand'; if (T.t > T.dur) { if (T.then === 'basket0' || T.then === 'bucket0') { p.carry = null; bubble(p, T.then === 'basket0' ? 'leaf' : 'pho'); } p.task = null; } return;
@@ -262,7 +264,7 @@ function hsPerson(p, dt) {
   }
 }
 function bubble(p, k) { p.bub = k; p.bubT = 2.5; }
-function melee(p, z) { faceTo(p, z); p.act = 'stab'; if (p.cool <= 0) { p.cool = 1.2; if (HS.R() < 0.7) hsHitZ(z, p, 1); hsSound('stab', p.x, p.y, 0.5); } }
+function melee(p, z) { faceTo(p, z); p.act = 'stab'; if (p.cool <= 0) { p.cool = 1.1; if (HS.R() < 0.72) hsHitZ(z, p, p.role === 'guard' ? 2 : 1); hsSound('stab', p.x, p.y, 0.5); } }
 function towerGuard(p, dt) {
   const T = p.onTower, t = T.t;
   if (T.climb < 1) { T.climb += dt / 3; p.x = t.x + 9; p.y = t.y + 19; p.z = T.climb * 48; return; }
@@ -332,7 +334,7 @@ function hsZ(z, dt) {
     case 'attack': {
       const p = z.tgt; if (!p || !p.alive || p.onTower) { z.st = 'wander'; z.tgt = null; return; }
       const d = Math.hypot(p.x - z.x, p.y - z.y); if (d > 11) { z.st = 'pursue'; return; }
-      faceTo(z, p); if (z.cool <= 0) { z.cool = 1.5; if (HS.R() < 0.42) hsHurt(p, z); hsSound('growl', z.x, z.y, 0.5); }
+      faceTo(z, p); if (z.cool <= 0) { z.cool = 1.6; if (HS.R() < (p.role === 'guard' ? 0.22 : 0.32)) hsHurt(p, z); hsSound('growl', z.x, z.y, 0.5); }
       return;
     }
     case 'wall': {
@@ -363,7 +365,7 @@ function hsCloseBreach(s) {
   s.breached = false; HF.walk[tIdx(s.i, s.j)] &= ~W_BREACH; HF.breaches = Math.max(0, HF.breaches - 1); HF.ver++; HS.dirtyWall = true; hsLog('sealed', {});
   for (const z of HS.zombies) if (tileOfW(z.x, z.y) === tIdx(s.i, s.j) && s.outT >= 0) [z.x, z.y] = tileC(s.outT);
 }
-function hsAlarm(why) { if (HS.alarm <= 0) { hsLog('alarm', { why }, true); hsSound('bell', HF.gate.x, HF.gate.y, 1); } HS.alarm = 45; for (const p of HS.people) if (p.alive && (p.role === 'kid' || p.role === 'elder' || p.role === 'guard' || p.tier === 2) && !p.exp && !p.rescue && !p.onTower && p.task?.k !== 'shelter' && p.task?.k !== 'bed') p.task = null; }
+function hsAlarm(why) { const fresh = HS.alarm <= 0; HS.alarm = 45; if (!fresh) return; hsLog('alarm', { why }, true); hsSound('bell', HF.gate.x, HF.gate.y, 1); for (const p of HS.people) if (p.alive && (p.role === 'kid' || p.role === 'elder' || p.role === 'guard' || p.tier === 2) && !p.exp && !p.rescue && !p.onTower && p.task?.k !== 'shelter' && p.task?.k !== 'bed') p.task = null; }
 
 // ---------------------------------------------------------------- wildlife
 function hsAddWild(k, x, y, o) { const w = Object.assign({ k, x, y, px: x, py: y, dir: 1, t: 0, path: null, spd: k === 'deer' ? 7 : k === 'rabbit' ? 9 : k === 'dog' ? 8 : 3, ph: HS.R() * 10, stride: 0, flee: 0 }, o || {}); HS.wild.push(w); return w; }
@@ -412,8 +414,8 @@ function hsExp(e, dt) {
     if (p.st === 'down') { p.task = { k: 'down', t: 0 }; continue; }
     if (isInside(p.x, p.y) && e.ph !== 'out' && e.ph !== 'search') continue;
     const z = nearestZ(p.x, p.y, 80);
-    if (z && p.cool <= 0) { p.cool = rr2(0.9, 1.4); faceTo(p, z); hsShoot(p, z, { x: p.x, y: p.y, z: 14 }, 80, 0.58); bubble(p, 'ex'); }
-    if ((e.ph === 'out' || e.ph === 'search') && (countZ(p.x, p.y, 90) >= 3 || p.inj)) { e.ph = 'back'; e.chased = true; hsLog('exp.chased', { poi: e.poi.name }, true); for (const q of e.team) q.path = null; hsMaybeRescue(e); }
+    if (z && p.cool <= 0) { p.cool = rr2(0.9, 1.4); faceTo(p, z); hsShoot(p, z, { x: p.x, y: p.y, z: 14 }, 90, 0.64); bubble(p, 'ex'); }
+    if ((e.ph === 'out' || e.ph === 'search') && (countZ(p.x, p.y, 100) >= 2 || p.inj)) { e.ph = 'back'; e.chased = true; hsLog('exp.chased', { poi: e.poi.name }, true); for (const q of e.team) q.path = null; hsMaybeRescue(e); }
   }
   const moveAll = (x, y, run) => { let all = true; for (const p of e.team) { if (p.st === 'down') { all = false; continue; } if (!p.path) hsGo(p, x + (p.lane * 3), y - p.lane * 3, 'all', run); if (p.path) { if (needGate(p)) { all = false; continue; } const done = hsStep(p, dt, (run ? 12.5 : p.spd) * (p.inj ? 0.6 : 1)); if (!done) all = false; } } return all; };
   switch (e.ph) {
@@ -424,7 +426,9 @@ function hsExp(e, dt) {
     case 'done': {
       const lost = e.start - e.team.length, hurt = e.team.filter(p => p.inj).length;
       if (lost) { HS.stats.expDead++; hsLog('exp.dead', { poi: e.poi.name, n: lost }, true); } else if (hurt) { HS.stats.expHurt++; hsLog('exp.hurt', { poi: e.poi.name, loot: e.loot }); } else { HS.stats.expOk++; hsLog('exp.ok', { poi: e.poi.name, loot: e.loot }); }
+      const out = e.team.filter(p => !isInside(p.x, p.y));
       for (const p of e.team) { p.exp = null; p.task = null; p.variant = ''; p.L.pack2 = 0; }
+      if (out.length) { for (const p of out) { p.arriving = true; p.task = { k: 'arrive', t: 0 }; } HS.arrivals.push({ group: out, t: 0, home: 1 }); }   // stragglers still walk home through the gate
       return false;
     }
   }
@@ -476,7 +480,7 @@ function hsArrive(a, dt) {
     if (p.path && !hsStep(p, dt, countZ(p.x, p.y, 90) ? 12 : p.spd)) all = false;
     if (!isInside(p.x, p.y)) all = false;
   }
-  if (all || a.t > 300) { for (const p of a.group) { p.arriving = false; p.task = null; } HS.stats.arrivals += a.group.length; hsLog('arrived', { n: a.group.length }); return false; }
+  if (all || a.t > 300) { for (const p of a.group) { p.arriving = false; p.task = null; } if (!a.home) { HS.stats.arrivals += a.group.length; hsLog('arrived', { n: a.group.length }); } return false; }
   return true;
 }
 

@@ -8,7 +8,7 @@ Object.assign(UI, {
   'hf.sound': ['Âm thanh', 'Sound'], 'hf.music': ['Nhạc', 'Music'], 'hf.amb': ['Môi trường', 'Ambient'], 'hf.mute': ['Tắt', 'Mute'], 'hf.unmute': ['Bật', 'Unmute'], 'hf.load': ['Mở', 'Load'], 'hf.view': ['Khung nhìn', 'View'], 'hf.hide': ['Ẩn bảng (H)', 'Hide panel (H)'],
   'hf.hint': ['kéo để nhìn quanh · cuộn để phóng to · Esc về Lofi Worlds', 'drag to look around · wheel to zoom · Esc for Lofi Worlds'],
   't.auto': ['Tự động', 'Auto'], 't.morning': ['Sáng', 'Morning'], 't.noon': ['Trưa', 'Noon'], 't.dusk': ['Chiều tà', 'Dusk'], 't.night': ['Đêm', 'Night'],
-  'w.auto': ['Tự động', 'Auto'], 'w.clear': ['Quang', 'Clear'], 'w.rain': ['Mưa', 'Rain'], 'w.wind': ['Gió', 'Wind'],
+  'w.auto': ['Tự động', 'Auto'], 'w.clear': ['Quang', 'Clear'], 'w.rain': ['Mưa', 'Rain'], 'w.wind': ['Gió', 'Wind'], 'w.snow': ['Tuyết', 'Snow'],
   's.auto': ['Tự động', 'Auto'], 's.spring': ['Xuân', 'Spring'], 's.summer': ['Hạ', 'Summer'], 's.fall': ['Thu', 'Autumn'], 's.winter': ['Đông', 'Winter'],
   'd.calm': ['Yên ả', 'Calm'], 'd.standard': ['Tiêu chuẩn', 'Standard'], 'd.grim': ['Khắc nghiệt', 'Grim'],
   'st.day': ['Ngày {d}', 'Day {d}'], 'st.peace': ['bình yên', 'quiet'], 'st.attack': ['BÁO ĐỘNG', 'ALARM'], 'st.recovery': ['đang khắc phục', 'recovering'], 'st.pop': ['{n} người', '{n} people'], 'hf.radio': ['radio lofi', 'lofi radio'], 'hf.paused': ['nhạc đang tắt', 'music paused'],
@@ -76,7 +76,7 @@ async function hfBoot() {
   if (Q.get('cam') === 'exp') { const e = HS.exps[0]; if (e && e.team[0]) HFG.follow = e.team[0]; }
   HR.bakeAll = true; hrFrame(1, performance.now()); HR.bakeAll = false; await prog(1);
   hfUIBuild(); if (Q.get('clean')) document.body.classList.add('clean');
-  $('load').classList.add('done'); setTimeout(() => $('load').hidden = true, 700);
+  $('load').classList.add('done'); if (Q.get('warp') || Q.get('test') || Q.get('bench')) $('load').hidden = true; else setTimeout(() => $('load').hidden = true, 700);
   HFG.booted = true; HFG.last = performance.now(); requestAnimationFrame(hfLoop);
   if (MW !== LOCAL_LW && MW.AU.playing) haStart(MW);
   if (Q.get('test')) hfSelfTest(); if (Q.get('bench')) hfBench();
@@ -179,7 +179,7 @@ function hfUIBuild() {
 function hfStatus() {
   const h = HS.hour, hh = String(Math.floor(h)).padStart(2, '0'), mm = String(Math.floor((h % 1) * 60)).padStart(2, '0'), pop = HS.people.filter(p => p.alive).length;
   const m = HS.mode === 'attack' ? `<span class="alarm">⚠ ${t('st.attack')}</span>` : t('st.' + HS.mode);
-  $('status').innerHTML = `${t('st.day', { d: HS.day })} · ${hh}:${mm} · ${t('w.' + HS.weather)} · ${t('s.' + HS.season)} · ${m}`;
+  $('status').innerHTML = `${t('st.day', { d: HS.day })} · ${hh}:${mm} · ${t('w.' + (HS.weather === 'rain' && HS.season === 'winter' ? 'snow' : HS.weather))} · ${t('s.' + HS.season)} · ${m}`;
 }
 function hfMusicUI() { if (!HFG.booted) return; const on = mus.playing(); $('mPlay').textContent = on ? '❚❚' : '▶'; $('mTrack').textContent = mus.title(); $('mState').textContent = on ? t('hf.radio') : t('hf.paused'); }
 function hfOnEvent(e) { if (!HFG.booted) return; if ($('chron').hidden) $('bChron').classList.add('new'); else hfLogUI(); if (e.bad || e.k === 'exp.ok' || e.k === 'arrived' || e.k === 'rescue') hfToast(logText(e), e.bad); }
