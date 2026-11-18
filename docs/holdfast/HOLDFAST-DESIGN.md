@@ -5,6 +5,8 @@
 >
 > **v0.3 direction:** Holdfast is a **busy, living survival world, not a quiet village.** Something meaningful is always moving, there's frequent small-scale danger, and big battles are occasional. Individual encounters can go badly, people can die, and the settlement always endures.
 
+> **Art pilot (pending approval):** [`art-pilot/`](art-pilot/README.md) re-renders Holdfast with SaigonLofi's own art system at Saigon's pixel density. If approved, its art rules **supersede §A and §H's "13-px people at 3×"**: Holdfast uses `K = 2` and 1 art px = 1 device px at 1080p, with people about 40 art px tall. The v0.3 mockups below are layout and density diagrams, not final art.
+
 | Mockup | File |
 |---|---|
 | 1. World Overview: planning diagram, whole 144 × 144 map, day | [`mockups/01-world-overview.png`](mockups/01-world-overview.png) |
