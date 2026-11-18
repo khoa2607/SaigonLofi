@@ -15,7 +15,8 @@ function ambient(h) { let i = 0; while (i < KF.length - 2 && KF[i + 1][0] <= h) 
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 3), cw = window.innerWidth, ch = window.innerHeight, pw = cw * dpr, ph = ch * dpr;
   // screen pixels per art pixel (aps) is a whole number so the K-density art stays crisp; one world unit = K art pixels
-  const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K)), sMin = Math.max(1, Math.ceil((pw / (WORLD * 2) + ph / WORLD) / 0.96 / K));
+  // default view ~17% wider than before (still a whole number of screen px per art px)
+  const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K * 0.83)), sMin = Math.max(1, Math.ceil((pw / (WORLD * 2) + ph / WORLD) / 0.96 / K));
   const aps = clamp(base + R.zoom, sMin, 6); R.zoom = aps - base; const s = aps * K; R.scale = s; R.dpr = dpr;
   R.vw = Math.ceil(pw / s); R.vh = Math.ceil(ph / s);
   for (const c of [R.canvas, R.lc]) { c.width = R.vw * K; c.height = R.vh * K; }
@@ -63,7 +64,7 @@ function draw() {
   for (const s of CITY.stands) if (s.state === 'parked' && G.onScreen(s.x, s.y, 30)) dyn.push({ key: s.x + s.y, stand: s });
   for (const s of W.visSig) dyn.push({ key: s[0] + s[1] + 0.5, sig: s });
   for (const f of W.visTet) dyn.push({ key: TET.key(f), tet: f });
-  for (const f of W.visEv) dyn.push({ key: f.key, ev: f }); EV.pushDyn(dyn, shadow);   // night events: decorations, crowds, boat flags
+  for (const f of W.visEv) dyn.push({ key: f.key, ev: f }); EV.pushDyn(dyn, shadow); DAN.pushDyn(dyn, shadow);   // night events: decorations, crowds, boat flags
   dyn.sort((a, b) => a.key - b.key);
   const sway = (0.5 + G.gust * 2.8 + (G.windy ? 0.9 : 0));
   const drawStatic = it => {
@@ -97,6 +98,7 @@ function draw() {
     else if (d.stand) { const s = d.stand, p = vehicle(s.kind === 'xeom' ? ERA[G.era].xeom : 'cyclo', s.v, s.dir, [s.x, s.y], s.driver ? [s.driver] : [], s.alpha === undefined ? 1 : s.alpha); if (s.bub) bubbles.push([BUB[s.bub.k], p[0] - 3, p[1] - 36]); }
     else if (d.tet) TET.draw(g, lg, useL, d.tet, cx, cy);
     else if (d.ev) EV.draw(g, lg, useL, d.ev);
+    else if (d.dan) DAN.draw(g, lg, useL, d.dan, bubbles);
     else if (d.sig) { const st = sigOf(d.sig[2]), s = scn(d.sig[0], d.sig[1], st === 0 ? 31.5 : st === 2 ? 29 : 26.5); g.fillStyle = SIGC[st]; g.fillRect(s[0] - 1, s[1], 2, 2); if (useL) { lg.fillStyle = SIGC[st]; lg.fillRect(s[0] - 1, s[1], 2, 2); } }
   };
   const vis = W.vis; let i = 0, j = 0;
@@ -123,13 +125,13 @@ function toggleRiverView() { const nearRiver = Math.abs(R.panX - RIVER_VIEW.px) 
 function setTet(on, quiet) {
   if (!G.world || G.busy || on === G.tet) return;
   if (on) EV.clear(true);                                                  // Tết and the night events never overlap
-  snapshot(); G.tet = on; EV.sel = on ? 'tet' : EV.sel === 'tet' ? 'none' : EV.sel; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync();
+  snapshot(); G.tet = on; EV.sel = on ? 'tet' : EV.sel === 'tet' ? 'none' : EV.sel; G.world.items = buildStatics(G.season, G.era); G.world.vis = null; R.dirty = true; R.xf = 1; if (!on) TET.off(); TET.sync(); DAN.sync();
   updateUI(); save(); if (!quiet) ticker(on ? 'Tết đến rồi! Hoa mai nở vàng, đèn lồng đỏ khắp phố' : 'Hết Tết, phố trở lại nhịp sống thường ngày', true);
 }
 function setEra(e, quiet) {
   if (e === G.era || G.busy || !G.world) return;
   snapshot();
-  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync(); EV.onEra();
+  G.era = e; ensureOv(G.season, e); G.world.items = buildStatics(G.season, e); G.world.vis = null; R.dirty = true; R.xf = 1; TET.sync(); EV.onEra(); DAN.sync();
   eraShift(); updateUI(); save(); if (!quiet) ticker(UI['era.' + e + '.msg'][0], true);
 }
 // bake the other eras' buildings a few at a time while idle, so the first switch has no hitch
@@ -144,7 +146,7 @@ function tick(dt) {
   if (G.autoTime) G.hour = (G.hour + dt * G.daySpeed) % 24; else { const df = ((G.hourTarget - G.hour + 36) % 24) - 12; G.hour = (G.hour + clamp(df, -dt * 7, dt * 7) + 24) % 24; }
   if (G.autoSeason && !G.busy) { G.seasonT += dt; if (G.seasonT > 150) setSeason(SEASONS[(SEASONS.indexOf(G.season) + 1) % 4]); }
   if (R.xf > 0) R.xf -= dt / 1.1;
-  TET.tick(dt); EV.tick(dt); updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
+  TET.tick(dt); EV.tick(dt); DAN.tick(dt); updateWeather(dt); updateSim(dt); updateFx(dt); updateWater(dt); ambTick(dt);
 }
 let _last = 0, _uiT = 0;
 function frame(ts) {
@@ -170,7 +172,7 @@ async function setSeason(s, first) {
   if (!G.world) G.world = { ground: GROUNDS[s], items }; else { G.world.ground = GROUNDS[s]; G.world.items = items; }
   for (const k in GROUNDS) if (k !== s) delete GROUNDS[k];   // the K-density ground is large: keep only the current season
   G.world.vis = null; R.dirty = true; visList();
-  if (first) { initSim(); TET.sync(); EV.sync('boot'); } else { reseasonPeds(); EV.onSeason(); R.xf = 1; }
+  if (first) { initSim(); TET.sync(); DAN.sync(); EV.sync('boot'); } else { reseasonPeds(); EV.onSeason(); DAN.sync(); R.xf = 1; }
   _pb = 0; FX.drift.length = 0; if (G.autoWeather && G.weather !== 'clear' && !first) setWeather('clear');
   if (first) { await sleep(200); fade.classList.remove('on'); }
   G.busy = false; updateUI(); save();
@@ -229,9 +231,9 @@ function initUI() {
   window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase(); if (k === 'h') document.body.classList.toggle('clean'); else if (k === ' ') { e.preventDefault(); $('play').click(); } else if (k >= '1' && k <= '4') { const s = SEASONS[+k - 1]; if (s !== G.season) setSeason(s); } else if (k === 't') setEvent(G.tet ? 'none' : 'tet'); else if (k === 'q' || k === 'o' || k === 'x') { const e = { q: 'qk', o: 'hw', x: 'xm' }[k]; setEvent(EV.sel === e ? 'none' : e); } else if (k === 'b') toggleRiverView(); else if (k === '[' || k === ']') setEra(clamp(G.era + (k === ']' ? 1 : -1), 0, 3)); else if (k === 'r') setWx(G.weather === 'rain' && !G.autoWeather ? 'clear' : 'rain'); else if (k === 'n') setTime(G.timeKey === 'night' ? 'auto' : 'night'); else if (k === '+' || k === '=') $('zin').click(); else if (k === '-') $('zout').click(); });
   // drag to pan, wheel to zoom
   const cv = R.canvas; let drag = null;
-  cv.addEventListener('pointerdown', e => { R.tween = null; drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY }; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener('pointermove', e => { if (!drag) return; const k = R.dpr / R.scale; R.panX = drag.px - (e.clientX - drag.x) * k; R.panY = drag.py - (e.clientY - drag.y) * k; camera(); });
-  cv.addEventListener('pointerup', () => { drag = null; }); cv.addEventListener('pointercancel', () => { drag = null; });
+  cv.addEventListener('pointerdown', e => { R.tween = null; drag = { x: e.clientX, y: e.clientY, px: R.panX, py: R.panY, m: 0 }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!drag) return; drag.m = Math.max(drag.m, Math.hypot(e.clientX - drag.x, e.clientY - drag.y)); const k = R.dpr / R.scale; R.panX = drag.px - (e.clientX - drag.x) * k; R.panY = drag.py - (e.clientY - drag.y) * k; camera(); });
+  cv.addEventListener('pointerup', e => { if (drag && drag.m < 5) DAN.click(e.clientX, e.clientY); drag = null; }); cv.addEventListener('pointercancel', () => { drag = null; });
   cv.addEventListener('dblclick', () => document.body.classList.remove('clean'));
   cv.addEventListener('wheel', e => { e.preventDefault(); R.zoom += e.deltaY < 0 ? 1 : -1; resize(); save(); }, { passive: false });
   window.addEventListener('resize', resize);
@@ -247,7 +249,7 @@ async function boot() {
   if (q.get('zoom')) R.zoom = +q.get('zoom');
   if (q.get('look')) { const t = q.get('look').split(','), wx = t[0] * T + 4, wy = t[1] * T + 4; R.panX = wx - wy; R.panY = (wx + wy) / 2 - WORLD / 2; }
   if (q.get('pan')) { const p = q.get('pan').split(','); R.panX = +p[0]; R.panY = +p[1]; }
-  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); planTet(); EV.plan(); resize();
+  initIcons(); initUmbrellas(); initDogs(); initFx(); planCity(); planTet(); EV.plan(); DAN.plan(); resize();
   const tm = q.get('time') || st.time; if (tm && tm !== 'auto' && TIMES[tm]) { G.timeKey = tm; G.autoTime = false; G.hour = G.hourTarget = TIMES[tm]; }
   EV.boot(q.get('ev') || st.ev);                                           // night events start at night, before the world is built
   await setSeason(G.season, true);

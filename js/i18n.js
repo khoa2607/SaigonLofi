@@ -59,6 +59,11 @@ const MSG = {
   'Tết đến rồi! Hoa mai nở vàng, đèn lồng đỏ khắp phố': 'Tết is here! Golden mai blossoms and red lanterns all over the street',
   'Hết Tết, phố trở lại nhịp sống thường ngày': 'Tết is over, the street returns to its everyday rhythm',
   'Bấm phím H hoặc chạm 2 lần để hiện lại bảng': 'Press H or double-tap to show the panel again',
+  'Múa lân rộn ràng trong công viên: tùng tùng chát!': 'Lion dance in the park: drums, cymbals and gong ring out!',
+  'Đoàn múa rồng uốn lượn quanh công viên': 'The dragon dance troupe winds around the park',
+  'Con lân quay lại chào bạn, chớp mắt và cúi đầu!': 'The lion turns to greet you, blinks and bows!',
+  'Máy quay bay tới sân múa lân': 'Camera flies to the lion dance',
+  'Máy quay bay tới sân múa rồng': 'Camera flies to the dragon dance',
   // events.js
   'Đêm Quốc khánh 2/9: cờ đỏ sao vàng rợp phố, pháo hoa rực trời!': 'National Day night: red flags with gold stars everywhere, fireworks light up the sky!',
   'Đêm Halloween: phố đầy ma, phù thủy và bí ngô dễ thương': 'Halloween night: the street is full of cute ghosts, witches and pumpkins',
