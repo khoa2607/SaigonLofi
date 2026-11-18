@@ -1,7 +1,7 @@
 'use strict';
 // ===== Sài Gòn Lofi — game state, camera, renderer, UI wiring, boot =====
 const G = { tet: false, era: 0, season: 'spring', hour: 7.5, hourTarget: 7.5, t: 0, daySpeed: 24 / 600, autoTime: true, autoSeason: false, autoWeather: true, seasonT: 0, weather: 'clear', weatherT: 45, rain: 0, rainTarget: 0, cloud: 0, cloudTarget: 0, gust: 0, gustT: 6, gustP: 0, windy: false, wet: 0, flash: 0, lights: 0, hot: false, snowAmt: 0, world: null, busy: true, tickT: -9 };
-const R = { canvas: null, ctx: null, lc: null, lctx: null, vw: 640, vh: 360, scale: 3, zoom: 0, panX: -110, panY: -120, cx: 0, cy: 0, dirty: true, dpr: 1 };
+const R = { canvas: null, ctx: null, lc: null, lctx: null, vw: 640, vh: 360, scale: 3, zoom: 0, panX: 0, panY: 0, cx: 0, cy: 0, dirty: true, dpr: 1 };
 const GROUNDS = {}, SEASONS = ['spring', 'summer', 'fall', 'winter'];
 const SNAME = new Proxy({}, { get: (_, k) => t('season.' + k) });   // season display names follow the UI language (js/i18n.js)
 const SCARD = { spring: '#f8c6d8', summer: '#bfe6a8', fall: '#f4c98a', winter: '#dbe8f6' };
@@ -15,9 +15,15 @@ function ambient(h) { let i = 0; while (i < KF.length - 2 && KF[i + 1][0] <= h) 
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 3), cw = window.innerWidth, ch = window.innerHeight, pw = cw * dpr, ph = ch * dpr;
   // screen pixels per art pixel (aps) is a whole number so the K-density art stays crisp; one world unit = K art pixels
-  // default view ~17% wider than before (still a whole number of screen px per art px)
-  const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K * 0.83)), sMin = Math.max(1, Math.ceil((pw / (WORLD * 2) + ph / WORLD) / 0.96 / K));
-  const aps = clamp(base + R.zoom, sMin, 6); R.zoom = aps - base; const s = aps * K; R.scale = s; R.dpr = dpr;
+  // default view = 50% of the previous default (aps halves; 0.5 downsamples art pixels by an exact 2:1 so edges stay crisp).
+  // Levels are discrete; R.zoom is a step offset from the default level, so wheel / buttons / ?zoom= keep working.
+  const LV = [0.5, 1, 2, 3, 4, 5, 6];
+  const prev = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K * 0.83)), want = Math.max(0.5, prev / 2);
+  const sMin = (pw / (WORLD * 2) + ph / WORLD) / 0.96 / K;   // fit-the-world scale; a little blank corner is tolerated at 0.5
+  let lo = 0; while (lo < LV.length - 1 && LV[lo] < sMin * (LV[lo] === 0.5 ? 0.55 : 1)) lo++;
+  let def = 0; for (let i = 0; i < LV.length; i++) if (LV[i] <= want) def = i;
+  def = Math.max(def, lo); const idx = clamp(def + R.zoom, lo, LV.length - 1); R.zoom = idx - def;
+  const aps = LV[idx], s = aps * K; R.scale = s; R.dpr = dpr;
   R.vw = Math.ceil(pw / s); R.vh = Math.ceil(ph / s);
   for (const c of [R.canvas, R.lc]) { c.width = R.vw * K; c.height = R.vh * K; }
   R.canvas.style.width = (R.vw * s / dpr) + 'px'; R.canvas.style.height = (R.vh * s / dpr) + 'px';
@@ -180,7 +186,7 @@ async function setSeason(s, first) {
 }
 
 // ----- UI -----
-function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, ev: EV.sel, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom })); } catch (e) { } }
+function save() { try { localStorage.setItem('saigonlofi', JSON.stringify({ tet: G.tet, ev: EV.sel, streetOn: AU.streetOn, era: G.era, season: G.season, autoSeason: G.autoSeason, time: G.autoTime ? 'auto' : G.timeKey, wx: G.autoWeather ? 'auto' : G.weather, vol: AU.vol, track: AU.track, zoom: R.zoom, zv: 2 })); } catch (e) { } }
 function load() { try { return JSON.parse(localStorage.getItem('saigonlofi') || '{}'); } catch (e) { return {}; } }
 const TIMES = { morning: 7.5, noon: 12.5, dusk: 17.9, night: 21.5 };
 function setTime(k) { G.timeKey = k; if (k === 'auto') G.autoTime = true; else { G.autoTime = false; G.hourTarget = TIMES[k]; } updateUI(); save(); }
@@ -208,7 +214,7 @@ function initUI() {
   const st = load();
   ytRender();
   document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => setLang(b.dataset.lang));
-  if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
+  if (st.vol) Object.assign(AU.vol, st.vol); if (st.track !== undefined) AU.track = st.track % TRACKS.length; if (st.zoom && st.zv === 2) R.zoom = st.zoom; G.autoSeason = !!st.autoSeason;
   if (st.streetOn === false) AU.streetOn = false; $('vStreet').value = AU.vol.street * 100; $('vMusic').value = AU.vol.music * 100; $('vAmb').value = AU.vol.amb * 100; $('vVinyl').value = AU.vol.vinyl * 100;
   $('play').onclick = () => { $('hint').classList.add('gone'); if (YTS.on) { ytToggle(); return; } if (AU.playing) audioPause(); else audioPlay(); updateUI(); };
   $('prev').onclick = () => { if (YTS.on) ytNext(-1); else nextTrack(-1); updateUI(); save(); }; $('next').onclick = () => { if (YTS.on) ytNext(1); else nextTrack(1); updateUI(); save(); };
