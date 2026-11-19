@@ -49,7 +49,7 @@ function hwEnter(era) {
 function hwWith(era, fn) { const prev = HWD.cur; hwEnter(era); try { return fn(); } finally { if (prev && prev !== era) hwEnter(prev); } }
 function hwEnv() { const e = {}; for (const k of HW_ENV) e[k] = HS[k]; return e; }
 function hwApplyEnv(e) { for (const k of HW_ENV) if (e[k] !== undefined) HS[k] = e[k]; HS.life = lifeHour(); }
-const hwSeed = era => (((HWD.params.simSeed * 31 + (era === 'past' ? 17 : 29)) >>> 0) % 2147483647) || 1;
+const hwSeed = era => (((HWD.params.simSeed * 31 + (era === 'past' ? 17 : era === 'future' ? 41 : 29)) >>> 0) % 2147483647) || 1;
 
 // ---------------------------------------------------------------- background preparation (generators run in short slices by hwRunSliced)
 function* hwPrepareG(era, env) {

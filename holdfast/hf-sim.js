@@ -24,7 +24,7 @@ function hsSound(k, x, y, v) { if (HS.sound) HS.sound(k, x, y, v); }
 // ---------------------------------------------------------------- setup
 function hsInit(opt) { for (const _ of hsInitG(opt)); }
 function* hsInitG(opt) {
-  opt = opt || {}; if (HF.era === 'past') pastPre(); HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
+  opt = opt || {}; if (HF.era === 'past') pastPre(); else if (HF.era === 'future') futPre(); HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
   HS.people = []; HS.zombies = []; HS.wild = []; HS.fx = []; HS.noises = []; HS.log = []; HS.exps = []; HS.rescues = []; HS.arrivals = [];
   HS.spots.clear(); HS.vacant = []; HS.alarm = 0; HS.mode = 'peace'; HS.recoverT = 0; HS.stats.exp = 0;
   // the viewer arrives at an arbitrary daytime moment of an ongoing world (a seeded hour unless one is asked for): no "day 1"
@@ -60,7 +60,7 @@ function* hsInitG(opt) {
   for (let i = 0; i < Math.round(Z_WANDER * DANGER[HS.danger].n * HS.zScale); i++) hsSpawnWanderer(true);
   for (let i = 0; i < Math.round(Z_BAND * DANGER[HS.danger].n * HS.zScale); i++) hsSpawnBand(true);     // the frontier is already busy
   const now = HS.t, iv = DANGER[HS.danger].iv;
-  if (HF.era === 'past') pastInit();
+  if (HF.era === 'past') pastInit(); else if (HF.era === 'future') futInit();
   HS.next = { minor: now + rr2(30, 70), medium: now + rr2(6, 10) * 60 * iv, major: now + rr2(18, 28) * 60 * iv, siege: now + rr2(100, 140) * 60 * iv, exp: now + rr2(30, 60), wx: now + 300, arrive: now + 240, act: 0 };
   yield* hsWarmStartG();
 }
@@ -218,6 +218,7 @@ function hsNoise(x, y, r, kind) { HS.noises.push({ x, y, r: r * (HS.weather === 
 // ---------------------------------------------------------------- combat helpers
 function hsShoot(a, z, from, range, base) {
   if (HF.era === 'past') return pastShoot(a, z, from, range, base);
+  if (HF.era === 'future') return futShoot(a, z, from, range, base);
   const d = Math.hypot(z.x - a.x, z.y - a.y); if (d > range) return false;
   const night = hsDark(), p = clamp(base - d / 1000 - (night ? 0.14 : 0) - (HS.weather === 'rain' ? 0.08 : 0), 0.15, 0.95), hit = HS.R() < p;
   HS.stats.shots++; hsNoise(a.x, a.y, 230, 'shot'); hsSound('shot', a.x, a.y, from.z ? 0.9 : 0.7);
@@ -230,7 +231,7 @@ function hsShoot(a, z, from, range, base) {
 // corpseT is the REMAINING life of the body; the last CORPSE_FADE seconds fade it out, at 0 it is removed from HS.zombies.
 // Large dinosaurs keep their bodies longer. A body is never hit "back to life" or given a fresh timer: hsKillZ is idempotent.
 const CORPSE_FADE = 6;
-function hsCorpseLife(z) { if (!z.L || z.L.ev !== 'dino') return rr2(90, 150); return clamp((38 + (z.hp0 || 4) * 7) * rr2(0.88, 1.12), 40, 210); }
+function hsCorpseLife(z) { if (z.L && z.L.ev === 'bot') return futCorpseLife(z); if (!z.L || z.L.ev !== 'dino') return rr2(90, 150); return clamp((38 + (z.hp0 || 4) * 7) * rr2(0.88, 1.12), 40, 210); }
 function hsKillZ(z) {
   if (z.st === 'dead') return false;
   z.st = 'dead'; z.stT = 0; z.path = null; z.tgt = null; z.prey = null; z.charging = 0; z.ram = 0; z.toWallAt = 0; z.fall = 0;
@@ -451,6 +452,7 @@ function towerGuard(p, dt) {
 // ---------------------------------------------------------------- infected
 function hsAddZ(x, y, o) {
   if (HF.era === 'past') return pastAddDino(x, y, o);
+  if (HF.era === 'future') return futAddBot(x, y, o);
   x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4);
   const L = hfZombieLook(HS.R);
   const z = Object.assign({ id: HS.zid++, L, x, y, px: x, py: y, dir: 1, st: 'wander', hp: HS.R() < 0.35 ? 4 : 3, spd: HS.R() < 0.12 ? rr2(5.4, 6.4) : rr2(3.2, 4.6), t: 0, path: null, stride: 0, ph: HS.R() * 10, cool: 0, seg: -1, st2: '', stT: 0, kx: 0, ky: 0, idle: 0, route: null, rp: 0, lane: rr2(-3, 3) }, o || {});
@@ -480,6 +482,7 @@ function hsZ(z, dt) {
   if (z.delay > 0) { z.delay -= dt; return; }
   if (z.cool > 0) z.cool -= dt;
   if (z.L.ev === 'dino' && pastZ(z, dt)) return;
+  if (z.L.ev === 'bot' && futZ(z, dt)) return;
   const inside = isInside(z.x, z.y);
   // targets: humans in sight
   const sight = (hsDark() ? 46 : 74) * (z.sight || 1);
@@ -534,6 +537,7 @@ function hsZ(z, dt) {
       if (Math.hypot(s.x - z.x, s.y - z.y) > 16) { z.tries = (z.tries || 0) + 1; if (z.tries > 3) { z.st = 'wander'; z.seg = -1; z.tries = 0; return; } const [x, y] = tileC(s.outT); hsGo(z, x + rr2(-2, 2), y + rr2(-2, 2), 'z'); return; }   // only at the wall itself
       z.tries = 0; faceTo(z, s); s.pressure = (s.pressure || 0) + 1; s.lastHit = HS.t;
       if (z.cool <= 0 && z.L.ev === 'dino') { pastWallHit(z, s); return; }
+      if (z.cool <= 0 && z.L.ev === 'bot') { futWallHit(z, s); return; }
       if (z.cool <= 0) { z.cool = rr2(1.6, 2.2); s.dmgT = 0.25; hsSound('bang', s.x, s.y, 0.35);   // a few infected dent the wall; it takes a real pack to break it
         const crowd = countZ(s.x, s.y, 16); if (crowd >= 4 || HS.R() < (s.hp > 3 ? 0.5 : 0.12)) { s.hp -= 1; if (s.hp <= 0) hsBreach(s); } }
       return;

@@ -74,7 +74,7 @@ function hfNoise(x, y, s) { return vnoise(x / s + 11.3, y / s + 4.7); }
 
 function hfBuildMap(seed, era) { for (const _ of hfBuildMapG(seed, era)); return HF; }
 function* hfBuildMapG(seed, era) {
-  HF.era = era === 'past' ? 'past' : 'current';                // milestone 8: the same valley in another age (hf-past*.js)
+  HF.era = era === 'past' || era === 'future' ? era : 'current';                // milestone 8: the same valley in another age (hf-past*.js)
   const R = mulberry32(seed || 7);
   HF.R = R;
   // 1) zones + ground per tile
@@ -103,7 +103,7 @@ function* hfBuildMapG(seed, era) {
   if (slDue()) yield; yield* hfBuildSettlementG(R);
   if (slDue()) yield; hfBuildOutside(R);
   if (slDue()) yield; hfBuildWalk();
-  if (slDue()) yield; if (HF.era === 'past') pastMap();
+  if (slDue()) yield; if (HF.era === 'past') pastMap(); else if (HF.era === 'future') futMap();
 }
 
 // ---------------------------------------------------------------- wall: a 4-connected tile chain along the arch, straight run at the gate

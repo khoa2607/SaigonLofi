@@ -75,6 +75,7 @@ function lfDo(p, T, dt) {
       if (T.t > (T.next || (T.next = rr2(1.2, 2.4)))) { T.next = T.t + rr2(1.8, 3.4); HS.Ls.shots++;
         const hit = HS.R() < 0.7, tx = tg.x + (hit ? 0 : rr2(-3, 3)), ty = tg.y + (hit ? 0 : rr2(-2, 2));
         if (HF.era === 'past') HS.fx.push({ k: 'arrow', x0: p.x, y0: p.y, z0: 12, x1: tx, y1: ty, z1: hit ? tg.z : rr2(2, 12), t: 0.3, T: 0.3 }, { k: hit ? 'splinter' : 'dust', x: tx, y: ty, t: 0.35 });
+        else if (HF.era === 'future') HS.fx.push({ k: 'bolt', x0: p.x, y0: p.y, z0: 12, x1: tx, y1: ty, z1: hit ? tg.z : rr2(2, 12), t: 0.12, T: 0.12, train: 1 }, { k: hit ? 'spark' : 'dust', x: tx, y: ty, t: 0.35 });
         else HS.fx.push({ k: 'tracer', x0: p.x, y0: p.y, z0: 12, x1: tx, y1: ty, z1: hit ? tg.z : rr2(2, 12), t: 0.12 }, { k: 'flash', x: p.x, y: p.y, z: 13, t: 0.06 }, { k: hit ? 'splinter' : 'dust', x: tx, y: ty, t: 0.35 });
         hsSound('shot', p.x, p.y, 0.22); if (HS.R() < 0.2) hsNoise(p.x, p.y, 90, 'practice'); }
       if (T.t > T.dur) { HS.Ls.range++; p.variant = 'sling'; p.task = null; } return;
@@ -407,7 +408,7 @@ function lfTick(dt) {
   for (const p of leaders) { const tr = p.trail || (p.trail = []); const q = tr[tr.length - 1]; if (!q || Math.hypot(p.x - q[0], p.y - q[1]) > 1.3) { tr.push([p.x, p.y]); if (tr.length > 60) tr.shift(); } }
   if (HS.squad && (!HS.squad.lead.alive || HS.squad.lead.task?.a !== 'formlead')) HS.squad = null;
   lfBall(dt); lfRiverTick(dt);
-  if (HF.era === 'past') pastTick(dt);
+  if (HF.era === 'past') pastTick(dt); else if (HF.era === 'future') futTick(dt);
   if (HS.people.some(q => q.task && q.task.feed && q.task.ph === 'do')) HS.feedT = HS.t;   // chickens rush to the feeder
   // eggs accumulate; pigs eat what is in the trough
   if (HS.t > HS.nextL.eggs) { HS.nextL.eggs = HS.t + rr2(45, 80); if (HS.eggs < 6 && h > 6 && h < 19) HS.eggs++; }

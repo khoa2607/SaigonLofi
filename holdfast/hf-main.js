@@ -47,7 +47,7 @@ const POIN = { gas: ['trạm xăng', 'gas station'], houses: ['dãy nhà bỏ ho
 const LOOT = { food: ['đồ hộp', 'canned food'], parts: ['phụ tùng', 'spare parts'], medicine: ['thuốc men', 'medicine'], seeds: ['hạt giống', 'seeds'], radio: ['một chiếc radio', 'a radio'], fuel: ['xăng', 'fuel'] };
 const WXN = { clear: 'wx.clear', rain: 'wx.rain', wind: 'wx.wind' };
 const li = () => LANG.cur === 'en' ? 1 : 0;
-function logText(e) { const past = HF.era === 'past', tpl = ((past && LOGT_P[e.k]) || LOGT[e.k] || [e.k, e.k])[li()]; return tpl.replace(/\{(\w+)\}/g, (m, k) => { let v = e.p[k]; if (k === 'poi') v = ((past && POIN_P[v]) || POIN[v] || [v, v])[li()]; if (k === 'loot') v = ((past && LOOT_P[v]) || LOOT[v] || [v, v])[li()]; if (k === 'w') v = t(WXN[v] || v); return v === undefined ? '' : v; }); }
+function logText(e) { const past = HF.era === 'past', fut = HF.era === 'future', tpl = ((past && LOGT_P[e.k]) || (fut && LOGT_F[e.k]) || LOGT[e.k] || [e.k, e.k])[li()]; return tpl.replace(/\{(\w+)\}/g, (m, k) => { let v = e.p[k]; if (k === 'poi') v = ((past && POIN_P[v]) || (fut && POIN_F[v]) || POIN[v] || [v, v])[li()]; if (k === 'loot') v = ((past && LOOT_P[v]) || (fut && LOOT_F[v]) || LOOT[v] || [v, v])[li()]; if (k === 'w') v = t(WXN[v] || v); return v === undefined ? '' : v; }); }
 
 // ---------------------------------------------------------------- shared music: the gallery's radio when embedded, our own otherwise
 const Q = new URLSearchParams(location.search);
@@ -68,7 +68,7 @@ async function hfBoot() {
   const pop = +(Q.get('pop') || (mobile ? 70 : 120)), seed = +(Q.get('seed') || 7);        // the map seed stays fixed: the street/valley layout is approved
   // the population seed: fixed when asked for (tests, screenshots), otherwise a fresh arbitrary moment of the living world each visit
   const simSeed = Q.get('seed') || Q.get('simseed') ? (+(Q.get('simseed') || Q.get('seed')) * 3 + 1) : ((Date.now() % 1000003) * 2654435761 >>> 0) % 2147483647;
-  const era = Q.get('era') === 'past' || Q.get('era') === 'current' ? Q.get('era') : hfPref('era', 'current');   // milestone 8: the timeline tab (PAST / CURRENT)
+  const era = ['past', 'current', 'future'].includes(Q.get('era')) ? Q.get('era') : hfPref('era', 'current');   // milestone 8: the timeline tab (PAST / CURRENT)
   hfBuildMap(seed, era); await prog(0.1);
   hfApplyEraUI(HF.era);
   HS.danger = Q.get('danger') || hfPref('danger', 'standard');
@@ -103,11 +103,11 @@ async function hfBoot() {
   if (Q.get('test')) hfSelfTest(); if (Q.get('bench')) hfBench();
 }
 // what changes on the page when the timeline on screen changes: the subtitle, the world-sound hint, the page class and the canvas description
-const ERA_ARIA = { past: 'Holdfast, the Past: a palisaded tribe in a river bend, in the age of dinosaurs', current: 'Holdfast: a walled settlement in a river bend, living through a zombie apocalypse' };
+const ERA_ARIA = { past: 'Holdfast, the Past: a palisaded tribe in a river bend, in the age of dinosaurs', future: 'Holdfast, the Future: a settlement rebuilt from salvaged technology, holding out against autonomous machines', current: 'Holdfast: a walled settlement in a river bend, living through a zombie apocalypse' };
 function hfApplyEraUI(era) {
-  const past = era === 'past';
-  $('eraSub').dataset.i18n = past ? 'hf.sub.past' : 'hf.sub'; $('streetOn').dataset.i18nAttr = past ? 'title:hf.world.t.past' : 'title:hf.world.t';
-  document.body.classList.toggle('era-past', past); $('c').setAttribute('aria-label', ERA_ARIA[era]); applyStatic();
+  const past = era === 'past', fut = era === 'future';
+  $('eraSub').dataset.i18n = past ? 'hf.sub.past' : fut ? 'hf.sub.future' : 'hf.sub'; $('streetOn').dataset.i18nAttr = past ? 'title:hf.world.t.past' : fut ? 'title:hf.world.t.future' : 'title:hf.world.t';
+  document.body.classList.toggle('era-past', past); document.body.classList.toggle('era-future', fut); $('c').setAttribute('aria-label', ERA_ARIA[era]); applyStatic();
 }
 // a summary of the world as it is the instant it is built: proof that nobody starts at a shared spawn point
 function hfFirstState() {
@@ -229,7 +229,7 @@ function hfInput() {
 // touched; the environment (time, weather, season, danger) carries over. Clicks during a transition only change the *latest request*.
 const TR = { want: null, busy: false, fade: null, ms: 1200, count: 0, last: null };
 function hfSwitchEra(era) {
-  if (era !== 'past' && era !== 'current') return;
+  if (era !== 'past' && era !== 'current' && era !== 'future') return;
   if (TR.want === era || (!TR.busy && era === HWD.shown)) return;
   TR.want = era; hfUI();                                  // the tab shows the request at once
   if (!TR.busy) hfTransitions();

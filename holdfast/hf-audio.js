@@ -35,7 +35,7 @@ function haFrame(dt, view) {
   const t = HS.t;
   if (!night && wx !== 'rain' && HR.season !== 'winter' && t > (HA.last.bird || 0)) { HA.last.bird = t + 2 + Math.random() * 6; haBird(); }
   if (night && t > (HA.last.owl || 0)) { HA.last.owl = t + 25 + Math.random() * 40; haOwl(); }
-  if (view.zombies > 0 && t > (HA.last.moanAmb || 0)) { HA.last.moanAmb = t + 6 + Math.random() * 10; if (HF.era === 'past') haCall(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); else haMoan(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); }
+  if (view.zombies > 0 && t > (HA.last.moanAmb || 0)) { HA.last.moanAmb = t + 6 + Math.random() * 10; if (HF.era === 'future') haHum(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); else if (HF.era === 'past') haCall(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); else haMoan(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); }
 }
 function haEnv(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
 function haNode(gain, pan) { const c = HA.ctx, g = c.createGain(); let out = g; if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan || 0, -1, 1); g.connect(p); const dst = HA.nature ? HA.out : HA.evt; p.connect(dst); } else g.connect(HA.nature ? HA.out : HA.evt); return g; }
@@ -53,6 +53,7 @@ function haEvent(k, x, y, v) {
   if (att < 0.08 && k !== 'bell' && k !== 'breach') return;
   const now = performance.now();
   if (HF.era === 'past' && haPast(k, t, att, pan, v, now)) return;
+  if (HF.era === 'future' && haFuture(k, t, att, pan, v, now)) return;
   if (k === 'shot') { HA.shots = HA.shots.filter(s => now - s < 10000); if (HA.shots.length >= 6 || now - (HA.last.shot || 0) < 120) return; HA.shots.push(now); HA.last.shot = now; haNoise(t, 0.09, 0.22 * att * v, 'lowpass', 1500, pan); haTone('sine', 110, 50, t, 0.002, 0.16 * att * v, 0.14, pan); haNoise(t + 0.04, 0.5, 0.035 * att, 'lowpass', 400, pan); return; }
   if (HA.voices > 4) return; HA.voices++; setTimeout(() => HA.voices--, 400);
   if (k === 'bang') haTone('sine', 120, 70, t, 0.003, 0.11 * att * v, 0.12, pan), haNoise(t, 0.05, 0.05 * att, 'bandpass', 700, pan);

@@ -31,6 +31,7 @@ function hrGround(wx, wy, ss) {
   const G = z === Z_SETTLE ? SG[ss] : SGO[ss];
   let c;
   if (HF.era === 'past') { const pc = pastGround(g, wx, wy, u, v, n, vn, G, win); if (pc !== undefined) return pc; }
+  if (HF.era === 'future') { const fc = futGround(g, wx, wy, u, v, n, vn, G, win); if (fc !== undefined) return fc; }
   switch (g) {
     case GK.ROAD: {
       if (Math.abs(u - roadU(v)) > 9) { c = G[0]; break; }
@@ -126,7 +127,7 @@ function* hrBuildStaticsG() {
   for (const p of HF.props) {
     if (slDue()) yield;
     if (p.kind === 'lights') continue;
-    const f = (HF.era === 'past' && PPROPS[p.kind]) || PROPS[p.kind]; if (!f) continue;
+    const f = (HF.era === 'past' && PPROPS[p.kind]) || (HF.era === 'future' && FPROPS[p.kind]) || PROPS[p.kind]; if (!f) continue;
     const key = 'p' + p.kind + '|' + (p.c || '') + '|' + (p.w || '') + '|' + (p.v || '') + '|' + (p.r ? p.r.toFixed(1) : '') + (p.kind === 'laundry' ? (p.x | 0) : '') + '|' + (p.along || '') + (p.cross ? 'c' : '') + (p.white ? 'w' : '') + '|' + ss;
     const spr = bakeCached(key, () => f(p), p.kind === 'messtent' || p.kind === 'gasstation' || p.kind === 'bus' || p.kind === 'greenhouse' || p.kind === 'watertower' || p.kind === 'medtent' || p.kind === 'forge' || p.kind === 'wagon');
     addStatic(spr, p.x, p.y, 0, { em: p.kind === 'lamp' || p.kind === 'rv' || p.kind === 'forge' || p.kind === 'lantern' });
@@ -138,7 +139,7 @@ function* hrBuildStaticsG() {
     if (p.kind === 'lantern') HR.lights.push([...ISO(p.x, p.y, 12), 30, 'rgba(255,210,140,', 0.75, 2, p]);
     if (['truck', 'car', 'bus', 'gasstation', 'watertower', 'greenhouse', 'barn', 'messtent', 'rv', 'shed', 'smokehouse', 'coop', 'stall', 'silo', 'medtent', 'forge', 'wagon', 'hay', 'pighut'].includes(p.kind)) castShadow(p.x, p.y, p.bw || 10, p.bd || 8, p.kind === 'watertower' ? 46 : p.kind === 'stall' ? 13 : 12);
   }
-  for (const d of HF.docks) addStatic(bakeCached('dock' + d.len, () => PROPS.dock(d)), d.x, d.y, -6);
+  for (const d of HF.docks) addStatic(bakeCached('dock' + d.len, () => ((HF.era === 'future' && FPROPS.dock) || PROPS.dock)(d)), d.x, d.y, -6);
   // wall pieces
   if (slDue()) yield;
   yield* hrBuildWallsG();
@@ -232,10 +233,11 @@ function* hrPrewarmG() {
   const cx = HR.cx, cy = HR.cy, d = a => { const p = ISO(a.x, a.y); return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) * 2; };
   const all = HS.people.filter(p => p.alive).concat(HS.zombies.filter(z => z.st !== 'dead')).sort((a, b) => d(a) - d(b));
   for (const a of all) {
-    if (a.L && a.L.ev === 'dino') dinoSheet(a.L); else if (a.L) sheetFor(a, a.role === 'guard' && a.post ? 'sling' : (a.variant || ''));
+    if (a.L && a.L.ev === 'dino') dinoSheet(a.L); else if (a.L && a.L.ev === 'bot') botSprite(a.L.t, 'stand', 0, 0, 0, 0); else if (a.L) sheetFor(a, a.role === 'guard' && a.post ? 'sling' : (a.variant || ''));
     if (slDue()) yield;
   }
   if (HF.era === 'past') for (const sp of ['raptor', 'compy', 'dilo', 'pachy', 'ptero']) for (let m = 0; m < DSPEC[sp].col.length; m++) for (const sd of [0, 37]) { dinoSheet({ sp, morph: m, seed: sd }); if (slDue()) yield; }
+  if (HF.era === 'future') yield* futPrewarmG();
 }
 // the timeline being left keeps only the ground chunks in view (a handful of MB instead of every chunk it ever baked): coming back to it needs no ground re-bake
 function hrTrimChunks() {
@@ -283,7 +285,7 @@ function hrFrame(alpha, now) {
   hrLife(D, cull, t);
   for (const s of HR.statics) { if (cull(s.x, s.y, s.w, s.h)) continue; D.push(s); }
   const L = HR.lerp = alpha;
-  HR.dyn = []; if (HF.era === 'past') pastFires(D, cull, t);
+  HR.dyn = []; if (HF.era === 'past') pastFires(D, cull, t); else if (HF.era === 'future') futDraw(D, cull, t);
   for (const p of HS.people) actorDraw(D, p, false, L, cull);
   for (const z of HS.zombies) actorDraw(D, z, true, L, cull);
   for (const w of HS.wild) { if (HF.era === 'past' && (w.k === 'deer' || w.big)) { wildDino(D, w, L, cull, t); continue; } const x = w.px + (w.x - w.px) * L, y = w.py + (w.y - w.py) * L, pp = ISO(x, y, w.k === 'crows' ? 34 + Math.sin(t * 2 + w.ph) * 4 : 0); if (cull(pp[0] - 10, pp[1] - 16, 20, 18)) continue; const fr = w.k === 'crows' ? Math.floor(t * 6 + w.ph) : Math.floor(w.stride / 2.5), flip = w.dir === 2 || w.dir === 3; const s = animalSprite(w.k, fr, flip); D.push({ c: s.c, e: s.e, x: Math.round((pp[0] - 10) * K) / K, y: Math.round((pp[1] - 15.5) * K) / K, w: 20, h: 16, d: x + y }); }
@@ -307,10 +309,12 @@ function hrFrame(alpha, now) {
     lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = 'source-over'; lg.fillStyle = '#000'; lg.fillRect(0, 0, W, H);
     lg.setTransform(K, 0, 0, K, -Math.round(x0 * K), -Math.round(y0 * K));
     for (const s of D) { if (!s.e) continue; if (s.sx !== undefined) lg.drawImage(s.e, s.sx, s.sy, s.sw, s.shh, s.x, s.y, s.w, s.h); else lg.drawImage(s.e, s.x, s.y, s.w, s.h); }
+    if (HF.era === 'future') futLightMask(lg);
     lg.globalCompositeOperation = 'lighter';
     for (const L2 of HR.dyn.length ? HR.lights.concat(HR.dyn) : HR.lights) { const [lx, ly, r, c, a, kind, ref] = L2; if (lx < x0 - r || lx > x0 + uw + r || ly < y0 - r || ly > y0 + uh + r) continue; const fl = kind >= 2 ? 0.85 + Math.sin(t * 9 + lx) * 0.08 + Math.sin(t * 23 + ly) * 0.05 : 1; hrGlow(lg, lx, ly, r * fl, c, a * fl); }
     for (const f of HS.fx) if (f.k === 'flash') { const p = ISO(f.x, f.y, f.z); hrGlow(lg, p[0], p[1], 30, 'rgba(255,226,150,', 0.9); }
     for (const f of HS.fx) if (f.k === 'arrow' && f.fire) { const q = 1 - f.t / f.T, p = ISO(f.x0 + (f.x1 - f.x0) * q, f.y0 + (f.y1 - f.y0) * q, f.z0 + (f.z1 - f.z0) * q); hrGlow(lg, p[0], p[1], 10, 'rgba(255,170,80,', 0.8); }
+    if (HF.era === 'future') futLight(lg, t);
     if (HF.oak && HF.era !== 'past') for (let k = 0; k < 14; k++) { const p = stringPt(k / 14); hrGlow(lg, p[0], p[1], 7, 'rgba(255,220,150,', 0.5); }
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, dark * 1.3); g.drawImage(HR.lc, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
@@ -386,6 +390,7 @@ function hrStores(D, cull) {
 const POSE_ACT = { wash: 5, sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
 function actorDraw(D, a, isZ, L, cull) {
   if (isZ && a.L.ev === 'dino') return dinoDraw(D, a, L, cull);
+  if (isZ && a.L.ev === 'bot') return botDraw(D, a, L, cull);
   if (!isZ && (!a.vis || (a.st === 'dead' && a.gone))) return;
   const x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, z = a.mount ? 9 : (a.z || 0), p = ISO(x, y, z);
   if (cull(p[0] - 10, p[1] - 28, 20, 30)) return;
@@ -462,6 +467,7 @@ function hrWeather(g, W, H, t, dark) {
 // horses: a side-view pixel sprite in the animals' ink style (walk cycle, grazing, saddle when tacked or ridden)
 function horseSprite(c, frame, flip, pose, saddle) {
   if (HF.era === 'past') return ridgebackSprite(c, frame, flip, pose, saddle);
+  if (HF.era === 'future') return roverSprite(c, frame, flip, pose, saddle);
   const key = 'h' + c + frame + (flip ? 'f' : '') + pose + (saddle ? 's' : ''); let s = HR.anim.get(key); if (s) return s;
   const W = 60, H = 46, g = new Int32Array(W * H).fill(-1), set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + (flip ? W - 1 - x : x)] = grade(col); };
   const sh = mixc(c, 0x2b1a16, 0.32), hl = mixc(c, 0xfff1d6, 0.22), mane = mixc(c, 0x1e1614, 0.55);
