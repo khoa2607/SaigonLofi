@@ -147,6 +147,14 @@ function hfBuildWall() {
 
 // ---------------------------------------------------------------- settlement
 function fp(x, y, w, d) { const i0 = Math.floor(x / HT), j0 = Math.floor(y / HT), i1 = Math.ceil((x + w) / HT) - 1, j1 = Math.ceil((y + d) / HT) - 1; const out = []; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) out.push([i, j]); return out; }
+function dockPoint(d, t, side) { side = side || 0; return [d.x + d.dx * t - d.dy * side, d.y + d.dy * t + d.dx * side]; }
+function dockTiles(d) {
+  const out = new Map();
+  for (let t = 0; t <= d.len; t += 2) for (let side = -3; side <= 3; side += 2) {
+    const [x, y] = dockPoint(d, t, side), i = Math.floor(x / HT), j = Math.floor(y / HT); if (inMap(i, j)) out.set(tIdx(i, j), [i, j]);
+  }
+  return [...out.values()];
+}
 function freeRect(x, y, w, d, okZone) {
   for (const [i, j] of fp(x, y, w, d)) { if (!inMap(i, j)) return false; const k = tIdx(i, j); if (HF.occ[k] || HF.wallAt[k] >= 0) return false; if (okZone && !okZone(k, i, j)) return false; }
   return true;
@@ -280,10 +288,13 @@ function* hfBuildSettlementG(R) {
   putU('watertower', 298, 434, { block: 1, bw: 12, bd: 12 }); putU('turbine', 818, 420); putU('turbine', 842, 360);
   for (const [u, v] of [[692, 404], [730, 410], [716, 432]]) putU('greenhouse', u, v, { block: 1, bw: 26, bd: 16 });
   for (let k = 0; k < 3; k++) putU('hive', 770 + k * 7, 330 + k * 6);
-  // ---- docks and smokehouse
-  for (const [u, v] of [[480, 498], [226, 466], [740, 466]]) {
-    const [px, py] = d2w(u, v), along = 'y';      // run out over the water toward +x+y
-    HF.docks.push({ x: px - 3, y: py, len: 30 }); spot('fish', px + 1, py + 26); spot('fish', px + 1, py + 16);
+  // ---- docks and smokehouse. Each follows the outward normal of the curved bank:
+  // west runs +y, the centre runs +x+y, and east runs +x in world space.
+  for (const [u, v, axis, len] of [[480, 498, 'xy', 64], [226, 466, 'y', 38], [740, 466, 'x', 38]]) {
+    const [px, py] = d2w(u, v), q = axis === 'xy' ? Math.SQRT1_2 : 1;
+    const d = { x: px, y: py, len, dx: axis === 'y' ? 0 : q, dy: axis === 'x' ? 0 : q, axis };
+    HF.docks.push(d);
+    for (const t of [len - 4, Math.max(12, len - 14)]) { const [fx, fy] = dockPoint(d, t); spot('fish', fx, fy); }
   }
   putU('smokehouse', 520, 490, { block: 1, bw: 12, bd: 10 });
   // ---- inner patrol waypoints just inside the wall, tower sites
@@ -423,7 +434,7 @@ function hfBuildWalk() {
     if (HF.wallAt[k] >= 0) f = HF.walls[HF.wallAt[k]].gate ? W_GATE : 0;
     W[k] = f;
   }
-  for (const d of HF.docks) for (const [i, j] of fp(d.x, d.y, 6, d.len)) if (inMap(i, j)) W[tIdx(i, j)] |= W_DOCK;
+  for (const d of HF.docks) for (const [i, j] of dockTiles(d)) W[tIdx(i, j)] |= W_DOCK;
   // the bank tiles outside the wall ends belong to the outside
   // inside = flood fill from the green over walkable inside tiles; everything else walkable is outside
   const q = [], gi = Math.floor(HF.oak.x / HT) + 2, gj = Math.floor(HF.oak.y / HT) + 2; HF.inside.fill(0);

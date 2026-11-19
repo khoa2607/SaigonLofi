@@ -476,8 +476,8 @@ function lfRiverInit() {
     const s = [0]; for (let i = 1; i < P.length; i++) s.push(s[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
     HF.boatLane = { P, s, len: s[s.length - 1] };
     // moorings: the lane point nearest each dock's outer end (the medical boat ties up at the dock nearest the hospital)
-    HF.moor = HF.docks.map((d, i) => { const ex = d.x + 3, ey = d.y + d.len; let bi = 0, bd = 1e9; P.forEach((q, n) => { const dd = Math.hypot(q[0] - ex, q[1] - ey); if (dd < bd) { bd = dd; bi = n; } }); let wx = ex, wy = ey + 6, wd = 1e9; for (let j = 0; j < HN; j++) for (let ii = 0; ii < HN; ii++) { const k = tIdx(ii, j); if (HF.gk[k] !== GK.WATER) continue; let ok = true; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const q = tIdx(ii + a, j + b); if (inMap(ii + a, j + b) && HF.gk[q] !== GK.WATER && !(HF.walk[q] & W_DOCK)) ok = false; } if (!ok) continue; const cx2 = ii * HT + 4, cy2 = j * HT + 4, dd = Math.hypot(cx2 - ex - 6, cy2 - ey - 2); if (dd < wd) { wd = dd; wx = cx2; wy = cy2; } }   // open water right beside the dock end
-      return { i, s: s[bi], x: ex, y: ey - 3, dist: bd, bx: wx, by: wy }; });
+    HF.moor = HF.docks.map((d, i) => { const [ex, ey] = dockPoint(d, d.len); let bi = 0, bd = 1e9; P.forEach((q, n) => { const dd = Math.hypot(q[0] - ex, q[1] - ey); if (dd < bd) { bd = dd; bi = n; } }); const lp = P[bi], nx = -d.dy, ny = d.dx, side = (lp[0] - ex) * nx + (lp[1] - ey) * ny < 0 ? -1 : 1, tx = ex + nx * side * 8, ty = ey + ny * side * 8; let wx = ex, wy = ey, wd = 1e9; for (let j = 0; j < HN; j++) for (let ii = 0; ii < HN; ii++) { const k = tIdx(ii, j); if (HF.gk[k] !== GK.WATER) continue; let ok = true; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const q = tIdx(ii + a, j + b); if (inMap(ii + a, j + b) && HF.gk[q] !== GK.WATER && !(HF.walk[q] & W_DOCK)) ok = false; } if (!ok) continue; const cx2 = ii * HT + 4, cy2 = j * HT + 4, dd = Math.hypot(cx2 - tx, cy2 - ty); if (dd < wd) { wd = dd; wx = cx2; wy = cy2; } }   // open water beside the dock end, on the lane-facing side
+      return { i, s: s[bi], x: ex, y: ey, dist: bd, bx: wx, by: wy }; });
     const hos = HF.buildings.find(b => b.kind === 'infirmary'); HF.medMoor = HF.moor.slice().sort((p, q) => Math.hypot(p.x - hos.x, p.y - hos.y) - Math.hypot(q.x - hos.x, q.y - hos.y))[0];
     HF.cargoMoor = HF.moor.slice().sort((p, q) => Math.abs(w2d(p.x, p.y)[0] - 480) - Math.abs(w2d(q.x, q.y)[0] - 480))[0];
   }
@@ -518,7 +518,7 @@ function lfBoatCall(b) {
   const free = q => q.alive && q.vis && !q.exp && !q.ride && !q.rescue && !q.load && !q.inj && !q.onTower && (!q.task || ['sit', 'chat', 'walk'].includes(q.task.k) || (q.task.k === 'life' && q.task.a === 'stand')) && !(q.task && q.task.boat);
   const c = HS.people.filter(q => want.includes(q.role) && free(q)).sort((p, q) => Math.hypot(p.x - dock.x, p.y - dock.y) - Math.hypot(q.x - dock.x, q.y - dock.y))[0];
   if (!c || HS.alarm > 0) return;
-  b.crew = c; const end = { x: dock.x + 3, y: dock.y + dock.len - 4 };
+  b.crew = c; const [endX, endY] = dockPoint(dock, dock.len - 4), end = { x: endX, y: endY };
   const to = b.kind === 'med' ? spotXY('supplyIn') : spotXY(HAUL_SP.yard || 'storage');
   setTask(c, lfChain('boat', [
     lfLeg(end, 3, 'kneel', '', () => { if (b.st !== 'moored') return false; bubble(c, b.kind === 'med' ? 'heart' : 'star'); }, { face: b }),

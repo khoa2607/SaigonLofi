@@ -539,6 +539,14 @@ The 35 ms slice is the Ancestor Hall sprite: a single `bake()` call in Saigon's 
 
 Screenshots in `docs/holdfast/screenshots/`: `30-switch-fade-1…4.png` (one crossfade slowed to 6 s: the modern hospital dissolving into the thatched Ancestor Hall at the same coordinates) and `31-past-corpse.png` (a collapsed raptor with its ground shadow).
 
+## Current/Past maintenance — river dock alignment
+
+The three approved dock anchors and the valley geography are unchanged. Dock direction now follows the curved riverbank: west `+world-y`, centre `+world-x+y`, east `+world-x`. The centre dock is long enough to connect the main farm road to open water; the side docks extend visibly past the bank. Navigation footprints, fishing spots, supply-boat moorings and unload endpoints are derived from the same directional centre line, so residents stay on `W_DOCK` tiles and boats remain in open water. Current and Past share the corrected timber artwork and identical map/navigation geometry.
+
+Focused validation: `node tests/holdfast-docks.mjs 7` checks both eras (dry landward connection, water outer end, continuous reachable navigation, fishing/bathing/washing spots, three art directions, open-water moorings, and forced cargo arrival → crew call → unload → departure). Before/after Current and after Past screenshots are `current-past-docks-before.png`, `current-past-docks-after.png`, and `current-past-docks-past-after.png`.
+
+Regression result: **PASS** — `holdfast-docks`, `holdfast-m7`, `holdfast-sim 3600` (21 checks), `holdfast-past` (42), `holdfast-corpse` (33), `holdfast-world` (21), `holdfast-transition` (46, real Chrome) and `holdfast-browser` (Current/Past self-tests, gallery + Saigon smoke).
+
 ### Limitations
 
 - **The first switch is not instant:** 2–4 s of background preparation. The figure is the spare time per frame, so a bigger screen or a busy moment is slower, but never a freeze. Nothing is pre-built at boot (to keep the first load and memory small); a "Changing the age…" hint is shown meanwhile.

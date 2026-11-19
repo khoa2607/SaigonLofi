@@ -115,6 +115,17 @@ const carDoorP = (c) => (f, u, v, b) => { if (f === 0) return mixc(c, HINK, 0.3)
 const grateP = (f, u, v, b) => { if (f === 0) return 0x5a5e62; if ((u % 2) < 0.6 || v < 1 || v > b.h - 1 || Math.abs(v - b.h / 2) < 0.4) return vnoise(u, v) > 0.6 ? RUST : 0x6a6e72; return -1; };
 const sandP = (f, u, v, b) => { const W = f === 0 ? b.w : f === 1 ? b.w : b.d; const e = Math.min(u, W - u, f === 0 ? Math.min(v, b.d - v) : Math.min(v, b.h - v)); let c = e < 0.4 ? 0x7e6a48 : 0xb8a47c; if (hs(u * 3, v * 3 + f) > 0.82) c = 0xa8946c; if (f === 0 && e > 0.9) c = mixc(c, 0xfff1d6, 0.12); return c; };
 const plankP = (f, u, v, b) => { if (f === 0) { const k = (b.along === 'y' ? u : v) % 2; return k < 0.3 ? 0x5a3e2a : hs(Math.floor((b.along === 'y' ? u : v) / 2), 3) > 0.5 ? 0xa87a4c : 0x9a6e44; } return v < 0.6 ? 0x5a3e2a : 0x8a5e3a; };
+function dockBoxes(o) {
+  const B = [];
+  if (o.axis === 'xy') {
+    for (let t = 0; t < o.len; t += 3) { const q = Math.min(4.5, o.len - t), a = t * Math.SQRT1_2; B.push(HB(a - 3, a - 3, 1, q + 3, q + 3, 1.6, WOOD, plankP, { along: 'xy' })); }
+  } else if (o.axis === 'x') B.push(HB(0, -3, 1, o.len, 6, 1.6, WOOD, plankP, { along: 'x' }));
+  else B.push(HB(-3, 0, 1, 6, o.len, 1.6, WOOD, plankP, { along: 'y' }));
+  for (const t of [o.len * 0.5, o.len - 1]) for (const side of [-2.5, 2.5]) {
+    const x = o.dx * t - o.dy * side, y = o.dy * t + o.dx * side; B.push(HB(x - 0.5, y - 0.5, -4, 1, 1, 6, WOOD_D));
+  }
+  return B;
+}
 const woodP = (f, u, v) => (f === 0 ? WOOD_L : vnoise(u * 2, v / 3) > 0.58 ? WOOD_D : WOOD);
 const stoneP = (f, u, v, b, wx, wy) => { const n = vnoise(wx / 2 + u, wy / 2 + v); return f === 0 ? (n > 0.55 ? 0xb8b2a6 : 0xa49e94) : n > 0.6 ? 0x8a847c : f === 2 ? 0x7a746e : 0x96908a; };
 const canvasP = (c) => (f, u, v) => f === 0 ? ((u % 4) < 0.5 ? mixc(c, HINK, 0.2) : vnoise(u / 3, v / 3) > 0.62 ? mixc(c, 0x8a7a6a, 0.25) : c) : mixc(c, HINK, 0.15);
@@ -330,7 +341,7 @@ const PROPS = {
   silo: () => { const B = []; for (let k = 0; k < 4; k++) B.push(HB(k < 2 ? 0 : 1, k < 2 ? 0 : 1, k * 9, k < 2 ? 12 : 10, k < 2 ? 12 : 10, 9, 0xb8b4aa, (f, u, v) => (v % 3) < 0.5 ? 0x8a867c : vnoise(u, v) > 0.6 ? RUST : undefined)); return B; },
   mast: () => [HB(0, 0, 0, 3, 3, 90, 0xb84a3a, (f, u, v) => { if (f === 0) return 0x8a3a2a; if ((u + v * 0.8) % 2.4 < 0.6 || (u - v * 0.8 + 40) % 2.4 < 0.6 || u < 0.5 || u > 2.5) return ((v / 12) | 0) % 2 ? 0xe8e2d4 : 0xb84a3a; return -1; })],
   shed: () => [HB(0, 0, 0, 14, 12, 10, 0x8a949a, corrP(0x8a949a, 0.7, 6)), HB(-1, -1, 10, 16, 14, 1.4, 0x6a7a84, corrP(0x6a7a84, 0.7, 7))],
-  dock: (o) => [HB(0, 0, 1, 6, o.len, 1.6, WOOD, plankP, { along: 'y' }), HB(0, o.len - 1, -4, 1, 1, 6, WOOD_D), HB(5, o.len - 1, -4, 1, 1, 6, WOOD_D), HB(0, o.len * 0.5, -4, 1, 1, 6, WOOD_D), HB(5, o.len * 0.5, -4, 1, 1, 6, WOOD_D)],
+  dock: dockBoxes,
   // ---- milestone 6 props (same box + painter language as the approved pilot)
   rail: (o) => railBoxes(o.w, o.along, 0),
   picket: (o) => railBoxes(o.w, o.along, 1),

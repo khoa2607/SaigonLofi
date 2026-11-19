@@ -139,7 +139,7 @@ function* hrBuildStaticsG() {
     if (p.kind === 'lantern') HR.lights.push([...ISO(p.x, p.y, 12), 30, 'rgba(255,210,140,', 0.75, 2, p]);
     if (['truck', 'car', 'bus', 'gasstation', 'watertower', 'greenhouse', 'barn', 'messtent', 'rv', 'shed', 'smokehouse', 'coop', 'stall', 'silo', 'medtent', 'forge', 'wagon', 'hay', 'pighut'].includes(p.kind)) castShadow(p.x, p.y, p.bw || 10, p.bd || 8, p.kind === 'watertower' ? 46 : p.kind === 'stall' ? 13 : 12);
   }
-  for (const d of HF.docks) addStatic(bakeCached('dock' + d.len, () => ((HF.era === 'future' && FPROPS.dock) || PROPS.dock)(d)), d.x, d.y, -6);
+  for (const d of HF.docks) addStatic(bakeCached('dock' + d.axis + d.len, () => ((HF.era === 'future' && FPROPS.dock) || PROPS.dock)(d)), d.x, d.y, -6);
   // wall pieces
   if (slDue()) yield;
   yield* hrBuildWallsG();
