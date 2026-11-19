@@ -136,6 +136,7 @@ function winLayout(R, W, floors, doorU, opt) {
   return out;
 }
 function suburbHouse(o) {
+  if (HF.era === 'past') return pastHouse(o);
   const R = mulberry32(o.seed + 1), { w, d, floors } = o, wall = o.wall, roof = o.roof, H = floors * 18 + 1, B = [], Z0 = 2.5;
   const doorU = Math.round(w * 0.3);
   const S = { wall, trim: o.trim || TRIM, seed: o.seed % 97, band: floors > 1 ? 18.5 : 0, wear: o.wear || 0, moss: o.moss,
@@ -171,6 +172,7 @@ function suburbHouse(o) {
   return B;
 }
 function civicModel(b) {
+  if (HF.era === 'past') { const P = pastCivic(b); if (P) return P; }
   const R = mulberry32(b.seed * 31 + 7), w = b.w, d = b.d, B = [];
   const base = () => B.push(HB(-0.5, -0.5, 0, w + 1, d + 1, 2.2, CONC));
   const gable = (wall, roof, H, S, n) => { n = n || 6; const s = (d + 3) / (2 * n); for (let k = 0; k < n; k++) B.push(HB(-0.6, -1.5 + k * s, H + k * 2.3, w + 1.2, d + 3 - 2 * k * s, 2.3, roof, shingleP(roof, b.seed), { k, gable: Object.assign({ z0: 2.2 }, S) })); };
@@ -358,6 +360,7 @@ const PROPS = {
 };
 // ranch rails (o.w long, along 'x' or 'y'): posts every 6 units; pickets: a white picket fence for the graveyard
 function railBoxes(len, along, picket) {
+  if (HF.era === 'past') return pastRailBoxes(len, along, picket);
   const B = [], ax = along !== 'y', post = (t) => B.push(ax ? HB(t, 0, 0, 0.9, 0.9, picket ? 6 : 7.5, picket ? 0xe8e2d4 : WOOD_D, picket ? undefined : woodP) : HB(0, t, 0, 0.9, 0.9, picket ? 6 : 7.5, picket ? 0xe8e2d4 : WOOD_D, picket ? undefined : woodP));
   for (let t = 0; t <= len + 0.01; t += 6) post(Math.min(t, len - 0.9));
   if (picket) { const pp = (f, u, v) => { if (f === 0) return 0xe8e2d4; if ((u % 1.6) > 0.95) return -1; if (v > 4.6 && (u % 1.6) > 0.65) return -1; if (v < 1) return 0xb8b0a0; return hs(u * 2, v) > 0.9 ? 0xc8c0ae : undefined; }; B.push(ax ? HB(0, 0.1, 0, len, 0.6, 5.4, 0xeeeae0, pp) : HB(0.1, 0, 0, 0.6, len, 5.4, 0xeeeae0, pp)); }
@@ -367,6 +370,7 @@ function railBoxes(len, along, picket) {
 // a two-wheeled handcart (tray along x or y) with an optional load: 1 produce, 2 sacks, 3 planks, 4 fish, 5 crates, 6 hay, 7 med supplies
 const CART_LOAD = { 1: [0x6aa244, 0xd9534f], 2: [0xd8c08a, 0xc0a874], 3: [0xc49a64, 0x9a7446], 4: [0xc8d4dc, 0x6a7a84], 5: [0xc98a4a, 0xa8703a], 6: [0xe0c878, 0xb89a48], 7: [0xeeeae0, 0xc8382e] };
 function cartBoxes(along, load) {
+  if (HF.era === 'past') return pastCartBoxes(along, load);
   const ax = along !== 'y', L = (x, y, z, w, d, h, c, p, e) => ax ? HB(x, y, z, w, d, h, c, p, e) : HB(y, x, z, d, w, h, c, p, e);
   const wheel = (f, u, v) => { const r = Math.hypot(u - 1.6, v - 1.6); return r > 1.6 ? -1 : r > 1.1 || Math.abs(u - 1.6) < 0.25 ? 0x3a2e28 : -1; };
   const B = [L(0, 0, 2.2, 9, 5, 0.8, WOOD, plankP, { along: ax ? 'x' : 'y' }), L(0, 0, 3, 9, 0.6, 1.8, WOOD_D), L(0, 4.4, 3, 9, 0.6, 1.8, WOOD_D), L(8.4, 0, 3, 0.6, 5, 1.8, WOOD_D),
@@ -376,6 +380,7 @@ function cartBoxes(along, load) {
 }
 // a grave marker: 0 wooden cross, 1 rounded stone, 2 flat stone, 3 a stone cross; fresh = a dirt mound with flowers
 function graveBoxes(v, fresh) {
+  if (HF.era === 'past') return pastGraveBoxes(v, fresh);
   const B = [];
   if (fresh) B.push(HB(-1.6, 0.6, 0, 3.4, 5.2, 0.9, 0x6a4e34, (f, u, v2) => hs(u * 3, v2 * 3) > 0.85 ? 0xd9685c : hs(u * 3 + 1, v2 * 3) > 0.9 ? 0xf2e6a0 : undefined));
   if (v === 0 || fresh) B.push(HB(-0.4, -0.3, 0, 0.8, 0.6, 6, WOOD, woodP), HB(-1.8, -0.3, 3.8, 3.6, 0.6, 0.8, WOOD, woodP));
@@ -393,6 +398,7 @@ function carBoxes(c, wreck) {
 // ---------------------------------------------------------------- wall pieces, tower, gate
 // shape: list of half-directions from the tile centre: 'E','W','S','N' (world +x,-x,+y,-y); dmg 0 intact, 1 damaged, 2 breached
 function wallBoxes(s, shape, dmg) {
+  if (HF.era === 'past') return pastWallBoxes(s, shape, dmg);
   const B = [], h = s.kind === 'culvert' ? 13 : s.h, th = 1.4, c0 = [GALV, 0xb0583a, 0x5f86a8, 0x7a9a6a, 0xb8b8b0][s.seed % 5];
   if (dmg === 2) {   // breach: twisted sheet + rubble
     B.push(HB(-3, -2, 0, 6, 4, 1.6, 0x8a7a6a, metalP(0x8a7a6a)), HB(-1, 0, 0, 5, 2, 3, c0, metalP(c0)), HB(-4, 1, 0, 3, 3, 1.2, WOOD, woodP));
@@ -413,6 +419,7 @@ function wallBoxes(s, shape, dmg) {
 }
 function stakeBoxes(shape) { const B = []; for (const dd of shape) { const ox = dd === 'E' ? 2 : dd === 'W' ? -2 : 0, oy = dd === 'S' ? 2 : dd === 'N' ? -2 : 0; B.push(HB(ox - 0.5, oy - 3.6, 0, 1.1, 1.1, 16 + (ox + oy + 8) % 5, WOOD_D, (f, u, v, b) => v > b.h - 2 ? 0xd8b48a : undefined)); } return B; }
 function towerBoxes() {
+  if (HF.era === 'past') return pastTowerBoxes();
   const h = 46, s = 18, back = [], front = [];
   for (const [a, b] of [[0, 0], [s - 2, 0], [0, s - 2], [s - 2, s - 2]]) back.push(HB(a, b, 0, 2, 2, h, WOOD, woodP));
   for (const z of [13, 29]) back.push(HB(0, 0.4, z, s, 1.2, 1.6, WOOD_D, woodP), HB(0.4, 0, z + 1.6, 1.2, s, 1.6, WOOD_D, woodP), HB(0, s - 1.6, z, s, 1.2, 1.6, WOOD_D, woodP), HB(s - 1.6, 0, z + 1.6, 1.2, s, 1.6, WOOD_D, woodP));
@@ -426,10 +433,12 @@ function towerBoxes() {
   return { back, front };
 }
 function gateFrameBoxes() {   // gate spans 24 units along x; posts + painted HOLDFAST sign
+  if (HF.era === 'past') return pastGateFrameBoxes();
   return [HB(-1.2, -1.4, 0, 2.4, 2.8, 26, WOOD, woodP), HB(22.8, -1.4, 0, 2.4, 2.8, 26, WOOD, woodP),
     HB(-6, -0.6, 22, 36, 1.2, 6.4, 0xb08a5a, (f, u, v) => f === 1 && textAt('HOLDFAST', u - (36 - textW('HOLDFAST')) / 2, v - 0.8) ? 0xf6f0e0 : f === 1 && (v < 0.5 || v > 5.9 || u < 0.6 || u > 35.4) ? 0x6a4a32 : undefined)];
 }
 function gateLeafBoxes() {
+  if (HF.era === 'past') return pastGateLeafBoxes();
   return [HB(0, -0.7, 0.4, 12, 1.4, 17, 0x5a5e64, (f, u, v, b) => { if (f === 0) return 0x4a4e54; if (u < 0.8 || u > 11.2 || v < 0.8 || v > 16.2) return 0x3a3e44; const d1 = Math.abs((u - 0.8) - (v - 0.8) * 10.4 / 15.4), d2 = Math.abs((u - 0.8) - (16.2 - v) * 10.4 / 15.4); if (d1 < 0.6 || d2 < 0.6) return 0xd8b040; if ((u % 2.4) < 0.4) return 0x6a6e74; return vnoise(u / 2, v / 3) > 0.62 ? mixc(0x5a5e64, RUST, 0.5) : undefined; })];
 }
 
@@ -437,6 +446,7 @@ function gateLeafBoxes() {
 // Saigon's drawPerson calls these ev* hooks only when L.ev is set; Holdfast uses them for infected, guards and work gear.
 function evBehind(X) { if (X.L.pack2 && !X.back) { const c = grade(0x6a5a3a); X.rect(X.cx - 9, X.torsoTop, X.cx - 6, X.legTop + 1, c, 0, X.cx - 7, clothSh(c)); } }
 function evTorso(X) {
+  if (X.L.past) return pastTorso(X);
   const L = X.L, { rect, put, cx, torsoTop: tt, legTop: lt } = X;
   if (L.ev === 'guard') { const v = grade(0x4e5a3e); rect(cx - 5, tt + 1, cx + 5, lt - 1, v, 6, cx + 3, clothSh(v)); rect(cx - 4, lt - 4, cx - 2, lt - 2, grade(0x3a4430), 6); rect(cx + 1, lt - 4, cx + 3, lt - 2, grade(0x3a4430), 6); rect(cx - 5, lt - 1, cx + 6, lt - 1, grade(0x2e2a24), 6); }
   if (L.ev === 'builder') { const v = grade(0xe8b83a); rect(cx - 5, tt + 1, cx - 3, lt - 1, v, 6); rect(cx + 2, tt + 1, cx + 4, lt - 1, v, 6, cx + 4, clothSh(v)); rect(cx - 5, tt + 5, cx + 4, tt + 5, grade(0xf4f1e8), 6); rect(cx - 6, lt - 1, cx + 6, lt, grade(0x5a3a24), 6); }
@@ -446,13 +456,15 @@ function evTorso(X) {
   if (L.pack2 && X.back) { const c = grade(0x6a5a3a); rect(cx - 5, tt + 1, cx + 5, lt - 1, c, 7, cx + 3, clothSh(c)); rect(cx - 4, tt + 3, cx + 4, tt + 4, grade(0x4a3e2a), 7); }
 }
 function evFace(X, ex1, ex2, ey, eh) {
+  if (X.L.past) return pastFace(X, ex1, ex2, ey, eh);
   const L = X.L, { rect, put, cx } = X;
 }
-function evHat() { }
+function evHat(hat, X) { if (X && X.L.past) pastHat(hat, X); }
 function evCarry() { }
 function evOver(X, hx, hy, raise) {
   const L = X.L, { rect, put, cx, torsoTop: tt, legTop: lt, back } = X;
   const M = 0x2e2c30, Wd = grade(0x7a5234);
+  if (L.past && pastOver(X, hx, hy, raise)) return;
   if (L.gun === 'aim') { for (let i = 0; i < 17; i++) { const x = cx + 6 - i, y = tt + 3 - Math.round(i * 0.42); put(x, y, i < 6 ? Wd : M, 15); if (i < 12) put(x, y + 1, i < 6 ? clothSh(Wd) : 0x48464c, 15); } }
   else if (L.gun === 'sling') { for (let i = 0; i < 15; i++) { const x = cx - 6 + Math.round(i * 0.8), y = lt + 1 - i; put(x, y, i < 5 ? Wd : M, back ? 0 : 15); } }
   else if (L.gun === 'carry') { for (let i = 0; i < 16; i++) { const x = cx - 5 + i, y = lt - 1 - Math.round(i * 0.45); put(x, y, i < 6 ? Wd : M, 15); put(x, y + 1, i < 6 ? clothSh(Wd) : 0x48464c, 15); } }
@@ -493,6 +505,7 @@ function hfLying(L, cover) {   // the figure laid on its side; cover = a sheet o
 const HF_TOPS = [0x7a6a5a, 0x5a6a7a, 0x8a5a4a, 0x6a7a5a, 0xa8906a, 0x4a5a6a, 0x9a6a5a, 0x7a7a6a, 0xb8a888, 0x6a5a6a, 0x8a7a4a, 0xa85a4a];
 const HF_BOTS = [0x3a3e4a, 0x4a4a3a, 0x5a4a3a, 0x3a4a5a, 0x2e2e34, 0x5a5a4a];
 function hfLook(role, R) {
+  if (HF.era === 'past') return pastLook(role, R);
   const kid = role === 'kid', type = kid ? 'kid' : role === 'elder' ? (R() < 0.5 ? 'oldman' : 'oldlady') : R() < 0.45 ? 'worker' : R() < 0.5 ? 'youth' : 'dress';
   const L = randLook(type); L.top = sp(R, HF_TOPS); L.bot = sp(R, HF_BOTS); L.carry = null; L.tie = 0; L.mask = 0; L.kq = false; L.pattern = 0; L.pack = 0; L.glasses = R() < 0.08;
   if (type === 'dress') { L.dress = R() < 0.5 ? 1 : 0; L.bot = sp(R, [0x6a4a5a, 0x4a5a6a, 0x7a6a4a]); }
@@ -510,6 +523,7 @@ function hfLook(role, R) {
 }
 // ---------------------------------------------------------------- milestone 7: river craft (sampan hulls with painted bow eyes; cargo, fishing, red-cross medical boats)
 function boatBoxes(kind, axis) {
+  if (HF.era === 'past') return pastBoatBoxes(kind, axis);
   const B = [], L = kind === 'fish' ? 24 : 32, hw = kind === 'fish' ? 3.6 : 4.6, med = kind === 'med';
   const hullC = med ? 0xf0ece2 : 0x7a5434, hullD = med ? 0xc8c2b4 : 0x5a3a26, stripe = med ? 0xc8382e : 0x3d6f8a;
   const hullP = (f, u, v, b) => { if (f === 0) return (u * 2 | 0) % 3 ? 0x9a7046 : 0x8a6038; const W = f === 1 ? b.w : b.d; if (Math.abs(v - (b.h - 0.9)) < 0.45) return stripe; if (f === 1 && u > W - 4.2 && u < W - 2.6 && v > 0.8 && v < 1.8) return u < W - 3.4 ? 0xf6f2e6 : 0x1e1818; return v < 0.7 ? hullD : undefined; };   // painted eye at the bow
@@ -709,6 +723,7 @@ function pineSprite(v, season) {
 // the great oak: Saigon's 'me' crown scaled up by stacking two variants
 function hfTree(spc, season, v) {
   if (spc === 'pine') return pineSprite(v % 6, season);
+  if (spc === 'fern' || spc === 'cycad') return fernTreeSprite(v % 6, season, spc === 'cycad');
   if (spc === 'fruit') return treeSprite('mai', season, v % 6);
   if (spc === 'oak') return treeSprite('dau', season, 1);
   return treeSprite(spc, season, v % 6);

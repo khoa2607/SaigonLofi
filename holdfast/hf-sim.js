@@ -19,7 +19,7 @@ function hsSound(k, x, y, v) { if (HS.sound) HS.sound(k, x, y, v); }
 
 // ---------------------------------------------------------------- setup
 function hsInit(opt) {
-  opt = opt || {}; HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
+  opt = opt || {}; if (HF.era === 'past') pastPre(); HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
   HS.people = []; HS.zombies = []; HS.wild = []; HS.fx = []; HS.noises = []; HS.log = []; HS.exps = []; HS.rescues = []; HS.arrivals = [];
   HS.spots.clear(); HS.vacant = []; HS.alarm = 0; HS.mode = 'peace'; HS.recoverT = 0; HS.stats.exp = 0;
   // the viewer arrives at an arbitrary daytime moment of an ongoing world (a seeded hour unless one is asked for): no "day 1"
@@ -53,6 +53,7 @@ function hsInit(opt) {
   for (let i = 0; i < Math.round(Z_WANDER * DANGER[HS.danger].n * HS.zScale); i++) hsSpawnWanderer(true);
   for (let i = 0; i < Math.round(Z_BAND * DANGER[HS.danger].n * HS.zScale); i++) hsSpawnBand(true);     // the frontier is already busy
   const now = HS.t, iv = DANGER[HS.danger].iv;
+  if (HF.era === 'past') pastInit();
   HS.next = { minor: now + rr2(30, 70), medium: now + rr2(6, 10) * 60 * iv, major: now + rr2(18, 28) * 60 * iv, siege: now + rr2(100, 140) * 60 * iv, exp: now + rr2(30, 60), wx: now + 300, arrive: now + 240, act: 0 };
   hsWarmStart();
 }
@@ -206,6 +207,7 @@ function hsNoise(x, y, r, kind) { HS.noises.push({ x, y, r: r * (HS.weather === 
 
 // ---------------------------------------------------------------- combat helpers
 function hsShoot(a, z, from, range, base) {
+  if (HF.era === 'past') return pastShoot(a, z, from, range, base);
   const d = Math.hypot(z.x - a.x, z.y - a.y); if (d > range) return false;
   const night = hsDark(), p = clamp(base - d / 1000 - (night ? 0.14 : 0) - (HS.weather === 'rain' ? 0.08 : 0), 0.15, 0.95), hit = HS.R() < p;
   HS.stats.shots++; hsNoise(a.x, a.y, 230, 'shot'); hsSound('shot', a.x, a.y, from.z ? 0.9 : 0.7);
@@ -215,7 +217,7 @@ function hsShoot(a, z, from, range, base) {
   return true;
 }
 function hsHitZ(z, a, dmg) {
-  z.hp -= dmg; z.st2 = 'stagger'; z.stT = 0.45; const dx = z.x - a.x, dy = z.y - a.y, d = Math.hypot(dx, dy) || 1; z.kx = dx / d * 6; z.ky = dy / d * 6;
+  z.hp -= dmg; z.st2 = 'stagger'; z.stT = z.stag != null ? z.stag : 0.45; const dx = z.x - a.x, dy = z.y - a.y, d = Math.hypot(dx, dy) || 1, kb = z.stag != null ? 2 + z.stag * 10 : 6; z.kx = dx / d * kb; z.ky = dy / d * kb;
   HS.fx.push({ k: 'hit', x: z.x, y: z.y, t: 0.2 });
   if (z.hp <= 0) { z.st = 'dead'; z.corpseT = rr2(90, 150); z.path = null; HS.stats.kills++; HS.fx.push({ k: 'dust', x: z.x, y: z.y, t: 0.6 }); hsSound('fall', z.x, z.y, 0.6); }
 }
@@ -409,7 +411,7 @@ function towerGuard(p, dt) {
   if (T.climb < 1) { if (glide(lx, ly)) { T.climb += dt / 3; p.z = Math.min(1, T.climb) * 48; } return; }
   p.z = 48.2; if (!glide(slot[0], slot[1])) return;
   if (!onShift(p) && HS.alarm <= 0 && p.task) { T.down = 1; p.aim = null; p.variant = 'carry'; return; }
-  const z = nearestZ(p.x, p.y, 230, q => !isInside(q.x, q.y) || HS.zInside > 0);
+  const z = nearestZ(p.x, p.y, 230, q => (!isInside(q.x, q.y) || HS.zInside > 0 || q.fly) && (!q.fly || Math.hypot(q.x - p.x, q.y - p.y) < 150));
   p.aim = z; p.variant = z ? 'aim' : 'carry';
   if (z) { faceTo(p, z); if (p.cool <= 0) { p.cool = rr2(2.6, 4.2) * (HS.alarm > 0 ? 0.85 : 1); hsShoot(p, z, { x: p.x - (p.dir === 2 ? 5 : p.dir === 0 ? -5 : 0), y: p.y, z: 61 }, 230, 0.6); } }
   else { p.dir = (Math.floor((HS.t + p.ph) / 6) % 2) ? 3 : 2; }
@@ -417,6 +419,7 @@ function towerGuard(p, dt) {
 
 // ---------------------------------------------------------------- infected
 function hsAddZ(x, y, o) {
+  if (HF.era === 'past') return pastAddDino(x, y, o);
   x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4);
   const L = hfZombieLook(HS.R);
   const z = Object.assign({ id: HS.zid++, L, x, y, px: x, py: y, dir: 1, st: 'wander', hp: HS.R() < 0.35 ? 4 : 3, spd: HS.R() < 0.12 ? rr2(5.4, 6.4) : rr2(3.2, 4.6), t: 0, path: null, stride: 0, ph: HS.R() * 10, cool: 0, seg: -1, st2: '', stT: 0, kx: 0, ky: 0, idle: 0, route: null, rp: 0, lane: rr2(-3, 3) }, o || {});
@@ -445,9 +448,10 @@ function hsZ(z, dt) {
   if (z.stT > 0) { z.stT -= dt; z.x += z.kx * dt * 2; z.y += z.ky * dt * 2; z.kx *= 0.8; z.ky *= 0.8; if (!hfPass(tileOfW(z.x, z.y), 'z')) { z.x -= z.kx * dt * 2; z.y -= z.ky * dt * 2; } return; }
   if (z.delay > 0) { z.delay -= dt; return; }
   if (z.cool > 0) z.cool -= dt;
+  if (z.L.ev === 'dino' && pastZ(z, dt)) return;
   const inside = isInside(z.x, z.y);
   // targets: humans in sight
-  const sight = hsDark() ? 46 : 74;
+  const sight = (hsDark() ? 46 : 74) * (z.sight || 1);
   if (z.st !== 'attack' && z.st !== 'pursue') {
     let tgt = null, bd = sight * sight;
     shNear(SHP, z.x, z.y, sight, p => { if (!p.alive || p.onTower || p.st === 'down') return; if (!inside && isInside(p.x, p.y) && !p.exp && !p.rescue) return; const d = (p.x - z.x) ** 2 + (p.y - z.y) ** 2; if (d < bd) { bd = d; tgt = p; } });
@@ -489,7 +493,7 @@ function hsZ(z, dt) {
       const p = z.tgt; if (!p || !p.alive || p.onTower) { z.st = 'wander'; z.tgt = null; return; }
       const d = Math.hypot(p.x - z.x, p.y - z.y); if (d > 11) { z.st = 'pursue'; return; }
       if (p.st === 'down' && z.t > 5) { z.st = 'wander'; z.tgt = null; z.path = null; return; }   // loses interest in someone who no longer moves
-      faceTo(z, p); if (z.cool <= 0) { z.cool = 1.6; if (HS.R() < (p.role === 'guard' ? 0.22 : 0.32) * (p.st === 'down' ? 0.35 : 1)) hsHurt(p, z); hsSound('growl', z.x, z.y, 0.5); }
+      faceTo(z, p); if (z.cool <= 0) { z.cool = z.acool || 1.6; if (HS.R() < (p.role === 'guard' ? 0.22 : 0.32) * (p.st === 'down' ? 0.35 : 1) * (z.bite || 1)) hsHurt(p, z); hsSound(z.L.ev === 'dino' ? 'snarl' : 'growl', z.x, z.y, 0.5); }
       return;
     }
     case 'wall': {
@@ -498,11 +502,12 @@ function hsZ(z, dt) {
       if (s.breached || s.hp <= 0) { z.st = 'wander'; z.path = null; z.seg = -1; const [gx, gy] = d2w(HGREEN[0], HGREEN[1]); hsGo(z, gx, gy, 'z'); z.st = 'investigate'; return; }
       if (Math.hypot(s.x - z.x, s.y - z.y) > 16) { z.tries = (z.tries || 0) + 1; if (z.tries > 3) { z.st = 'wander'; z.seg = -1; z.tries = 0; return; } const [x, y] = tileC(s.outT); hsGo(z, x + rr2(-2, 2), y + rr2(-2, 2), 'z'); return; }   // only at the wall itself
       z.tries = 0; faceTo(z, s); s.pressure = (s.pressure || 0) + 1; s.lastHit = HS.t;
+      if (z.cool <= 0 && z.L.ev === 'dino') { pastWallHit(z, s); return; }
       if (z.cool <= 0) { z.cool = rr2(1.6, 2.2); s.dmgT = 0.25; hsSound('bang', s.x, s.y, 0.35);   // a few infected dent the wall; it takes a real pack to break it
         const crowd = countZ(s.x, s.y, 16); if (crowd >= 4 || HS.R() < (s.hp > 3 ? 0.5 : 0.12)) { s.hp -= 1; if (s.hp <= 0) hsBreach(s); } }
       return;
     }
-    case 'gate': { if (z.path) { if (hsStep(z, dt, z.spd)) z.path = null; return; } if (Math.hypot(HF.gate.x - z.x, HF.gate.y - z.y) > 26) { z.st = 'wander'; return; } faceTo(z, HF.gate); if (HF.gate.open > 0.7) { z.st = 'investigate'; const [gx, gy] = d2w(HGREEN[0], HGREEN[1]); hsGo(z, gx, gy, 'z'); } if (z.cool <= 0) { z.cool = 2; hsSound('bang', HF.gate.x, HF.gate.y, 0.4); } return; }
+    case 'gate': { if (z.path) { if (hsStep(z, dt, z.spd)) z.path = null; return; } if (Math.hypot(HF.gate.x - z.x, HF.gate.y - z.y) > 26) { z.st = 'wander'; return; } faceTo(z, HF.gate); if (HF.gate.open > 0.7) { z.st = 'investigate'; const [gx, gy] = d2w(HGREEN[0], HGREEN[1]); hsGo(z, gx, gy, 'z'); } if (z.cool <= 0) { z.cool = 2; hsSound('bang', HF.gate.x, HF.gate.y, 0.4); if (z.ram) { z.ram = 0; HS.Ps.gateRams++; HS.fx.push({ k: 'dust', x: HF.gate.x, y: HF.gate.y, t: 0.6 }); } } return; }
   }
 }
 function steer(z, x, y, sp, dt) { const dx = x - z.x, dy = y - z.y, d = Math.hypot(dx, dy) || 1, nx = z.x + dx / d * sp * dt, ny = z.y + dy / d * sp * dt; if (hfPass(tileOfW(nx, ny), 'z')) { z.x = nx; z.y = ny; z.stride += sp * dt; } else { hsGo(z, x, y, 'z'); if (z.path) hsStep(z, dt, sp); } if (Math.abs(dx) > Math.abs(dy)) z.dir = dx > 0 ? 0 : 2; else z.dir = dy > 0 ? 1 : 3; }
@@ -539,6 +544,7 @@ function hsSpawnHerd() { const [x, y] = hsWildPoint(), n = 2 + Math.floor(HS.R()
 function hsWild(w, dt) {
   w.t += dt;
   if (w.k === 'crows') { w.x += Math.cos(w.ph + HS.t * 0.3) * dt * 10; w.y += Math.sin(w.ph * 1.7 + HS.t * 0.2) * dt * 8; if (w.t > 30) { const c = HS.zombies.find(z => z.st === 'dead'); if (c && HS.R() < 0.5) { w.x = c.x; w.y = c.y - 30; } w.t = 0; } return; }
+  if (w.big) return pastHerb(w, dt);
   if (w.pen) { const P = w.pen, night = HS.life < 5.6 || HS.life > 20.8; if (!w.path || w.t > (w.wait || 4)) { w.t = 0; w.wait = rr2(2.5, 7); let x = P.x + 2 + HS.R() * (P.w - 4), y = P.y + 2 + HS.R() * (P.d - 4);
       if (w.trough && HS.pigFood > 0 && !night && HS.R() < 0.7) { x = w.trough[0] + rr2(-5, 5); y = w.trough[1] + rr2(-1.5, 1.5); w.eat = 1; } else w.eat = 0;
       if ((w.k === 'chicken' || w.k === 'rooster') && HS.t - HS.feedT < 18) { x = P.x + P.w - 4 + rr2(-3, 2); y = P.y + P.d - 4 + rr2(-3, 2); w.wait = rr2(0.6, 1.6); }
@@ -574,7 +580,7 @@ function hsStartExpedition() {
   const pool = HS.people.filter(p => p.alive && p.role === 'scav' && !p.exp && !p.inj && p.vis !== false);
   if (pool.length < 2 || HS.alarm > 0) return null;
   const team = pool.slice(0, Math.min(3, pool.length)); const poi = pickR(HF.pois.filter(q => !q.horde || HS.R() < 0.25));
-  const e = { id: HS.stats.exp++, team, poi, ph: 'prep', t: 0, loot: pickR(['food', 'parts', 'medicine', 'seeds', 'radio', 'fuel']), start: team.length, hurt: 0, rescued: false };
+  const e = { id: HS.stats.exp++, team, poi, ph: 'prep', t: 0, loot: pickR(HF.era === 'past' ? ['meat', 'hides', 'flint', 'herbs', 'berries', 'eggs'] : ['food', 'parts', 'medicine', 'seeds', 'radio', 'fuel']), start: team.length, hurt: 0, rescued: false };
   for (const p of team) { hsClaim(p, null); p.exp = e; p.task = { k: 'exp', t: 0 }; p.variant = 'pistol'; p.L.pack2 = 1; const s = spotXY('yard', 4); hsGo(p, s.x, s.y, 'all'); }
   if (HS.gear > 0) HS.gear--;
   const H = HS.horses && HS.horses.find(q => q.st === 'paddock' && q.rest <= 0 && !q.groom); if (H && HS.R() < 0.55) { e.horse = H; H.st = 'pack'; H.lead = team[0]; team[0].trail = [[team[0].x, team[0].y]]; HS.Ls.packHorse++; }
@@ -601,7 +607,7 @@ function hsExp(e, dt) {
       const lost = e.start - e.team.length, hurt = e.team.filter(p => p.inj).length;
       if (lost) { HS.stats.expDead++; hsLog('exp.dead', { poi: e.poi.name, n: lost }, true); } else if (hurt) { HS.stats.expHurt++; hsLog('exp.hurt', { poi: e.poi.name, loot: e.loot }); } else { HS.stats.expOk++; hsLog('exp.ok', { poi: e.poi.name, loot: e.loot }); }
       const out = e.team.filter(p => !isInside(p.x, p.y));
-      if (e.team.length && HS.store) { if (e.loot === 'food' || e.loot === 'seeds') HS.store.food = Math.min(STORE_CAP.food, HS.store.food + 3 + e.team.length); else if (e.loot === 'medicine') HS.store.med = Math.min(STORE_CAP.med, HS.store.med + 3 + e.team.length); else HS.store.yard = Math.min(STORE_CAP.yard, HS.store.yard + 2 + e.team.length * 2); }
+      if (e.team.length && HS.store) { if (e.loot === 'food' || e.loot === 'seeds' || e.loot === 'meat' || e.loot === 'berries' || e.loot === 'eggs') HS.store.food = Math.min(STORE_CAP.food, HS.store.food + 3 + e.team.length); else if (e.loot === 'medicine' || e.loot === 'herbs') HS.store.med = Math.min(STORE_CAP.med, HS.store.med + 3 + e.team.length); else HS.store.yard = Math.min(STORE_CAP.yard, HS.store.yard + 2 + e.team.length * 2); }
       for (const p of e.team) { p.exp = null; p.task = null; p.variant = ''; p.L.pack2 = 0; }
       if (e.horse) { e.horse.st = 'loose'; e.horse.lead = null; e.horse.unload = 1; e.horse.path = null; e.horse = null; }
       if (out.length) { for (const p of out) { p.arriving = true; p.task = { k: 'arrive', t: 0 }; } HS.arrivals.push({ group: out, t: 0, home: 1 }); }   // stragglers still walk home through the gate
@@ -711,10 +717,10 @@ function hsMajor(n, routes, siege) {
 function hsThreat(dt) {
   for (const s of HF.walls) { if (HS.t - (s.lastHit || -99) > 1.5) s.pressure = 0; else s.pressure = Math.max(0, (s.pressure || 0) - dt * 2); }
   let nearWall = 0, inside = 0;
-  for (const z of HS.zombies) { if (z.st === 'dead') continue; if (isInside(z.x, z.y)) inside++; else if (z.st === 'wall' || z.st === 'gate') nearWall++; }
+  for (const z of HS.zombies) { if (z.st === 'dead' || z.fly) continue; if (isInside(z.x, z.y)) inside++; else if (z.st === 'wall' || z.st === 'gate') nearWall++; }
   HS.zInside = inside; if (inside > HS.stats.zInside) HS.stats.zInside = inside; if (HF.breaches > HS.stats.breachMax) HS.stats.breachMax = HF.breaches;
   // curious wanderers drawn by gunfire do not ring the bell
-  let close = 0; for (const z of HS.zombies) if (z.st !== 'dead' && (z.st === 'march' || z.st === 'wall' || z.st === 'gate') && !isInside(z.x, z.y)) { const [u, v] = w2d(z.x, z.y); if (v > wallV(u) - 70) close++; }
+  let close = 0; for (const z of HS.zombies) if (z.st !== 'dead' && !z.fly && (z.st === 'march' || z.st === 'wall' || z.st === 'gate') && !isInside(z.x, z.y)) { const [u, v] = w2d(z.x, z.y); if (v > wallV(u) - 70) close++; }
   if (nearWall >= 8 || inside > 0 || close >= 12) hsAlarm('wall');
   if (HS.alarm > 0) { HS.alarm -= dt; if (HS.alarm <= 0) { HS.alarm = 0; hsLog('clear', {}); HS.mode = 'recovery'; HS.recoverT = 90; } }
   HS.mode = HS.alarm > 0 ? 'attack' : (HS.recoverT > 0 ? 'recovery' : 'peace'); if (HS.recoverT > 0) HS.recoverT -= dt;

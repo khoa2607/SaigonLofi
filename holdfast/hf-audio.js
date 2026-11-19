@@ -35,7 +35,7 @@ function haFrame(dt, view) {
   const t = HS.t;
   if (!night && wx !== 'rain' && HR.season !== 'winter' && t > (HA.last.bird || 0)) { HA.last.bird = t + 2 + Math.random() * 6; haBird(); }
   if (night && t > (HA.last.owl || 0)) { HA.last.owl = t + 25 + Math.random() * 40; haOwl(); }
-  if (view.zombies > 0 && t > (HA.last.moanAmb || 0)) { HA.last.moanAmb = t + 6 + Math.random() * 10; haMoan(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); }
+  if (view.zombies > 0 && t > (HA.last.moanAmb || 0)) { HA.last.moanAmb = t + 6 + Math.random() * 10; if (HF.era === 'past') haCall(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); else haMoan(0.25 + Math.min(0.4, view.zombies / 30), (Math.random() - 0.5) * 1.4); }
 }
 function haEnv(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
 function haNode(gain, pan) { const c = HA.ctx, g = c.createGain(); let out = g; if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan || 0, -1, 1); g.connect(p); const dst = HA.nature ? HA.out : HA.evt; p.connect(dst); } else g.connect(HA.nature ? HA.out : HA.evt); return g; }
@@ -52,6 +52,7 @@ function haEvent(k, x, y, v) {
   const c = HA.ctx, t = c.currentTime, p = ISO(x, y), dx = p[0] - HR.cx, dy = p[1] - HR.cy, d = Math.hypot(dx, dy * 1.6), att = 1 / (1 + d / 200), pan = clamp(dx / 420, -0.9, 0.9);
   if (att < 0.08 && k !== 'bell' && k !== 'breach') return;
   const now = performance.now();
+  if (HF.era === 'past' && haPast(k, t, att, pan, v, now)) return;
   if (k === 'shot') { HA.shots = HA.shots.filter(s => now - s < 10000); if (HA.shots.length >= 6 || now - (HA.last.shot || 0) < 120) return; HA.shots.push(now); HA.last.shot = now; haNoise(t, 0.09, 0.22 * att * v, 'lowpass', 1500, pan); haTone('sine', 110, 50, t, 0.002, 0.16 * att * v, 0.14, pan); haNoise(t + 0.04, 0.5, 0.035 * att, 'lowpass', 400, pan); return; }
   if (HA.voices > 4) return; HA.voices++; setTimeout(() => HA.voices--, 400);
   if (k === 'bang') haTone('sine', 120, 70, t, 0.003, 0.11 * att * v, 0.12, pan), haNoise(t, 0.05, 0.05 * att, 'bandpass', 700, pan);
@@ -63,4 +64,17 @@ function haEvent(k, x, y, v) {
   else if (k === 'bell') { if (now - (HA.last.bell || 0) < 8000) return; HA.last.bell = now; for (let i = 0; i < 3; i++) for (const [f, a] of [[660, 0.06], [990, 0.03], [1325, 0.02]]) haTone('sine', f, f * 0.995, t + i * 0.9, 0.004, a * Math.max(0.4, att), 1.6, pan); }
   else if (k === 'breach') { haNoise(t, 0.6, 0.12 * Math.max(0.4, att), 'lowpass', 900, pan); haTone('sine', 80, 40, t, 0.01, 0.1, 0.4, pan); }
   else if (k === 'loss') haTone('sine', 196, 180, t, 0.4, 0.02, 2.2, pan);
+}
+// ---------------------------------------------------------------- PAST timeline: bowstrings, roars, a pteranodon's screech, the war horn + drum (same channels and caps)
+function haCall(v, pan) { const t = HA.ctx.currentTime, f = 620 + Math.random() * 300; for (let i = 0; i < 2 + (Math.random() * 2 | 0); i++) haTone('triangle', f, f * 0.7, t + i * 0.16, 0.01, 0.025 * v, 0.1, pan); }
+function haRoar(v, pan, f0, d) { const c = HA.ctx, t = c.currentTime, o = c.createOscillator(), fl = c.createBiquadFilter(), g = haNode(1, pan); o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, t); o.frequency.linearRampToValueAtTime(f0 * 1.25, t + d * 0.3); o.frequency.linearRampToValueAtTime(f0 * 0.6, t + d); fl.type = 'lowpass'; fl.frequency.value = 520; fl.Q.value = 2; haEnv(g, t, 0.12, 0.1 * v, d); o.connect(fl); fl.connect(g); o.start(t); o.stop(t + d + 0.2); haNoise(t, d * 0.8, 0.04 * v, 'bandpass', 380, pan, 1.2); }
+function haPast(k, t, att, pan, v, now) {
+  if (k === 'shot') { HA.shots = HA.shots.filter(s => now - s < 10000); if (HA.shots.length >= 6 || now - (HA.last.shot || 0) < 120) return true; HA.shots.push(now); HA.last.shot = now; haNoise(t, 0.05, 0.07 * att * v, 'bandpass', 2600, pan, 3); haTone('triangle', 240, 170, t, 0.002, 0.05 * att * v, 0.14, pan); return true; }
+  if (HA.voices > 4) return true;
+  if (k === 'moan' || k === 'growl' || k === 'snarl') { if (now - (HA.last.moan || 0) < 900) return true; HA.last.moan = now; HA.voices++; setTimeout(() => HA.voices--, 400); haRoar(att, pan, 140 + Math.random() * 60, 0.45); return true; }
+  if (k === 'roar') { if (now - (HA.last.roar || 0) < 3000) return true; HA.last.roar = now; HA.voices++; setTimeout(() => HA.voices--, 1600); haRoar(Math.max(0.5, att) * 1.6, pan, 62 + Math.random() * 14, 1.7); return true; }
+  if (k === 'screech') { haTone('triangle', 1900, 900, t, 0.01, 0.04 * att, 0.38, pan); haTone('square', 2400, 1300, t + 0.05, 0.01, 0.01 * att, 0.3, pan); return true; }
+  if (k === 'drum') { haTone('sine', 96, 52, t, 0.004, 0.07 * att, 0.24, pan); haNoise(t, 0.05, 0.02 * att, 'lowpass', 400, pan); return true; }
+  if (k === 'bell') { if (now - (HA.last.bell || 0) < 8000) return true; HA.last.bell = now; haTone('triangle', 147, 139, t, 0.35, 0.07 * Math.max(0.4, att), 1.5, pan); haTone('sine', 220, 208, t + 0.1, 0.3, 0.025 * Math.max(0.4, att), 1.3, pan); for (let i = 0; i < 6; i++) haTone('sine', 92, 50, t + 1.7 + i * 0.36, 0.004, 0.11 * Math.max(0.4, att), 0.22, pan); return true; }
+  return false;
 }

@@ -63,7 +63,8 @@ const W_IN = 1, W_OUT = 2, W_GATE = 4, W_BREACH = 8, W_DOCK = 16;
 
 function hfNoise(x, y, s) { return vnoise(x / s + 11.3, y / s + 4.7); }
 
-function hfBuildMap(seed) {
+function hfBuildMap(seed, era) {
+  HF.era = era === 'past' ? 'past' : 'current';                // milestone 8: the same valley in another age (hf-past*.js)
   const R = mulberry32(seed || 7);
   HF.R = R;
   // 1) zones + ground per tile
@@ -92,6 +93,7 @@ function hfBuildMap(seed) {
   hfBuildSettlement(R);
   hfBuildOutside(R);
   hfBuildWalk();
+  if (HF.era === 'past') pastMap();
   return HF;
 }
 

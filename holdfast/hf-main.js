@@ -14,8 +14,23 @@ Object.assign(UI, {
   'hf.yesterday': ['hôm qua', 'yesterday'], 'hf.daysago': ['{n} ngày trước', '{n} days ago'], 'hf.hide.msg': ['Bấm phím H hoặc chạm 2 lần để hiện lại bảng', 'Press H or tap twice to show the panel again'],
   'hf.season.busy': ['Đang sang mùa {s}…', 'Changing to {s}…'],
   'st.peace': ['bình yên', 'quiet'], 'st.attack': ['BÁO ĐỘNG', 'ALARM'], 'st.recovery': ['đang khắc phục', 'recovering'],
-  'loading': ['đang dựng thung lũng…', 'building the valley…']
+  'loading': ['đang dựng thung lũng…', 'building the valley…'],
+  'hf.sub.past': ['Bộ lạc bên khúc sông, thời khủng long', 'A tribe in the river bend, in the age of dinosaurs'], 'tl.switch': ['Đang chuyển thời đại…', 'Changing the age…'],
+  'hf.world.t.past': ['Tiếng cung tên, trống trận, tiếng gầm… tách riêng khỏi nhạc', 'Bowstrings, war drum, roars… separate from the music']
 });
+// PAST timeline wording (same events, another age); falls back to LOGT
+const LOGT_P = {
+  'exp.out': ['{n} đi săn, hướng về {poi}.', '{n} set out to hunt toward the {poi}.'], 'exp.ok': ['Đội săn trở về từ {poi}, mang theo {loot}.', 'The hunters are back from the {poi} with {loot}.'],
+  'exp.hurt': ['Đội săn từ {poi} về, có người bị thương — vẫn mang được {loot}.', 'The hunters made it back from the {poi}, hurt but carrying {loot}.'],
+  'exp.dead': ['Đội săn từ {poi} về thiếu {n} người.', 'The hunters came back from the {poi} {n} short.'], 'exp.lost': ['Không ai trở về từ {poi}.', 'Nobody came back from the {poi}.'],
+  'exp.chased': ['Đội săn ở {poi} bị phát hiện — chạy về cổng!', 'The hunters at the {poi} were spotted — running for the gate!'], rescue: ['Một toán cầm giáo lao ra khỏi cổng.', 'A band of spear-carriers rushes out of the gate.'],
+  died: ['{n} đã ra đi. Một ụ đá được dựng ở bãi mộ.', '{n} is gone. A cairn is raised at the burial ground.'], hurt: ['{n} bị thương và được khiêng vào lều thầy thuốc.', "{n} was hurt and carried to the healer's lodge."],
+  breach: ['Hàng rào cọc bị phá thủng!', 'The palisade is broken!'], sealed: ['Hàng rào cọc đã được dựng lại.', 'The palisade is mended.'], alarm: ['Trống trận vang lên.', 'The war drum sounds.'], clear: ['Đã yên. Cả bộ lạc bắt đầu sửa sang.', 'All quiet again. The tribe starts mending.'],
+  pack: ['Một bầy raptor áp sát một chòi canh.', 'A raptor pack is closing on a watch platform.'], major: ['Thú săn mồi kéo đến từ nhiều hướng!', 'Predators come from several directions!'], siege: ['Mặt đất rung chuyển. Bạo chúa dẫn đầu cuộc đi săn.', 'The ground shakes. The tyrant king leads the hunt.'],
+  trex: ['Một con bạo chúa đi dọc bìa rừng.', 'A tyrant king walks the edge of the forest.'], arrived: ['{n} người mới được đón vào bộ lạc.', '{n} newcomers were taken into the tribe.']
+};
+const POIN_P = { gas: ['hang đá', 'rock shelter'], houses: ['những túp lều bỏ hoang', 'abandoned huts'], collapsed: ['mái đá', 'the overhang'], farm: ['bãi đất trống cũ', 'old clearing'], radio: ['đồi lửa hiệu', 'signal hill'], ruins: ['rừng cột đá', 'the stone stacks'] };
+const LOOT_P = { meat: ['thịt', 'meat'], hides: ['da thú', 'hides'], flint: ['đá lửa', 'flint'], herbs: ['thảo dược', 'herbs'], berries: ['quả mọng', 'berries'], eggs: ['trứng', 'eggs'] };
 const LOGT = {
   dawn: ['Bình minh lên trên thung lũng.', 'Dawn breaks over the valley.'],
   'exp.out': ['{n} ra cổng, hướng về {poi}.', '{n} head out toward the {poi}.'], 'exp.ok': ['Đội tìm kiếm trở về từ {poi}, mang theo {loot}.', 'The scavengers are back from the {poi} with {loot}.'],
@@ -32,7 +47,7 @@ const POIN = { gas: ['trạm xăng', 'gas station'], houses: ['dãy nhà bỏ ho
 const LOOT = { food: ['đồ hộp', 'canned food'], parts: ['phụ tùng', 'spare parts'], medicine: ['thuốc men', 'medicine'], seeds: ['hạt giống', 'seeds'], radio: ['một chiếc radio', 'a radio'], fuel: ['xăng', 'fuel'] };
 const WXN = { clear: 'wx.clear', rain: 'wx.rain', wind: 'wx.wind' };
 const li = () => LANG.cur === 'en' ? 1 : 0;
-function logText(e) { const tpl = (LOGT[e.k] || [e.k, e.k])[li()]; return tpl.replace(/\{(\w+)\}/g, (m, k) => { let v = e.p[k]; if (k === 'poi') v = (POIN[v] || [v, v])[li()]; if (k === 'loot') v = (LOOT[v] || [v, v])[li()]; if (k === 'w') v = t(WXN[v] || v); return v === undefined ? '' : v; }); }
+function logText(e) { const past = HF.era === 'past', tpl = ((past && LOGT_P[e.k]) || LOGT[e.k] || [e.k, e.k])[li()]; return tpl.replace(/\{(\w+)\}/g, (m, k) => { let v = e.p[k]; if (k === 'poi') v = ((past && POIN_P[v]) || POIN[v] || [v, v])[li()]; if (k === 'loot') v = ((past && LOOT_P[v]) || LOOT[v] || [v, v])[li()]; if (k === 'w') v = t(WXN[v] || v); return v === undefined ? '' : v; }); }
 
 // ---------------------------------------------------------------- shared music: the gallery's radio when embedded, our own otherwise
 const Q = new URLSearchParams(location.search);
@@ -53,7 +68,9 @@ async function hfBoot() {
   const pop = +(Q.get('pop') || (mobile ? 70 : 120)), seed = +(Q.get('seed') || 7);        // the map seed stays fixed: the street/valley layout is approved
   // the population seed: fixed when asked for (tests, screenshots), otherwise a fresh arbitrary moment of the living world each visit
   const simSeed = Q.get('seed') || Q.get('simseed') ? (+(Q.get('simseed') || Q.get('seed')) * 3 + 1) : ((Date.now() % 1000003) * 2654435761 >>> 0) % 2147483647;
-  hfBuildMap(seed); await prog(0.1);
+  const era = Q.get('era') === 'past' || Q.get('era') === 'current' ? Q.get('era') : hfPref('era', 'current');   // milestone 8: the timeline tab (PAST / CURRENT)
+  hfBuildMap(seed, era); await prog(0.1);
+  if (HF.era === 'past') { $('eraSub').dataset.i18n = 'hf.sub.past'; $('streetOn').dataset.i18nAttr = 'title:hf.world.t.past'; document.body.classList.add('era-past'); $('c').setAttribute('aria-label', 'Holdfast, the Past: a palisaded tribe in a river bend, in the age of dinosaurs'); applyStatic(); }
   HS.danger = Q.get('danger') || hfPref('danger', 'standard');
   HS.timeMode = Q.get('time') || hfPref('time', 'auto'); HS.wxMode = Q.get('wx') || hfPref('wx', 'auto');
   HS.autoSeason = Q.get('season') === 'auto' || (!Q.get('season') && !!hfPref('autoSeason', false)); HS.season = SEASONS.includes(Q.get('season')) ? Q.get('season') : hfPref('season', 'summer'); if (!SEASONS.includes(HS.season)) HS.season = 'summer';
@@ -98,7 +115,7 @@ function hfFirstState() {
 }
 // preferences of the world (time, weather, season, danger, view); music preferences are the shared Saigon record, see js/dock.js
 function hfPref(k, d) { try { const s = JSON.parse(localStorage.getItem('holdfast') || '{}'); return s[k] === undefined ? d : s[k]; } catch (e) { return d; } }
-function hfSave() { try { localStorage.setItem('holdfast', JSON.stringify({ time: HS.timeMode, wx: HS.wxMode, season: HS.season, autoSeason: !!HS.autoSeason, danger: HS.danger, zoom: HR.zoom, cam: [Math.round(HR.cx), Math.round(HR.cy)] })); } catch (e) { } }
+function hfSave() { try { localStorage.setItem('holdfast', JSON.stringify({ era: HF.era, time: HS.timeMode, wx: HS.wxMode, season: HS.season, autoSeason: !!HS.autoSeason, danger: HS.danger, zoom: HR.zoom, cam: [Math.round(HR.cx), Math.round(HR.cy)] })); } catch (e) { } }
 const CAMS = { default: [482, 236], gate: [480, 198], settlement: [470, 360], wall: [300, 186], market: [480, 264], commons: [480, 350], ruins: [500, -40], fields: [520, 470], east: [700, 214], west: [240, 214], training: [320, 244], stable: [640, 240], hospital: [610, 306], school: [220, 330], graveyard: [124, 366], church: [350, 330], river: [470, 500], farmyard: [226, 404], workshop: [740, 262] };
 function hfCamPreset(n) { const c = CAMS[n] || CAMS.default; const [x, y] = d2w(c[0], c[1]); hrCenterOn(x, y); }
 function hfCamTo(n) { const c = CAMS[n] || CAMS.default, [x, y] = d2w(c[0], c[1]), p = ISO(x, y); HFG.follow = null; HFG.tween = [p[0], p[1]]; }
@@ -170,6 +187,12 @@ function hfInput() {
     else if (k >= '1' && k <= '4') hfSet('season', SEASONS[+k - 1]);
   });
 }
+// the timeline tabs: the same valley is rebuilt in the other age (a reload of this frame; the gallery's radio keeps playing)
+function hfSwitchEra(era) {
+  if (era === HF.era || (era !== 'past' && era !== 'current')) return;
+  hfTicker(t('tl.switch'), true); try { const s = JSON.parse(localStorage.getItem('holdfast') || '{}'); s.era = era; localStorage.setItem('holdfast', JSON.stringify(s)); } catch (e) { }
+  const u = new URL(location.href); u.searchParams.set('era', era); setTimeout(() => location.replace(u.toString()), 60);
+}
 function hfZoom(d) { const old = HR.zoom; HR.zoom += d; hrResize(); if (HR.zoom !== old) hfSave(); }
 function hfExit() { hfSave(); if (EMBED) { try { window.parent.postMessage({ hf: 'exit', lang: LANG.cur }, '*'); return; } catch (e) { } } location.href = '../index.html'; }
 // the gallery keeps this frame alive while you browse and tells it when it is hidden/visible again: the world resumes where it was
@@ -193,7 +216,7 @@ function hfUI() {
   $('autoSeason').setAttribute('aria-pressed', !!HS.autoSeason);
   $('wxRainL').textContent = t(HS.season === 'winter' ? 'wx.snow' : 'wx.rain');
   const vb = $('viewRiver'); vb.textContent = t(HFG.gateView ? 'hf.view.back' : 'hf.view.gate'); vb.title = t(HFG.gateView ? 'hf.view.back.t' : 'hf.view.gate.t');
-  document.querySelectorAll('#eras [data-tl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tl === 'current'));
+  document.querySelectorAll('#eras [data-tl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tl === HF.era));
   $('logToggle').textContent = t($('log').hidden ? 'hf.journal.show' : 'hf.journal.hide'); $('logToggle').setAttribute('aria-pressed', !$('log').hidden);
   dockUpdate(); hfStatus();
 }
@@ -209,6 +232,7 @@ function hfUIBuild() {
   $('hide').onclick = () => { document.body.classList.add('clean'); hfTicker(t('hf.hide.msg'), true); };
   $('logToggle').onclick = () => { const l = $('log'); l.hidden = !l.hidden; hfLogUI(); hfUI(); };
   document.querySelectorAll('#eras [aria-disabled="true"]').forEach(b => b.onclick = () => hfTicker(t('tl.soon'), true));
+  document.querySelectorAll('#eras [data-tl]:not([aria-disabled="true"])').forEach(b => b.onclick = () => hfSwitchEra(b.dataset.tl));
   applyStatic(); hfLogUI(); hfUI();
 }
 // called by setLang(): re-render every dynamic string in the new language; no world state is touched
@@ -245,7 +269,7 @@ function hfSelfTest() {
     for (const tm of ['night', 'dusk', 'auto']) { hfSet('time', tm); hrFrame(1, performance.now()); }
     chk('timemodes', HS.timeMode === 'auto');
     chk('people', HS.people.filter(p => p.alive).length >= HS.floor, HS.people.filter(p => p.alive).length);
-    chk('noZoutside', HS.zombies.every(z => z.st === 'dead' || !isInside(z.x, z.y) || HF.breaches > 0 || HF.gate.open > 0));
+    chk('noZoutside', HS.zombies.every(z => z.st === 'dead' || z.fly || !isInside(z.x, z.y) || HF.breaches > 0 || HF.gate.open > 0));
     chk('errors', HFG.errs.length === 0, HFG.errs);
   } catch (e) { R.ok = false; R.exc = String(e.stack || e).slice(0, 400); }
   R.stats = HS.stats; R.fps = hfFps();
@@ -262,5 +286,5 @@ function hfBench0() {
   const tick = (ts) => { iv.push(ts - lt); lt = ts; if (ts - t0 < 5000) requestAnimationFrame(tick); else { const a = iv.slice(2).sort((x, y) => x - y); R.raf = { frames: a.length, fps: +(1000 / (a.reduce((s, v) => s + v, 0) / a.length)).toFixed(1), medianMs: +a[a.length >> 1].toFixed(1), p95Ms: +a[Math.floor(a.length * 0.95)].toFixed(1), loopJs: hfFps() }; $('hfTest').textContent = JSON.stringify(R); document.title = 'HFBENCH done'; } };
   requestAnimationFrame(tick);
 }
-window.HFAPI = { HS, HF, HR, HFG, HA, MW, LOCAL_LW, ui: hfUI, gate: hfToggleGate, ticker: hfTicker, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition, exit: hfExit };
+window.HFAPI = { HS, HF, HR, HFG, HA, MW, LOCAL_LW, era: hfSwitchEra, ui: hfUI, gate: hfToggleGate, ticker: hfTicker, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition, exit: hfExit };
 hfBoot().catch(e => { HFG.errs.push(String(e.stack || e).slice(0, 300)); const el = $('hfTest'); el.textContent = JSON.stringify({ ok: false, boot: String(e.stack || e).slice(0, 600) }); document.title = 'HFTEST FAIL boot'; $('loadT').textContent = 'Error: ' + e.message; });

@@ -24,6 +24,7 @@ function hrGround(wx, wy, ss) {
   if (v < 470 && Math.abs(u - streamU(v)) < 4.6 && z !== Z_RIVER && z !== Z_FAR && HF.gk[k] !== GK.ROAD) { const e = 4.6 - Math.abs(u - streamU(v)); if (e < 1) return 0x6a7a4a; let c = vn > 0.6 ? 0x4e8aa4 : 0x5a96ae; if (n > 0.93) c = 0x9ac8d8; if (win) c = mixc(c, 0xdce6ee, 0.5); return c; }
   const G = z === Z_SETTLE ? SG[ss] : SGO[ss];
   let c;
+  if (HF.era === 'past') { const pc = pastGround(g, wx, wy, u, v, n, vn, G, win); if (pc !== undefined) return pc; }
   switch (g) {
     case GK.ROAD: {
       if (Math.abs(u - roadU(v)) > 9) { c = G[0]; break; }
@@ -113,10 +114,11 @@ function hrBuildStatics(progress) {
   // props
   for (const p of HF.props) {
     if (p.kind === 'lights') continue;
-    const f = PROPS[p.kind]; if (!f) continue;
+    const f = (HF.era === 'past' && PPROPS[p.kind]) || PROPS[p.kind]; if (!f) continue;
     const key = 'p' + p.kind + '|' + (p.c || '') + '|' + (p.w || '') + '|' + (p.v || '') + '|' + (p.r ? p.r.toFixed(1) : '') + (p.kind === 'laundry' ? (p.x | 0) : '') + '|' + (p.along || '') + (p.cross ? 'c' : '') + (p.white ? 'w' : '') + '|' + ss;
     const spr = bakeCached(key, () => f(p), p.kind === 'messtent' || p.kind === 'gasstation' || p.kind === 'bus' || p.kind === 'greenhouse' || p.kind === 'watertower' || p.kind === 'medtent' || p.kind === 'forge' || p.kind === 'wagon');
     addStatic(spr, p.x, p.y, 0, { em: p.kind === 'lamp' || p.kind === 'rv' || p.kind === 'forge' || p.kind === 'lantern' });
+    if (HF.era === 'past') { if (['truck', 'car', 'bus', 'gasstation', 'watertower', 'greenhouse', 'messtent', 'rv', 'shed', 'smokehouse', 'coop', 'stall', 'silo', 'medtent', 'forge', 'wagon', 'hay', 'pighut'].includes(p.kind)) castShadow(p.x, p.y, p.bw || 10, p.bd || 8, p.kind === 'watertower' ? 40 : p.kind === 'stall' ? 12 : 10); continue; }   // fires and torches light the Past (drawn live)
     if (p.kind === 'lamp') HR.lights.push([...ISO(p.x, p.y, 24), 26, 'rgba(255,214,140,', 0.7, 1]);
     if (p.kind === 'drumfire') HR.lights.push([...ISO(p.x, p.y, 8), 40, 'rgba(255,150,70,', 0.85, 2, p]);
     if (p.kind === 'firepit') HR.lights.push([...ISO(p.x, p.y, 4), 64, 'rgba(255,150,70,', 1, 3, p]);
@@ -129,7 +131,8 @@ function hrBuildStatics(progress) {
   hrBuildWalls();
   // towers
   const TB = towerBoxes(), tb = bakeCached('tower-b' + ss, () => TB.back), tf = bakeCached('tower-f' + ss, () => TB.front);
-  for (const t of HF.towers) { addStatic(tb, t.x, t.y, -0.5); addStatic(tf, t.x, t.y, 36); castShadow(t.x, t.y, 18, 18, 66); HR.lights.push([...ISO(t.x + 16, t.y + 4, 66), 34, 'rgba(255,206,130,', 0.75, 1]); }
+  for (const t of HF.towers) { addStatic(tb, t.x, t.y, -0.5); addStatic(tf, t.x, t.y, 36); castShadow(t.x, t.y, 18, 18, 66); if (HF.era !== 'past') HR.lights.push([...ISO(t.x + 16, t.y + 4, 66), 34, 'rgba(255,206,130,', 0.75, 1]); }
+  if (!HR.nil) HR.nil = mk(1, 1);
   // trees
   for (const t of HF.trees) {
     const s = hfTree(t.spc, ss, t.v); const p = ISO(t.x, t.y);
@@ -171,11 +174,11 @@ function hrBuildWalls() {
 function hrRefreshWalls() { let ch = false; for (const s of HF.walls) if (!s.gate && hrWallState(s) !== s.st) ch = true; if (ch) hrBuildWalls(); }
 
 // ---------------------------------------------------------------- sprites for actors
-const VARIANT = { hay: { tool: 'hay' }, saddle: { tool: 'saddle' }, brush: { tool: 'brush' }, saw: { tool: 'saw' }, stretcher: { tool: 'stretcher' }, fork: { tool: 'fork' }, broom: { tool: 'broom' }, hoe: { tool: 'hoe' }, hammer: { tool: 'hammer' }, plank: { tool: 'plank' }, crate: { tool: 'crate' }, basket: { tool: 'basket' }, bucket: { tool: 'bucket' }, pot: { tool: 'pot' }, rod: { tool: 'rod' }, cloth: { tool: 'cloth' }, ball: { tool: 'ball' }, spear: { gun: 'spear' }, carry: { gun: 'carry' }, aim: { gun: 'aim' }, pistol: { gun: 'pistol' }, sling: { gun: 'sling' }, bag: { tool: 'bag' } };
+const VARIANT = { torch: { tool: 'torch' }, hay: { tool: 'hay' }, saddle: { tool: 'saddle' }, brush: { tool: 'brush' }, saw: { tool: 'saw' }, stretcher: { tool: 'stretcher' }, fork: { tool: 'fork' }, broom: { tool: 'broom' }, hoe: { tool: 'hoe' }, hammer: { tool: 'hammer' }, plank: { tool: 'plank' }, crate: { tool: 'crate' }, basket: { tool: 'basket' }, bucket: { tool: 'bucket' }, pot: { tool: 'pot' }, rod: { tool: 'rod' }, cloth: { tool: 'cloth' }, ball: { tool: 'ball' }, spear: { gun: 'spear' }, carry: { gun: 'carry' }, aim: { gun: 'aim' }, pistol: { gun: 'pistol' }, sling: { gun: 'sling' }, bag: { tool: 'bag' } };
 function sheetFor(a, variant) {
   const key = a.L.seed + '|' + (a.L.ev || '') + '|' + a.L.top + '|' + (variant || '') + '|' + (a.L.pack2 ? 1 : 0) + '|' + HR.season;
   let s = HR.sheets.get(key); if (s) return s;
-  const L = Object.assign({}, a.L, VARIANT[variant] || {}); if (HR.season === 'winter' && L.ev !== 'zombie') { L.sleeve = 'long'; if (L.r2 < 0.6) L.scarf = L.scarfC; if (L.r3 < 0.4 && !L.hat) L.hat = 'len'; }
+  const L = Object.assign({}, a.L, VARIANT[variant] || {}); if (HR.season === 'winter' && L.ev !== 'zombie') { L.sleeve = 'long'; if (L.r2 < 0.6) L.scarf = L.scarfC; if (L.r3 < 0.4 && !L.hat) L.hat = L.past ? 'hood' : 'len'; }
   s = hfSheet(L); HR.sheets.set(key, s); return s;
 }
 function lyingFor(a, cover) { const key = a.L.seed + '|' + a.L.top + (cover ? 'c' : ''); let s = HR.lying.get(key); if (!s) { s = hfLying(a.L, cover); HR.lying.set(key, s); } return s; }
@@ -236,9 +239,10 @@ function hrFrame(alpha, now) {
   hrLife(D, cull, t);
   for (const s of HR.statics) { if (cull(s.x, s.y, s.w, s.h)) continue; D.push(s); }
   const L = HR.lerp = alpha;
+  HR.dyn = []; if (HF.era === 'past') pastFires(D, cull, t);
   for (const p of HS.people) actorDraw(D, p, false, L, cull);
   for (const z of HS.zombies) actorDraw(D, z, true, L, cull);
-  for (const w of HS.wild) { const x = w.px + (w.x - w.px) * L, y = w.py + (w.y - w.py) * L, pp = ISO(x, y, w.k === 'crows' ? 34 + Math.sin(t * 2 + w.ph) * 4 : 0); if (cull(pp[0] - 10, pp[1] - 16, 20, 18)) continue; const fr = w.k === 'crows' ? Math.floor(t * 6 + w.ph) : Math.floor(w.stride / 2.5), flip = w.dir === 2 || w.dir === 3; const s = animalSprite(w.k, fr, flip); D.push({ c: s.c, e: s.e, x: Math.round((pp[0] - 10) * K) / K, y: Math.round((pp[1] - 15.5) * K) / K, w: 20, h: 16, d: x + y }); }
+  for (const w of HS.wild) { if (HF.era === 'past' && (w.k === 'deer' || w.big)) { wildDino(D, w, L, cull, t); continue; } const x = w.px + (w.x - w.px) * L, y = w.py + (w.y - w.py) * L, pp = ISO(x, y, w.k === 'crows' ? 34 + Math.sin(t * 2 + w.ph) * 4 : 0); if (cull(pp[0] - 10, pp[1] - 16, 20, 18)) continue; const fr = w.k === 'crows' ? Math.floor(t * 6 + w.ph) : Math.floor(w.stride / 2.5), flip = w.dir === 2 || w.dir === 3; const s = animalSprite(w.k, fr, flip); D.push({ c: s.c, e: s.e, x: Math.round((pp[0] - 10) * K) / K, y: Math.round((pp[1] - 15.5) * K) / K, w: 20, h: 16, d: x + y }); }
   // gate leaves (slide apart)
   const G0 = HR.gate; if (G0) { const o = HF.gate.open * 11, p1 = ISO(G0.x - o, G0.y), p2 = ISO(G0.x + 12 + o, G0.y), lf = G0.leaf; D.push({ c: lf.c, e: lf.e, x: p1[0] - lf.ax, y: p1[1] - lf.ay, w: lf.w, h: lf.h, d: G0.x + G0.y + 0.25 }, { c: lf.c, e: lf.e, x: p2[0] - lf.ax, y: p2[1] - lf.ay, w: lf.w, h: lf.h, d: G0.x + G0.y + 12.25 }); }
   D.sort((a, b) => a.d - b.d);
@@ -260,9 +264,10 @@ function hrFrame(alpha, now) {
     lg.setTransform(K, 0, 0, K, -Math.round(x0 * K), -Math.round(y0 * K));
     for (const s of D) { if (!s.e) continue; if (s.sx !== undefined) lg.drawImage(s.e, s.sx, s.sy, s.sw, s.shh, s.x, s.y, s.w, s.h); else lg.drawImage(s.e, s.x, s.y, s.w, s.h); }
     lg.globalCompositeOperation = 'lighter';
-    for (const L2 of HR.lights) { const [lx, ly, r, c, a, kind, ref] = L2; if (lx < x0 - r || lx > x0 + uw + r || ly < y0 - r || ly > y0 + uh + r) continue; const fl = kind >= 2 ? 0.85 + Math.sin(t * 9 + lx) * 0.08 + Math.sin(t * 23 + ly) * 0.05 : 1; hrGlow(lg, lx, ly, r * fl, c, a * fl); }
+    for (const L2 of HR.dyn.length ? HR.lights.concat(HR.dyn) : HR.lights) { const [lx, ly, r, c, a, kind, ref] = L2; if (lx < x0 - r || lx > x0 + uw + r || ly < y0 - r || ly > y0 + uh + r) continue; const fl = kind >= 2 ? 0.85 + Math.sin(t * 9 + lx) * 0.08 + Math.sin(t * 23 + ly) * 0.05 : 1; hrGlow(lg, lx, ly, r * fl, c, a * fl); }
     for (const f of HS.fx) if (f.k === 'flash') { const p = ISO(f.x, f.y, f.z); hrGlow(lg, p[0], p[1], 30, 'rgba(255,226,150,', 0.9); }
-    if (HF.oak) for (let k = 0; k < 14; k++) { const p = stringPt(k / 14); hrGlow(lg, p[0], p[1], 7, 'rgba(255,220,150,', 0.5); }
+    for (const f of HS.fx) if (f.k === 'arrow' && f.fire) { const q = 1 - f.t / f.T, p = ISO(f.x0 + (f.x1 - f.x0) * q, f.y0 + (f.y1 - f.y0) * q, f.z0 + (f.z1 - f.z0) * q); hrGlow(lg, p[0], p[1], 10, 'rgba(255,170,80,', 0.8); }
+    if (HF.oak && HF.era !== 'past') for (let k = 0; k < 14; k++) { const p = stringPt(k / 14); hrGlow(lg, p[0], p[1], 7, 'rgba(255,220,150,', 0.5); }
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, dark * 1.3); g.drawImage(HR.lc, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
   if (dark > 0.35) hrSpirits(g, lg, x0, y0, t, dark);
@@ -336,6 +341,7 @@ function hrStores(D, cull) {
 // people + infected -> drawables
 const POSE_ACT = { wash: 5, sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
 function actorDraw(D, a, isZ, L, cull) {
+  if (isZ && a.L.ev === 'dino') return dinoDraw(D, a, L, cull);
   if (!isZ && (!a.vis || (a.st === 'dead' && a.gone))) return;
   const x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, z = a.mount ? 9 : (a.z || 0), p = ISO(x, y, z);
   if (cull(p[0] - 10, p[1] - 28, 20, 30)) return;
@@ -350,7 +356,8 @@ function actorDraw(D, a, isZ, L, cull) {
   if (a.mount) pose = 5; else if (moving) pose = 1 + Math.floor(a.stride / (isZ ? 2.4 : 3.2)) % 4;
   else if (isZ) pose = a.st === 'attack' || a.st === 'wall' || a.st === 'gate' ? (Math.floor(tt / 0.32) % 2 ? 6 : 7) : 0;
   else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'reap') pose = Math.floor(tt / 0.55) % 2 ? 6 : 5; else if (act === 'saw') pose = Math.floor(tt / 0.28) % 2 ? 6 : 7; else if (act === 'water') pose = Math.floor(tt / 1.3) % 3 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
-  const variant = isZ ? '' : (a.variant || (a.role === 'guard' ? 'sling' : ''));
+  let variant = isZ ? '' : (a.variant || (a.role === 'guard' ? 'sling' : ''));
+  if (HF.era === 'past' && !isZ && a.role === 'guard' && a.post && a.post.k === 'patrol' && hsDark() && (variant === 'sling' || variant === 'carry') && !a.onTower) variant = 'torch';   // night patrols carry torches
   const s = sheetFor(a, variant), row = DIR_ROW[a.dir];
   if (!isZ && a.act === 'bathe') {   // milestone 7: waist-deep in the river, splashing now and then
     const sp = a.task && a.task.spot, wx = sp ? sp.wdx || 0 : 0, wy = sp ? sp.wdy || 0 : 0, q = ISO(x + wx * 6, y + wy * 6), cut = 0.6, bob = Math.sin(HS.t * 1.4 + a.ph) * 0.5;
@@ -358,6 +365,7 @@ function actorDraw(D, a, isZ, L, cull) {
       over: (g) => { g.fillStyle = 'rgba(232,244,246,0.75)'; const r = 4.5 + Math.sin(HS.t * 2 + a.ph) * 0.8; for (let i = -6; i <= 6; i++) { const yy = q[1] - PFOOT + 9 + PH * cut - 1 + Math.abs(i) * 0.15; g.fillRect(q[0] + i * r / 6, yy + bob, 0.5, 0.5); } g.fillStyle = 'rgba(220,236,242,0.45)'; g.fillRect(q[0] - r - 2, q[1] - PFOOT + 9 + PH * cut + 1 + bob, 2, 0.5); g.fillRect(q[0] + r + 0.5, q[1] - PFOOT + 9 + PH * cut + 1.5 + bob, 2, 0.5); if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], q[0] - 7, q[1] - 36, 14, 14); } });
     return;
   }
+  if (variant === 'torch' && HF.era === 'past') { const m = row >= 2 ? -1 : 1, fx = p[0] + m * 3.6, fy = p[1] - PFOOT + 11.5 - (pose === 6 ? 5 : 0); D.push({ c: HR.nil, x: fx, y: fy, w: 0.01, h: 0.01, d: x + y + 0.6, over: (g) => drawFlame(g, fx, fy, 1.1, HS.t * 9 + a.ph) }); HR.dyn.push([fx, fy - 1, 34, 'rgba(255,170,90,', 0.85, 2]); }
   D.push({ c: s.c, e: s.e, sx: pose * CW, sy: row * CH, sw: CW, shh: CH, x: Math.round((p[0] - PW / 2) * K) / K, y: Math.round((p[1] - PFOOT - (pose === 5 && !a.mount ? 2 : 0)) * K) / K, w: PW, h: PH, d: x + y + (a.mount ? 1 : z ? 15 : 0), sh: z ? null : [p[0], p[1], 4.2], blink: isZ && a.stT > 0,
     over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && (a.task.anim === 'fish' || a.task.anim === 'stir')) ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') fishLine(g, a, x, y, p);
       if (a.act === 'stir') for (let k = 0; k < 3; k++) { const q = ((HS.t * 0.6 + k / 3 + a.ph) % 1); g.fillStyle = 'rgba(236,232,226,' + (0.55 * (1 - q)).toFixed(2) + ')'; const r = 1 + q * 2.5; g.fillRect(Math.round((p[0] + 4 + Math.sin(HS.t * 2 + k) * 1.2) * K) / K - r / 2, p[1] - 14 - q * 12, r, r); } } : null });
@@ -371,7 +379,8 @@ function fishLine(g, a, x, y, p) {
 }
 function hrFx(g, t, now) {
   for (const f of HS.fx) {
-    if (f.k === 'tracer') { const a = ISO(f.x0, f.y0, f.z0), b = ISO(f.x1, f.y1, f.z1); g.fillStyle = '#fff2c4'; const n = Math.max(4, Math.hypot(b[0] - a[0], b[1] - a[1]) / 1.4 | 0); for (let i = 0; i < n; i++) { if (i % 3 === 2) continue; const q = i / n; g.fillRect(Math.round((a[0] + (b[0] - a[0]) * q) * K) / K, Math.round((a[1] + (b[1] - a[1]) * q) * K) / K, 0.5, 0.5); } }
+    if (f.k === 'arrow') { const q = 1 - f.t / f.T, ax = f.x0 + (f.x1 - f.x0) * q, ay = f.y0 + (f.y1 - f.y0) * q, az = f.z0 + (f.z1 - f.z0) * q + Math.sin(q * Math.PI) * 6, a2 = ISO(ax, ay, az), b2 = ISO(ax - (f.x1 - f.x0) * 0.05, ay - (f.y1 - f.y0) * 0.05, az - (f.z1 - f.z0) * 0.05 - Math.cos(q * Math.PI) * 0.6), n = f.spear ? 6 : 4; g.fillStyle = f.fire ? '#ffb050' : f.spear ? '#8a6a44' : '#5a4430'; for (let i = 0; i <= n; i++) g.fillRect(Math.round((a2[0] + (b2[0] - a2[0]) * i / n) * K) / K, Math.round((a2[1] + (b2[1] - a2[1]) * i / n) * K) / K, 0.5, 0.5); g.fillStyle = f.fire ? '#fff0a0' : '#c8c8d0'; g.fillRect(Math.round(a2[0] * K) / K, Math.round(a2[1] * K) / K, 0.5, 0.5); }
+    else if (f.k === 'tracer') { const a = ISO(f.x0, f.y0, f.z0), b = ISO(f.x1, f.y1, f.z1); g.fillStyle = '#fff2c4'; const n = Math.max(4, Math.hypot(b[0] - a[0], b[1] - a[1]) / 1.4 | 0); for (let i = 0; i < n; i++) { if (i % 3 === 2) continue; const q = i / n; g.fillRect(Math.round((a[0] + (b[0] - a[0]) * q) * K) / K, Math.round((a[1] + (b[1] - a[1]) * q) * K) / K, 0.5, 0.5); } }
     else if (f.k === 'flash') { const p = ISO(f.x, f.y, f.z); g.fillStyle = '#ffd36a'; g.fillRect(p[0] - 1.5, p[1] - 1, 3, 2); g.fillRect(p[0] - 0.5, p[1] - 2, 1, 4); }
     else if (f.k === 'dust') { const p = ISO(f.x, f.y), r = 2 + (0.6 - f.t) * 8; g.fillStyle = 'rgba(176,156,128,' + (f.t * 1.2).toFixed(2) + ')'; g.fillRect(p[0] - r, p[1] - r * 0.6, r * 2, r * 1.0); }
     else if (f.k === 'chaff') { const p = ISO(f.x, f.y, 3 + (0.6 - f.t) * 10); g.fillStyle = '#e8cc72'; g.fillRect(p[0], p[1], 0.5, 0.5); g.fillRect(p[0] + 1.5, p[1] + 1, 0.5, 0.5); g.fillRect(p[0] - 1, p[1] + 1.5, 0.5, 0.5); }
@@ -388,7 +397,7 @@ function hrFx(g, t, now) {
   const winterish = HR.season === 'winter' || HS.hour < 8 || HS.hour > 17;
   for (const [x, y, z, sd] of HR.smokers) { if (!winterish && sd % 3) continue; const p = ISO(x, y, z); for (let k = 0; k < 4; k++) { const q = ((t * 0.25 + k / 4 + sd * 0.13) % 1); g.fillStyle = 'rgba(200,194,190,' + (0.42 * (1 - q)).toFixed(2) + ')'; const r = 1.5 + q * 4; g.fillRect(Math.round((p[0] + q * 10 + Math.sin(t + k) * 1.5) * K) / K - r / 2, p[1] - q * 26 - r / 2, r, r); } }
   // string lights over the commons (always drawn as little bulbs)
-  if (HF.oak) { g.fillStyle = '#ffe6a0'; for (let k = 0; k < 28; k++) { const p = stringPt(k / 28); g.fillRect(Math.round(p[0] * K) / K, Math.round(p[1] * K) / K, 0.5, 0.5); } }
+  if (HF.oak && HF.era !== 'past') { g.fillStyle = '#ffe6a0'; for (let k = 0; k < 28; k++) { const p = stringPt(k / 28); g.fillRect(Math.round(p[0] * K) / K, Math.round(p[1] * K) / K, 0.5, 0.5); } }
 }
 // weather overlay in screen space
 function hrWeather(g, W, H, t, dark) {
@@ -408,6 +417,7 @@ function hrWeather(g, W, H, t, dark) {
 // ---------------------------------------------------------------- milestone 6: the community layer (horses, stall goods, graves, repair work, the ball)
 // horses: a side-view pixel sprite in the animals' ink style (walk cycle, grazing, saddle when tacked or ridden)
 function horseSprite(c, frame, flip, pose, saddle) {
+  if (HF.era === 'past') return ridgebackSprite(c, frame, flip, pose, saddle);
   const key = 'h' + c + frame + (flip ? 'f' : '') + pose + (saddle ? 's' : ''); let s = HR.anim.get(key); if (s) return s;
   const W = 60, H = 46, g = new Int32Array(W * H).fill(-1), set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + (flip ? W - 1 - x : x)] = grade(col); };
   const sh = mixc(c, 0x2b1a16, 0.32), hl = mixc(c, 0xfff1d6, 0.22), mane = mixc(c, 0x1e1614, 0.55);
@@ -510,4 +520,74 @@ function mkGhost() {   // two frames: a little sheet ghost with a wavy hem and d
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const dx = (x - 6.5) / 6, dy = (y - 6) / 6; const hem = 12 + ((x + f * 2) % 4 < 2 ? 1.5 : 0); if ((y < 6 && dx * dx + dy * dy > 1) || y > hem || Math.abs(dx) > 1) continue; gg[y * W + x] = y > 10 ? 0xd8e8f0 : 0xf4fbff; }
     gg[5 * W + 4] = gg[5 * W + 5] = gg[6 * W + 4] = gg[6 * W + 5] = 0x3a4a5a; gg[5 * W + 8] = gg[5 * W + 9] = gg[6 * W + 8] = gg[6 * W + 9] = 0x3a4a5a;
     return gridCanvas(gg, W, H, null, K); });
+}
+// ---------------------------------------------------------------- milestone 8 (PAST): dinosaurs, herbivores, flames, firelight, ridgebacks, earthen paths
+const _dsh = new Map();
+function dinoSheet(L) { const key = L.sp + '|' + (L.morph || 0) + '|' + (L.seed || 0); let s = _dsh.get(key); if (!s) { const D = dinoGrid(L); s = gridCanvas(D.g, D.W, D.H, null, K); _dsh.set(key, s); } return s; }
+function dinoDraw(D, a, L, cull) {
+  const S = DSPEC[a.L.sp], x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, alt = a.fly && a.st !== 'dead' ? (a.alt || 0) : 0, p = ISO(x, y, alt), w = S.W / K, h = S.H / K;
+  if (a.st === 'dead' && (a.corpseT < 0 || a.gone)) return;
+  if (cull(p[0] - w / 2, p[1] - h, w, h + 4 + alt)) return;
+  const sh = dinoSheet(a.L), tt = HS.t + (a.ph || 0), moving = Math.hypot(a.x - a.px, a.y - a.py) > 0.01; let pose = 0;
+  if (a.st === 'dead') pose = 8;
+  else if (a.fly) pose = a.fs === 'swoop' ? 6 : 1 + Math.floor(tt * (a.fs === 'leave' ? 7 : 5)) % 4;
+  else if (a.roarAt && HS.t - a.roarAt < 1.8) pose = 7;
+  else if (moving) pose = 1 + Math.floor(a.stride / Math.max(2.4, w / 6)) % 4;
+  else if (a.st === 'attack' || a.st === 'wall' || a.st === 'gate') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0;
+  else if (a.st === 'idle' || a.st === 'circle') pose = Math.floor(tt / 2.3) % 3 === 0 ? 5 : 0;
+  const flip = a.dir === 1 || a.dir === 2;
+  D.push({ c: sh.c, e: sh.e, sx: pose * S.W, sy: flip ? S.H : 0, sw: S.W, shh: S.H, x: Math.round((p[0] - w / 2) * K) / K, y: Math.round((p[1] - h + 1) * K) / K, w, h, d: x + y + (alt ? 40 : 0), sh: alt ? null : [p[0], p[1], Math.max(4, w * 0.28)], blink: a.stT > 0 && S.W < 80 });
+  if (alt) { const gp = ISO(x, y); D.push({ c: HR.nil, x: gp[0], y: gp[1], w: 0.01, h: 0.01, d: x + y - 1, sh: [gp[0], gp[1], Math.max(3, w * 0.22)] }); }
+}
+function wildDino(D, w, L, cull, t) {
+  if (!w.L) w.L = { sp: w.k === 'deer' ? 'para' : w.k, morph: Math.floor(hash2(w.ph * 13, 3) * 2), seed: (Math.floor(w.ph) % 4) * 37 };
+  const S = DSPEC[w.L.sp], x = w.px + (w.x - w.px) * L, y = w.py + (w.y - w.py) * L, p = ISO(x, y), ww = S.W / K, hh = S.H / K; if (cull(p[0] - ww / 2, p[1] - hh, ww, hh + 2)) return;
+  const moving = Math.hypot(w.x - w.px, w.y - w.py) > 0.004, pose = moving ? 1 + Math.floor(w.stride / Math.max(2.6, ww / 6)) % 4 : (Math.floor((t + w.ph) / 3) % 3 === 0 ? 5 : 0), flip = w.dir === 1 || w.dir === 2, sh = dinoSheet(w.L);
+  D.push({ c: sh.c, e: sh.e, sx: pose * S.W, sy: flip ? S.H : 0, sw: S.W, shh: S.H, x: Math.round((p[0] - ww / 2) * K) / K, y: Math.round((p[1] - hh + 1) * K) / K, w: ww, h: hh, d: x + y, sh: [p[0], p[1], Math.max(5, ww * 0.28)] });
+}
+// a small flickering flame (world units, drawn in the world transform): an orange body, a yellow core, a hot white tip, a few rising sparks
+function drawFlame(g, x, y, s, ph) {
+  const f1 = Math.sin(ph) * 0.5 + Math.sin(ph * 2.3) * 0.3, f2 = Math.sin(ph * 1.7 + 1) * 0.4, px = v => Math.round(v * K) / K;
+  g.fillStyle = '#d8501e'; g.fillRect(px(x - 1.5 * s), px(y - (2.6 + f1) * s), 3 * s, (2.6 + f1) * s); g.fillRect(px(x - 1 * s + f2 * 0.5), px(y - (4 + f1) * s), 2 * s, 1.5 * s);
+  g.fillStyle = '#ff9a2e'; g.fillRect(px(x - 1 * s), px(y - (2 + f1 * 0.6) * s), 2 * s, (2 + f1 * 0.6) * s); g.fillRect(px(x - 0.5 * s + f2 * 0.5), px(y - (3.4 + f1) * s), 1 * s, 1.2 * s);
+  g.fillStyle = '#ffe080'; g.fillRect(px(x - 0.5 * s), px(y - 1.4 * s), 1 * s, 1.2 * s);
+  if (s > 1.4) { g.fillStyle = '#ffd060'; for (let k = 0; k < 3; k++) { const q = ((ph * 0.11 + k / 3) % 1); g.fillRect(px(x + Math.sin(ph * 0.7 + k * 2) * 1.5 * s), px(y - (4 + q * 10) * s * 0.6), 0.5, 0.5); } }
+}
+// every lit fire of the tribe: a depth-sorted flame + its glow in the night light pass
+function pastFires(D, cull, t) {
+  const lightK = { beacon: [70, 'rgba(255,160,70,', 1, 2], sacred: [80, 'rgba(255,170,80,', 1, 3], pit: [66, 'rgba(255,150,70,', 1, 3], camp: [40, 'rgba(255,150,70,', 0.85, 2], spit: [44, 'rgba(255,150,70,', 0.9, 2], hearth: [38, 'rgba(255,140,60,', 0.85, 2] };
+  for (const f of HF.fires) { if (!pastFireLit(f)) continue; const p = ISO(f.x, f.y, f.z); if (cull(p[0] - 12, p[1] - 16, 24, 20)) continue; const s = f.r / 2.2 * (f.k === 'beacon' && HS.alarm > 0 ? 1.35 : 1), ph = t * 8 + f.x;
+    D.push({ c: HR.nil, x: p[0], y: p[1], w: 0.01, h: 0.01, d: f.x + f.y + (f.k === 'beacon' ? 40 : 0.4), over: (g) => drawFlame(g, p[0], p[1], s, ph) }); const L = lightK[f.k]; HR.dyn.push([p[0], p[1] - 3, L[0] * (f.k === 'beacon' && HS.alarm > 0 ? 1.4 : 1), L[1], L[2], L[3]]); }
+  for (const T of HF.torches) { if (!T.lit) continue; const p = ISO(T.x, T.y, T.z + 2.6); if (cull(p[0] - 6, p[1] - 8, 12, 10)) continue; const ph = t * 9 + T.x;
+    D.push({ c: HR.nil, x: p[0], y: p[1], w: 0.01, h: 0.01, d: T.x + T.y + 0.5, over: (g) => drawFlame(g, p[0], p[1], 1.2, ph) }); HR.dyn.push([p[0], p[1] - 2, 32, 'rgba(255,180,100,', 0.8, 2]); }
+}
+// earthen paths instead of asphalt, packed earth instead of paving
+function pastGround(g, wx, wy, u, v, n, vn, G, win) {
+  let c;
+  if (g === GK.ROAD) { const d = Math.abs(u - roadU(v)); if (d > 5.5 || (d > 3.5 && hash2(wx, wy) > 0.5)) return undefined; c = vn > 0.5 ? 0x9a7e5c : 0x8e7454; if (n > 0.9) c = 0x7a6448; if (hash2(wx * 3, wy) > 0.8) c = mixc(c, G[0], 0.5); }
+  else if (g === GK.MAIN) { c = vn > 0.55 ? 0xa08664 : 0x947a5a; if (n > 0.93) c = 0x8a847a; if (n < 0.05) c = 0x6e5c46; if (Math.abs(u - 480) > 9.3) c = mixc(c, G[0], 0.4); if (hash2(wx * 2, wy * 2) > 0.985) c = 0xb4aea2; }
+  else if (g === GK.STREET) { c = vn > 0.6 ? 0xa48a68 : 0x9a8062; if (n > 0.94) c = 0x8a7458; if (hash2(wx, wy * 2) > 0.88) c = mixc(c, G[0], 0.6); }
+  else if (g === GK.PLAZA) { c = vn > 0.55 ? 0xa89070 : 0x9c8466; if (n > 0.92) c = 0x8a7458; if (vnoise(wx / 12, wy / 12) > 0.62) c = mixc(c, G[0], 0.5); }
+  else return undefined;
+  if (win && vnoise(wx / 5, wy / 5 + 9) > 0.45) c = n > 0.8 ? 0xe6e8ee : 0xf2f4f6;
+  return c;
+}
+// the beast pen's mounts: "ridgebacks", small crested herbivores walking on two legs (same frame layout as the horses)
+function ridgebackSprite(c0, frame, flip, pose, saddle) {
+  const key = 'rb' + c0 + frame + (flip ? 'f' : '') + pose + (saddle ? 's' : ''); let s = HR.anim.get(key); if (s) return s;
+  const W = 60, H = 46, g = new Int32Array(W * H).fill(-1), c = mixc(c0, 0x6a8a4a, 0.35), sh = mixc(c, 0x2b1a16, 0.32), hl = mixc(c, 0xfff1d6, 0.22), bel = mixc(c, 0xe8dcc0, 0.5), crest = mixc(c0, 0xd8643a, 0.6);
+  const set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + (flip ? W - 1 - x : x)] = grade(col); };
+  const ell = (cx, cy, rx, ry, col, s2, h2, b2) => { for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy > 1) continue; set(x, y, dy > 0.4 ? (b2 || s2) : dx < -0.1 && dy < -0.35 ? h2 : col); } };
+  const f = frame % 4, sw = [0, 4, 0, -4][f];
+  const leg = (x, y0, st, col) => { for (let j = 0; j < 9; j++) { set(x + st * j / 9, y0 + j, col); set(x + 1 + st * j / 9, y0 + j, col); } for (let j = 0; j < 5; j++) set(x + st + 1 + (j > 2 ? 1 : 0), y0 + 9 + j, col); set(x + st + 3, y0 + 14, sh); set(x + st + 4, y0 + 14, sh); };
+  leg(24, 28, -sw * 0.5, sh); ell(23, 26, 5, 5.5, sh, sh, sh);
+  for (let j = 0; j < 14; j++) ell(14 - j * 0.8, 23 + j * 0.25, 4.6 - j * 0.3, 3.6 - j * 0.2, c, sh, hl, bel);   // tail
+  ell(29, 24, 12, 7, c, sh, hl, bel);
+  leg(26, 28, sw * 0.5, c); ell(25, 27, 5.5, 6, c, sh, hl);
+  if (pose === 'graze') { for (let j = 0; j < 8; j++) ell(39 + j * 0.8, 26 + j * 1.1, 3, 3, c, sh, hl, bel); ell(46, 35, 3.6, 2.6, c, sh, hl); set(49, 36, 0x2a2020); for (let j = 0; j < 5; j++) set(41 - j, 23 - j * 0.7, crest); }
+  else { for (let j = 0; j < 9; j++) ell(38 + j * 0.7, 21 - j * 1.1, 3.4, 3, c, sh, hl, bel); ell(46, 10, 4, 3, c, sh, hl); ell(50, 11.5, 2.4, 1.6, mixc(c, 0xe8dcc0, 0.3), sh, c); set(46, 9, 0x2a2020); for (let j = 0; j < 7; j++) { set(43 - j * 1.2, 7 - j * 0.6, crest); set(43 - j * 1.2, 8 - j * 0.6, crest); } }
+  for (let j = 0; j < 6; j++) set(36 + (j > 3 ? 1 : 0), 29 + j, sh);   // the small front arm
+  for (let x = 20; x < 38; x += 3) set(x, 17 - Math.sin((x - 20) / 18 * Math.PI) * 1.2, crest);   // a low crest of scales along the back
+  if (saddle) { for (let x = 24; x <= 33; x++) for (let y = 16; y <= 19; y++) set(x, y, y < 18 ? 0x8a6240 : 0xc8a050); for (let y = 20; y <= 25; y++) set(28, y, 0xc8ac70); }
+  s = gridCanvas(inkGrid(g, W, H, 0.85), W, H, null, K); HR.anim.set(key, s); return s;
 }
