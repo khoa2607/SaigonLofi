@@ -14,7 +14,7 @@ python -m http.server 8765        # or serve.bat, from the repo root
 | http://localhost:8765/holdfast/ | Holdfast standalone (direct testing) |
 | `holdfast/index.html` via `file://` | Works too (YouTube needs http, as in Saigon) |
 
-**URL parameters** (testing/screenshots): `seed`, `pop` (residents), `hour`, `time=auto|morning|noon|dusk|night`, `wx=auto|clear|rain|wind`, `season=auto|spring|summer|fall|winter`, `danger=calm|standard|grim`, `cam=default|gate|settlement|wall|market|commons|ruins|fields|east|west|exp|training|stable|hospital|school|graveyard|farmyard|workshop`, `zoom`, `warp=<seconds>` (fast-forward before the first frame), `attack=<n>` (force a major attack), `exp=1` (start an expedition), `clean=1` (hide UI), `test=1` (in-page self-test), `bench=1` (render benchmark).
+**URL parameters** (testing/screenshots): `seed`, `pop` (residents), `hour`, `time=auto|morning|noon|dusk|night`, `wx=auto|clear|rain|wind`, `season=auto|spring|summer|fall|winter`, `danger=calm|standard|grim`, `cam=default|gate|settlement|wall|market|commons|ruins|fields|east|west|exp|training|stable|hospital|school|graveyard|church|river|farmyard|workshop`, `zoom`, `warp=<seconds>` (fast-forward before the first frame), `attack=<n>` (force a major attack), `exp=1` (start an expedition), `clean=1` (hide UI), `test=1` (in-page self-test), `bench=1` (render benchmark).
 
 **Controls (same as Saigon):** drag to pan · wheel / pinch / `+` `−` zoom · Space music · H hide / double-click to show · R rain · N night · 1–4 seasons · B gate view · Esc back to Lofi Worlds · bottom dock (play, track, prev/next, ···, seasons + Auto) with the shared settings panel · VI/EN top-right. See milestone 4 below.
 
@@ -260,3 +260,116 @@ Screenshots were taken in headless Chrome to check each zone, the stall goods, h
 - Simulation cost rose to ~0.4-0.7 ms per 0.1 s tick (was 0.3-0.4), still far below a frame budget. The attack scenario's frame rate varied between runs (59.6 and 46.2 fps on software GL); not measured on a real GPU or a phone.
 - `node tests/holdfast-browser.mjs --bench` (the virtual-time benchmark) returns no result in this Chrome build — also on the milestone 5 code — so the numbers above come from `tests/holdfast-bench.mjs`. The benchmark now reports its own errors instead of failing silently.
 - The 'busy zones' and loop counts are day-level averages; any single minute can look quieter (e.g. during a long alarm the training ground empties because the reserves are on the wall, which is intended).
+
+
+## Milestone 7 (step 1) — zombie redesign, grand church, schoolhouse, riverside graveyard, river life + supply boats
+
+Current era only (Past/Future still "soon"). Shared Saigon UI/audio untouched; Saigon files untouched. Art stays in the approved Holdfast pilot style (code-drawn, cocoa/dark ink outline, warm grade).
+
+### Zombies from `holdfast/zombie.webp`
+
+The reference (an 800×800 sheet: 5 × 7 cells, 35 chibi zombies) was used as a **style and content reference only** — no pixels are copied and the file is not modified. Each cell was catalogued and grouped into **23 archetypes**; every archetype is drawn by code in `hf-art.js` (`ZTYPES`, `drawZombie`) into the same 8-pose × 4-row sheet the people use, so walking, attacks (arm-up / lunge), facing, mirroring and corpses (`hfLying`) run through the existing animation system unchanged.
+
+Shared language taken from the sheet: a big round head (≈ 45 % of the height), dark ink outline, green / olive / grey / pale skin, pale yellow eyes in dark sockets, an open mouth with teeth, arms reaching forward, torn and stained clothes with ragged hems, scuffed shoes. No gore (stains are muted, no wounds).
+
+| Archetype | From the reference | Archetype | From the reference |
+|---|---|---|---|
+| pale | grey skin, grey shirt, short grey hair | hunchgrey | hunched grey walker |
+| prisoner | white tank top, handcuff chain | cowboy | brown fedora / cowboy hat, tan shirt |
+| longblack | long black hair (woman) | messy | messy brown hair, torn grey shirt |
+| bald | classic bald green walker | small | small (child-sized) zombie, orange tee |
+| wrapped | bandaged head + chain | beanie | beanie / headband, hunched |
+| crawler | crawls on hands and knees | lanky | tall, thin, hunched |
+| stitched | stitched scar on scalp and shirt | spiky | spiky ginger-brown hair |
+| wildwoman | wild black hair, blue skirt | fat | bloated, shorts |
+| worker | brown work jacket | afro | big dark hair, navy jacket |
+| bob | brown bob (woman) | ginger | orange bob (woman) |
+| elder | white hair tufts, hunched | legchain | chain dragging from the ankle |
+| creeper | low crouch | | |
+
+Look selection uses exactly the same number of seeded draws as before, so simulation behaviour stays reproducible; crawlers / creepers are never "runners" (their speed is capped, a runner gets the lanky look instead).
+
+### Church
+
+`civicModel('church')` rebuilt as the community's grandest building: footprint 58 × 92 (was 34 × 54, **2.9×**), a stone nave with a steep slate roof, transept with a rose window, apse, buttresses, tall arched stained-glass windows that glow at night, and a front **bell tower** (great arched door, rose window, clock, open belfry with a bell, corner pinnacles, slate spire, gold cross at **122** units — the tallest structure in the community; the hospital is next at ~63). Stone steps, plaza, two lamps, benches and three prayer spots in front; elders sometimes kneel there (`pray`). The alarm shelter is still the church door.
+
+### School
+
+A two-storey brick **schoolhouse** (70 × 34, was 56 × 30 single storey): two rows of classroom windows, a white columned portico with steps, a big blue **SCHOOL** sign between the floors, a clock in the pediment, a bell cupola with a weathervane on the ridge; in the yard a **flagpole**, a **SCHOOL** entrance arch and a bike rack. The playground, outdoor class, garden beds (moved slightly east to make room) and ball field keep their behaviour.
+
+### Graveyard
+
+Moved from the centre-left (beside the church) to the **west edge of the community, beside the river** (design ≈ (116, 366), the nearest water tile is 4 units outside its fence) and doubled: **96 × 64 (6,144 sq units, was 64 × 44 = 2,816 → 2.2×)**, **34 graves** (was 20), central path, memorial stones, three lanterns, two benches, three trees, six mourning spots, three caretaker spots. Visits with flowers, the caretaker, burials (a fresh grave + a small gathering — gatherers now run and stay a shorter time, because the walk is longer) and the **night spirits** (they read `HF.graveyard`, so they follow it) all work in the new place. The site table keeps 38 homes.
+
+### River life
+
+- **Bank spots** are found automatically (walkable settlement tiles touching open water, each remembering which way the water is): 3 bathing / washing places (south-west by the fields, south by the main dock, south-east) and 4 quiet fishing spots.
+- **Bathing** (warm seasons, mornings and evenings): residents wade in waist-deep (the sprite is cut at the waist, shifted into the water, with ripples and splashes).
+- **Washing** (daytime): kneeling at the edge, swishing a coloured cloth in the water (splashes).
+- **Fishing**: fishers now also fish from the bank (30 %), and every fishing person shows a **line from the rod tip to a red-and-white float** that bobs and dips before a bite.
+- **Laundry**: part of the old "hang washing in the yard" chore now starts with washing the clothes at the river, then hanging them at home.
+- A small **river director** sends one idle resident (sitting / chatting / playing, never guards, never on an errand) to the river every ~18–35 s of game time, at most 6 at once, never in rain or an alarm. River life and boats draw from their **own seeded stream** (`HS.R2`), so the milestone 5/6 random sequence is disturbed as little as possible.
+
+### Supply boats
+
+A boat lane runs up the west arm, round the bend just off the settlement bank and out along the east arm. Every 50–110 s of daytime a boat may set out (never more than **2** on the water): a rotation of **medical supply boat → cargo sampan → medical → fishing boat**. All hulls are sampans with painted bow eyes and a boatman punting at the stern.
+- **Medical boats**: white hull with a red stripe, a white canopy with a big **red cross** on both sides and the roof, a red-cross flag and red-cross crates. They pull in alongside the dock nearest the hospital; a **medic walks down, takes the crates and carries them to the hospital supply point** (+3 medicine), then the boat backs out and leaves.
+- **Cargo sampans** (woven bamboo canopy, crates, sacks) sometimes moor at the main dock; a trader / technician unloads them into the yard store.
+- **Fishing boats** (basket, net, lantern) just pass by.
+
+### Small fixes found on the way
+
+- House repairs could take planks the store no longer had (two builders, one plank) and drive `mat` below zero; they now only take what is there.
+- The convalescent picker now chooses fairly among sitters (it used to take the first resident who won a 30 % draw, so a day could easily pass with one convalescent).
+- Both herders could start the same pig-feeding round at once (the chickens then went unfed for hours); only one takes it now.
+- The graveyard caretaker (an elder) gets a daytime round at most every ~150 s of game time; with the graveyard on the far edge, the random pick alone sometimes only sent them out at dusk.
+- `tests/holdfast-community.mjs` alarm check: the bell now rings once training is actually under way (the check is about the response; before, it depended on training happening at one exact second).
+
+### Measured (Node, accelerated time, `node tests/holdfast-m7.mjs <seed>`, summer day 06:30 → 21:30)
+
+| Seed | bathe | wash | bank fishing (peak at once) | boats (max at once) | medical boats / deliveries | cargo | boats on water or at a dock | graveyard visits | zombie looks seen |
+|---|---|---|---|---|---|---|---|---|---|
+| 7 | 10 | 7 | 11 (3) | 5 (2) | 2 / 2 | 2 | 645 / 645 | 15 | 23 / 23 |
+| 13 | 10 | 8 | 12 (2) | 5 (2) | 2 / 2 | 2 | 637 / 637 | 9 | 19 |
+| 21 | 7 | 8 | 14 (2) | 4 (2) | 2 / 1 | 1 | 502 / 502 | 6 | 22 |
+| 29 | 7 | 7 | 16 (3) | 6 (2) | 3 / 2 | 1 | 716 / 716 | 12 | 20 |
+| 37 | 10 | 10 | 13 (3) | 5 (2) | 2 / 2 | 2 | 656 / 656 | 10 | 22 |
+| 45 | 10 | 3 | 16 (4) | 5 (2) | 2 / 2 | 2 | 638 / 638 | 14 | 21 |
+
+Layout (seed-independent): church 58 × 92 = 5,336 sq units (old 34 × 54 = 1,836, **2.9×**), top of the cross 122 units (next tallest 62.8); schoolhouse 70 × 34, 62.8 units to the weathervane; graveyard 96 × 64 = 6,144 (old 2,816, **2.2×**), 34 graves, centre at design (≈ 116, 366), 4 units from open water; 38 homes, nothing overlaps the graveyard or the church. "Zombie looks seen" counts the archetypes walking around in the first 150 s (of 23).
+
+### Milestone 7 tests
+
+| Command | Proves | Last result |
+|---|---|---|
+| `node tests/holdfast-m7.mjs [seed]` (new) | 26 checks: 23 zombie archetypes, each drawing all 16 frames, front ≠ back, animated walk; ≥ 14 archetypes in the world; crawlers never run; church ≥ 2.5× and tallest; two-storey school + flagpole / arch / bike rack; graveyard ≥ 1.9×, ≥ 30 graves, west edge beside the water, inside the settlement, no clashes; ≥ 38 homes; a summer day: bathing ≥ 3, washing ≥ 3, bank fishing, 4+ boats never > 2 at once, ≥ 2 medical boats with ≥ 1 delivery, cargo boats, boats always on water / at a dock, graveyard visits, a death adds a grave inside the new graveyard, determinism | **PASS** on seeds 7, 13, 21, 29, 37, 45 |
+| `node tests/holdfast-community.mjs [seed]` | milestone 6's 36 checks on the new layout (alarm check now waits for training to be under way) | **PASS** on seeds 7, 13, 21, 29, 37, 45 |
+| `node tests/holdfast-life.mjs 1200 [seed]` | milestone 5's 36 checks | **PASS** on seeds 7, 13, 21 |
+| `node tests/holdfast-sim.mjs 3600` | 21 map + 3-day combat checks | **PASS** |
+| `node tests/holdfast-warm.mjs 20` | warm start | **PASS** (20 seeds) |
+| `node tests/holdfast-browser.mjs` | in-page self-test, gallery + Saigon smoke | **PASS** (Chromium, run as root through a `--no-sandbox` wrapper set in `CHROME`) |
+| `node tests/holdfast-flow.mjs` | UI flow | **PASS** except the two YouTube checks: youtube.com is not reachable from the test container (proxy refuses it), unrelated to this milestone |
+| `node tests/holdfast-bench.mjs` | frame time, software GL, same container for both | 1080p **57.1 fps**, loop JS 9.4 / 12.6 ms (median / p95); milestone 6 code on the same machine: 57.3 fps, 8.9 / 11.5 ms. 720p 58.8 fps (1.5 / 2.8 ms), phone 58.2 fps (1.0 / 1.9 ms), 60-strong attack 57.5 fps (9.3 / 13.6 ms; the milestone 6 run here got 32.2 fps, so this number is noisy) |
+
+### Screenshots (`docs/holdfast/screenshots/`, headless Chrome 1280 × 800, `seed=7`)
+
+| File | What |
+|---|---|
+| `15-m7-zombie-sheet.png` | All 23 archetypes, front + back, walk / attack / talk frames (straight from `hfSheet`) |
+| `16-m7-zombies-ingame.png` | A march group in the woods outside the wall after a forced attack (`attack=40`), zoom step 1 |
+| `17-m7-church.png` | The new church with bell tower, spire and prayer plaza |
+| `18-m7-school.png` | Schoolhouse, SCHOOL arch, flagpole, bike rack, outdoor class, playground |
+| `19-m7-graveyard.png` | The riverside graveyard (17:30) with visitors and the caretaker |
+| `20-m7-river-boats.png` | A red-cross medical boat alongside the hospital dock, a washer and a bank fisher (the boat was placed at the dock for the picture; its arrival is what the tests measure) |
+
+Stills do not prove behaviour; the numbers above do.
+
+### Remaining limitations
+
+- The zombies follow the reference's look but at the people's 28 × 52 sprite size; small details from the sheet (individual teeth, stitches, chain links) read as 1–2 pixel marks, best one zoom step in.
+- Crawlers and creepers use the existing animation rows (no dedicated crawling cycle beyond the limb swap), and corpses use the generic lying pose.
+- The far (south) bank is densely wooded: from the default camera, trees can hide part of a boat or a bather; the near bank is clear.
+- Bathers are drawn waist-deep by cutting the sprite; there is no swimming animation, and nobody bathes in rain, at night or in winter.
+- Boats are side-view sampans with 2 facings (mirrored); the boatman stands on the stern and can overlap the canopy edge when the boat turns. Boats do not interact with zombies.
+- The community checks are day-level counts on 6 seeds and still depend on the random sequence; milestone 7 changed that sequence (new layout, longer walks), and two loops (chicken feeding, the graveyard caretaker) needed small scheduling fixes to stay above their minimums.
+- Not watched live at 60 fps on a real GPU or phone; frame time was measured with software GL (below).

@@ -195,16 +195,69 @@ function civicModel(b) {
   } else if (b.kind === 'workshop') {
     const c = 0x8a949a; base(); B.push(HB(0, 0, 2.2, w, d, 22, c, (f, u, v, bb, wx, wy) => { if (f === 1 && ((u > 6 && u < 22) || (u > 30 && u < 46)) && v < 15) return doorPix({ w: 16, h: 15, k: 'roll' }, (u - 6) % 24, v, { trim: 0x6a6a64 }); if (f === 1 && v > 17 && v < 21 && u > 4 && u < 4 + textW('WORKSHOP') + 2) return textAt('WORKSHOP', u - 5, v - 17.4) ? 0xf2c94c : 0x3a3a3a; return corrP(c, 0.5, 4)(f, u, v, bb, wx, wy); }));
     for (let k = 0; k < 3; k++) B.push(HB(-1, -1 + k * 2, 24.2 + k * 1.2, w + 2, d + 2 - k * 4, 1.2, 0x7a8a94, corrP(0x7a8a94, 0.5, 9)));
-  } else if (b.kind === 'church') {
-    const S = { wall: 0xf0ece2, trim: 0xd8d0c0, seed: 9, wins: { 1: [{ u: 4, v: 7, w: 5, h: 12, k: 'glass', lit: 1, cur: 0 }, { u: w - 9, v: 7, w: 5, h: 12, k: 'glass', lit: 1 }], 2: [6, 18, 30, 42].map(u => ({ u, v: 7, w: 5, h: 12, k: 'glass', lit: 1 })) }, door: { f: 1, u: w / 2 - 4, w: 8, h: 16, c: 0x7a4a36 } };
-    base(); B.push(HB(0, 0, 2.2, w, d, 24, S.wall, sidingP(S)));
-    const n = 7, s = (w + 3) / (2 * n); for (let k = 0; k < n; k++) B.push(HB(-1.5 + k * s, -0.6, 26.2 + k * 2.3, w + 3 - 2 * k * s, d + 1.2, 2.3, 0x5a5458, shingleP(0x5a5458, 9), { k }));
-    B.push(HB(w / 2 - 5, d - 8, 26, 10, 10, 22, S.wall, sidingP({ wall: S.wall, trim: S.trim, seed: 2, wins: { 1: [{ u: 3, v: 10, w: 4, h: 7, k: 'glass' }], 2: [{ u: 3, v: 10, w: 4, h: 7, k: 'glass' }] } })));
-    for (let k = 0; k < 5; k++) B.push(HB(w / 2 - 5.5 + k, d - 8.5 + k, 48 + k * 2, 11 - k * 2, 11 - k * 2, 2, 0x5a5458));
-    B.push(HB(w / 2 - 0.4, d - 3.4, 58, 0.8, 0.8, 7, 0xd8c070), HB(w / 2 - 2, d - 3.4, 62, 4, 0.8, 0.8, 0xd8c070));
-  } else if (b.kind === 'school') {
-    const S = { wall: 0x9e5040, trim: 0xe8e0d0, seed: 11, wins: { 1: winLayout(R, w, 1, 22, { board: 0.04 }), 2: winLayout(R, d, 1) }, door: { f: 1, u: 22, w: 7, h: 13.5, c: 0x3d6f9a }, sign: { f: 1, t: 'SCHOOL', u: 4, v: 14.5, c: 0xf2eee2, bg: 0x3d6f9a } };
-    base(); B.push(HB(0, 0, 2.2, w, d, 18, S.wall, brickWallP(S))); gable(S.wall, 0x4e5a64, 20.2, Object.assign({}, S, { wall: 0xd8cfb8 }), 5);
+  } else if (b.kind === 'church') {      // milestone 7: the grandest building in the community — stone nave, transept, apse, bell tower + spire
+    const ST = 0xe4d8be, STD = 0xc8b898, SLATE = 0x4e5866;
+    const glass = (u, v, seed) => { const m = hs(Math.floor(u * 1.4) + seed, Math.floor(v * 0.9)); if ((u * 1.4) % 1 < 0.22 || (v * 0.9) % 1 < 0.2) return 0x3a3236; EM = [0xffd890, 0xa8c8ff, 0xffb0a0, 0xfff0a0][Math.floor(m * 4)]; return [0x3d6fb5, 0xc8463a, 0xe8b83a, 0x4f9a58, 0x8a5ab8, 0x3d8fb5][Math.floor(m * 6)]; };
+    const arch = (u, v, u0, v0, w, h) => { const x = u - u0, y = v - v0, r = w / 2; if (x < 0 || x > w || y < 0) return 0; if (y < h - r) return 1; const dx = x - r, dy = y - (h - r); return dx * dx + dy * dy < r * r ? 1 : 0; };
+    const archEdge = (u, v, u0, v0, w, h) => arch(u, v, u0 - 0.6, v0 - 0.6, w + 1.2, h + 1.2) && !arch(u, v, u0, v0, w, h);
+    const stone = (u, v, seed) => { const row = Math.floor(v / 2.4), fr = v - row * 2.4, off = (row % 2) * 2.5, cu = (u + off) % 5; let c = fr < 0.45 || cu < 0.4 ? STD : ST; const n = hs(Math.floor((u + off) / 5) + seed, row); if (n > 0.82) c = mixc(c, 0xb8a888, 0.4); else if (n < 0.1) c = mixc(c, 0xfff4e0, 0.3); if (v < 3) c = mixc(c, 0x8a7a68, 0.35); return c; };
+    // walls with tall arched stained-glass windows (lit at night)
+    const nave = (wins, seed, rose) => (f, u, v, bb) => { if (f === 0) return 0x8a8070; const W = f === 1 ? bb.w : bb.d;
+      if (rose && f === rose.f) { const dx = u - rose.u, dy = v - rose.v, r = Math.hypot(dx, dy); if (r < rose.r + 0.7) { if (r > rose.r) return STD; const a = Math.atan2(dy, dx); if (r < 1.1) { EM = 0xffd890; return 0xe8b83a; } if (Math.abs(((a / TAU * 12) % 1 + 1) % 1 - 0.5) > 0.42) return 0x3a3236; EM = r < rose.r * 0.55 ? 0xffb0a0 : 0xa8c8ff; return r < rose.r * 0.55 ? 0xc8463a : 0x3d6fb5; } }
+      for (const w of wins[f] || []) { if (archEdge(u, v, w.u, w.v, w.w, w.h)) return 0xf4ecdc; if (arch(u, v, w.u, w.v, w.w, w.h)) return glass(u - w.u, v - w.v, seed); }
+      if (u < 0.8 || u > W - 0.8) return STD; return stone(u, v, seed); };
+    const roof = (k, n) => (f, u, v) => { if (f === 0) return (Math.floor(u * 1.2) + Math.floor(v / 1.6)) % 2 ? SLATE : mixc(SLATE, 0x7a8698, 0.35); return mixc(SLATE, HINK, 0.25); };
+    base();                                                                                                           // stone plinth
+    B.push(HB(-1, -1, 0, w + 2, d + 2, 3, 0xb8ae98, stoneP));
+    // apse (back), nave, transept
+    B.push(HB(18, 2, 3, 22, 10, 30, ST, nave({ 2: [{ u: 3, v: 8, w: 4, h: 15 }] }, 3)));
+    for (let k = 0; k < 5; k++) B.push(HB(17 + k * 2, 1 + k, 33 + k * 2.4, 24 - k * 4, 12 - k, 2.4, SLATE, roof()));
+    const NW = { 2: [8, 20, 52, 64].map(u => ({ u, v: 9, w: 5, h: 19 })) };
+    B.push(HB(12, 8, 3, 34, 74, 36, ST, nave(NW, 9)));
+    for (let k = 0; k < 9; k++) B.push(HB(11 + k * 2, 7, 39 + k * 2.6, 36 - k * 4, 76, 2.6, SLATE, roof()));            // steep gable, ridge along y
+    B.push(HB(0, 36, 3, w, 18, 32, ST, nave({ 1: [{ u: 4, v: 9, w: 5, h: 16 }, { u: w - 9, v: 9, w: 5, h: 16 }] }, 5, { f: 2, u: 9, v: 21, r: 6 })));
+    for (let k = 0; k < 6; k++) B.push(HB(0 + (k ? 0 : -1), 35 + k * 1.6, 35 + k * 2.6, w + (k ? 0 : 2), 20 - k * 3.2, 2.6, SLATE, roof()));   // transept roof, ridge along x
+    for (const y0 of [14, 26, 60, 70]) B.push(HB(46, y0, 3, 3, 3, 24, STD, stoneP), HB(46.5, y0 + 0.5, 27, 2, 2, 5, STD, stoneP));      // buttresses
+    // bell tower at the front: great door, rose window, clock, open belfry with a bell, pinnacles, spire and a gold cross
+    const TX = 19, TY = 76, TW = 20, TD = 18;
+    B.push(HB(TX, TY, 3, TW, TD, 70, ST, (f, u, v, bb) => {
+      if (f === 0) return 0x8a8070; const W = f === 1 ? bb.w : bb.d, c = W / 2;
+      if (f === 1) { if (archEdge(u, v, c - 4, 0, 8, 17)) return 0xf4ecdc; if (arch(u, v, c - 4, 0, 8, 17)) { if (Math.abs(u - c) < 0.35) return 0x3a2420; return v % 3 < 0.4 ? 0x4a2a20 : 0x7a4430; }
+        const dr = Math.hypot(u - c, v - 27); if (dr < 6.6) { if (dr > 5.9) return STD; const a = Math.atan2(v - 27, u - c); if (dr < 1.2) { EM = 0xffd890; return 0xe8b83a; } if (Math.abs(((a / TAU * 10) % 1 + 1) % 1 - 0.5) > 0.4) return 0x3a3236; EM = dr < 3.4 ? 0xffb0a0 : 0xa8c8ff; return dr < 3.4 ? 0xc8463a : 0x3d6fb5; }
+        const cr = Math.hypot(u - c, v - 43); if (cr < 3.6) { if (cr > 3) return 0x3a3236; if ((Math.abs(u - c) < 0.3 && v > 43 && v < 45.6) || (Math.abs(v - 43) < 0.3 && u > c - 0.2 && u < c + 2)) return 0x2b1a16; return 0xf6f0dc; } }
+      if (v > 52 && v < 64 && Math.abs(u - c) < 5.5) { if (archEdge(u, v, c - 5, 52, 10, 12)) return 0xf4ecdc; if (arch(u, v, c - 5, 52, 10, 12)) { const bdx = u - c, bdy = v - 55.5; if (Math.abs(bdx) < 2.4 - bdy * 0.25 && bdy > -2 && bdy < 3) return bdy > 2 ? 0x8a6a2a : 0xd8a83a; return 0x2a2224; } }
+      if (f === 2 && arch(u, v, c - 2, 22, 4, 14)) return glass(u, v, 7);
+      if (Math.abs(v - 50) < 0.6 || Math.abs(v - 66) < 0.6) return 0xf4ecdc;
+      if (u < 0.8 || u > W - 0.8) return STD; return stone(u, v, 11); }));
+    for (const [px, py] of [[TX - 1, TY - 1], [TX + TW - 2, TY - 1], [TX - 1, TY + TD - 2], [TX + TW - 2, TY + TD - 2]]) B.push(HB(px, py, 73, 3, 3, 8, STD, stoneP), HB(px + 0.6, py + 0.6, 81, 1.8, 1.8, 3, SLATE));
+    B.push(HB(TX - 0.6, TY - 0.6, 73, TW + 1.2, TD + 1.2, 1.4, 0xf4ecdc));
+    for (let k = 0; k < 10; k++) { const s2 = 1 + k * 0.95; B.push(HB(TX + s2, TY + s2 * 0.9, 74.4 + k * 3.6, TW - s2 * 2, TD - s2 * 1.8, 3.6, SLATE, roof())); }
+    B.push(HB(TX + TW / 2 - 0.5, TY + TD / 2 - 0.5, 110, 1, 1, 12, 0xe8c050), HB(TX + TW / 2 - 3, TY + TD / 2 - 0.5, 117, 6, 1, 1.2, 0xe8c050));
+    // front steps and the door canopy
+    for (let k = 0; k < 3; k++) B.push(HB(TX - 4 + k * 1.5, TY + TD + 4 - k * 1.6, 0, TW + 8 - k * 3, 4, 1.2 + k * 1.2, 0xc8bea8, stoneP));
+    b.H = 122;
+  } else if (b.kind === 'school') {      // milestone 7: unmistakably a school — two storeys of classroom windows, portico, SCHOOL sign, clock, bell cupola
+    const BR = 0xa85a44, S = { wall: BR, trim: 0xf0ead8, seed: 11, band: 17.5, wins: { 1: [], 2: [] } };
+    for (let fl = 0; fl < 2; fl++) for (let u = 3; u + 6 < w - 2; u += 8.5) { if (u > 24 && u < 42) continue; S.wins[1].push({ u, v: fl ? 21 : 5, w: 6, h: 10, k: 'glass', lit: (u + fl) % 3 > 0, cur: 0xf2e6b8 }); }
+    for (let fl = 0; fl < 2; fl++) for (let u = 4; u + 6 < d - 2; u += 9) S.wins[2].push({ u, v: fl ? 21 : 5, w: 6, h: 10, k: 'glass', lit: fl === 0, cur: 0xf2e6b8 });
+    base(); B.push(HB(0, 0, 2.2, w, d, 33, BR, brickWallP(S)));
+    const n = 6, s = (d + 3) / (2 * n); for (let k = 0; k < n; k++) B.push(HB(-0.8, -1.5 + k * s, 35.2 + k * 2.3, w + 1.6, d + 3 - 2 * k * s, 2.3, 0x4e5a64, shingleP(0x4e5a64, 11), { k }));
+    // portico: columns, steps, a pediment with a clock, the big sign between the floors
+    const px = w / 2 - 9, PW = 18;
+    B.push(HB(px, d, 0, PW, 7, 1.4, CONC), HB(px + 1, d + 7, 0, PW - 2, 2.5, 0.8, CONC));
+    for (const cx of [px + 0.6, px + 5.6, px + PW - 7, px + PW - 1.8]) B.push(HB(cx, d + 5.4, 1.4, 1.2, 1.2, 15, 0xf4efe2));
+    B.push(HB(px - 0.5, d - 0.2, 16.4, PW + 1, 7, 1.4, 0xf4efe2));
+    B.push(HB(px + 1, d - 0.2, 0, PW - 2, 0.6, 15, BR, (f, u, v) => { if (f !== 1) return undefined; if (u > 4.5 && u < 11.5 && v < 12.5) return u < 4.9 || u > 11.1 || v > 12.1 ? 0xf0ead8 : Math.abs(u - 8) < 0.3 ? 0x2b3a5a : 0x3d6f9a; return undefined; }));
+    const sign = 'SCHOOL', sw = textW(sign) + 6;
+    B.push(HB(w / 2 - sw / 2, d + 0.1, 19, sw, 0.6, 8, 0xf6f2e6, (f, u, v) => { if (f !== 1) return undefined; if (u < 0.6 || u > sw - 0.6 || v < 0.6 || v > 7.4) return 0x3d6f9a; return textAt(sign, u - 3, v - 1.6) ? 0x2b4a7a : undefined; }));
+    for (let k = 0; k < 5; k++) B.push(HB(px + k * 1.8, d - 0.6, 30 + k * 1.6, PW - k * 3.6, 1.2, 1.6, 0xf0ead8, (f, u, v) => { if (f !== 1 || k !== 1) return undefined; const cu = (PW - 3.6) / 2, r = Math.hypot(u - cu, v - 0.8); return undefined; }));
+    B.push(HB(w / 2 - 2.8, d + 0.2, 30.6, 5.6, 0.6, 5.6, 0xf6f0dc, (f, u, v) => { if (f !== 1) return undefined; const r = Math.hypot(u - 2.8, v - 2.8); if (r > 2.8) return -1; if (r > 2.3) return 0x2b3a5a; if ((Math.abs(u - 2.8) < 0.3 && v > 2.8 && v < 4.8) || (Math.abs(v - 2.8) < 0.3 && u > 2.6 && u < 4.3)) return 0x2b1a16; return 0xf6f0dc; }));
+    // bell cupola on the ridge
+    const bx2 = w / 2 - 3.5, by2 = d / 2 - 3.5, z0 = 35.2 + n * 2.3 - 2;
+    B.push(HB(bx2, by2, z0, 7, 7, 7, 0xf4efe2, (f, u, v) => f !== 0 && u > 1.6 && u < 5.4 && v > 1.4 && v < 6 ? (Math.abs(u - 3.5) < 1.2 && v > 2.4 && v < 4.6 ? 0xd8a83a : 0x2a2224) : undefined));
+    for (let k = 0; k < 3; k++) B.push(HB(bx2 - 0.8 + k * 1.4, by2 - 0.8 + k * 1.4, z0 + 7 + k * 1.6, 8.6 - k * 2.8, 8.6 - k * 2.8, 1.6, 0x4e5a64));
+    B.push(HB(bx2 + 3.2, by2 + 3.2, z0 + 11.8, 0.6, 0.6, 4, 0x2b2a2a), HB(bx2 + 1.6, by2 + 3.2, z0 + 15, 3.8, 0.4, 0.8, 0x2b2a2a));
+    b.H = z0 + 20;
   } else if (b.kind === 'barn' || b.kind === 'farmbarn') {
     const ruin = b.kind === 'farmbarn', wall = ruin ? 0x8a4a3a : 0xa84a3a, S = { wall, trim: 0xe8e0d0, seed: 13, vert: 1, wear: ruin ? 1 : 0, moss: ruin, wins: { 1: [], 2: [{ u: d / 2 - 4, v: 14, w: 8, h: 7, k: ruin ? 'broken' : 'glass' }] }, door: { f: 1, u: w / 2 - 7, w: 14, h: 16, c: mixc(wall, HINK, 0.25) } };
     base(); B.push(HB(0, 0, 2.2, w, d, 20, wall, sidingP(S))); gable(wall, ruin ? 0x5a5048 : 0x6a5a50, 22.2, S, 7);
@@ -227,6 +280,9 @@ function civicModel(b) {
 }
 // ---------------------------------------------------------------- props
 const PROPS = {
+  flagpole: () => [HB(-0.6, -0.6, 0, 1.2, 1.2, 36, 0xd8d4cc), HB(-1.6, -1.6, 0, 3.2, 3.2, 1.4, CONC), HB(-0.9, -0.9, 36, 1.8, 1.8, 1, 0xe8c050), HB(0.6, -0.2, 27, 11, 0.4, 7.5, 0x3d6fb5, (f, u, v) => f === 0 ? undefined : (Math.abs(v - 3.75) < 1.1 ? 0xf2f0e6 : (u + v * 0.5) % 5 < 0.5 ? 0x2f5a9a : undefined))],
+  bikerack: () => { const B = [HB(0, 0, 0, 14, 1, 0.8, 0x7a7e84)]; for (let k = 0; k < 3; k++) { const c = [0xd9534f, 0x3d6fb5, 0xf2c94c][k]; B.push(HB(1 + k * 4.4, -0.4, 0.8, 0.4, 0.4, 3, 0x7a7e84), HB(0.4 + k * 4.4, -3, 0, 0.4, 6.4, 3.4, 0x2b2a2a, (f, u, v) => f === 2 ? (Math.hypot((u % 4.8) - 1.6, v - 1.6) < 1.6 && Math.hypot((u % 4.8) - 1.6, v - 1.6) > 1.1 ? 0x2b2a2a : (v > 2.4 && v < 3 ? c : -1)) : undefined)); } return B; },
+  schoolarch: () => { const t = 'SCHOOL', W = textW(t) + 8; return [HB(-W / 2, 0, 0, 1.2, 1.2, 15, 0xf4efe2), HB(W / 2 - 1.2, 0, 0, 1.2, 1.2, 15, 0xf4efe2), HB(-W / 2 - 0.6, -0.2, 15, W + 1.2, 1.6, 6.6, 0x3d6f9a, (f, u, v) => { if (f !== 1) return undefined; if (v < 0.6 || v > 6) return 0xf2c94c; return textAt(t, u - 4.6, v - 0.9) ? 0xf6f2e6 : undefined; }), HB(-W / 2 - 1, -0.4, 21.6, W + 2, 2, 0.8, 0xf2c94c)]; },
   truck: (o) => { const c = o.c; if (o.cross) return [...carBoxes(c, 0), HB(19, 0.5, 1.6, 9, 8, 9, 0xeeeae0, (f, u, v, b) => { if (f === 0) return 0xd8d4ca; const W = f === 1 ? b.w : b.d; return (Math.abs(u - W / 2) < 0.8 && v > 2.5 && v < 7.5) || (Math.abs(v - 5) < 0.8 && u > W / 2 - 2.6 && u < W / 2 + 2.6) ? 0xc8382e : v < 1 ? 0x9a968c : undefined; })]; return [...carBoxes(c, 0), HB(19, 0.5, 1.6, 9, 8, 6, mixc(c, HINK, 0.15), (f) => f === 0 ? mixc(c, HINK, 0.4) : undefined), HB(20, 1.5, 7.6, 7, 3, 3, 0x9a8a62), HB(23, 4.5, 7.6, 3, 3, 4, 0x7a5a3a)]; },
   car: (o) => carBoxes(o.c, o.wreck),
   bus: () => [HB(0, 0, 0, 44, 12, 15, 0xb8963e, (f, u, v, b) => { if (f === 0) return vnoise(u / 4, v / 3) > 0.55 ? RUST : 0xa8863a; if (v > 7 && v < 12 && (u % 5) > 1 && f === 1) return hs(Math.floor(u / 5), 2) < 0.5 ? 0x1e1a1e : 0x3a4048; if (vnoise(u / 3, v / 2) > 0.6) return mixc(0xb8963e, RUST, 0.6); if (v < 2) return 0x2a2626; return undefined; })],
@@ -382,10 +438,6 @@ function gateLeafBoxes() {
 function evBehind(X) { if (X.L.pack2 && !X.back) { const c = grade(0x6a5a3a); X.rect(X.cx - 9, X.torsoTop, X.cx - 6, X.legTop + 1, c, 0, X.cx - 7, clothSh(c)); } }
 function evTorso(X) {
   const L = X.L, { rect, put, cx, torsoTop: tt, legTop: lt } = X;
-  if (L.ev === 'zombie') {
-    for (let y = tt + 2; y < lt + 1; y++) for (let x = cx - 6; x <= cx + 6; x++) { const h = hash2(x * 3 + L.seed, y * 5); if (h < 0.1) put(x, y, x >= cx + 3 ? X.sS : X.skin, 5); else if (h > 0.86) put(x, y, mixc(X.top, 0x2b1a16, 0.35), 5); }
-    for (let x = cx - 6; x <= cx + 6; x++) if (hash2(x + L.seed, 9) < 0.45) put(x, lt, -1, 5);
-  }
   if (L.ev === 'guard') { const v = grade(0x4e5a3e); rect(cx - 5, tt + 1, cx + 5, lt - 1, v, 6, cx + 3, clothSh(v)); rect(cx - 4, lt - 4, cx - 2, lt - 2, grade(0x3a4430), 6); rect(cx + 1, lt - 4, cx + 3, lt - 2, grade(0x3a4430), 6); rect(cx - 5, lt - 1, cx + 6, lt - 1, grade(0x2e2a24), 6); }
   if (L.ev === 'builder') { const v = grade(0xe8b83a); rect(cx - 5, tt + 1, cx - 3, lt - 1, v, 6); rect(cx + 2, tt + 1, cx + 4, lt - 1, v, 6, cx + 4, clothSh(v)); rect(cx - 5, tt + 5, cx + 4, tt + 5, grade(0xf4f1e8), 6); rect(cx - 6, lt - 1, cx + 6, lt, grade(0x5a3a24), 6); }
   if (L.ev === 'medic') { const v = grade(0xf2f0ea); rect(cx - 5, tt + 1, cx + 5, lt - 1, v, 6, cx + 3, clothSh(v)); rect(cx - 1, tt + 3, cx + 1, tt + 7, grade(0x3a9a5a), 7); rect(cx - 3, tt + 4, cx + 3, tt + 6, grade(0x3a9a5a), 7); }
@@ -395,13 +447,11 @@ function evTorso(X) {
 }
 function evFace(X, ex1, ex2, ey, eh) {
   const L = X.L, { rect, put, cx } = X;
-  if (L.ev === 'zombie') { rect(ex1 - 1, ey - 1, ex1 + 2, ey + eh, 0x3e3438, 10); rect(ex2 - 1, ey - 1, ex2 + 2, ey + eh, 0x3e3438, 10); put(ex1, ey + 1, 0xd8d4a0, 11); put(ex2 + 1, ey + 1, 0xd8d4a0, 11); rect(cx + 1, ey + eh + 1, cx + 4, ey + eh + 3, 0x3a2024, 11); put(cx + 2, ey + eh + 1, 0xe8e0c8, 11); }
 }
 function evHat() { }
 function evCarry() { }
 function evOver(X, hx, hy, raise) {
   const L = X.L, { rect, put, cx, torsoTop: tt, legTop: lt, back } = X;
-  if (L.ev === 'zombie' && !raise) { const a = X.skin, s = X.sS; for (let x = cx - 3; x <= cx + 9; x++) { put(x, tt + 4, a, 14); put(x, tt + 5, x > cx + 5 ? s : a, 14); } rect(cx + 10, tt + 3, cx + 11, tt + 6, a, 14, cx + 11, s); }
   const M = 0x2e2c30, Wd = grade(0x7a5234);
   if (L.gun === 'aim') { for (let i = 0; i < 17; i++) { const x = cx + 6 - i, y = tt + 3 - Math.round(i * 0.42); put(x, y, i < 6 ? Wd : M, 15); if (i < 12) put(x, y + 1, i < 6 ? clothSh(Wd) : 0x48464c, 15); } }
   else if (L.gun === 'sling') { for (let i = 0; i < 15; i++) { const x = cx - 6 + Math.round(i * 0.8), y = lt + 1 - i; put(x, y, i < 5 ? Wd : M, back ? 0 : 15); } }
@@ -426,18 +476,14 @@ function evOver(X, hx, hy, raise) {
   if (L.tool === 'stretcher') { rect(hx - 9, hy + 1, hx + 9, hy + 1, grade(0x9a6a44), 15); rect(hx - 7, hy, hx + 7, hy, grade(0x8a9a6a), 15); }
   if (L.tool === 'fork' || L.tool === 'broom') { for (let i = 0; i < 20; i++) put(hx + 1 + Math.round(i * 0.4), hy - 8 + i, grade(0x8a5a34), 15); if (L.tool === 'fork') { for (const dx of [7, 9, 11]) rect(hx + dx, hy + 12, hx + dx, hy + 14, 0x6a6a72, 15); } else rect(hx + 7, hy + 11, hx + 12, hy + 14, grade(0xc8a650), 15, hx + 11, grade(0x9a7a38)); }
 }
-function zombify(gr, L) {
-  const gs = grade(L.skin), Z = L.zsk || 0x9aae8c, Zs = mixc(Z, 0x3a5040, 0.42), M = new Map([[gs, Z], [skinSh(gs), Zs], [hiOf(gs), mixc(Z, 0xfff4e2, 0.24)], [mixc(gs, INK, 0.72), mixc(Z, INK, 0.72)], [mixc(skinSh(gs), INK, 0.72), mixc(Zs, INK, 0.72)]]);
-  return gr.map(c => M.has(c) ? M.get(c) : c);
-}
 // sheet: 8 poses x 4 rows (front, back, front mirrored, back mirrored), same layout as Saigon's personSheet
 function hfSheet(L) {
   const Wd = CW * NPOSE, Hd = CH * 4, g = new Int32Array(Wd * Hd).fill(-1);
-  for (let b = 0; b < 2; b++) for (let p = 0; p < NPOSE; p++) { let s = drawPerson(L, b === 1, p); if (L.ev === 'zombie') s = zombify(s, L); for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) { const c = s[y * CW + x]; if (c < 0) continue; g[(b * CH + y) * Wd + p * CW + x] = c; g[((b + 2) * CH + y) * Wd + p * CW + CW - 1 - x] = c; } }
+  for (let b = 0; b < 2; b++) for (let p = 0; p < NPOSE; p++) { const s = L.ev === 'zombie' ? drawZombie(L, b === 1, p) : drawPerson(L, b === 1, p); for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) { const c = s[y * CW + x]; if (c < 0) continue; g[(b * CH + y) * Wd + p * CW + x] = c; g[((b + 2) * CH + y) * Wd + p * CW + CW - 1 - x] = c; } }
   return gridCanvas(g, Wd, Hd, null, K);
 }
 function hfLying(L, cover) {   // the figure laid on its side; cover = a sheet over a fallen settler (non-graphic)
-  let gr = drawPerson(L, false, 0); if (L.ev === 'zombie') gr = zombify(gr, L);
+  const gr = L.ev === 'zombie' ? drawZombie(L, false, 0) : drawPerson(L, false, 0);
   const Wd = CH, Hd = CW, rot = new Int32Array(Wd * Hd).fill(-1);
   for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) rot[x * Wd + (CH - 1 - y)] = gr[y * CW + x];
   if (cover) for (let y = 0; y < Hd; y++) for (let x = 0; x < Wd; x++) { const c = rot[y * Wd + x]; if (c >= 0 && x > 10) rot[y * Wd + x] = c === INK ? INK : y < 12 ? 0xe8e2d4 : 0xd2cbbc; }
@@ -462,11 +508,183 @@ function hfLook(role, R) {
   L.b = { top: L.top, sleeve: L.sleeve, hat: L.hat, legs: L.legs }; L.seed = Math.floor(R() * 999);
   return L;
 }
+// ---------------------------------------------------------------- milestone 7: river craft (sampan hulls with painted bow eyes; cargo, fishing, red-cross medical boats)
+function boatBoxes(kind, axis) {
+  const B = [], L = kind === 'fish' ? 24 : 32, hw = kind === 'fish' ? 3.6 : 4.6, med = kind === 'med';
+  const hullC = med ? 0xf0ece2 : 0x7a5434, hullD = med ? 0xc8c2b4 : 0x5a3a26, stripe = med ? 0xc8382e : 0x3d6f8a;
+  const hullP = (f, u, v, b) => { if (f === 0) return (u * 2 | 0) % 3 ? 0x9a7046 : 0x8a6038; const W = f === 1 ? b.w : b.d; if (Math.abs(v - (b.h - 0.9)) < 0.45) return stripe; if (f === 1 && u > W - 4.2 && u < W - 2.6 && v > 0.8 && v < 1.8) return u < W - 3.4 ? 0xf6f2e6 : 0x1e1818; return v < 0.7 ? hullD : undefined; };   // painted eye at the bow
+  B.push(HB(-L / 2 + 2, -hw + 0.8, 0, L - 4, hw * 2 - 1.6, 1.8, hullD), HB(-L / 2, -hw, 1.2, L, hw * 2, 2.2, hullC, hullP));
+  B.push(HB(-L / 2 - 1.2, -hw + 1.4, 2.4, 2.4, hw * 2 - 2.8, 2.2, hullC), HB(L / 2 - 1.2, -hw + 1.4, 2.4, 2.4, hw * 2 - 2.8, 2.6, hullC));   // raised bow and stern
+  B.push(HB(-L / 2 + 1, -hw + 0.6, 3.2, L - 2, hw * 2 - 1.2, 0.4, 0x8a6038, (f, u) => f === 0 && (u * 2 | 0) % 4 === 0 ? 0x6a4428 : undefined));   // deck boards
+  if (kind === 'cargo') {
+    for (let k = 0; k < 4; k++) B.push(HB(-5 + k * 0.4, -hw + 0.4 + k * 0.5, 3.6 + k * 1.6, 12 - k * 0.8, hw * 2 - 0.8 - k, 1.6, 0xb89a62, (f, u, v) => (Math.floor(u * 1.5) + Math.floor(v * 2)) % 2 ? 0xa48650 : undefined));   // woven bamboo canopy
+    B.push(HB(7, -2.6, 3.6, 4, 4, 3.2, 0xc98a4a, (f, u, v) => f !== 0 && Math.abs(v - 1.6) < 0.3 ? 0x8a5a2a : undefined), HB(-11, -2.2, 3.6, 3.4, 3.4, 2.6, 0xd8c8a0), HB(-11.4, 0.6, 3.6, 3, 3, 2.2, 0xc8b890));
+  } else if (kind === 'med') {
+    const cross = (u, v, W, H) => (Math.abs(u - W / 2) < W * 0.12 && Math.abs(v - H / 2) < H * 0.38) || (Math.abs(v - H / 2) < H * 0.13 && Math.abs(u - W / 2) < W * 0.38);
+    B.push(HB(-7, -hw + 0.6, 3.6, 14, hw * 2 - 1.2, 6.6, 0xf6f4ee, (f, u, v, b) => { const W = f === 0 ? b.w : f === 1 ? b.w : b.d, H = f === 0 ? b.d : b.h; if (f !== 0 && (v < 0.5 || v > H - 0.5)) return 0xc8382e; return cross(u, v, W, H) ? 0xc8382e : undefined; }));
+    B.push(HB(-7.4, -hw + 0.2, 10.2, 14.8, hw * 2 - 0.4, 0.8, 0xe8e4da));
+    B.push(HB(9, -2.2, 3.6, 4, 4, 3, 0xf0ece2, (f, u, v) => f !== 0 && cross(u, v, 4, 3) ? 0xc8382e : undefined), HB(9.4, 1.2, 3.6, 3, 2.4, 2.4, 0xf0ece2, (f, u, v) => f !== 0 && cross(u, v, 3, 2.4) ? 0xc8382e : undefined));
+    B.push(HB(-L / 2 + 2, -0.3, 3.6, 0.6, 0.6, 15, 0x8a8a84), HB(-L / 2 + 2.6, -0.2, 13, 7, 0.4, 5, 0xf6f4ee, (f, u, v) => f === 0 ? undefined : cross(u, v, 7, 5) ? 0xc8382e : undefined));   // red-cross flag
+  } else {
+    B.push(HB(-3, -2.4, 3.6, 5, 4.8, 2.2, 0xb8904a, (f, u, v) => f !== 0 && ((u * 2 | 0) + (v * 2 | 0)) % 2 ? 0x8a6a34 : undefined), HB(5, -1.8, 3.6, 3.6, 3.6, 1.4, 0x5a6a5a, (f, u, v) => f === 0 && (u + v) % 1.2 < 0.4 ? 0x3a4a3a : undefined));   // fish basket + net
+    B.push(HB(L / 2 - 4, -0.3, 3.6, 0.6, 0.6, 9, 0x6a4a2a), HB(L / 2 - 4.8, -0.9, 11.6, 1.8, 1.8, 2.2, 0xffe4a0, null, { em: 0xffd88a }));
+  }
+  return axis === 'x' ? B : mirrorBoxes(B);
+}
+// ---------------------------------------------------------------- infected (milestone 7): chibi zombies after holdfast/zombie.webp
+// 23 archetypes catalogued from the 35-cell reference sheet. Each is drawn by code (no image data is copied) into the same
+// 8-pose x 4-row sheet layout as people, so walking, attacks, facing and corpses use the existing animation system.
+// Shared language from the reference: big round head (~45 % of the height), dark ink outline, green or grey skin, pale yellow
+// eyes in dark sockets, open mouth with teeth, arms reaching forward, torn and stained clothes, scuffed shoes. No gore.
+const ZSKIN = { green: [0x8aa868, 0x5e7a48, 0xa8c486], olive: [0x9aa870, 0x6a7848, 0xb8c48c], grey: [0xa4a8a2, 0x747a78, 0xc4c8c0], pale: [0xb4b8a4, 0x82887a, 0xd0d4c0] };
+const ZTYPES = {
+  pale:      { w: 3, skin: 'grey', hair: 'short', hc: 0x8a8a84, top: 0x8a8e94, tst: 'shirt', bot: 0x3a4250 },
+  hunchgrey: { w: 2, skin: 'grey', hair: 'tuft', hc: 0x6a6660, top: 0x5a5658, tst: 'tee', bot: 0x4a3e36, post: 'hunch' },
+  prisoner:  { w: 2, skin: 'green', hair: 'bald', top: 0xe8e4d8, tst: 'tank', bot: 0x3a4a6a, extra: 'chain', stain: 1 },
+  cowboy:    { w: 2, skin: 'green', hair: 'short', hc: 0x4a3426, hat: 'fedora', hatc: 0x6a4a2e, top: 0xc8a878, tst: 'shirt', bot: 0x5a4a3a },
+  longblack: { w: 2, skin: 'green', hair: 'long', hc: 0x262022, top: 0x7a8a5a, tst: 'tee', bot: 0x4a4a52, fem: 1 },
+  messy:     { w: 3, skin: 'grey', hair: 'messy', hc: 0x5a3a26, top: 0x7a7e84, tst: 'shirt', bot: 0x3a4250 },
+  bald:      { w: 4, skin: 'green', hair: 'bald', top: 0x4a3a34, tst: 'tee', bot: 0x3a4a64 },
+  small:     { w: 2, skin: 'green', hair: 'tuft', hc: 0x5a4a30, top: 0xd0884a, tst: 'tee', bot: 0x3a4a6a, build: 'small' },
+  wrapped:   { w: 2, skin: 'green', hair: 'bald', hat: 'bandage', top: 0x6a6450, tst: 'shirt', bot: 0x3e3a36, extra: 'chain' },
+  beanie:    { w: 2, skin: 'olive', hair: 'short', hc: 0x3a2e24, hat: 'beanie', hatc: 0x5a4a3a, top: 0x4e4a3a, tst: 'jacket', bot: 0x4a3e30, post: 'hunch' },
+  crawler:   { w: 1, skin: 'green', hair: 'tuft', hc: 0x4a4038, top: 0xd8d4c8, tst: 'shirt', bot: 0x4a4a4e, post: 'crawl' },
+  lanky:     { w: 2, skin: 'green', hair: 'bald', top: 0x6a7a52, tst: 'tee', bot: 0x4a5a3a, build: 'lanky', post: 'hunch' },
+  stitched:  { w: 2, skin: 'green', hair: 'bald', top: 0x8a5a44, tst: 'tee', bot: 0x3a3a40, extra: 'stitches' },
+  spiky:     { w: 2, skin: 'grey', hair: 'spiky', hc: 0x7a4a2a, top: 0x9a9894, tst: 'shirt', bot: 0x3e4658 },
+  wildwoman: { w: 2, skin: 'green', hair: 'wild', hc: 0x1e1a1e, top: 0x6a7a4a, tst: 'tee', bot: 0x3a5a8a, bst: 'skirt', fem: 1 },
+  fat:       { w: 2, skin: 'green', hair: 'bald', top: 0x7a9a5a, tst: 'tee', bot: 0x4a4a3e, build: 'fat' },
+  worker:    { w: 3, skin: 'green', hair: 'tuft', hc: 0x4a3a2a, top: 0x8a5e3e, tst: 'jacket', bot: 0x3a4a64, stain: 1 },
+  afro:      { w: 2, skin: 'green', hair: 'afro', hc: 0x1e1a1e, top: 0x2e3a5a, tst: 'jacket', bot: 0x4a3a32 },
+  bob:       { w: 2, skin: 'green', hair: 'bob', hc: 0x6a4428, top: 0x6a5a48, tst: 'tee', bot: 0x3a3a44, fem: 1 },
+  ginger:    { w: 1, skin: 'green', hair: 'bob', hc: 0xc8682a, top: 0x5a7a9a, tst: 'tee', bot: 0x4a3e3a, fem: 1 },
+  elder:     { w: 2, skin: 'pale', hair: 'elder', hc: 0xe0ddd4, top: 0x9a9a92, tst: 'shirt', bot: 0x5a4a3e, post: 'hunch' },
+  legchain:  { w: 1, skin: 'olive', hair: 'bald', top: 0x7a6a54, tst: 'tee', bot: 0x3a4a5a, extra: 'legchain' },
+  creeper:   { w: 1, skin: 'grey', hair: 'tuft', hc: 0x4a4440, top: 0x5a5450, tst: 'tee', bot: 0x4a3a30, post: 'crouch', stain: 1 }
+};
+const ZKEYS = Object.keys(ZTYPES), ZW = ZKEYS.reduce((s, k) => s + ZTYPES[k].w, 0);
 function hfZombieLook(R) {
-  const L = randLook(R() < 0.7 ? 'youth' : 'worker');
-  Object.assign(L, { ev: 'zombie', hair: sp(R, [0x3a3a34, 0x2a2420, 0x5a5048, 0x8a8a84]), hs: sp(R, [0, 0, 4, 6]), hat: 0, blush: false, top: sp(R, [0x6a7480, 0x8a6a5a, 0x5a6a7a, 0x7a5a4a, 0x6a6a5a, 0x5a5a6a, 0x4a5a4a]), bot: sp(R, [0x4a4440, 0x3a3e4a, 0x4a4a3a]), carry: null, glasses: false, mask: 0, pack: 0, tie: 0, kq: false, pattern: 0, zsk: sp(R, [0x9aae8c, 0x8ea68a, 0xa2ae90]) });
-  L.b = { top: L.top, sleeve: L.sleeve, hat: 0, legs: L.legs }; L.seed = Math.floor(R() * 999);
+  // exactly seven draws from the simulation's seeded stream (same count as the old look), so behaviour stays reproducible
+  const r = [R(), R(), R(), R(), R(), R(), R()];
+  let q = r[0] * ZW, zt = ZKEYS[0]; for (const k of ZKEYS) { q -= ZTYPES[k].w; if (q <= 0) { zt = k; break; } }
+  const T = ZTYPES[zt], tint = (c, k) => mixc(c, k > 0.5 ? 0xfff2dc : 0x2b1a16, Math.abs(k - 0.5) * 0.3);
+  const L = { ev: 'zombie', zt, skin: 0xd8b48a, zsk: ZSKIN[T.skin][0], top: tint(T.top, r[1]), bot: tint(T.bot, r[2]), hair: T.hc || 0x3a3434, hatc: T.hatc || 0x5a4a3a,
+    lean: r[3], gape: r[4] < 0.5 ? 1 : 0, stain: T.stain || r[5] < 0.25 ? 1 : 0, hat: 0, sleeve: 'short', legs: 'long', r1: 0, r2: 1, r3: 1, seed: Math.floor(r[6] * 999) };
+  L.b = { top: L.top, sleeve: L.sleeve, hat: 0, legs: L.legs };
   return L;
+}
+function drawZombie(L, back, pose) {
+  const W = CW, H = CH, col = new Int32Array(W * H).fill(-1), zz = new Int8Array(W * H).fill(-1), T = ZTYPES[L.zt] || ZTYPES.bald;
+  const put = (x, y, c, z) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= H || c < 0) return; if (zz[y * W + x] > z) return; col[y * W + x] = c; zz[y * W + x] = z; };
+  const rect = (x0, y0, x1, y1, c, z, shX, sc) => { for (let y = Math.round(y0); y <= Math.round(y1); y++) for (let x = Math.round(x0); x <= Math.round(x1); x++) put(x, y, shX !== undefined && x >= shX ? sc : c, z); };
+  const ell = (cx, cy, rx, ry, c, z, sc, hl, clip) => { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry; if (dx * dx + dy * dy > 1 || (clip && !clip(x, y))) continue; put(x, y, sc !== undefined && dx > 0.42 - dy * 0.2 ? sc : hl !== undefined && dx < -0.25 && dy < -0.35 ? hl : c, z); } };
+  const line = (x0, y0, x1, y1, c, z, w) => { const n = Math.max(1, Math.ceil(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)))); for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n; for (let k = 0; k < (w || 1); k++) put(x, y + k, c, z); } };
+  const SK = ZSKIN[T.skin], sk = grade(SK[0]), sS = grade(SK[1]), sH = grade(SK[2]), top = grade(L.top), tS = mixc(top, 0x2b1a16, 0.32), tH = mixc(top, 0xfff2dc, 0.2), bot = grade(L.bot), bS = mixc(bot, 0x2b1a16, 0.3);
+  const shoe = 0x3a3434, shoeS = 0x262222, hair = grade(L.hair), hS = mixc(hair, 0x1a1414, 0.4), hH = mixc(hair, 0xd8d0c0, 0.22), stainC = 0x6a3a30;
+  const post = T.post || 'up', build = T.build || 'normal', walk = pose >= 1 && pose <= 4, step = pose === 1 ? 1 : pose === 3 ? -1 : 0, bob = pose === 2 || pose === 4 ? -1 : 0;
+  const crawl = post === 'crawl', crouch = post === 'crouch', hunch = post === 'hunch' || pose === 7, small = build === 'small', fat = build === 'fat', lanky = build === 'lanky';
+  const cx = 12, gr = 49;
+  // body proportions per build (art px). Head is big: chibi like the reference.
+  let hx = cx + 2, hy = small ? 26 : lanky ? 15 : 19, hr = small ? 7.5 : 8.8, tt = small ? 33 : lanky ? 24 : 28, lt = small ? 41 : lanky ? 38 : 39, tw = fat ? 8 : lanky ? 4.5 : small ? 4.5 : 6;
+  if (hunch) { hx += 3; hy += 3; } if (crouch) { hy += 8; tt += 8; lt += 6; hx += 3; }
+  hy += bob; tt += bob;
+  if (crawl) { hx = 20; hy = 34 + (walk ? (pose % 2 ? 0 : -1) : 0); hr = 7.6; }
+  const zDrop = 0;   // (reserved)
+  // ---- legs / lower body
+  if (crawl) {
+    ell(11, 41, 8.5, 4.2, top, 4, tS, tH);                                                           // torso, belly down
+    rect(1, 42, 7, 45, bot, 3, 6, bS); rect(0, 46, 4, 48, shoe, 3);                                  // legs dragging behind
+    const a1 = walk ? step : 0;
+    line(16, 41, 22 + a1 * 2, 48, sk, 6, 2); ell(23 + a1 * 2, 48, 1.8, 1.3, sk, 6, sS);               // arm planted on the ground
+    line(14, 42, 18 - a1 * 2, 48, sS, 2, 2); ell(18 - a1 * 2, 48.5, 1.6, 1.2, sS, 2);
+  } else {
+    const legW = small ? 3 : 4, lens = gr - 2 - lt, lx = [cx - legW - 0.5 + (fat ? -1 : 0), cx + 1 + (fat ? 1 : 0)];
+    const leg = (x, lift, z, shade) => {
+      const c = shade ? bS : bot; rect(x, lt, x + legW - 1, gr - 2 - lift, c, z, x + legW - 1, bS);
+      if (T.bst === 'skirt') rect(x, lt + 4, x + legW - 1, gr - 2 - lift, shade ? sS : sk, z, x + legW - 1, sS);
+      if (fat) rect(x, lt + 4, x + legW - 1, gr - 2 - lift, shade ? sS : sk, z, x + legW - 1, sS);              // shorts
+      if (hash2(x + L.seed, 3) < 0.5) put(x + 1, lt + 2 + (L.seed % 3), -1, z);                                 // a rip
+      rect(x - (crouch ? 0 : 0), gr - 1 - lift, x + legW + 1, gr - lift, shade ? shoeS : shoe, z + 1, x + legW, shoeS);
+    };
+    if (crouch) { const k = walk ? step : 0; rect(cx - 5, lt, cx + 6, lt + 3, bot, 3, cx + 4, bS); rect(cx - 5 - k, lt + 4, cx - 2 - k, gr - 2, bS, 3); rect(cx + 3 + k, lt + 4, cx + 6 + k, gr - 2, bot, 4, cx + 5 + k, bS); rect(cx - 6 - k, gr - 1, cx - 1 - k, gr, shoeS, 4); rect(cx + 3 + k, gr - 1, cx + 8 + k, gr, shoe, 5); }
+    else { leg(lx[0] + step, walk && step < 0 ? 1 : 0, 2, true); leg(lx[1] - step, walk && step > 0 ? 1 : 0, 3, false); }
+    if (T.bst === 'skirt' && !crouch) { for (let y = lt - 1; y <= lt + 4; y++) { const hw = tw + (y - lt + 1) * 0.5; for (let x = Math.round(cx - hw); x <= Math.round(cx + hw); x++) put(x, y, x > cx + hw * 0.4 ? bS : (y === lt + 4 && (x + L.seed) % 3 === 0) ? -1 : bot, 4); } }
+    if (T.extra === 'legchain') { for (let i = 0; i < 9; i++) put(lx[1] - step - 2 - i, gr - 1 + (i % 2 ? 0 : -1), i % 2 ? 0x8a8e94 : 0x5a5e64, 6); rect(lx[1] - step - 1, gr - 3, lx[1] - step + legW, gr - 3, 0x8a8e94, 6); }
+  }
+  // ---- back arm (reaching forward, behind the torso)
+  const reach = pose === 6 ? -6 : pose === 7 ? 2 : 0, armY = tt + 3 + (walk ? (pose % 2 ? 0 : 1) : 0);
+  if (!crawl) {
+    if (back) { line(cx - tw, tt + 2, cx - tw - 2, tt + 9, sS, 1, 2); ell(cx - tw - 2, tt + 10, 1.6, 1.4, sS, 1); }
+    else { line(cx - 1, armY - 1, cx + 10 + (fat ? 2 : 0), armY - 2 + reach, sS, 1, 2); ell(cx + 11 + (fat ? 2 : 0), armY - 1.5 + reach, 1.8, 1.5, sS, 1); }
+  }
+  // ---- torso + clothes
+  if (!crawl) {
+    for (let y = tt; y < lt + (T.tst === 'jacket' ? 1 : 0); y++) {
+      const r = y - tt, bulge = fat ? Math.sin(Math.min(1, r / (lt - tt)) * Math.PI) * 2.2 : 0, ins = r === 0 ? 2 : r === 1 ? 1 : 0, sx = hunch ? Math.round((lt - y) / (lt - tt) * 2) : 0;
+      for (let x = Math.round(cx - tw + ins - bulge * 0.4 + sx); x <= Math.round(cx + tw - ins + bulge + sx); x++) {
+        let c = x > cx + tw * 0.4 + sx + bulge * 0.5 ? tS : (x < cx - tw * 0.3 + sx && r < 4 ? tH : top);
+        if (T.tst === 'tank' && (x < cx - tw + 3 + sx || x > cx + tw - 3 + sx) && r < 5) c = x > cx + sx ? sS : sk;     // bare shoulders
+        if (T.tst === 'jacket' && Math.abs(x - cx - sx - 1) < 1 && !back) c = tS;                                       // open front
+        if (L.stain && !back && hash2(x * 3 + L.seed, y * 2) < 0.12 && r > 2) c = mixc(c, stainC, 0.55);
+        if (hash2(x * 5 + L.seed, y * 7) < 0.05) c = x > cx + sx ? sS : sk;                                           // tears showing skin
+        put(x, y, c, 5);
+      }
+    }
+    for (let x = Math.round(cx - tw); x <= Math.round(cx + tw + (fat ? 2 : 0)); x++) if (hash2(x + L.seed, 9) < 0.4) put(x + (hunch ? 0 : 0), lt - 1 + (T.tst === 'jacket' ? 1 : 0), -1, 5);   // ragged hem
+    if (T.extra === 'stitches' && !back) for (let j = 0; j < 5; j++) { put(cx - 2 + j, tt + 4 + j, 0x2b1a16, 6); if (j % 2) put(cx - 1 + j, tt + 3 + j, 0x2b1a16, 6); }
+  }
+  // ---- head
+  ell(hx, hy, hr, hr * 0.98, sk, 8, sS, sH);
+  if (!back) { ell(hx - hr + 0.5, hy + 1.5, 1.6, 2.2, sk, 8, sS); }   // ear
+  else { ell(hx - hr + 0.5, hy + 1, 1.5, 2, sk, 8, sS); ell(hx + hr - 0.5, hy + 1, 1.5, 2, sS, 8); }
+  // ---- hair / hats
+  const hs = T.hair, capClip = (x, y) => y < hy - (back ? -3 : 2) - ((x * 7) % 3 === 0 ? 1 : 0) || (!back && x < hx - hr + 3 && y < hy + 2);
+  if (hs === 'short' || hs === 'messy' || hs === 'spiky') ell(hx, hy - 1, hr + 0.6, hr * 0.92, hair, 9, hS, hH, capClip);
+  if (hs === 'messy') for (let i = 0; i < 6; i++) { const x = hx - 7 + i * 3, y = hy - hr - (i % 2); put(x, y, hair, 9); put(x + 1, y - 1, hair, 9); put(x - 1, y + 1, hS, 9); }
+  if (hs === 'spiky') for (let i = 0; i < 6; i++) { const x = hx - 7 + i * 2.8; line(x, hy - hr + 1, x + 1, hy - hr - 3, hair, 9); }
+  if (hs === 'tuft') { for (let i = 0; i < 5; i++) { const x = hx - 5 + i * 2.6 + (L.seed % 3); line(x, hy - hr + 1, x + (i % 2 ? 1 : -1), hy - hr - 2, hair, 9); } }
+  if (hs === 'elder') { ell(hx - hr + 2, hy - 1, 3, 4, hair, 9, hS); ell(hx + hr - 2, hy - 1, 3, 4, hair, 9, hS); for (let i = 0; i < 3; i++) line(hx - 2 + i * 2, hy - hr + 1, hx - 3 + i * 2, hy - hr - 2, hair, 9); }
+  if (hs === 'long' || hs === 'wild' || hs === 'bob' || hs === 'afro') {
+    const big = hs === 'afro' ? 3 : hs === 'wild' ? 1.8 : 0.8;
+    ell(hx, hy - 1, hr + big, hr + big * 0.7, hair, 9, hS, hH, back ? null : (x, y) => y < hy - 2 + ((x * 5) % 3 === 0 ? 1 : 0) || x < hx - hr + 3 || (hs !== 'afro' && x > hx + hr - 1));
+    if (hs === 'long' || hs === 'wild') { const y1 = tt + (hs === 'wild' ? 9 : 7); rect(hx - hr - (hs === 'wild' ? 2 : 1), hy, hx - hr + 3, y1, hair, back ? 10 : 2, hx - hr + 2, hS); if (back) rect(hx - hr + 1, hy, hx + hr - 1, y1, hair, 10, hx + 2, hS); else rect(hx + hr - 2, hy + 1, hx + hr + 1, y1 - 3, hS, 2); if (hs === 'wild') for (let i = 0; i < 7; i++) { const x = hx - hr - 2 + i * 3.4; line(x, hy - hr - 1, x + (i % 2 ? 2 : -2), hy - hr - 4, hair, 9); line(hx - hr - 2, hy + 3 + i, hx - hr - 4, hy + 4 + i, hair, 2); } }
+    if (hs === 'bob') rect(hx - hr - 1, hy, hx - hr + 3, hy + 6, hair, back ? 10 : 9, hx - hr + 2, hS);
+    if (hs === 'afro') for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; put(hx + Math.cos(a) * (hr + 3.5), hy - 1 + Math.sin(a) * (hr + 2.5), hair, 9); }
+  }
+  if (T.hat === 'fedora') { ell(hx, hy - hr + 2, hr + 4.5, 2.2, grade(L.hatc), 12, mixc(grade(L.hatc), 0x2b1a16, 0.3)); rect(hx - hr + 2, hy - hr - 4, hx + hr - 2, hy - hr + 1, grade(L.hatc), 12, hx + 3, mixc(grade(L.hatc), 0x2b1a16, 0.3)); rect(hx - hr + 2, hy - hr, hx + hr - 2, hy - hr, mixc(grade(L.hatc), 0x2b1a16, 0.5), 12); put(hx, hy - hr - 4, -1, 12); }
+  if (T.hat === 'beanie') { ell(hx, hy - 2, hr + 0.8, hr * 0.85, grade(L.hatc), 12, mixc(grade(L.hatc), 0x2b1a16, 0.3), undefined, (x, y) => y < hy - 3); rect(hx - hr, hy - 4, hx + hr, hy - 3, mixc(grade(L.hatc), 0xfff2dc, 0.15), 12); }
+  if (T.hat === 'bandage') { const wc = 0xdcd2b8, ws = 0xa89c80; ell(hx, hy - 1, hr + 0.6, hr * 0.96, wc, 12, ws, 0xf0e8d0, (x, y) => back || y < hy - 3 || (y > hy + 2 && y < hy + 5) || x < hx - hr + 3); for (let y = Math.round(hy - hr); y < hy + 5; y += 2) line(hx - hr + 1, y, hx + hr - 1, y + 1, ws, 12); if (!back) line(hx + 2, hy - 2, hx + hr, hy + 4, ws, 12); }
+  // ---- face (front 3/4, looking right): pale eyes in dark sockets, gaping mouth with teeth
+  if (!back) {
+    const ey = hy + 1, e1 = hx - 4, e2 = hx + 3, sock = mixc(sS, 0x2b1a16, 0.45), eyeC = 0xf0e6a8, pup = 0x2b1a16;
+    for (const [ex, w] of [[e1, 3], [e2, 3]]) { rect(ex - 1, ey - 1, ex + w, ey + 3, sock, 14); rect(ex, ey, ex + w - 1, ey + 2, eyeC, 15); put(ex + (ex === e2 ? 2 : 1), ey + 1, pup, 16); }
+    if ((L.seed % 4) === 0) put(e2 + 1, ey + 2, sock, 16);                                                   // droopy eye
+    const my = ey + 5, mx = hx - 1, mw = L.gape ? 5 : 4, mh = L.gape ? 3 : 2;
+    rect(mx, my, mx + mw, my + mh, 0x4a1c1e, 15); for (let i = 0; i <= mw; i += 2) put(mx + i, my, 0xf0ece0, 16); if (L.gape) for (let i = 1; i <= mw; i += 2) put(mx + i, my + mh, 0xe8e2d0, 16);
+    put(hx + 1, ey + 3, sS, 15);                                                                            // nose shadow
+    if (T.extra === 'stitches') { line(hx - 6, hy - 5, hx - 1, hy - 2, 0x2b1a16, 16); for (let j = 0; j < 3; j++) put(hx - 5 + j * 2, hy - 5 + j, 0xb8a8a0, 16); }
+    if (L.stain && (L.seed % 3) === 0) { put(hx + 4, my + 2, stainC, 15); put(hx + 5, my + 3, stainC, 15); }
+  }
+  // ---- front arm: the classic forward reach (raised for an attack, low lunge for a bite)
+  if (!crawl) {
+    const ax = cx + (hunch ? 2 : 0), ay = armY + 1, tx = ax + 13 + (fat ? 2 : 0), ty = ay + reach + (walk ? (pose % 2 ? -1 : 0) : 0);
+    const sl = T.tst === 'tank' ? 0 : 4, c0 = T.tst === 'jacket' || T.tst === 'shirt' ? top : top;
+    if (back) { line(cx + tw, tt + 2, cx + tw + 3, tt + 8, top, 13, 2); ell(cx + tw + 3, tt + 9, 1.7, 1.5, sk, 13, sS); }
+    else {
+      for (let i = 0; i <= 13; i++) { const q = i / 13, x = ax + (tx - ax) * q, y = ay + (ty - ay) * q; put(x, y, i < sl ? c0 : sk, 13); put(x, y + 1, i < sl ? tS : sS, 13); }
+      ell(tx + 1, ty + 0.5, 2, 1.7, sk, 13, sS, sH); put(tx + 3, ty, sk, 13); put(tx + 3, ty + 1.5, sS, 13);           // hand with fingers
+      if (T.extra === 'chain') { for (let i = 0; i < 7; i++) put(tx + (i % 2), ty + 3 + i, i % 2 ? 0x9a9ea4 : 0x5e6268, 13); rect(tx - 1, ty + 1, tx + 1, ty + 2, 0x8a8e94, 14); }
+    }
+  }
+  // ---- ink: dark outline around the figure + lines where a nearer part overlaps a farther one
+  const out = col.slice();
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x;
+    if (col[i] < 0) { if ((x > 0 && col[i - 1] >= 0) || (x < W - 1 && col[i + 1] >= 0) || (y > 0 && col[i - W] >= 0) || (y < H - 1 && col[i + W] >= 0)) out[i] = 0x1e1818; continue; }
+    const z = zz[i]; if (z >= 14) continue;
+    for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) if (j >= 0 && col[j] >= 0 && zz[j] < z - 2 && !(z === 9 && zz[j] === 8)) { out[i] = mixc(col[i], 0x1e1818, 0.68); break; }
+  }
+  return out;
 }
 // a Holdfast conifer in Saigon's puff-shaded, inked tree style
 const _pine = {};

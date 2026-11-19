@@ -49,6 +49,7 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 
 | Command | What |
 |---|---|
+| `node tests/holdfast-m7.mjs [seed]` | Milestone 7: zombie archetypes (from `holdfast/zombie.webp`), church / school / riverside graveyard layout, bathing, washing, bank fishing, supply + red-cross medical boats, determinism |
 | `node tests/holdfast-community.mjs [seed]` | Milestone 6: zone distribution, crowding, food chain, market, training + alarm, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, frontier, 2-day stability, determinism |
 | `node tests/holdfast-life.mjs [secs] [seed]` | Milestone 5: congestion, synchrony, walking speed, crop cycles, visible work, infected density |
 | `node tests/holdfast-sim.mjs 3600` | Map sanity + 3 game days of combat, expeditions, repairs |

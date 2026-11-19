@@ -32,7 +32,7 @@ function lfInit() {
   HS.reps = []; HS.graves = HF.graves.map(g => Object.assign({}, g, { flowers: R() < 0.25 ? 200 : 0, fresh: 0 })); HS.stonesSeen = HF.memorial.stones;
   HS.nextL = { dmg: HS.t + rr2(60, 150), ride: HS.t + rr2(30, 90), conv: 0, eggs: 0 };
   lfDamageHouse(null, 'wall', 1); lfDamageHouse(null, 'roof', 0);   // a couple of houses already need work when the viewer arrives
-  lfAnimals();
+  lfAnimals(); lfRiverInit();
 }
 function lfAnimals() {
   const R = HS.R, inR = (P) => [P.x + 3 + R() * (P.w - 6), P.y + 3 + R() * (P.d - 6)];
@@ -62,7 +62,7 @@ const lfDay = () => HS.life >= 7 && HS.life < 19.5;
 function lfDo(p, T, dt) {
   if (HS.alarm > 0 && p.role === 'guard' && (T.a === 'range' || T.a === 'laps' || T.a === 'form' || T.a === 'formlead' || T.a === 'stand')) { p.task = null; p.variant = 'sling'; return; }   // the bell: drop everything and go to the wall
   switch (T.a) {
-    case 'chain': case 'scaffold': case 'patch': case 'lead': case 'unload': case 'pigs': case 'eggs': case 'milk': case 'supply': case 'setup': case 'packup': case 'visit': case 'tools': case 'medcheck': case 'reinforce': case 'muck': case 'feedh': case 'tackup': case 'sheets': {
+    case 'river': case 'boat': case 'chain': case 'scaffold': case 'patch': case 'lead': case 'unload': case 'pigs': case 'eggs': case 'milk': case 'supply': case 'setup': case 'packup': case 'visit': case 'tools': case 'medcheck': case 'reinforce': case 'muck': case 'feedh': case 'tackup': case 'sheets': {
       const G = T.legs[T.li];
       if (G.tick) { if (!G.tick(p, T, dt, G)) return; }
       else { p.act = G.anim || 'stand'; if (G.tool !== undefined) p.variant = G.tool; if (G.dir != null) p.dir = G.dir; if (G.face) faceTo(p, G.face); if (G.z) p.z = G.z; if (G.fx) lfFx(p, G.fx, dt, G.fxr); if (G.snd && Math.floor((T.t - dt) / 1.4) !== Math.floor(T.t / 1.4)) hsSound(G.snd, p.x, p.y, 0.3); if (T.t < G.dur) return; }
@@ -193,12 +193,12 @@ function lfHouseJob(p) {
   for (const r of HS.reps) { if (r.st >= 3) continue; if (r.crew && r.crew !== p && r.crew.alive && r.crew.task && r.crew.task.rep === r) continue; const sc = -Math.hypot(r.wx - p.x, r.wy - p.y) / 220 + (r.st > 0 ? 0.6 : 0) + HS.R() * 0.4; if (sc > bs) { bs = sc; best = r; } }
   if (!best) return null; const r = best, S = HS.store, site = { x: r.wx, y: r.wy };
   if (r.st === 0) { if (S.mat <= 0) return null; r.crew = p;
-    return lfChain('scaffold', [lfLeg(lfWood(p), 2, 'kneel', '', () => { S.mat--; }, { carry: 'plank' }), lfLeg(site, 9, 'hammer', 'hammer', () => { r.st = 1; HS.Ls.scaffolds++; bubble(p, 'star'); }, { snd: 'hammer', fx: 'dust', fxr: 0.8, dir: 3 })], { rep: r }); }
+    return lfChain('scaffold', [lfLeg(lfWood(p), 2, 'kneel', '', () => { if (S.mat < 1) return false; S.mat--; }, { carry: 'plank' }), lfLeg(site, 9, 'hammer', 'hammer', () => { r.st = 1; HS.Ls.scaffolds++; bubble(p, 'star'); }, { snd: 'hammer', fx: 'dust', fxr: 0.8, dir: 3 })], { rep: r }); }
   if (r.st === 1) { r.crew = p;
     if (r.planks > r.used) return lfChain('patch', [lfLeg(site, 1e9, 'hammer', 'hammer', null, { tick: (q, T) => lfPatch(q, T, r) })], { rep: r });
     if (S.mat <= 0) { r.crew = null; return null; }
     const n = Math.min(S.mat, r.need - r.planks, HS.R() < 0.6 ? 3 : 1), cart = n >= 2;
-    return lfChain('patch', [lfLeg(lfWood(p), 2, 'kneel', '', () => { S.mat -= n; if (cart) { p.cart = 3; HS.Ls.carts++; } }, { carry: cart ? '' : 'plank' }),
+    return lfChain('patch', [lfLeg(lfWood(p), 2, 'kneel', '', () => { if (S.mat < n) return false; S.mat -= n; if (cart) { p.cart = 3; HS.Ls.carts++; } }, { carry: cart ? '' : 'plank' }),
       lfLeg(site, 2, 'kneel', '', () => { r.planks += n; p.cart = 0; }, { carry: 'hammer', dir: 3 }), lfLeg(site, 1e9, 'hammer', 'hammer', null, { tick: (q, T) => lfPatch(q, T, r) })], { rep: r }); }
   if (r.st === 2) { r.crew = p; return lfChain('scaffold', [lfLeg(site, 6, 'hammer', 'hammer', () => { r.st = 3; r.t = HS.t; HS.Ls.houseRepairs++; bubble(p, 'star'); hsLog('houseFixed', {}); }, { snd: 'hammer', fx: 'dust', dir: 3 })], { rep: r }); }
   return null;
@@ -249,23 +249,23 @@ function lfKidJob(p, h, rain) {
 function lfHerdJob(p) {
   const R = HS.R, S = HS.store;
   if (HS.t - HS.milkT > 260 && HS.life > 6 && HS.life < 19) { HS.milkT = HS.t; return lfChain('milk', [lfLeg(spotXY('milk'), 8, 'kneel', 'bucket', () => { HS.Ls.milk++; p.load = { k: 'kitchen', n: 1 }; }, { carry: 'bucket', face: HF.goatPen })]); }   // the goats are milked a few times a day
-  if (HS.pigFood <= 0 && R() < 0.8) return lfChain('pigs', [lfLeg(spotXY('kitchenIn'), 2, 'kneel', '', null, { carry: 'bucket' }), lfLeg(spotXY('pigfeed'), 3.5, 'kneel', 'bucket', () => { HS.pigFood = 1; HS.Ls.pigFeed++; bubble(p, 'heart'); })]);
+  if (HS.pigFood <= 0 && R() < 0.8 && !HS.people.some(q => q !== p && q.task && q.task.a === 'pigs')) return lfChain('pigs', [lfLeg(spotXY('kitchenIn'), 2, 'kneel', '', null, { carry: 'bucket' }), lfLeg(spotXY('pigfeed'), 3.5, 'kneel', 'bucket', () => { HS.pigFood = 1; HS.Ls.pigFeed++; bubble(p, 'heart'); })]);
   if (HS.t - HS.feedT > 110 && R() < 0.7) return lfChain('chain', [lfLeg(spotXY('coop'), 7, 'water', 'bag', () => { HS.Ls.chickFeed++; }, { fx: 'seed', fxr: 3, tick: null, face: HF.coopRun })], { feed: 1 });
   if (HS.eggs >= 2) return lfChain('eggs', [lfLeg(spotXY('egg'), 4, 'kneel', 'basket', () => { const n = HS.eggs; HS.eggs = 0; HS.Ls.eggs += n; p.load = { k: 'kitchen', n: Math.max(1, Math.round(n / 2)) }; bubble(p, 'heart'); }, { carry: 'basket' })]);
   if (HS.t - HS.milkT > 160 && R() < 0.6) return lfChain('milk', [lfLeg(spotXY('milk'), 8, 'kneel', 'bucket', () => { HS.milkT = HS.t; HS.Ls.milk++; p.load = { k: 'kitchen', n: 1 }; }, { carry: 'bucket', face: HF.goatPen })]);
   return { k: 'life', a: 'stand', ...spotXY(R() < 0.5 ? 'coop' : 'pigfeed', 1), dur: rr2(10, 18), anim: R() < 0.5 ? 'look' : 'hoe', tool: R() < 0.5 ? '' : 'fork' };
 }
 // ---- graveyard: visits with flowers, the caretaker, burials
-function lfVisitJob(p) {
+function lfVisitJob(p, gather) {
   if (!lfOpen('mourn')) return null; const s = spotXY('mourn');
-  return lfChain('visit', [lfLeg(s, rr2(18, 32), HS.R() < 0.4 ? 'kneel' : 'stand', '', () => { HS.Ls.visits++; let g = null, bd = 1e9; for (const q of HS.graves) { if (!q.used) continue; const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; g = q; } } if (g && HS.R() < 0.6) { g.flowers = 240; HS.Ls.flowers++; bubble(p, 'leaf'); } else bubble(p, 'heart'); }, { dir: 3 })]);
+  return lfChain('visit', [lfLeg(s, gather ? rr2(8, 14) : rr2(18, 32), HS.R() < 0.4 ? 'kneel' : 'stand', '', () => { HS.Ls.visits++; let g = null, bd = 1e9; for (const q of HS.graves) { if (!q.used) continue; const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; g = q; } } if (g && HS.R() < 0.6) { g.flowers = 240; HS.Ls.flowers++; bubble(p, 'leaf'); } else bubble(p, 'heart'); }, { dir: 3 })]);
 }
 function lfTendJob(p) { return lfChain('chain', [lfLeg(spotXY('tend', 3), rr2(12, 20), 'hoe', 'broom', () => { HS.Ls.tend++; }, { fx: 'dust', fxr: 0.5 })]); }
 function lfBurial() {             // someone died: a fresh grave, and a few neighbours gather
   const g = HS.graves.find(q => !q.used) || HS.graves.reduce((a, b) => (a.fresh || 0) < (b.fresh || 0) ? a : b);
   g.used = true; g.fresh = HS.t; g.flowers = 400; HS.Ls.burials++;
-  const near = HS.people.filter(q => q.alive && q.vis && q.tier > 0 && q.role !== 'guard' && q.role !== 'kid' && !q.exp && !q.ride && !q.rescue && !q.load && !q.inj && q.task && (q.task.k === 'sit' || q.task.k === 'chat' || q.task.k === 'walk' || q.task.k === 'shop' || (q.task.k === 'life' && (q.task.a === 'stand' || q.task.a === 'visit')))).sort((a, b) => Math.hypot(a.x - g.x, a.y - g.y) - Math.hypot(b.x - g.x, b.y - g.y)).slice(0, 4);
-  for (const q of near) { const t = lfVisitJob(q); if (t) setTask(q, t); }
+  const near = HS.people.filter(q => q.alive && q.vis && q.tier > 0 && q.role !== 'guard' && q.role !== 'kid' && !q.exp && !q.ride && !q.rescue && !q.load && !q.inj && q.task && (q.task.k === 'sit' || q.task.k === 'chat' || q.task.k === 'walk' || q.task.k === 'shop' || (q.task.k === 'life' && (q.task.a === 'stand' || q.task.a === 'visit' || q.task.a === 'river')) || (q.task.k === 'work' && q.tier === 2))).sort((a, b) => Math.hypot(a.x - g.x, a.y - g.y) - Math.hypot(b.x - g.x, b.y - g.y)).slice(0, 4);
+  for (const q of near) { const t = lfVisitJob(q, 1); if (t) setTask(q, Object.assign(t, { run: 1 })); }
 }
 // ---- market
 function lfTraderJob(p, h) {
@@ -294,7 +294,8 @@ function lfShopTask(p) {         // a customer: the open stall with the shortest
 // ---- residents (ambient + general adults + elders): the community beyond home and the green
 function lfResidentJob(p, rain) {
   const R = HS.R, h = HS.life; if (rain) return null;
-  if (p.role === 'elder') { const r = R(); if (r < 0.4 && lfOpen('story') && h > 13 && h < 17.5) return { k: 'life', a: 'stand', ...spotXY('story'), dur: rr2(30, 50), anim: 'talk', story: 1, out: () => { HS.Ls.story++; } }; if (r < 0.4) return lfTendJob(p); if (r < 0.6) { const v = lfVisitJob(p); if (v) return v; } if (r < 0.72) return { k: 'life', a: 'checkup', ...spotXY('wait'), dur: 60 }; }
+  if (p.role === 'elder') { const r = R(); if (h > 8.5 && h < 17 && HS.t - (HS.tendT == null ? -1e9 : HS.tendT) > 150 && lfOpen('tend')) { HS.tendT = HS.t; return lfTendJob(p); }   // the caretaker's daytime round (the graveyard is a long walk now)
+  if (r < 0.4 && lfOpen('story') && h > 13 && h < 17.5) return { k: 'life', a: 'stand', ...spotXY('story'), dur: rr2(30, 50), anim: 'talk', story: 1, out: () => { HS.Ls.story++; } }; if (r < 0.4) return lfTendJob(p); if (r < 0.6) { const v = lfVisitJob(p); if (v) return v; } if (r < 0.66 && lfOpen('pray')) { const s = spotXY('pray'); return { k: 'life', a: 'stand', ...s, dur: rr2(20, 35), anim: 'kneel', dir: 3, out: () => { HS.Ls.pray++; } }; } if (r < 0.72) return { k: 'life', a: 'checkup', ...spotXY('wait'), dur: 60 }; }
   const r = R();
   if (r < 0.45 && h > 7.5 && h < 18.3) { const s = lfShopTask(p); if (s) return s; }
   if (r < 0.6) return { k: 'life', a: 'checkup', ...spotXY('wait'), dur: 60 };
@@ -368,7 +369,7 @@ function lfHorse(H, dt) {
   if (H.st !== 'loose') H.lt = 0;
   if (H.st === 'ridden') { const p = H.rider; if (!p || !p.alive) { H.st = 'loose'; H.rider = null; return; } H.x = p.x; H.y = p.y; H.dir = p.dir; H.stride = p.stride; H.run = p.path && p.path.run; return; }
   if (H.st === 'led' || H.st === 'pack') {   // follow the leader's footsteps, a few steps behind
-    const L = H.lead; if (!L || !L.alive) { H.st = 'loose'; H.lead = null; return; }
+    const L = H.lead; if (!L || !L.alive || (H.st === 'led' && !(L.task && L.task.a === 'lead'))) { H.st = 'loose'; H.lead = null; if (H.groom === L) H.groom = null; return; }   // an interrupted lead: the horse walks back to the rail on its own
     const tr = L.trail || []; const q = tr[Math.max(0, tr.length - 4)] || [L.x, L.y]; const dx = q[0] - H.x, dy = q[1] - H.y, d = Math.hypot(dx, dy);
     if (d > 0.5) { const s = Math.min(d, Math.min(16, 4 + d * 2.5) * dt); H.x += dx / d * s; H.y += dy / d * s; H.stride += s; H.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 2) : (dy > 0 ? 1 : 3); }
     if (d > 30) { if (!H.path) hsGo(H, L.x, L.y, 'all'); if (H.path && hsStep(H, dt, 14)) H.path = null; } return;
@@ -405,7 +406,7 @@ function lfTick(dt) {
   const leaders = new Set(); for (const H of HS.horses) if (H.lead) leaders.add(H.lead); if (HS.squad) leaders.add(HS.squad.lead);
   for (const p of leaders) { const tr = p.trail || (p.trail = []); const q = tr[tr.length - 1]; if (!q || Math.hypot(p.x - q[0], p.y - q[1]) > 1.3) { tr.push([p.x, p.y]); if (tr.length > 60) tr.shift(); } }
   if (HS.squad && (!HS.squad.lead.alive || HS.squad.lead.task?.a !== 'formlead')) HS.squad = null;
-  lfBall(dt);
+  lfBall(dt); lfRiverTick(dt);
   if (HS.people.some(q => q.task && q.task.feed && q.task.ph === 'do')) HS.feedT = HS.t;   // chickens rush to the feeder
   // eggs accumulate; pigs eat what is in the trough
   if (HS.t > HS.nextL.eggs) { HS.nextL.eggs = HS.t + rr2(45, 80); if (HS.eggs < 6 && h > 6 && h < 19) HS.eggs++; }
@@ -417,7 +418,7 @@ function lfTick(dt) {
   for (const r of HS.reps) if (r.crew && (!r.crew.alive || !r.crew.task || r.crew.task.rep !== r)) r.crew = null;
   // convalescents on the hospital cots (daytime)
   if (HS.t > HS.nextL.conv) { HS.nextL.conv = HS.t + rr2(35, 80);
-    if (lfDay() && HS.people.filter(q => q.task && q.task.a === 'conv').length < 2 && lfOpen('bed')) { const q = HS.people.find(q => q.alive && q.vis && q.tier === 2 && !q.inj && !q.load && !q.exp && !q.ride && q.task && (q.task.k === 'sit' || q.task.k === 'chat') && HS.R() < 0.3); if (q) setTask(q, { k: 'life', a: 'conv', ...spotXY('bed'), dur: rr2(80, 150) }); } }
+    if (lfDay() && HS.people.filter(q => q.task && q.task.a === 'conv').length < 2 && lfOpen('bed')) { /* milestone 7: a fair pick among the sitters (was: the first lucky one) */ const pool = HS.people.filter(q => q.alive && q.vis && q.tier === 2 && !q.inj && !q.load && !q.exp && !q.ride && q.task && (q.task.k === 'sit' || q.task.k === 'chat')); const q = pool.length && HS.R() < 0.75 ? pool[Math.floor(HS.R() * pool.length)] : null; if (q) setTask(q, { k: 'life', a: 'conv', ...spotXY('bed'), dur: rr2(80, 150) }); } }
   // burials
   if (HF.memorial && HF.memorial.stones > HS.stonesSeen) { HS.stonesSeen = HF.memorial.stones; lfBurial(); }
   for (const g of HS.graves) if (g.flowers > 0) g.flowers -= dt;
@@ -442,4 +443,110 @@ function lfZoneOf(x, y) {
   if (HF.gk[k] === GK.FIELD || isField(u, v, 0.5)) return 'fields';
   if (HF.walk[k] & W_DOCK || v > 480) return 'river';
   return 'homes';
+}
+
+// ---------------------------------------------------------------- milestone 7: river life — bathing, washing, bank fishing, supply boats
+// Bank spots are found on walkable tiles inside the settlement that touch open water; each knows which way the water is.
+Object.assign(SPOT_CAP, { bathe: 1, wash: 1, bankfish: 1, pray: 1 });
+const rr3 = (a, b) => a + HS.R2() * (b - a), pickR3 = a => a[Math.floor(HS.R2() * a.length)];
+function lfRiverInit() {
+  HS.R2 = mulberry32(((HS.seed0 || 11) * 2654435761) >>> 0 ^ 0x5bd1e995);   // river life + boats draw from their own stream
+  const S = HF.spots;
+  if (!S.bathe) {
+    const edge = [];
+    for (let j = 1; j < HN - 1; j++) for (let i = 1; i < HN - 1; i++) {
+      const k = tIdx(i, j); if (!(HF.walk[k] & W_IN) || (HF.walk[k] & W_DOCK) || HF.occ[k] || HF.zone[k] === Z_RIVER) continue;
+      for (const [a, b] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) if (HF.gk[tIdx(i + a, j + b)] === GK.WATER) { const [u, v] = w2d(i * HT + 4, j * HT + 4); edge.push({ i, j, a, b, u, v }); break; }
+    }
+    const near = (u0, v0, n, used) => edge.filter(e => !used.has(e)).sort((p, q) => Math.hypot(p.u - u0, p.v - v0) - Math.hypot(q.u - u0, q.v - v0)).slice(0, n);
+    const used = new Set(), mk = (name, e) => { used.add(e); const x = e.i * HT + 4 + e.a * 2.5, y = e.j * HT + 4 + e.b * 2.5; spot(name, x, y, { wdx: e.a, wdy: e.b, dir: e.a > 0 ? 0 : e.a < 0 ? 2 : e.b > 0 ? 1 : 3 }); };
+    // three bathing / washing places along the bank (south-west by the fields, south by the main dock, south-east), a few quiet fishing spots
+    for (const [u, v] of [[300, 505], [600, 510], [850, 420]]) { const c = near(u, v, 8, used).filter((e, n) => n % 2 === 0); c.slice(0, 2).forEach(e => mk('bathe', e)); c.slice(2, 4).forEach(e => mk('wash', e)); }
+    for (const [u, v] of [[40, 300], [400, 518], [700, 492], [915, 320]]) near(u, v, 1, used).forEach(e => mk('bankfish', e));
+    for (const n of ['bathe', 'wash', 'bankfish', 'pray']) for (const s of (S[n] || [])) { s.nm = n; s.zone = ''; }
+  }
+  // the boat lane: up the west arm, round the bend just off the settlement bank, out along the east arm (world coordinates)
+  if (!HF.boatLane) {
+    const P = [], wpt = (u, v) => P.push(d2w(u, v));
+    for (let v = 140; v < 300; v += 16) wpt(riverSide(v, -1) + 12, v);
+    for (let a = Math.PI; a >= 0; a -= Math.PI / 48) wpt(480 + 445 * 1.04 * Math.cos(a), 300 + 222 * 1.04 * Math.sin(a));
+    for (let v = 300; v >= 140; v -= 16) wpt(riverSide(v, 1) - 12, v);
+    const s = [0]; for (let i = 1; i < P.length; i++) s.push(s[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+    HF.boatLane = { P, s, len: s[s.length - 1] };
+    // moorings: the lane point nearest each dock's outer end (the medical boat ties up at the dock nearest the hospital)
+    HF.moor = HF.docks.map((d, i) => { const ex = d.x + 3, ey = d.y + d.len; let bi = 0, bd = 1e9; P.forEach((q, n) => { const dd = Math.hypot(q[0] - ex, q[1] - ey); if (dd < bd) { bd = dd; bi = n; } }); let wx = ex, wy = ey + 6, wd = 1e9; for (let j = 0; j < HN; j++) for (let ii = 0; ii < HN; ii++) { const k = tIdx(ii, j); if (HF.gk[k] !== GK.WATER) continue; let ok = true; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const q = tIdx(ii + a, j + b); if (inMap(ii + a, j + b) && HF.gk[q] !== GK.WATER && !(HF.walk[q] & W_DOCK)) ok = false; } if (!ok) continue; const cx2 = ii * HT + 4, cy2 = j * HT + 4, dd = Math.hypot(cx2 - ex - 6, cy2 - ey - 2); if (dd < wd) { wd = dd; wx = cx2; wy = cy2; } }   // open water right beside the dock end
+      return { i, s: s[bi], x: ex, y: ey - 3, dist: bd, bx: wx, by: wy }; });
+    const hos = HF.buildings.find(b => b.kind === 'infirmary'); HF.medMoor = HF.moor.slice().sort((p, q) => Math.hypot(p.x - hos.x, p.y - hos.y) - Math.hypot(q.x - hos.x, q.y - hos.y))[0];
+    HF.cargoMoor = HF.moor.slice().sort((p, q) => Math.abs(w2d(p.x, p.y)[0] - 480) - Math.abs(w2d(q.x, q.y)[0] - 480))[0];
+  }
+  HS.boats = []; HS.boatId = 0; HS.nextL.boat = HS.t + rr3(20, 70); HS.nextL.river = HS.t + rr3(5, 20);
+  Object.assign(HS.Ls, { bathe: 0, wash: 0, bankfish: 0, boats: 0, medBoats: 0, medDeliver: 0, cargoBoats: 0, cargoDeliver: 0, pray: 0 });
+  if (HS.R2() < 0.5) lfBoatLaunch(HS.R2() * 0.8);                                                       // warm start: a boat may already be on the water
+}
+function lfLanePt(s) { const L = HF.boatLane; s = clamp(s, 0, L.len); let i = 1; while (i < L.s.length - 1 && L.s[i] < s) i++; const a = L.P[i - 1], b = L.P[i], q = (s - L.s[i - 1]) / Math.max(1e-6, L.s[i] - L.s[i - 1]); return [a[0] + (b[0] - a[0]) * q, a[1] + (b[1] - a[1]) * q, b[0] - a[0], b[1] - a[1]]; }
+function lfBoatLaunch(prog) {
+  const R = HS.R2, r = R(), seq = ['med', 'cargo', 'med', 'fish'], kind = seq[((HS.boatSeq == null ? (HS.boatSeq = Math.floor(r * 4)) : ++HS.boatSeq)) % 4], fwd = R() < 0.5, L = HF.boatLane;   // a rotation: medical supply runs are every other boat, cargo and fishing boats in between
+  const b = { id: HS.boatId++, kind, fwd, s: fwd ? 0 : L.len, spd: kind === 'fish' ? rr3(7, 8.5) : rr3(9, 11), st: 'go', t: 0, moor: kind === 'med' ? HF.medMoor : kind === 'cargo' && R() < 0.6 ? HF.cargoMoor : null, x: 0, y: 0, px: 0, py: 0, dir: 0, ph: R() * 10, rower: hfLook('adult', R) };
+  if (prog) b.s = fwd ? L.len * prog : L.len * (1 - prog);
+  if (b.moor && (fwd ? b.s > b.moor.s : b.s < b.moor.s)) b.moor = null;       // already past its dock
+  const p = lfLanePt(b.s); b.x = b.px = p[0]; b.y = b.py = p[1]; b.dir = Math.abs(p[2]) > Math.abs(p[3]) ? (p[2] > 0) === fwd ? 0 : 2 : (p[3] > 0) === fwd ? 1 : 3;
+  HS.boats.push(b); HS.Ls.boats++; if (kind === 'med') HS.Ls.medBoats++; if (kind === 'cargo') HS.Ls.cargoBoats++;
+  return b;
+}
+function lfBoat(b, dt) {
+  b.px = b.x; b.py = b.y; b.t += dt; const L = HF.boatLane;
+  if (b.st === 'go') {
+    b.s += (b.fwd ? 1 : -1) * b.spd * dt;
+    if (b.moor && (b.fwd ? b.s >= b.moor.s : b.s <= b.moor.s)) { b.s = b.moor.s; b.st = 'moored'; b.t = 0; b.wait = rr3(26, 38); lfBoatCall(b); }
+    if (b.s < -5 || b.s > L.len + 5) return false;
+  } else if (b.st === 'moored') {
+    if (b.t > b.wait && !(b.crew && b.crew.alive && b.crew.task && b.crew.task.boat === b && b.crew.task.li === 0 && b.t < b.wait + 25)) { b.st = 'go'; b.lastMoor = b.moor; b.moor = null; b.leave = 5; }
+  }
+  const p = lfLanePt(b.s); b.x = p[0]; b.y = p[1];
+  if (b.st === 'moored' || b.leave > 0) {   // pull in alongside the dock end, then back out to the lane
+    const M2 = b.moor || b.lastMoor, tx = M2.bx, ty = M2.by, q = b.st === 'moored' ? Math.min(1, b.t / 5) : b.leave / 5;
+    b.x += (tx - b.x) * q; b.y += (ty - b.y) * q; if (b.st !== 'moored') b.leave = Math.max(0, b.leave - dt);
+  }
+  if (b.st === 'go') b.dir = Math.abs(p[2]) > Math.abs(p[3]) ? (p[2] > 0) === b.fwd ? 0 : 2 : (p[3] > 0) === b.fwd ? 1 : 3;
+  return true;
+}
+// a moored boat calls someone down to the dock: a medic for the red-cross boat, a trader or worker for cargo
+function lfBoatCall(b) {
+  const want = b.kind === 'med' ? ['medic'] : ['trader', 'tech', 'adult', 'farmer'], M = b.moor, dock = HF.docks[M.i];
+  const free = q => q.alive && q.vis && !q.exp && !q.ride && !q.rescue && !q.load && !q.inj && !q.onTower && (!q.task || ['sit', 'chat', 'walk'].includes(q.task.k) || (q.task.k === 'life' && q.task.a === 'stand')) && !(q.task && q.task.boat);
+  const c = HS.people.filter(q => want.includes(q.role) && free(q)).sort((p, q) => Math.hypot(p.x - dock.x, p.y - dock.y) - Math.hypot(q.x - dock.x, q.y - dock.y))[0];
+  if (!c || HS.alarm > 0) return;
+  b.crew = c; const end = { x: dock.x + 3, y: dock.y + dock.len - 4 };
+  const to = b.kind === 'med' ? spotXY('supplyIn') : spotXY(HAUL_SP.yard || 'storage');
+  setTask(c, lfChain('boat', [
+    lfLeg(end, 3, 'kneel', '', () => { if (b.st !== 'moored') return false; bubble(c, b.kind === 'med' ? 'heart' : 'star'); }, { face: b }),
+    lfLeg(to, 2, 'kneel', '', () => { if (b.kind === 'med') { HS.store.med = Math.min(STORE_CAP.med, HS.store.med + 3); HS.Ls.medDeliver++; } else { HS.store.yard = Math.min(STORE_CAP.yard, (HS.store.yard || 0) + 2); HS.Ls.cargoDeliver++; } }, { carry: '' })
+  ], { boat: b }));
+  c.task.legs[0].carry = 'crate';
+}
+// residents use the river: bathe in the cool of the morning and evening, wash clothes in the day, fish quietly from the bank
+function lfRiverJob(p, rain) {
+  const R = HS.R2, h = HS.life, warm = HR_SEASON() !== 'winter'; if (rain || HS.alarm > 0) return null;
+  const r = R();
+  if (warm && (h < 9.8 || (h > 16 && h < 19.5)) && r < 0.75 && lfOpen('bathe')) { const s = spotXY('bathe'); return lfChain('river', [lfLeg(s, rr3(22, 40), 'bathe', '', () => { HS.Ls.bathe++; bubble(p, pickR3(['smile', 'drop', 'note'])); }, { fx: 'splash', fxr: 0.25, face: { x: s.x + s.spot.wdx * 9, y: s.y + s.spot.wdy * 9 } })]); }
+  if (h > 7.5 && h < 17.5 && r < 0.88 && lfOpen('wash')) { const s = spotXY('wash'); return lfChain('river', [lfLeg(s, rr3(20, 34), 'wash', 'cloth', () => { HS.Ls.wash++; }, { fx: 'splash', fxr: 0.35, face: { x: s.x + s.spot.wdx * 9, y: s.y + s.spot.wdy * 9 } })]); }
+  if (lfOpen('bankfish')) { const s = spotXY('bankfish'); HS.Ls.bankfish++; return { k: 'work', ...s, dur: rr3(40, 70), tool: 'rod', anim: 'fish', bank: 1, face: { x: s.x + s.spot.wdx * 9, y: s.y + s.spot.wdy * 9 } }; }
+  return null;
+}
+const HR_SEASON = () => HS.season || 'summer';
+// laundry day: a household chore that goes via the river — wash at the bank, carry the wet cloth home, hang it on the line
+function lfLaundryJob(p, home) {
+  if (!lfOpen('wash') || HS.life < 7.5 || HS.life > 17 || HS.weather === 'rain' || HS.R2() > 0.5) return null; const s = spotXY('wash'), hm = home();
+  return lfChain('river', [lfLeg(s, rr3(22, 36), 'wash', 'cloth', () => { HS.Ls.wash++; }, { fx: 'splash', fxr: 0.35, face: { x: s.x + s.spot.wdx * 9, y: s.y + s.spot.wdy * 9 } }), lfLeg(hm, rr3(10, 16), 'hang', 'cloth', () => { HS.Ls.laundry = (HS.Ls.laundry || 0) + 1; })]);
+}
+function lfRiverTick(dt) {
+  if (!HF.boatLane) return;
+  // the river director: every so often an idle resident (sitting, chatting, playing) goes down to the water instead — never more than 6 at once
+  if (HS.t > HS.nextL.river) { HS.nextL.river = HS.t + rr3(16, 30);
+    if (HS.alarm <= 0 && HS.weather !== 'rain' && HS.life > 6 && HS.life < 19.5 && HS.people.filter(q => q.task && q.task.a === 'river').length < 6) {
+      const pool = HS.people.filter(q => q.alive && q.vis && q.role !== 'guard' && !q.exp && !q.ride && !q.rescue && !q.load && !q.inj && !q.onTower && q.task && q.task.ph === 'do' && q.tier !== 2 && (q.task.k === 'sit' || q.task.k === 'play'));   // ambient residents (the hospital's convalescent pool) are left alone; they wash via their laundry chore
+      const q = pool.length ? pool[Math.floor(HS.R2() * pool.length)] : null;
+      if (q) { const j = lfRiverJob(q, false); if (j && !(q.role === 'kid' && j.legs && j.legs[0].anim !== 'bathe')) setTask(q, j); } } }
+  HS.boats = HS.boats.filter(b => lfBoat(b, dt));
+  if (HS.t > HS.nextL.boat) { HS.nextL.boat = HS.t + rr3(50, 110); if (HS.boats.length < 2 && HS.life > 6 && HS.life < 20) lfBoatLaunch(0); }
 }

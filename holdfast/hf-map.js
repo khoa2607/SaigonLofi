@@ -36,7 +36,7 @@ function zoneAt(u, v) {
 // Milestone 6 layout: zones spread over the whole bend so activity is not concentrated at the green and the fields.
 const HSITES = {
   yard: [408, 556, 190, 228], market: [420, 540, 228, 292], training: [226, 404, 202, 274], stable: [562, 656, 194, 264],
-  workshop: [682, 806, 214, 284], infirmary: [562, 664, 262, 336], church: [328, 398, 286, 340], graveyard: [302, 394, 340, 392],
+  workshop: [682, 806, 214, 284], infirmary: [562, 664, 262, 336], church: [296, 404, 280, 394], graveyard: [62, 178, 334, 404],   // milestone 7: grand church; graveyard 2x, by the west river bank
   school: [146, 300, 288, 374], kitchen: [522, 594, 338, 380], barn: [258, 336, 380, 418], farmyard: [170, 256, 376, 444], newcomers: [800, 874, 244, 292]
 };
 function reservedAt(u, v) {
@@ -216,22 +216,39 @@ function hfBuildSettlement(R) {
   addP('laundry', inf.x + inf.w + 26, inf.y + 6, { w: 22, white: 1, along: 'y' });
   addP('truck', inf.x + inf.w + 8, inf.y + inf.d + 16, { c: 0xe8e4da, cross: 1, block: 1, bw: 20, bd: 10 });
   HF.supply = [inf.x + inf.w + 6, inf.y + inf.d + 12];
-  // ---- church and its graveyard (the memorial lives there now)
-  [x, y] = d2w(362, 312); const ch = addB({ kind: 'church', x: x - 18, y: y - 30, w: 34, d: 54, seed: 9, door: [x - 1, y + 28] }); spot('shelter', ch.door[0], ch.door[1]);
-  [x, y] = d2w(348, 368); const gx = x - 32, gy = y - 22, gw = 64, gd = 44; HF.graveyard = { x: gx, y: gy, w: gw, d: gd };
-  rails('picket', gx, gy, gw, gd, ['s', 26, 38]);
+  // ---- milestone 7: the church is the grandest building in the community (stone nave, transept, bell tower with spire, steps, plaza)
+  [x, y] = d2w(350, 334); const cw = 58, cd = 92, ch = addB({ kind: 'church', x: Math.round(x - cw / 2), y: Math.round(y - cd / 2), w: cw, d: cd, seed: 9 });
+  ch.door = [ch.x + cw / 2, ch.y + cd + 10]; spot('shelter', ch.door[0], ch.door[1]);
+  addP('lamp', ch.x + 12, ch.y + cd + 8); addP('lamp', ch.x + cw - 12, ch.y + cd + 8);
+  addP('bench', ch.x + 2, ch.y + cd + 4); addP('bench', ch.x + cw - 10, ch.y + cd + 4);
+  for (let k = 0; k < 3; k++) spot('pray', ch.x + 20 + k * 9, ch.y + cd + 14, { dir: 3 });
+  HF.trees.push({ x: ch.x - 6, y: ch.y + cd - 8, spc: 'me', v: 2 }); HF.trees.push({ x: ch.x + cw + 6, y: ch.y + 10, spc: 'dau', v: 4 });
+  // ---- milestone 7: the graveyard moved to the community's west edge, beside the river, and doubled in size
+  [x, y] = d2w(116, 366); const gw = 96, gd = 64, gx = Math.round(x - gw / 2), gy = Math.round(y - gd / 2); HF.graveyard = { x: gx, y: gy, w: gw, d: gd };
+  rails('picket', gx, gy, gw, gd, ['s', 40, 56]);
   HF.graves = [];
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 7; c++) { if (r === 1 && c === 3) continue; const qx = gx + 6 + c * 8.6, qy = gy + 8 + r * 12; HF.graves.push({ x: qx, y: qy, v: (c * 7 + r * 3) % 4, used: (c * 5 + r * 11) % 9 < 6 }); occupy(qx - 1, qy - 1, 3, 3, 3); }
-  HF.memorial = { x: gx + 33, y: gy + 22, stones: 3 }; addP('memorial', gx + 25, gy + 18, { block: 1, bw: 16, bd: 6 });
-  addP('lantern', gx + 24, gy + gd + 3); addP('bench', gx + 40, gy + gd + 6); HF.trees.push({ x: gx - 4, y: gy + 6, spc: 'me', v: 3 });
-  for (let k = 0; k < 4; k++) spot('mourn', gx + 12 + k * 13, gy + 31 + (k % 2) * 3, { dir: 3 }); spot('tend', gx + 20, gy + 20); spot('tend', gx + 46, gy + 9);
+  const graveOk = (qx, qy) => { const k = tileOfW(qx, qy); return HF.zone[k] === Z_SETTLE && HF.wallAt[k] < 0 && !HF.occ[k]; };
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 10; c++) {
+    if (c === 4 || c === 5 && r > 0 && r < 3) continue;                                         // the central path and the memorial
+    const qx = gx + 6 + c * 9.2 + (c > 4 ? 2 : 0), qy = gy + 8 + r * 13; if (!graveOk(qx, qy)) continue;
+    HF.graves.push({ x: qx, y: qy, v: (c * 7 + r * 3) % 4, used: (c * 5 + r * 11) % 9 < 6 }); occupy(qx - 1, qy - 1, 3, 3, 3);
+  }
+  HF.memorial = { x: gx + 50, y: gy + 32, stones: 3 }; addP('memorial', gx + 42, gy + 27, { block: 1, bw: 16, bd: 6 });
+  addP('lantern', gx + 38, gy + gd + 3); addP('lantern', gx + 4, gy + 4); addP('lantern', gx + gw - 6, gy + gd - 6);
+  addP('bench', gx + 60, gy + gd + 6); addP('bench', gx + 12, gy + gd + 6);
+  HF.trees.push({ x: gx - 4, y: gy + 6, spc: 'me', v: 3 }); HF.trees.push({ x: gx + gw + 4, y: gy + 10, spc: 'dau', v: 5 }); HF.trees.push({ x: gx - 2, y: gy + gd - 4, spc: 'me', v: 1 });
+  for (let k = 0; k < 6; k++) spot('mourn', gx + 12 + (k % 3) * 26, gy + 21 + Math.floor(k / 3) * 26 + (k % 2) * 2, { dir: 3 });
+  spot('tend', gx + 24, gy + 20); spot('tend', gx + 70, gy + 9); spot('tend', gx + 30, gy + 46);
   // ---- school campus (left side): school, playground, outdoor class with a chalkboard, garden beds, a ball field
-  Bd('school', 198, 306, 56, 30, { seed: 11 });
+  const sch = Bd('school', 196, 304, 70, 34, { seed: 11 });                                          // milestone 7: a two-storey schoolhouse
+  sch.door = [sch.x + 35, sch.y + sch.d + 10];
+  addP('flagpole', sch.x + 14, sch.y + sch.d + 12, { block: 1, bw: 2, bd: 2 }); addP('bikerack', sch.x + 48, sch.y + sch.d + 10);
+  addP('schoolarch', sch.x + 26, sch.y + sch.d + 22);
   [x, y] = d2w(256, 322); addP('swings', x - 10, y - 6); addP('slide', x + 14, y + 6); addP('sandbox', x - 16, y + 14); addP('seesaw', x + 2, y + 22);
   for (let k = 0; k < 12; k++) spot('play', x - 22 + (k % 4) * 14, y - 12 + Math.floor(k / 4) * 12);
   [x, y] = d2w(198, 344); addP('chalk', x - 4, y - 12, { block: 1, bw: 10, bd: 2 }); spot('teach', x + 2, y - 6, { dir: 1 });
   for (let k = 0; k < 8; k++) spot('class', x - 8 + (k % 4) * 6, y + 4 + Math.floor(k / 4) * 7, { dir: 3 });
-  [x, y] = d2w(170, 362); for (let k = 0; k < 4; k++) { addP('bed', x + k * 11, y, { v: k }); spot('garden', x + 4 + k * 11, y + 19); }
+  [x, y] = d2w(196, 366); for (let k = 0; k < 4; k++) { addP('bed', x + k * 11, y, { v: k }); spot('garden', x + 4 + k * 11, y + 19); }
   [x, y] = d2w(258, 360); addP('goal', x - 26, y - 4, { block: 1, bw: 2, bd: 9 }); addP('goal', x + 26, y - 4, { block: 1, bw: 2, bd: 9 }); HF.ball = { x, y };
   for (let k = 0; k < 6; k++) spot('ball', x - 16 + (k % 3) * 16, y - 6 + Math.floor(k / 3) * 12);
   // ---- kitchen + mess tent

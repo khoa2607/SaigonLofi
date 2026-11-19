@@ -19,7 +19,7 @@ function hsSound(k, x, y, v) { if (HS.sound) HS.sound(k, x, y, v); }
 
 // ---------------------------------------------------------------- setup
 function hsInit(opt) {
-  opt = opt || {}; HS.R = mulberry32(opt.seed || 11); HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
+  opt = opt || {}; HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
   HS.people = []; HS.zombies = []; HS.wild = []; HS.fx = []; HS.noises = []; HS.log = []; HS.exps = []; HS.rescues = []; HS.arrivals = [];
   HS.spots.clear(); HS.vacant = []; HS.alarm = 0; HS.mode = 'peace'; HS.recoverT = 0; HS.stats.exp = 0;
   // the viewer arrives at an arbitrary daytime moment of an ongoing world (a seeded hour unless one is asked for): no "day 1"
@@ -260,7 +260,7 @@ function hsThink(p) {
   if (p.role !== 'medic' && p.role !== 'trader') { const mc = lfMinorCheckup(p); if (mc) return setTask(p, mc); }   // a splinter, a scraped knee: off to the hospital bench
   switch (p.role) {
     case 'farmer': { const fs = R() < 0.06 && h > 8 && h < 18 && lfShopTask(p); if (fs) return setTask(p, fs); if (rain && R() < 0.15) return setTask(p, { k: 'sit', ...spotXY('porch'), dur: rr2(15, 30) }); const j = hwFarmJob(p); if (j) return setTask(p, j); return setTask(p, (R() < 0.5 && hwHaulJob(p)) || { k: 'work', ...spotXY('yardwork'), dur: rr2(12, 20), tool: 'hoe', anim: 'hoe' }); }
-    case 'fisher': { const sh = R() < 0.12 && h > 8 && h < 18 && lfShopTask(p); if (sh) return setTask(p, sh); return setTask(p, { k: 'work', ...spotXY('fish', 1), dur: rr2(40, 80), tool: 'rod', anim: 'fish' }); }
+    case 'fisher': { const sh = R() < 0.12 && h > 8 && h < 18 && lfShopTask(p); if (sh) return setTask(p, sh); if (HS.R2() < 0.3 && lfOpen('bankfish')) { const s = spotXY('bankfish'); HS.Ls.bankfish++; return setTask(p, { k: 'work', ...s, dur: rr2(40, 80), tool: 'rod', anim: 'fish', bank: 1, face: { x: s.x + s.spot.wdx * 9, y: s.y + s.spot.wdy * 9 } }); } return setTask(p, { k: 'work', ...spotXY('fish', 1), dur: rr2(40, 80), tool: 'rod', anim: 'fish' }); }
     case 'groom': return setTask(p, lfStableJob(p));
     case 'smith': return setTask(p, lfForgeJob(p));
     case 'herder': return setTask(p, lfHerdJob(p));
@@ -285,7 +285,7 @@ function ambientThink(p, rain) {
   if (r < 0.28 && HS.life > 7.5 && HS.life < 18.3) { const sh = lfShopTask(p); if (sh) return setTask(p, sh); }   // errands at the market
   if (r < 0.56) { const lj = lfResidentJob(p, rain); if (lj) return setTask(p, lj); }   // a check-up, the graveyard, stories, watching the horses or the drills
   if (r < 0.63) { const hj = (HS.store.food > 12 || R() < 0.35) && hwHomeFood(p) || hwHaulJob(p); if (hj) return setTask(p, hj); }
-  if (r < 0.74 && L && L.yard) { const c = R(); return setTask(p, { k: 'work', ...hwHomeXY(p, 'yard'), dur: rr2(12, 22), tool: c < 0.4 ? 'cloth' : c < 0.75 ? 'hoe' : 'bucket', anim: c < 0.4 ? 'hang' : c < 0.75 ? 'hoe' : 'water' }); }
+  if (r < 0.74 && L && L.yard) { const c = R(); if (c < 0.4 && HS.R2() < 0.6) { const lj = lfLaundryJob(p, () => hwHomeXY(p, 'yard')); if (lj) return setTask(p, lj); } return setTask(p, { k: 'work', ...hwHomeXY(p, 'yard'), dur: rr2(12, 22), tool: c < 0.4 ? 'cloth' : c < 0.75 ? 'hoe' : 'bucket', anim: c < 0.4 ? 'hang' : c < 0.75 ? 'hoe' : 'water' }); }
   if (r < 0.88) return setTask(p, { k: 'sit', ...(R() < 0.7 ? hwHomeXY(p, 'porch') : spotXY('bench')), dur: rr2(20, 45) });
   return setTask(p, hwChat(p));
 }
@@ -420,6 +420,7 @@ function hsAddZ(x, y, o) {
   x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4);
   const L = hfZombieLook(HS.R);
   const z = Object.assign({ id: HS.zid++, L, x, y, px: x, py: y, dir: 1, st: 'wander', hp: HS.R() < 0.35 ? 4 : 3, spd: HS.R() < 0.12 ? rr2(5.4, 6.4) : rr2(3.2, 4.6), t: 0, path: null, stride: 0, ph: HS.R() * 10, cool: 0, seg: -1, st2: '', stT: 0, kx: 0, ky: 0, idle: 0, route: null, rp: 0, lane: rr2(-3, 3) }, o || {});
+  if (L.zt === 'crawler' || L.zt === 'creeper') { if (z.spd > 5) L.zt = 'lanky'; else z.spd = Math.min(z.spd, 3.6); }   // crawlers / creepers are never runners (look only; no extra random draws)
   HS.zombies.push(z); return z;
 }
 function hsBand(z) { const [u, v] = w2d(z.x, z.y); const wv = wallV(u); return v < wv - 20 && v > wv - 160 && u > 150 && u < 810; }

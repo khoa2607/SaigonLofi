@@ -108,7 +108,7 @@ function hrBuildStatics(progress) {
     if (b.kind === 'house') { const L = HF.lots[b.lot]; const o = { w: L.w, d: L.d, floors: L.floors, wall: L.wall, roof: L.roof, seed: L.seed, porch: L.porch, garage: L.garage, solar: L.seed % 4 === 0 }; boxes = () => { const bx = suburbHouse(o); H = o.H; if (o.chim) HR.smokers.push([b.x + o.chim[0], b.y + o.chim[1], o.chim[2], L.seed]); return bx; }; }
     else boxes = () => { const bx = civicModel(b); if (b.chim) HR.smokers.push([b.x + b.chim[0], b.y + b.chim[1], b.chim[2], b.seed]); return bx; };
     const spr = bakeCached(key, boxes, true);
-    addStatic(spr, b.x, b.y, 0, { em: 1 }); castShadow(b.x, b.y, b.w, b.d, b.kind === 'block' ? b.h : b.kind === 'church' ? 34 : b.kind === 'infirmary' ? 44 : b.kind === 'house' ? (HF.lots[b.lot].floors * 18 + 10) : 26);
+    addStatic(spr, b.x, b.y, 0, { em: 1 }); castShadow(b.x, b.y, b.w, b.d, b.kind === 'block' ? b.h : b.kind === 'church' ? 90 : b.kind === 'school' ? 42 : b.kind === 'infirmary' ? 44 : b.kind === 'house' ? (HF.lots[b.lot].floors * 18 + 10) : 26);
   }
   // props
   for (const p of HF.props) {
@@ -334,7 +334,7 @@ function hrStores(D, cull) {
 }
 
 // people + infected -> drawables
-const POSE_ACT = { sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
+const POSE_ACT = { wash: 5, sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
 function actorDraw(D, a, isZ, L, cull) {
   if (!isZ && (!a.vis || (a.st === 'dead' && a.gone))) return;
   const x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, z = a.mount ? 9 : (a.z || 0), p = ISO(x, y, z);
@@ -352,9 +352,22 @@ function actorDraw(D, a, isZ, L, cull) {
   else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'reap') pose = Math.floor(tt / 0.55) % 2 ? 6 : 5; else if (act === 'saw') pose = Math.floor(tt / 0.28) % 2 ? 6 : 7; else if (act === 'water') pose = Math.floor(tt / 1.3) % 3 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
   const variant = isZ ? '' : (a.variant || (a.role === 'guard' ? 'sling' : ''));
   const s = sheetFor(a, variant), row = DIR_ROW[a.dir];
+  if (!isZ && a.act === 'bathe') {   // milestone 7: waist-deep in the river, splashing now and then
+    const sp = a.task && a.task.spot, wx = sp ? sp.wdx || 0 : 0, wy = sp ? sp.wdy || 0 : 0, q = ISO(x + wx * 6, y + wy * 6), cut = 0.6, bob = Math.sin(HS.t * 1.4 + a.ph) * 0.5;
+    D.push({ c: s.c, e: s.e, sx: (Math.floor(tt / 2.2) % 3 === 0 ? 6 : 0) * CW, sy: row * CH, sw: CW, shh: Math.round(CH * cut), x: Math.round((q[0] - PW / 2) * K) / K, y: Math.round((q[1] - PFOOT + 9 + bob) * K) / K, w: PW, h: PH * cut, d: x + y + 0.5,
+      over: (g) => { g.fillStyle = 'rgba(232,244,246,0.75)'; const r = 4.5 + Math.sin(HS.t * 2 + a.ph) * 0.8; for (let i = -6; i <= 6; i++) { const yy = q[1] - PFOOT + 9 + PH * cut - 1 + Math.abs(i) * 0.15; g.fillRect(q[0] + i * r / 6, yy + bob, 0.5, 0.5); } g.fillStyle = 'rgba(220,236,242,0.45)'; g.fillRect(q[0] - r - 2, q[1] - PFOOT + 9 + PH * cut + 1 + bob, 2, 0.5); g.fillRect(q[0] + r + 0.5, q[1] - PFOOT + 9 + PH * cut + 1.5 + bob, 2, 0.5); if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], q[0] - 7, q[1] - 36, 14, 14); } });
+    return;
+  }
   D.push({ c: s.c, e: s.e, sx: pose * CW, sy: row * CH, sw: CW, shh: CH, x: Math.round((p[0] - PW / 2) * K) / K, y: Math.round((p[1] - PFOOT - (pose === 5 && !a.mount ? 2 : 0)) * K) / K, w: PW, h: PH, d: x + y + (a.mount ? 1 : z ? 15 : 0), sh: z ? null : [p[0], p[1], 4.2], blink: isZ && a.stT > 0,
-    over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && (a.task.anim === 'fish' || a.task.anim === 'stir')) ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') { g.fillStyle = 'rgba(232,226,212,0.8)'; for (let i = 0; i < 12; i++) g.fillRect(p[0] + 9 + i * 0.9, p[1] - 20 + i * 1.4 + Math.sin(HS.t * 2) * 0.5, 0.5, 0.5); }
+    over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && (a.task.anim === 'fish' || a.task.anim === 'stir')) ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') fishLine(g, a, x, y, p);
       if (a.act === 'stir') for (let k = 0; k < 3; k++) { const q = ((HS.t * 0.6 + k / 3 + a.ph) % 1); g.fillStyle = 'rgba(236,232,226,' + (0.55 * (1 - q)).toFixed(2) + ')'; const r = 1 + q * 2.5; g.fillRect(Math.round((p[0] + 4 + Math.sin(HS.t * 2 + k) * 1.2) * K) / K - r / 2, p[1] - 14 - q * 12, r, r); } } : null });
+}
+// milestone 7: a fishing line from the rod tip to a red-and-white float on the water (direction-aware)
+function fishLine(g, a, x, y, p) {
+  const dv = DIRV[a.dir], side = a.dir === 0 || a.dir === 3 ? 1 : -1, tip = [p[0] + side * 9, p[1] - 21], b = ISO(x + dv[0] * 17, y + dv[1] * 17), bob = Math.sin(HS.t * 2.2 + a.ph) * 0.6 + (a.task && a.task.w > a.task.next - 1.2 ? 1.2 : 0);
+  g.fillStyle = 'rgba(236,230,214,0.85)'; const n = 18; for (let i = 0; i <= n; i++) { const q = i / n, sag = Math.sin(q * Math.PI) * 4; g.fillRect(tip[0] + (b[0] - tip[0]) * q, tip[1] + (b[1] - 1 - tip[1]) * q + sag * q, 0.5, 0.5); }
+  g.fillStyle = '#e8463a'; g.fillRect(b[0] - 0.5, b[1] - 1.5 + bob, 1, 1); g.fillStyle = '#f6f2e6'; g.fillRect(b[0] - 0.5, b[1] - 0.5 + bob, 1, 0.5);
+  g.fillStyle = 'rgba(232,244,246,0.6)'; g.fillRect(b[0] - 2, b[1] + 0.5, 4, 0.5);
 }
 function hrFx(g, t, now) {
   for (const f of HS.fx) {
@@ -441,6 +454,18 @@ function hrLife(D, cull, t) {
     put(bakeCached('rep' + r.kind + r.st + step + Lt.floors + Lt.d + ss, () => repBoxes(r, step)), ax, ay, 0, 0.6);
     if (r.st === 1 || r.st === 2) put(bakeCached('scaf' + r.kind + Lt.floors + ss, () => scaffoldBoxes(r)), ax, ay, 0, 3);
   }
+  // milestone 7: river traffic — sampans, cargo boats and red-cross medical supply boats with a boatman punting at the stern
+  if (HS.boats) for (const b of HS.boats) {
+    const x = b.px + (b.x - b.px) * L, y = b.py + (b.y - b.py) * L, ax = b.dir === 0 || b.dir === 2 ? 'x' : 'y', bob = Math.sin(t * 1.3 + b.ph) * 0.4, p = ISO(x, y, bob);
+    const spr = bakeCached('boat' + b.kind + ax + ss, () => boatBoxes(b.kind, ax)); if (cull(p[0] - spr.ax, p[1] - spr.ay, spr.w, spr.h)) continue;
+    D.push({ c: spr.c, e: spr.e, x: p[0] - spr.ax, y: p[1] - spr.ay, w: spr.w, h: spr.h, d: x + y, over: b.st === 'go' ? (g) => { g.fillStyle = 'rgba(236,246,248,0.55)'; const dv = DIRV[b.dir]; for (let k = 1; k < 4; k++) { const w2 = ISO(x - dv[0] * (14 + k * 4), y - dv[1] * (14 + k * 4)); g.fillRect(w2[0] - k, w2[1] + Math.sin(t * 3 + k) * 0.3, 0.5 + k * 0.6, 0.5); g.fillRect(w2[0] + k * 0.6, w2[1] + 0.8, 0.5 + k * 0.4, 0.5); } } : null });
+    const dv = DIRV[b.dir], sx = x - dv[0] * 12.5, sy = y - dv[1] * 12.5, sp = ISO(sx, sy, 2.4 + bob), sh = sheetFor({ L: b.rower }, ''), pole = b.st === 'go' && Math.floor(t / 1.6 + b.ph) % 2;
+    D.push({ c: sh.c, e: sh.e, sx: (pole ? 6 : 0) * CW, sy: DIR_ROW[b.dir] * CH, sw: CW, shh: CH, x: Math.round((sp[0] - PW / 2) * K) / K, y: Math.round((sp[1] - PFOOT) * K) / K, w: PW, h: PH, d: x + y + 0.4,
+      over: (g) => { g.fillStyle = '#7a5434'; const top = [sp[0] + (pole ? 5 : 4), sp[1] - PFOOT - (pole ? 6 : 2)], bot = ISO(sx - dv[0] * 3, sy - dv[1] * 3, -3); for (let i = 0; i <= 14; i++) { const q = i / 14; g.fillRect(top[0] + (bot[0] - top[0]) * q, top[1] + (bot[1] - top[1]) * q, 0.5, 0.5); } } });
+  }
+  // washing at the river: a cloth swished back and forth in the water at the person's feet
+  for (const a of HS.people) if (a.act === 'wash' && a.vis) { const sp = a.task && a.task.spot; if (!sp) continue; const q = ISO(a.x + (sp.wdx || 0) * 5, a.y + (sp.wdy || 0) * 5), sw = Math.round(Math.sin(t * 3 + a.ph) * 2 * K) / K, cs = bakeCached('washcloth' + (a.L.seed % 3) + ss, () => [HB(-2, -1, 0, 4, 2, 0.5, [0xd9685c, 0x8fc1e3, 0xf2e6c8][a.L.seed % 3])]); if (cull(q[0] - 4, q[1] - 2, 8, 4)) continue;
+    D.push({ c: cs.c, e: cs.e, x: q[0] - cs.ax + sw, y: q[1] - cs.ay, w: cs.w, h: cs.h, d: a.x + a.y + 0.3, over: (g) => { g.fillStyle = 'rgba(236,246,248,0.6)'; g.fillRect(q[0] - 3 + sw, q[1] + 1, 6, 0.5); } }); }
   // the ball on the school field
   const B = HS.ball; if (B && (B.holder || B.fly)) { const p = ISO(B.x, B.y, B.z + 0.8); if (!cull(p[0] - 2, p[1] - 2, 4, 4)) D.push({ c: bakeCached('ball', () => [HB(-0.7, -0.7, 0, 1.4, 1.4, 1.4, 0xf4f1e8, (f, u, v) => (u + v) % 1.4 < 0.5 ? 0x3a3a3a : undefined)]).c, e: null, x: p[0] - 1, y: p[1] - 1.5, w: 2, h: 2, d: B.x + B.y + 0.5, sh: [ISO(B.x, B.y)[0], ISO(B.x, B.y)[1], 1.6] }); }
 }

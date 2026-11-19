@@ -85,6 +85,7 @@ const ZONES = ['fields', 'market', 'kitchen', 'training', 'stable', 'workshop', 
 {
   const c = world(SEED + 2, 10);
   for (let i = 0; i < 600; i++) c.hsTick(0.1);
+  for (let i = 0; i < 1200 && J(c, `HS.people.filter(p => p.alive && p.role === 'guard' && p.task && ((p.task.k === 'life' && ['range', 'laps', 'form', 'formlead'].includes(p.task.a)) || p.task.k === 'drill')).length`) < 2; i++) c.hsTick(0.1);   // milestone 7: ring the bell once training is under way (the check is about the response)
   const before = J(c, `HS.people.filter(p => p.alive && p.role === 'guard' && p.task && p.task.k === 'life' && ['range', 'laps', 'form', 'formlead', 'stand'].includes(p.task.a)).length + HS.people.filter(p => p.alive && p.role === 'guard' && p.task && p.task.k === 'drill').length`);
   ev(c, `(() => { const s = HF.walls.find(s => !s.gate && s.inT >= 0 && s.id % 7 === 3); s.pressure = 9; s.lastHit = HS.t; s.hp = Math.max(1, s.hp - 3); HS.forced = s; hsAlarm('test'); })()`);
   let afterTrain = 99, defenders = 0;

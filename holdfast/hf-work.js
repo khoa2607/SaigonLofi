@@ -180,7 +180,7 @@ function hwSalvaged(p, T) { if (T.salvage && HS.R() < 0.5) { HS.store.mat = Math
 
 // ---------------------------------------------------------------- fishers: casts, catches, a bucket to the smokehouse
 function hwFish(p, T, dt) {
-  p.act = 'fish'; T.w = (T.w || 0) + dt; if (!T.next) T.next = rr2(7, 15);
+  p.act = 'fish'; if (T.face) faceTo(p, T.face); T.w = (T.w || 0) + dt; if (!T.next) T.next = rr2(7, 15);
   if (T.w > T.next) { T.next += rr2(8, 16); if (HS.R() < 0.45) { T.catch = (T.catch || 0) + 1; HS.stats.work.fishCaught++; bubble(p, 'fish'); HS.fx.push({ k: 'splash', x: p.x + (p.dir === 0 ? 10 : p.dir === 2 ? -10 : 0), y: p.y + (p.dir === 1 ? 10 : p.dir === 3 ? -10 : 0), t: 0.7 }); } }
   if (T.w > T.dur || (T.catch || 0) >= 3) { if (T.catch) { p.carry = 'bucket'; p.variant = 'bucket'; p.load = { k: 'fish', n: T.catch }; } p.task = null; }
 }

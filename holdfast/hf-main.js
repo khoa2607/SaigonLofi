@@ -99,7 +99,7 @@ function hfFirstState() {
 // preferences of the world (time, weather, season, danger, view); music preferences are the shared Saigon record, see js/dock.js
 function hfPref(k, d) { try { const s = JSON.parse(localStorage.getItem('holdfast') || '{}'); return s[k] === undefined ? d : s[k]; } catch (e) { return d; } }
 function hfSave() { try { localStorage.setItem('holdfast', JSON.stringify({ time: HS.timeMode, wx: HS.wxMode, season: HS.season, autoSeason: !!HS.autoSeason, danger: HS.danger, zoom: HR.zoom, cam: [Math.round(HR.cx), Math.round(HR.cy)] })); } catch (e) { } }
-const CAMS = { default: [482, 236], gate: [480, 198], settlement: [470, 360], wall: [300, 186], market: [480, 264], commons: [480, 350], ruins: [500, -40], fields: [520, 470], east: [700, 214], west: [240, 214], training: [320, 244], stable: [640, 240], hospital: [610, 306], school: [220, 330], graveyard: [348, 362], farmyard: [226, 404], workshop: [740, 262] };
+const CAMS = { default: [482, 236], gate: [480, 198], settlement: [470, 360], wall: [300, 186], market: [480, 264], commons: [480, 350], ruins: [500, -40], fields: [520, 470], east: [700, 214], west: [240, 214], training: [320, 244], stable: [640, 240], hospital: [610, 306], school: [220, 330], graveyard: [124, 366], church: [350, 330], river: [470, 500], farmyard: [226, 404], workshop: [740, 262] };
 function hfCamPreset(n) { const c = CAMS[n] || CAMS.default; const [x, y] = d2w(c[0], c[1]); hrCenterOn(x, y); }
 function hfCamTo(n) { const c = CAMS[n] || CAMS.default, [x, y] = d2w(c[0], c[1]), p = ISO(x, y); HFG.follow = null; HFG.tween = [p[0], p[1]]; }
 function hfToggleGate() { HFG.gateView = !HFG.gateView; hfCamTo(HFG.gateView ? 'gate' : 'default'); if (HFG.gateView) hfTicker(t('hf.view.gate.t'), true); hfUI(); }
