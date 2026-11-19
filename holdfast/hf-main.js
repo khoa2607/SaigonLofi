@@ -234,7 +234,7 @@ function hfSelfTest() {
   const R = { ok: true, checks: {} }, chk = (k, v, info) => { R.checks[k] = { pass: !!v, info }; if (!v) R.ok = false; };
   try {
     chk('statics', HR.statics.length > 1500, HR.statics.length);
-    chk('houses', HF.lots.length >= 55, HF.lots.length);
+    chk('houses', HF.lots.length >= 38, HF.lots.length);
     const zones = [[480, 100, 'wild'], [480, 190, 'cleared'], [480, 330, 'settle'], [480, 520, 'river'], [480, 470, 'field']];
     chk('zones', zones.every(([u, v]) => { const [x, y] = d2w(u, v); return hrGround(x, y, 'summer') !== 0x2a2630; }));
     const c0 = [HR.cx, HR.cy]; HR.cx += 40; hrClampCam(); chk('pan', HR.cx !== c0[0]); HR.cx = c0[0];
@@ -252,7 +252,8 @@ function hfSelfTest() {
   $('hfTest').textContent = JSON.stringify(R); document.title = 'HFTEST ' + (R.ok ? 'PASS' : 'FAIL');
 }
 function hfFps() { const a = HR.ft.slice().sort((x, y) => x - y); return a.length ? { median: +a[a.length >> 1].toFixed(2), p95: +a[Math.floor(a.length * 0.95)].toFixed(2), n: a.length } : null; }
-function hfBench() {
+function hfBench() { try { hfBench0(); } catch (e) { $('hfTest').textContent = JSON.stringify({ ok: false, bench: String(e.stack || e).slice(0, 600) }); } }
+function hfBench0() {
   const N = +(Q.get('frames') || 180), sim = [], ren = [];
   for (let i = 0; i < N; i++) { const t0 = performance.now(); hsTick(0.1); const t1 = performance.now(); hrFrame(0.5, t1); const t2 = performance.now(); sim.push(t1 - t0); ren.push(t2 - t1); if (i % 30 === 0) { HR.cx += 30; hrClampCam(); } }
   const st = a => { a.sort((x, y) => x - y); return { median: +a[a.length >> 1].toFixed(2), p95: +a[Math.floor(a.length * 0.95)].toFixed(2) }; };

@@ -171,7 +171,7 @@ function hrBuildWalls() {
 function hrRefreshWalls() { let ch = false; for (const s of HF.walls) if (!s.gate && hrWallState(s) !== s.st) ch = true; if (ch) hrBuildWalls(); }
 
 // ---------------------------------------------------------------- sprites for actors
-const VARIANT = { hoe: { tool: 'hoe' }, hammer: { tool: 'hammer' }, plank: { tool: 'plank' }, crate: { tool: 'crate' }, basket: { tool: 'basket' }, bucket: { tool: 'bucket' }, pot: { tool: 'pot' }, rod: { tool: 'rod' }, cloth: { tool: 'cloth' }, ball: { tool: 'ball' }, spear: { gun: 'spear' }, carry: { gun: 'carry' }, aim: { gun: 'aim' }, pistol: { gun: 'pistol' }, sling: { gun: 'sling' }, bag: { tool: 'bag' } };
+const VARIANT = { hay: { tool: 'hay' }, saddle: { tool: 'saddle' }, brush: { tool: 'brush' }, saw: { tool: 'saw' }, stretcher: { tool: 'stretcher' }, fork: { tool: 'fork' }, broom: { tool: 'broom' }, hoe: { tool: 'hoe' }, hammer: { tool: 'hammer' }, plank: { tool: 'plank' }, crate: { tool: 'crate' }, basket: { tool: 'basket' }, bucket: { tool: 'bucket' }, pot: { tool: 'pot' }, rod: { tool: 'rod' }, cloth: { tool: 'cloth' }, ball: { tool: 'ball' }, spear: { gun: 'spear' }, carry: { gun: 'carry' }, aim: { gun: 'aim' }, pistol: { gun: 'pistol' }, sling: { gun: 'sling' }, bag: { tool: 'bag' } };
 function sheetFor(a, variant) {
   const key = a.L.seed + '|' + (a.L.ev || '') + '|' + a.L.top + '|' + (variant || '') + '|' + (a.L.pack2 ? 1 : 0) + '|' + HR.season;
   let s = HR.sheets.get(key); if (s) return s;
@@ -191,6 +191,8 @@ function animalSprite(k, frame, flip) {
   else if (k === 'chicken') { ell(18, 25, 4, 3.5, 0xf0ece0, 0xc8c0b0, 0xffffff); ell(22, 20, 2, 2, 0xf0ece0, 0xc8c0b0); set(22, 17, 0xd9534f); set(23, 17, 0xd9534f); set(24, 20, 0xe8a03a); set(17 + f, 29, 0xe8a03a); set(19 - f, 29, 0xe8a03a); }
   else if (k === 'goat') { ell(18, 22, 7, 4.5, 0xe8e2d4, 0xb8b0a0, 0xffffff); rect(24, 14, 26, 20, 0xe8e2d4, 0xc8c0b0); ell(27, 14, 2.5, 2, 0xe8e2d4, 0xc8c0b0); set(29, 14, 0x2a2020); rect(26, 10, 26, 12, 0x8a7a6a); const l = f ? 1 : -1; rect(13 + l, 26, 13 + l, 30, 0xa8a090); rect(16 - l, 26, 16 - l, 30, 0xa8a090); rect(21 + l, 26, 21 + l, 30, 0xa8a090); rect(23 - l, 26, 23 - l, 30, 0xa8a090); }
   else if (k === 'dog') { ell(18, 23, 6, 3.5, 0xa8784a, 0x7a5434, 0xc89a6a); ell(25, 19, 3, 2.5, 0xa8784a, 0x7a5434, 0xc89a6a); set(27, 19, 0x2a2020); rect(24, 16, 24, 17, 0x7a5434); rect(11, 19 - f, 12, 21 - f, 0x7a5434); const l = f ? 1 : -1; rect(14 + l, 26, 14 + l, 30, 0x7a5434); rect(16 - l, 26, 16 - l, 30, 0x7a5434); rect(21 + l, 26, 21 + l, 30, 0x7a5434); rect(23 - l, 26, 23 - l, 30, 0x7a5434); }
+  else if (k === 'pig' || k === 'pigs') { const c = 0xe8a8a0, sh = 0xc07870, hl = 0xf8c8c0; if (k === 'pigs') { ell(18, 26, 8, 3.5, c, sh, hl); ell(26, 25, 3, 2.5, c, sh, hl); set(28, 25, 0x8a4a48); } else { ell(18, 23, 8, 5, c, sh, hl); ell(26, 22, 3.5, 3, c, sh, hl); rect(28, 22, 29, 23, 0xd08a84); set(28, 22, 0x6a3a38); set(26, 19, sh); set(24, 18, sh); set(25, 21, 0x2a2020); set(10, 20 - f, sh); set(9, 19, sh); const l = f ? 1 : 0; rect(13 + l, 27, 14 + l, 30, sh); rect(16 - l, 27, 17 - l, 30, sh); rect(21 + l, 27, 22 + l, 30, sh); rect(23 - l, 27, 24 - l, 30, sh); } }
+  else if (k === 'rooster') { ell(18, 24, 4.5, 4, 0xa8562e, 0x7a3a22, 0xd8a050); ell(22, 19, 2, 2.2, 0xd8a050, 0xa8562e); rect(21, 15, 23, 16, 0xd9534f); set(22, 14, 0xd9534f); set(24, 19, 0xe8a03a); set(22, 21, 0xd9534f); rect(12, 18, 13, 22, 0x2a3a5a); set(11, 17, 0x3a6a4a); set(17 + f, 29, 0xe8a03a); set(19 - f, 29, 0xe8a03a); }
   else if (k === 'crows') { for (const [ox, oy] of [[0, 0], [9, 3], [4, 7]]) { const w = f ? -1 : 1; set(14 + ox, 10 + oy, 0x2a2428); set(15 + ox, 10 + oy, 0x2a2428); set(13 + ox, 10 + oy - w, 0x2a2428); set(16 + ox, 10 + oy - w, 0x2a2428); set(12 + ox, 10 + oy - w * 2, 0x2a2428); set(17 + ox, 10 + oy - w * 2, 0x2a2428); } }
   s = gridCanvas(k === 'crows' ? g : inkGrid(g, W, H, 0.85), W, H, null, K); HR.anim.set(key, s); return s;
 }
@@ -231,6 +233,7 @@ function hrFrame(alpha, now) {
   const D = [], cull = (x, y, w, h) => x + w < x0 || x > x0 + uw || y + h < y0 || y > y0 + uh;
   if (HS.plots) for (const P of HS.plots) { const sp = hrPlotSprite(P); if (cull(sp.x, sp.y, sp.w, sp.h)) continue; g.drawImage(sp.c, sp.x, sp.y, sp.w, sp.h); }
   hrStores(D, cull);
+  hrLife(D, cull, t);
   for (const s of HR.statics) { if (cull(s.x, s.y, s.w, s.h)) continue; D.push(s); }
   const L = HR.lerp = alpha;
   for (const p of HS.people) actorDraw(D, p, false, L, cull);
@@ -262,6 +265,7 @@ function hrFrame(alpha, now) {
     if (HF.oak) for (let k = 0; k < 14; k++) { const p = stringPt(k / 14); hrGlow(lg, p[0], p[1], 7, 'rgba(255,220,150,', 0.5); }
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, dark * 1.3); g.drawImage(HR.lc, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
+  if (dark > 0.35) hrSpirits(g, lg, x0, y0, t, dark);
   hrWeather(g, W, H, t, dark);
 }
 function hrGlow(g, x, y, r, c, a) { const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c + a + ')'); rg.addColorStop(1, c + '0)'); g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); }
@@ -319,7 +323,7 @@ function hrStores(D, cull) {
   for (const kind in STOCK_PER) {
     const at = A[kind]; if (!at) continue; const n = Math.min(6, Math.ceil((S[kind] || 0) / STOCK_PER[kind])); if (!n) continue;
     const spr = bakeCached('stk' + kind + HR.season, STOCK_BOX[kind]);
-    for (let i = 0; i < n; i++) { if (kind === 'mat') push(spr, at[0] - 5, at[1] + (i % 2) * 0.3, i * 1.1, i * 0.01); else push(spr, at[0] - 6 + (i % 3) * 4.8, at[1] - 2 + Math.floor(i / 3) * 4.4, 0); }
+    for (let i = 0; i < n; i++) { if (kind === 'mat') { push(spr, at[0] - 5, at[1] + (i % 2) * 0.3, i * 1.1, i * 0.01); if (A.mat2 && i < 4) push(spr, A.mat2[0] - 5, A.mat2[1] + (i % 2) * 0.3, i * 1.1, i * 0.01); } else push(spr, at[0] - 6 + (i % 3) * 4.8, at[1] - 2 + Math.floor(i / 3) * 4.4, 0); }
   }
   // meals served on the mess tables
   if (S.meals > 0) {
@@ -333,21 +337,22 @@ function hrStores(D, cull) {
 const POSE_ACT = { sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
 function actorDraw(D, a, isZ, L, cull) {
   if (!isZ && (!a.vis || (a.st === 'dead' && a.gone))) return;
-  const x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, z = a.z || 0, p = ISO(x, y, z);
+  const x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, z = a.mount ? 9 : (a.z || 0), p = ISO(x, y, z);
   if (cull(p[0] - 10, p[1] - 28, 20, 30)) return;
+  if (!isZ && a.cart) { const ax = a.dir === 0 || a.dir === 2, cs = bakeCached('cart' + (ax ? 'x' : 'y') + a.cart + HR.season, () => cartBoxes(ax ? 'x' : 'y', a.cart)), ox = a.dir === 0 ? 6 : a.dir === 2 ? -14 : -2.5, oy = a.dir === 1 ? 6 : a.dir === 3 ? -14 : -2.5, cp = ISO(x + ox, y + oy); D.push({ c: cs.c, e: cs.e, x: cp[0] - cs.ax, y: cp[1] - cs.ay, w: cs.w, h: cs.h, d: x + ox + y + oy + 4 }); }
   // fallen: lying sprite (settlers covered by a sheet)
   if ((isZ && a.st === 'dead') || (!isZ && (!a.alive || a.st === 'down' || a.act === 'lie'))) {
     const s = lyingFor(a, !isZ && !a.alive), fade = isZ && a.corpseT < 0 ? clamp(1 + a.corpseT / 5, 0, 1) : 1; if (fade <= 0) return;
-    D.push({ c: s.c, e: s.e, x: Math.round((p[0] - CH / K / 2) * K) / K, y: Math.round((p[1] - CW / K + 3) * K) / K, w: CH / K, h: CW / K, d: x + y - 2, sh: [p[0], p[1], 6] });
+    D.push({ c: s.c, e: s.e, x: Math.round((p[0] - CH / K / 2) * K) / K, y: Math.round((p[1] - CW / K + 3) * K) / K, w: CH / K, h: CW / K, d: x + y + (z ? 2 : -2), sh: z ? null : [p[0], p[1], 6] });
     return;
   }
   let pose = 0; const tt = HS.t + (a.ph || 0), moving = Math.hypot(a.x - a.px, a.y - a.py) > 0.01;
-  if (moving) pose = 1 + Math.floor(a.stride / (isZ ? 2.4 : 3.2)) % 4;
+  if (a.mount) pose = 5; else if (moving) pose = 1 + Math.floor(a.stride / (isZ ? 2.4 : 3.2)) % 4;
   else if (isZ) pose = a.st === 'attack' || a.st === 'wall' || a.st === 'gate' ? (Math.floor(tt / 0.32) % 2 ? 6 : 7) : 0;
-  else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'reap') pose = Math.floor(tt / 0.55) % 2 ? 6 : 5; else if (act === 'water') pose = Math.floor(tt / 1.3) % 3 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
+  else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'reap') pose = Math.floor(tt / 0.55) % 2 ? 6 : 5; else if (act === 'saw') pose = Math.floor(tt / 0.28) % 2 ? 6 : 7; else if (act === 'water') pose = Math.floor(tt / 1.3) % 3 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
   const variant = isZ ? '' : (a.variant || (a.role === 'guard' ? 'sling' : ''));
   const s = sheetFor(a, variant), row = DIR_ROW[a.dir];
-  D.push({ c: s.c, e: s.e, sx: pose * CW, sy: row * CH, sw: CW, shh: CH, x: Math.round((p[0] - PW / 2) * K) / K, y: Math.round((p[1] - PFOOT - (pose === 5 ? 2 : 0)) * K) / K, w: PW, h: PH, d: x + y + (z ? 15 : 0), sh: z ? null : [p[0], p[1], 4.2], blink: isZ && a.stT > 0,
+  D.push({ c: s.c, e: s.e, sx: pose * CW, sy: row * CH, sw: CW, shh: CH, x: Math.round((p[0] - PW / 2) * K) / K, y: Math.round((p[1] - PFOOT - (pose === 5 && !a.mount ? 2 : 0)) * K) / K, w: PW, h: PH, d: x + y + (a.mount ? 1 : z ? 15 : 0), sh: z ? null : [p[0], p[1], 4.2], blink: isZ && a.stT > 0,
     over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && (a.task.anim === 'fish' || a.task.anim === 'stir')) ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') { g.fillStyle = 'rgba(232,226,212,0.8)'; for (let i = 0; i < 12; i++) g.fillRect(p[0] + 9 + i * 0.9, p[1] - 20 + i * 1.4 + Math.sin(HS.t * 2) * 0.5, 0.5, 0.5); }
       if (a.act === 'stir') for (let k = 0; k < 3; k++) { const q = ((HS.t * 0.6 + k / 3 + a.ph) % 1); g.fillStyle = 'rgba(236,232,226,' + (0.55 * (1 - q)).toFixed(2) + ')'; const r = 1 + q * 2.5; g.fillRect(Math.round((p[0] + 4 + Math.sin(HS.t * 2 + k) * 1.2) * K) / K - r / 2, p[1] - 14 - q * 12, r, r); } } : null });
 }
@@ -359,6 +364,11 @@ function hrFx(g, t, now) {
     else if (f.k === 'chaff') { const p = ISO(f.x, f.y, 3 + (0.6 - f.t) * 10); g.fillStyle = '#e8cc72'; g.fillRect(p[0], p[1], 0.5, 0.5); g.fillRect(p[0] + 1.5, p[1] + 1, 0.5, 0.5); g.fillRect(p[0] - 1, p[1] + 1.5, 0.5, 0.5); }
     else if (f.k === 'water') { const p = ISO(f.x, f.y, f.t * 10); g.fillStyle = 'rgba(150,200,230,0.9)'; g.fillRect(p[0], p[1], 0.5, 1); g.fillRect(p[0] + 1, p[1] + 1, 0.5, 1); }
     else if (f.k === 'splash') { const p = ISO(f.x, f.y), r = 1.5 + (0.7 - f.t) * 6; g.fillStyle = 'rgba(236,244,248,' + (f.t * 1.2).toFixed(2) + ')'; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; g.fillRect(p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r * 0.5, 0.5, 0.5); } }
+    else if (f.k === 'spark') { const p = ISO(f.x, f.y, 4 + (0.35 - f.t) * 14); g.fillStyle = f.t > 0.2 ? '#fff0a0' : '#ff9a3a'; for (let i = 0; i < 4; i++) g.fillRect(p[0] + Math.cos(i * 1.7 + f.x) * (0.4 - f.t) * 9, p[1] - Math.abs(Math.sin(i * 2.3 + f.y)) * (0.4 - f.t) * 6, 0.5, 0.5); }
+    else if (f.k === 'sawdust') { const p = ISO(f.x, f.y, 4 - (0.6 - f.t) * 5); g.fillStyle = '#e8d4a8'; g.fillRect(p[0], p[1], 0.5, 0.5); g.fillRect(p[0] + 1, p[1] + 0.5, 0.5, 0.5); }
+    else if (f.k === 'seed') { const p = ISO(f.x, f.y, (f.t) * 8); g.fillStyle = '#f2d870'; g.fillRect(p[0], p[1], 0.5, 0.5); g.fillRect(p[0] - 1.5, p[1] + 1, 0.5, 0.5); g.fillRect(p[0] + 1.5, p[1] + 0.5, 0.5, 0.5); }
+    else if (f.k === 'steam') { const p = ISO(f.x, f.y, 6 + (0.8 - f.t) * 16), r = 1.5 + (0.8 - f.t) * 4; g.fillStyle = 'rgba(236,236,232,' + (f.t * 0.7).toFixed(2) + ')'; g.fillRect(p[0] - r / 2, p[1] - r / 2, r, r); }
+    else if (f.k === 'splinter') { const p = ISO(f.x, f.y, 9), r = (0.35 - f.t) * 10; g.fillStyle = '#e8d4a8'; for (let i = 0; i < 4; i++) g.fillRect(p[0] + Math.cos(i * 1.6) * r, p[1] + Math.sin(i * 1.6) * r * 0.6, 0.5, 0.5); }
     else if (f.k === 'hit') { const p = ISO(f.x, f.y, 12); g.fillStyle = f.h ? '#ffb0a0' : '#f8f4e8'; g.fillRect(p[0] - 1, p[1] - 1, 2, 2); g.fillRect(p[0] + 2, p[1] - 3, 1, 1); g.fillRect(p[0] - 3, p[1] + 1, 1, 1); }
   }
   // chimney smoke
@@ -380,4 +390,99 @@ function hrWeather(g, W, H, t, dark) {
   } else {
     for (const q of P) { q.x += 3 * q.s; q.y += Math.sin(t * 2 + q.s * 7) * 0.6; if (q.x > W) { q.x = -4; q.y = Math.random() * H; } g.fillStyle = HR.season === 'fall' ? (q.s > 1 ? '#c0622a' : '#e8b03a') : snow ? '#f4f6f8' : (q.s > 1 ? 'rgba(200,188,150,0.8)' : 'rgba(120,150,80,0.8)'); g.fillRect(q.x | 0, q.y | 0, 2, 1); }
   }
+}
+
+// ---------------------------------------------------------------- milestone 6: the community layer (horses, stall goods, graves, repair work, the ball)
+// horses: a side-view pixel sprite in the animals' ink style (walk cycle, grazing, saddle when tacked or ridden)
+function horseSprite(c, frame, flip, pose, saddle) {
+  const key = 'h' + c + frame + (flip ? 'f' : '') + pose + (saddle ? 's' : ''); let s = HR.anim.get(key); if (s) return s;
+  const W = 60, H = 46, g = new Int32Array(W * H).fill(-1), set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + (flip ? W - 1 - x : x)] = grade(col); };
+  const sh = mixc(c, 0x2b1a16, 0.32), hl = mixc(c, 0xfff1d6, 0.22), mane = mixc(c, 0x1e1614, 0.55);
+  const ell = (cx, cy, rx, ry, col, s2, h2) => { for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy > 1) continue; set(x, y, dy > 0.35 ? s2 : dx < -0.1 && dy < -0.35 ? h2 : col); } };
+  const leg = (x, y0, len, bend) => { for (let j = 0; j < len; j++) { const xx = x + (j > len / 2 ? bend : 0); set(xx, y0 + j, j > len - 3 ? 0x2a2220 : sh); set(xx + 1, y0 + j, j > len - 3 ? 0x2a2220 : c); } };
+  const f = frame % 4, sw = [[0, 0, 0, 0], [2, -2, -2, 2], [0, 0, 0, 0], [-2, 2, 2, -2]][f];
+  // legs (far pair darker), body, neck, head
+  leg(19 + sw[1] * 0.5, 28, 13, sw[1] > 0 ? 1 : 0); leg(35 + sw[3] * 0.5, 28, 13, sw[3] > 0 ? 1 : 0);
+  ell(28, 24, 13, 6.5, c, sh, hl);
+  leg(17 + sw[0] * 0.5, 28, 14, sw[0] > 0 ? 1 : 0); leg(37 + sw[2] * 0.5, 28, 14, sw[2] > 0 ? 1 : 0);
+  if (pose === 'graze') { for (let j = 0; j < 9; j++) ell(40 + j * 0.7, 22 + j * 1.2, 3, 3, c, sh, hl); ell(47, 33, 3.2, 2.4, c, sh, hl); set(49, 34, 0x2a2020); for (let j = 0; j < 8; j++) set(40 + j * 0.7, 19 + j * 1.2, mane); }
+  else { for (let j = 0; j < 10; j++) ell(39 + j * 0.6, 21 - j * 1.1, 3.2, 3, c, sh, hl); ell(46, 9.5, 4.2, 2.6, c, sh, hl); ell(49.5, 10.8, 2.2, 1.7, mixc(c, 0x2b1a16, 0.15), sh, c); set(46, 8.6, 0x2a2020); set(43, 6, sh); set(44, 5.5, sh); set(51, 11, 0x2a2020); for (let j = 0; j < 11; j++) { set(37.5 + j * 0.6, 19 - j * 1.1, mane); set(36.8 + j * 0.6, 20 - j * 1.1, mane); } }
+  for (let j = 0; j < 9; j++) { set(14 - j * 0.25, 21 + j * 1.2, mane); set(13 - j * 0.25, 21 + j * 1.2, mane); }   // tail
+  if (saddle) { for (let x = 23; x <= 33; x++) for (let y = 16; y <= 20; y++) set(x, y, y < 18 ? 0x6a3a22 : 0x3d6f9a); set(28, 21, 0x6a3a22); set(28, 22, 0x6a3a22); }
+  s = gridCanvas(inkGrid(g, W, H, 0.85), W, H, null, K); HR.anim.set(key, s); return s;
+}
+const STALL_GOODS = [[0xd9534f, 0x6aa244], [0xd8b070, 0xc09050], [0x8aa0b4, 0xc8d4dc], [0x8a8a92, 0xb08458], [0xe8c84a, 0x6aa244], [0x9a6aa8, 0xd9685c], [0xc98a4a, 0xf2c94c], [0x6a9a54, 0xd8c070]];
+function hrLife(D, cull, t) {
+  if (!HS.horses) return;
+  const L = HR.lerp || 1, ss = HR.season;
+  const put = (spr, x, y, z, dd) => { const p = ISO(x, y, z || 0); if (cull(p[0] - spr.ax, p[1] - spr.ay, spr.w, spr.h)) return; D.push({ c: spr.c, e: spr.e, x: p[0] - spr.ax, y: p[1] - spr.ay, w: spr.w, h: spr.h, d: x + y + (dd || 0) }); };
+  // horses
+  for (const H of HS.horses) {
+    const x = H.px + (H.x - H.px) * L, y = H.py + (H.y - H.py) * L, p = ISO(x, y); if (cull(p[0] - 16, p[1] - 24, 32, 26)) continue;
+    const moving = Math.hypot(H.x - H.px, H.y - H.py) > 0.004, fr = moving ? 1 + Math.floor(H.stride / (H.st === 'ridden' && H.run ? 3.4 : 2.6)) % 4 : 0;
+    const s = horseSprite(H.c, moving ? fr : 0, H.dir === 2 || H.dir === 3, !moving && H.graze ? 'graze' : '', H.st === 'ridden' || H.st === 'tohitch' || H.st === 'hitched2' || H.st === 'pack');
+    D.push({ c: s.c, e: s.e, x: Math.round((p[0] - 15) * K) / K, y: Math.round((p[1] - 21.5) * K) / K, w: 30, h: 23, d: x + y, sh: [p[0], p[1], 9] });
+  }
+  // goods on the market stalls (a cloth over the counter when the stall is closed)
+  for (const S of HS.stalls) {
+    const n = S.open ? S.stock : 0;
+    if (!S.open) { put(bakeCached('stallcover' + ss, () => [HB(0, 0, 0, 11, 6, 0.9, 0xc8b89a, (f, u) => f === 0 && (u * 2 | 0) % 5 === 0 ? 0xb8a888 : undefined)]), S.x + 0.5, S.y + 0.5, 5.6, 7); continue; }
+    for (let i = 0; i < n; i++) { const gc = STALL_GOODS[S.k], spr = bakeCached('good' + S.k + (i % 2) + ss, () => [HB(0, 0, 0, 1.9, 2.4, 1.3, gc[i % 2], (f, u, v) => f === 0 && hash2(u * 3 + i, v * 3) > 0.6 ? mixc(gc[i % 2], 0xfff1d6, 0.25) : undefined), HB(0.4, 0.4, 1.3, 1.1, 1.4, 0.6, gc[(i + 1) % 2])]); put(spr, S.x + 1.2 + (i % 5) * 2.0, S.y + 1.6 + (i % 2) * 2.2, 5.6, 7); }
+  }
+  // graves: markers, fresh mounds with flowers, flowers left by visitors
+  for (const g2 of HS.graves) {
+    if (!g2.used) continue; const fresh = g2.fresh && HS.t - g2.fresh < 900;
+    put(bakeCached('grave' + g2.v + (fresh ? 'f' : '') + ss, () => graveBoxes(g2.v, fresh)), g2.x, g2.y, 0, 0.5);
+    if (g2.flowers > 0 && !fresh) put(bakeCached('flowers' + ss, () => [HB(-1, 0.9, 0, 2, 1, 0.6, 0x6aa244, (f, u) => f === 0 ? ((u * 3 | 0) % 2 ? 0xd9685c : 0xf2e6a0) : undefined)]), g2.x, g2.y, 0, 0.6);
+  }
+  // house repairs: damage, scaffolding, the patch filling in, fresh boards
+  for (const r of HS.reps) {
+    const b = r.b, Lt = r.L, ax = b.x + r.px, ay = b.y + Lt.d, step = Math.round(r.prog * 4);
+    put(bakeCached('rep' + r.kind + r.st + step + Lt.floors + Lt.d + ss, () => repBoxes(r, step)), ax, ay, 0, 0.6);
+    if (r.st === 1 || r.st === 2) put(bakeCached('scaf' + r.kind + Lt.floors + ss, () => scaffoldBoxes(r)), ax, ay, 0, 3);
+  }
+  // the ball on the school field
+  const B = HS.ball; if (B && (B.holder || B.fly)) { const p = ISO(B.x, B.y, B.z + 0.8); if (!cull(p[0] - 2, p[1] - 2, 4, 4)) D.push({ c: bakeCached('ball', () => [HB(-0.7, -0.7, 0, 1.4, 1.4, 1.4, 0xf4f1e8, (f, u, v) => (u + v) % 1.4 < 0.5 ? 0x3a3a3a : undefined)]).c, e: null, x: p[0] - 1, y: p[1] - 1.5, w: 2, h: 2, d: B.x + B.y + 0.5, sh: [ISO(B.x, B.y)[0], ISO(B.x, B.y)[1], 1.6] }); }
+}
+// a patch on the front wall (dark hole -> fresh planks bottom-up) or a tarp on the front roof slope (tarp -> new shingles), plus debris
+function repBoxes(r, step) {
+  const B = [], Lt = r.L, fresh = 0xd8b080, done = r.st >= 2, rows = done ? 4 : step;
+  if (r.kind === 'wall') {
+    B.push(HB(0, -0.2, 3.5, 9, 0.6, 9.5, 0x2a2024, (f, u, v) => { if (f !== 1) return 0x5a4a40; const row = Math.floor(v / 2.4); if (row < rows) return (v % 2.4) < 0.4 ? 0x9a7446 : hs(Math.floor(u / 3), row) > 0.5 ? fresh : 0xc8a070; const edge = Math.min(u, 9 - u, v, 9.5 - v); return edge < 0.9 + hs(u * 2, v * 2) * 0.8 ? (hs(u, v) > 0.5 ? 0x8a6a4a : 0x6a4a34) : 0x1e1618; }));
+  } else {
+    const d = Lt.d, s = (d + 3) / 12, Hh = r.H;
+    for (let k = 0; k < 3; k++) B.push(HB(0, 1.5 - (k + 1) * s - 0.05, Hh + (k + 1) * 2.3 - 0.1, 10, s + 0.1, 0.35, k < rows ? 0x8a6a50 : 0x3d6f9a, (f, u, v) => k < rows ? ((u % 2.6) < 0.35 ? 0x5a4434 : undefined) : ((u * 1.3 + k) % 3 < 0.4 ? 0x2e5274 : undefined)));
+  }
+  if (r.st < 2) B.push(HB(0.5, 1.4, 0, 6, 2.6, 1.1, 0x8a6a4a, (f, u, v) => hs(u * 2, v * 2) > 0.6 ? 0x6a4a34 : hs(u * 3, v) > 0.85 ? 0xc49a64 : undefined), HB(7, 2, 0, 3, 1.4, 0.7, 0xb8a47c));
+  return B;
+}
+// scaffolding in front of the patch: four poles, a plank platform at the working height, braces, a ladder
+function scaffoldBoxes(r) {
+  const z = r.zw, h = z + 7, P = 0xa8885a, B = [];
+  for (const [x, y] of [[-1.5, 2.6], [10.5, 2.6], [-1.5, 7.4], [10.5, 7.4]]) B.push(HB(x, y, 0, 0.7, 0.7, h, P, woodP));
+  B.push(HB(-1.8, 2.4, z, 13.2, 5.6, 0.8, WOOD_L, plankP, { along: 'x' }), HB(-1.8, 7.6, z + 3.2, 13.2, 0.4, 0.4, P), HB(-1.8, 2.4, z + 3.2, 13.2, 0.4, 0.4, P));
+  for (let k = 0; k < Math.floor(z / 3); k++) B.push(HB(11.5, 4.6, 1.5 + k * 3, 0.3, 2, 0.3, 0x8a6a44));
+  B.push(HB(11.4, 4.4, 0, 0.4, 0.4, z + 1, 0x8a6a44), HB(11.4, 6.6, 0, 0.4, 0.4, z + 1, 0x8a6a44));
+  return B;
+}
+// night only: a few soft spirits drifting over the graveyard (gentle, a little whimsical; they glow faintly and peek from behind the stones)
+function hrSpirits(g, lg, x0, y0, t, dark) {
+  const G = HF.graveyard; if (!G) return;
+  const a = clamp((dark - 0.35) * 2.2, 0, 1); if (a <= 0) return;
+  g.setTransform(K, 0, 0, K, -Math.round(x0 * K), -Math.round(y0 * K));
+  if (!HR.ghost) HR.ghost = mkGhost();
+  for (let i = 0; i < 4; i++) {
+    const ph = i * 1.9, cyc = (t * 0.035 + i * 0.27) % 1, vis = Math.sin(cyc * Math.PI) ** 2;    // each fades in, drifts and fades out on its own cycle
+    const wx = G.x + 8 + ((Math.sin(t * 0.11 + ph) + 1) / 2) * (G.w - 16), wy = G.y + 6 + ((Math.cos(t * 0.083 + ph * 1.3) + 1) / 2) * (G.d - 12);
+    const p = ISO(wx, wy, 7 + Math.sin(t * 1.3 + ph) * 1.6 + (i === 3 ? Math.max(0, Math.sin(t * 0.7)) * 3 : 0));
+    g.globalAlpha = 0.5 * vis * a; const sp = HR.ghost[(i + Math.floor(t * 2)) % 2]; g.drawImage(sp.c, Math.round((p[0] - 3.5) * K) / K, Math.round((p[1] - 5) * K) / K, 7, 8);
+    g.globalAlpha = 0.35 * vis * a; g.fillStyle = '#d8f0ff'; g.fillRect(p[0] - 0.25 + Math.sin(t * 2 + ph) * 3, p[1] + 3 + Math.cos(t * 1.7 + ph) * 1.5, 0.5, 0.5);   // a wisp light trailing behind
+  }
+  g.globalAlpha = 1; g.setTransform(1, 0, 0, 1, 0, 0);
+}
+function mkGhost() {   // two frames: a little sheet ghost with a wavy hem and dot eyes
+  return [0, 1].map(f => { const W = 14, H = 16, gg = new Int32Array(W * H).fill(-1);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const dx = (x - 6.5) / 6, dy = (y - 6) / 6; const hem = 12 + ((x + f * 2) % 4 < 2 ? 1.5 : 0); if ((y < 6 && dx * dx + dy * dy > 1) || y > hem || Math.abs(dx) > 1) continue; gg[y * W + x] = y > 10 ? 0xd8e8f0 : 0xf4fbff; }
+    gg[5 * W + 4] = gg[5 * W + 5] = gg[6 * W + 4] = gg[6 * W + 5] = 0x3a4a5a; gg[5 * W + 8] = gg[5 * W + 9] = gg[6 * W + 8] = gg[6 * W + 9] = 0x3a4a5a;
+    return gridCanvas(gg, W, H, null, K); });
 }

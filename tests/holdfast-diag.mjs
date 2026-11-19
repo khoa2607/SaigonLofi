@@ -2,7 +2,7 @@
 // Usage: node tests/holdfast-diag.mjs [gameSeconds=1200] [seed=7]
 import { loadHF, ev } from './hf-load.mjs';
 const SECS = +(process.argv[2] || 1200), SEED = +(process.argv[3] || 7);
-const c = loadHF(['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js']);
+const c = loadHF(['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js', 'holdfast/hf-life.js']);
 c.hfBuildMap(SEED); c.hsInit({ seed: SEED * 3 + 1, pop: 120, hour: 9 });
 ev(c, `globalThis.__D = { samples: 0, crowd: 0, crowdMax: 0, pairs: 0, sync: 0, walkers: 0, still: new Map(), stuckMax: 0, wildZ: 0, outZ: 0, near: 0, hot: new Map(), act: {}, pr: new Map(), persist: 0, unrel: 0 };`);
 const probe = `(()=>{ const D = __D; D.samples++;

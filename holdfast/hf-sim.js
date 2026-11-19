@@ -11,7 +11,7 @@ const HS = {
 };
 const SEASONS = ['spring', 'summer', 'fall', 'winter'];
 const Z_WANDER = 20, Z_BAND = 12;                      // roaming infected kept alive in the wilderness / in the band the default camera sees (x danger x device)
-const ROLE_MIX = [['guard', 30], ['farmer', 16], ['builder', 8], ['tech', 5], ['medic', 4], ['cook', 4], ['fisher', 6], ['scav', 9], ['trader', 6], ['teacher', 1], ['elder', 8], ['kid', 14], ['adult', 9]];
+const ROLE_MIX = [['guard', 30], ['farmer', 13], ['builder', 8], ['tech', 4], ['smith', 2], ['groom', 3], ['medic', 5], ['cook', 4], ['fisher', 4], ['scav', 9], ['trader', 6], ['teacher', 2], ['herder', 2], ['elder', 8], ['kid', 14], ['adult', 6]];   // milestone 6: work spread over every zone
 const rr2 = (a, b) => a + HS.R() * (b - a), pickR = a => a[Math.floor(HS.R() * a.length)];
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 function hsLog(k, p, bad) { const e = { day: HS.day, h: HS.hour, k, p: p || {}, bad: !!bad }; HS.log.push(e); if (HS.log.length > 80) HS.log.shift(); if (HS.onEvent) HS.onEvent(e); }
@@ -28,27 +28,26 @@ function hsInit(opt) {
   HS.weather = HS.wxMode !== 'auto' ? HS.wxMode : (HS.R() < 0.8 ? 'clear' : 'wind');
   HF.breaches = 0; HS.zScale = HS.zScale || clamp(HS.target / 120, 0.6, 1); HS.view = null;
   hwInit();                                             // crop plots, stores, delivery points, spot zones
+  lfInit();                                             // milestone 6: horses, stalls, repairs, graves, farmyard animals, zone spots
   const scale = HS.target / 120, roles = [];
   for (const [r, n] of ROLE_MIX) for (let i = 0; i < Math.max(r === 'teacher' ? 1 : 1, Math.round(n * scale)); i++) roles.push(r);
   while (roles.length > HS.target) roles.splice(roles.findIndex(r => r === 'adult' || r === 'trader'), 1);
   roles.forEach((r, i) => hsAddPerson(r, null, i));
   // tiers: 16 named (rich routines + chronicle), ~25% ambient (simple loops), the rest scheduled workers
-  const named = new Set(['guard', 'scav', 'medic', 'builder', 'farmer', 'teacher', 'elder', 'cook', 'fisher']);
+  const named = new Set(['guard', 'scav', 'medic', 'builder', 'farmer', 'teacher', 'elder', 'cook', 'fisher', 'groom', 'smith', 'herder']);
   let n = 0; for (const p of HS.people) if (n < Math.round(16 * scale) && named.has(p.role) && (p.role !== 'guard' || n % 3 === 0)) { p.tier = 0; p.name = NAMES[n % NAMES.length]; n++; }
-  const amb = HS.people.filter(p => p.tier === 1 && (p.role === 'adult' || p.role === 'elder' || p.role === 'trader' || p.role === 'kid'));
+  const amb = HS.people.filter(p => p.tier === 1 && (p.role === 'adult' || p.role === 'elder'));   // traders and kids keep their own routines (market, school)
   for (let i = 0; i < amb.length && i < Math.round(30 * scale); i++) amb[i].tier = 2;
   // guard posts: towers, gate, patrol, reserve
   const guards = HS.people.filter(p => p.role === 'guard'); let gi = 0;
   for (const t of HF.towers) for (let s = 0; s < (t.main ? 2 : 1); s++) { const g = guards[gi++]; if (g) { g.post = { k: 'tower', t: t.id, slot: s }; g.shift = gi % 2; } }
   for (let s = 0; s < 4; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'gate', slot: s }; g.shift = s % 2; } }
-  for (let s = 0; s < 8; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'patrol', wp: Math.floor((s + HS.R() * 0.8) / 8 * HF.patrol.length), dirn: s % 2 ? 1 : -1 }; g.shift = s % 2; } }   // spread along the wall
+  for (let s = 0; s < 6; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'patrol', wp: Math.floor((s + HS.R() * 0.8) / 6 * HF.patrol.length), dirn: s % 2 ? 1 : -1 }; g.shift = s % 2; } }   // milestone 6: 6 patrols, the rest reserve (they train)   // spread along the wall
   while (gi < guards.length) { const g = guards[gi++]; g.post = { k: 'reserve' }; g.shift = gi % 2; }
   // night shift guards also cover towers at night (swap duties)
   // initial wildlife + infected
   for (let h = 0; h < 5; h++) hsSpawnHerd();
   for (let i = 0; i < 6; i++) hsAddWild('rabbit', ...hsWildPoint());
-  for (let i = 0; i < 4; i++) hsAddWild('chicken', HF.spots.coop[0].x + rr2(-6, 6), HF.spots.coop[0].y + rr2(-4, 4), { home: 'coop' });
-  for (let i = 0; i < 3; i++) hsAddWild('goat', HF.spots.goat[i].x, HF.spots.goat[i].y, { home: 'goat' });
   for (let i = 0; i < 2; i++) hsAddWild('dog', HF.oak.x + 10 + i * 8, HF.oak.y + 20);
   for (let i = 0; i < 3; i++) hsAddWild('crows', ...hsWildPoint());
   for (let i = 0; i < Math.round(Z_WANDER * DANGER[HS.danger].n * HS.zScale); i++) hsSpawnWanderer(true);
@@ -222,6 +221,7 @@ function hsHitZ(z, a, dmg) {
 }
 function hsHurt(p, z) {
   if (!p.alive || p.st === 'dead') return;
+  if (p.mount) { p.inj = 1; HS.fx.push({ k: 'hit', x: p.x, y: p.y, t: 0.25, h: 1 }); hsSound('hurt', p.x, p.y, 0.6); if (p.ride) p.ride.chased = true; return; }   // a rider keeps the saddle and gallops home
   p.hp--; HS.fx.push({ k: 'hit', x: p.x, y: p.y, t: 0.25, h: 1 }); hsSound('hurt', p.x, p.y, 0.6);
   if (p.hp <= 0) {
     if (HS.R() < DANGER[HS.danger].die) hsKill(p, z);
@@ -229,7 +229,7 @@ function hsHurt(p, z) {
   } else if (p.hp === 1 && !p.inj) { p.inj = 1; HS.stats.injuries++; }
 }
 function hsKill(p) {
-  hsClaim(p, null); p.alive = false; p.st = 'dead'; p.deadT = 60; p.path = null; p.task = null; HS.stats.deaths++;
+  hsClaim(p, null); if (p.mount) { p.mount.st = 'loose'; p.mount.rider = null; p.mount = null; } p.alive = false; p.st = 'dead'; p.deadT = 60; p.path = null; p.task = null; HS.stats.deaths++;
   if (p.post && p.post.k !== 'reserve') (HS.vacant = HS.vacant || []).push(p.post);
   hsLog('died', { n: hsName(p), r: p.role }, true); hsSound('loss', p.x, p.y, 0.5);
   for (const e of HS.exps) e.team = e.team.filter(q => q !== p);
@@ -246,6 +246,7 @@ function hsThink(p) {
   if (p.inj && p.st !== 'down' && p.task?.k !== 'bed') return hsBed(p);
   if (p.exp) return;                              // expedition controller drives scavengers out of the gate
   if (p.rescue) return;
+  if (p.ride) return;                             // mounted scouts are driven by their ride (lfRide)
   // alarm: kids and elders shelter, reserve guards and patrols reinforce
   if (alarm && (p.role === 'kid' || p.role === 'elder' || (p.tier === 2 && p.role !== 'guard'))) { const s = HF.spots.shelter[0]; return setTask(p, { k: 'shelter', x: s.x, y: s.y, run: 1 }); }
   if (p.role === 'guard') return guardThink(p);
@@ -253,21 +254,25 @@ function hsThink(p) {
   const meal = mealTime(h);
   const sleep = (h >= 21.6 || h < 5.4) && !(p.role === 'fisher' && p.id % 4 === 0);
   if (sleep) return setTask(p, { k: 'sleep', x: p.home.x, y: p.home.y });
-  if (meal && p.role !== 'cook' && R() < 0.85) { const r = R(), s = hsPickSpot(r < 0.4 ? 'seat' : r < 0.6 ? 'green' : r < 0.85 ? 'porch' : 'bench', p); return setTask(p, { k: 'eat', spot: s, x: s.x + rr2(-1.5, 1.5), y: s.y + rr2(-1, 1), dur: rr2(20, 40) }); }
+  if (meal && p.role !== 'cook' && R() < 0.85 && !(p.role === 'trader' && h > 18 && HS.stalls.some(s => s.open))) { const r = R(), s = hsPickSpot(r < 0.4 ? 'seat' : r < 0.6 ? 'green' : r < 0.85 ? 'porch' : 'bench', p); return setTask(p, { k: 'eat', spot: s, x: s.x + rr2(-1.5, 1.5), y: s.y + rr2(-1, 1), dur: rr2(20, 40) }); }
   const rain = HS.weather === 'rain';
   if (p.tier === 2) return ambientThink(p, rain);
+  if (p.role !== 'medic' && p.role !== 'trader') { const mc = lfMinorCheckup(p); if (mc) return setTask(p, mc); }   // a splinter, a scraped knee: off to the hospital bench
   switch (p.role) {
-    case 'farmer': { if (rain && R() < 0.15) return setTask(p, { k: 'sit', ...spotXY('porch'), dur: rr2(15, 30) }); const j = hwFarmJob(p); if (j) return setTask(p, j); return setTask(p, (R() < 0.5 && hwHaulJob(p)) || { k: 'work', ...spotXY('yardwork'), dur: rr2(12, 20), tool: 'hoe', anim: 'hoe' }); }
-    case 'fisher': return setTask(p, { k: 'work', ...spotXY('fish', 1), dur: rr2(40, 80), tool: 'rod', anim: 'fish' });
+    case 'farmer': { const fs = R() < 0.06 && h > 8 && h < 18 && lfShopTask(p); if (fs) return setTask(p, fs); if (rain && R() < 0.15) return setTask(p, { k: 'sit', ...spotXY('porch'), dur: rr2(15, 30) }); const j = hwFarmJob(p); if (j) return setTask(p, j); return setTask(p, (R() < 0.5 && hwHaulJob(p)) || { k: 'work', ...spotXY('yardwork'), dur: rr2(12, 20), tool: 'hoe', anim: 'hoe' }); }
+    case 'fisher': { const sh = R() < 0.12 && h > 8 && h < 18 && lfShopTask(p); if (sh) return setTask(p, sh); return setTask(p, { k: 'work', ...spotXY('fish', 1), dur: rr2(40, 80), tool: 'rod', anim: 'fish' }); }
+    case 'groom': return setTask(p, lfStableJob(p));
+    case 'smith': return setTask(p, lfForgeJob(p));
+    case 'herder': return setTask(p, lfHerdJob(p));
     case 'cook': return setTask(p, hwCookJob(p));
-    case 'builder': { const s = hsRepairJob(p); if (s) return setTask(p, s); return setTask(p, hwBuildJob(p)); }
-    case 'tech': { const hj = R() < 0.55 && hwHaulJob(p); return setTask(p, hj || { k: 'work', salvage: R() < 0.5 ? 1 : 0, ...spotXY('bench', 2), dur: rr2(20, 40), tool: 'hammer', anim: R() < 0.5 ? 'hammer' : 'kneel' }); }
-    case 'medic': { const pat = HS.people.find(q => q.alive && q.inj === 2 && !q.medic && isInside(q.x, q.y)); if (pat) { pat.medic = p; return setTask(p, { k: 'treat', x: pat.x, y: pat.y, pat, run: 1 }); } return setTask(p, R() < 0.7 ? { k: 'work', ...spotXY('medic'), dur: rr2(15, 30), anim: 'stand' } : { k: 'walk', ...spotXY('bed'), dur: 6 }); }
-    case 'trader': { if (h > 6.5 && h < 18) { if (HS.store.market < 2 && HS.store.food > 2 && R() < 0.5) return setTask(p, { k: 'haul', from: 'food', to: 'market', leg: 0, ...spotXY('granary'), dur: 2 }); return setTask(p, { k: 'work', ...spotXY('stall', 1), dur: rr2(30, 60), anim: 'talk' }); } return setTask(p, { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 20 }); }
-    case 'teacher': return setTask(p, h > 8 && h < 11.5 ? { k: 'work', ...spotXY('teach'), dur: 30, anim: 'talk' } : { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 20 });
-    case 'kid': if (h > 8 && h < 11.4 && !rain) return setTask(p, { k: 'sit', ...spotXY('class', 1), dur: 30 }); return setTask(p, rain ? { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 25 } : { k: 'play', ...(R() < 0.6 ? spotXY('play') : R() < 0.5 ? spotXY('green') : hwHomeXY(p, 'yard')), dur: rr2(6, 14), run: 1 });
-    case 'elder': if (R() < 0.15) { const j = hwFarmJob(p); if (j && j.job !== 'harvest') return setTask(p, j); if (j) j.plot.worker = null; } return setTask(p, R() < 0.45 ? { k: 'sit', ...(R() < 0.7 ? hwHomeXY(p, 'porch') : spotXY('bench')), dur: rr2(30, 60) } : R() < 0.2 ? { k: 'sit', ...spotXY('mourn'), dur: 20 } : R() < 0.5 ? hwChat(p) : { k: 'work', ...hwHomeXY(p, 'yard'), dur: 20, tool: 'hoe', anim: 'hoe' });
-    case 'scav': { if (R() < 0.35) { const j = hwFarmJob(p); if (j) return setTask(p, j); } if (R() < 0.35) return setTask(p, { k: 'work', ...spotXY('yard'), dur: 20, anim: 'kneel', tool: 'bag' }); const hj = R() < 0.5 && hwHaulJob(p); return setTask(p, hj || { k: 'sit', ...(R() < 0.5 ? hwHomeXY(p, 'porch') : spotXY('seat')), dur: 20 }); }
+    case 'builder': { const s = hsRepairJob(p); if (s) return setTask(p, s); const hj = lfHouseJob(p); if (hj) return setTask(p, hj); const rf = R() < 0.18 && lfReinforceJob(p); if (rf) return setTask(p, rf); return setTask(p, R() < 0.3 ? lfSawJob(p) : hwBuildJob(p)); }
+    case 'tech': return setTask(p, lfTechJob(p));
+    case 'medic': { const pat = HS.people.find(q => q.alive && q.inj === 2 && !q.medic && isInside(q.x, q.y)); if (pat) { pat.medic = p; HS.Ls.stretcher++; return setTask(p, { k: 'treat', x: pat.x, y: pat.y, pat, run: 1, tool: 'stretcher' }); } return setTask(p, lfMedJob(p)); }
+    case 'trader': { if (h > 6.5 && h < 18.6) { const tj = lfTraderJob(p, h); if (tj) return setTask(p, tj); if (HS.store.market < 2 && HS.store.food > 2 && R() < 0.6) return setTask(p, { k: 'haul', from: 'food', to: 'market', leg: 0, ...spotXY('granary'), dur: 2 }); } else { const tj = lfTraderJob(p, h); if (tj) return setTask(p, tj); } return setTask(p, { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 20 }); }
+    case 'teacher': return setTask(p, lfTeacherJob(p, h) || (R() < 0.4 ? { k: 'life', a: 'stand', ...spotXY('play', 4), dur: rr2(15, 25), anim: 'look' } : { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 20 }));
+    case 'kid': { const kj = lfKidJob(p, h, rain); if (kj) return setTask(p, kj); return setTask(p, rain ? { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 25 } : { k: 'play', ...(R() < 0.65 ? spotXY('play') : hwHomeXY(p, 'yard')), dur: rr2(6, 14), run: 1 }); }
+    case 'elder': { if (R() < 0.12) { const j = hwFarmJob(p); if (j && j.job !== 'harvest') return setTask(p, j); if (j) j.plot.worker = null; } const lj = R() < 0.4 && lfResidentJob(p, rain); if (lj) return setTask(p, lj); if (R() < 0.1) return setTask(p, lfHerdJob(p)); return setTask(p, R() < 0.45 ? { k: 'sit', ...(R() < 0.7 ? hwHomeXY(p, 'porch') : spotXY('bench')), dur: rr2(30, 60) } : R() < 0.5 ? hwChat(p) : { k: 'work', ...hwHomeXY(p, 'yard'), dur: 20, tool: 'hoe', anim: 'hoe' }); }
+    case 'scav': { if (HS.gear < 3 && R() < 0.3 && lfOpen('gear')) return setTask(p, lfGearJob(p)); if (R() < 0.25) { const j = hwFarmJob(p); if (j) return setTask(p, j); } if (R() < 0.15) return setTask(p, lfStableJob(p)); const hj = R() < 0.5 && hwHaulJob(p); return setTask(p, hj || { k: 'sit', ...(R() < 0.5 ? hwHomeXY(p, 'porch') : spotXY('seat')), dur: 20 }); }
     default: return ambientThink(p, rain);
   }
 }
@@ -276,11 +281,12 @@ function ambientThink(p, rain) {
   const R = HS.R, r = R(), L = p.home && HS.lotSpot[p.home.lot];
   if (p.role === 'kid') return setTask(p, rain ? { k: 'sit', ...hwHomeXY(p, 'porch'), dur: 25 } : { k: 'play', ...(R() < 0.5 ? spotXY('play') : hwHomeXY(p, 'yard')), dur: rr2(6, 12), run: 1 });
   if (rain) return setTask(p, { k: 'sit', ...hwHomeXY(p, 'porch'), dur: rr2(20, 45) });
-  if (p.tier === 1 && r > 0.8) { const j = hwFarmJob(p); if (j) return setTask(p, j); }   // neighbours lend a hand in the fields
-  if (r < 0.16) return setTask(p, { k: 'shop', ...spotXY('shop', 2), dur: rr2(8, 16), anim: 'talk' });
-  if (r < 0.32) { const hj = (HS.store.food > 12 || R() < 0.35) && hwHomeFood(p) || hwHaulJob(p); if (hj) return setTask(p, hj); }
-  if (r < 0.56 && L && L.yard) { const c = R(); return setTask(p, { k: 'work', ...hwHomeXY(p, 'yard'), dur: rr2(12, 22), tool: c < 0.4 ? 'cloth' : c < 0.75 ? 'hoe' : 'bucket', anim: c < 0.4 ? 'hang' : c < 0.75 ? 'hoe' : 'water' }); }
-  if (r < 0.74) return setTask(p, { k: 'sit', ...(R() < 0.7 ? hwHomeXY(p, 'porch') : spotXY('bench')), dur: rr2(20, 45) });
+  if (p.tier === 1 && r > 0.86) { const j = hwFarmJob(p); if (j) return setTask(p, j); }   // neighbours lend a hand in the fields
+  if (r < 0.28 && HS.life > 7.5 && HS.life < 18.3) { const sh = lfShopTask(p); if (sh) return setTask(p, sh); }   // errands at the market
+  if (r < 0.56) { const lj = lfResidentJob(p, rain); if (lj) return setTask(p, lj); }   // a check-up, the graveyard, stories, watching the horses or the drills
+  if (r < 0.63) { const hj = (HS.store.food > 12 || R() < 0.35) && hwHomeFood(p) || hwHaulJob(p); if (hj) return setTask(p, hj); }
+  if (r < 0.74 && L && L.yard) { const c = R(); return setTask(p, { k: 'work', ...hwHomeXY(p, 'yard'), dur: rr2(12, 22), tool: c < 0.4 ? 'cloth' : c < 0.75 ? 'hoe' : 'bucket', anim: c < 0.4 ? 'hang' : c < 0.75 ? 'hoe' : 'water' }); }
+  if (r < 0.88) return setTask(p, { k: 'sit', ...(R() < 0.7 ? hwHomeXY(p, 'porch') : spotXY('bench')), dur: rr2(20, 45) });
   return setTask(p, hwChat(p));
 }
 // own-lot spots first (spreads people over the whole settlement), the shared spot list otherwise
@@ -302,7 +308,7 @@ function setTask(p, t) {
   if (p.task && p.task.plot && p.task.plot.worker === p) p.task.plot.worker = null;
   p.task = t; t.t = 0; t.ph = 'go';
   if (p.vis === false && t.k !== 'sleep' && t.k !== 'shelter') { p.vis = true; }
-  p.variant = t.tool || (p.carry || ''); p.act = '';
+  p.variant = t.tool || (p.carry || ''); p.act = ''; if (!p.onTower && !p.mount) p.z = 0; if (!p.load) p.cart = 0;
   if (!hsGo(p, t.x, t.y, p.exp || p.rescue ? 'all' : 'in', t.run, t.spot && Math.hypot(t.spot.x - t.x, t.spot.y - t.y) < 14 ? t.spot : null)) { t.ph = 'do'; }
 }
 function hsBed(p) { const s = hsPickSpot('bed'); setTask(p, { k: 'bed', x: s.x, y: s.y, spot: s, dur: 1e9 }); }
@@ -312,22 +318,23 @@ function guardThink(p) {
   if (!onShift(p) && !alarm) {
     const h = (HS.life + (p.sch || 0) + 24) % 24, meal = mealTime(h);
     if (meal) { const s = hsPickSpot(HS.R() < 0.7 ? 'seat' : 'bench', p); return setTask(p, { k: 'eat', spot: s, x: s.x, y: s.y, dur: 30 }); }
-    if (h >= 22 || h < 5 || (h > 9 && h < 15 && p.shift)) return setTask(p, { k: 'sleep', x: p.home.x, y: p.home.y });
-    return setTask(p, HS.R() < 0.4 ? { k: 'sit', ...spotXY(HS.R() < 0.5 ? 'seat' : 'bench'), dur: 30 } : { k: 'drill', ...spotXY('drill'), dur: 25, anim: 'drill', tool: HS.R() < 0.5 ? 'spear' : 'carry' });
+    if (h >= 22 || h < 5 || (h > 10 && h < 14 && p.shift)) return setTask(p, { k: 'sleep', x: p.home.x, y: p.home.y });
+    const sh = HS.R() < 0.12 && h > 7.5 && h < 18 && lfShopTask(p); if (sh) return setTask(p, sh);   // off duty: the market
+    return setTask(p, HS.R() < 0.3 ? { k: 'sit', ...spotXY(HS.R() < 0.5 ? 'seat' : 'bench'), dur: 30 } : lfTrainJob(p));
   }
   if (P.k === 'tower') { const t = HF.towers[P.t]; return setTask(p, { k: 'tower', x: t.base[0], y: t.base[1], tower: t, dur: 1e9, tool: 'carry' }); }
   if (P.k === 'gate') { const [gx, gy] = tileC(HF.gate.inTile); return setTask(p, { k: 'gatepost', x: gx + (P.slot - 1.5) * 6, y: gy + 2 + (P.slot % 2) * 3, dur: 60, anim: 'stand', tool: 'spear' }); }
   if (P.k === 'patrol') { P.wp = (P.wp + P.dirn + HF.patrol.length) % HF.patrol.length; const [x, y] = tileC(HF.patrol[P.wp]); return setTask(p, { k: 'patrol', x, y, dur: rr2(2, 6), tool: 'carry', anim: 'look' }); }
-  // reserve: during an alarm hold the most threatened section; otherwise drill
-  if (alarm) { const s = hsHotSeg(); if (s && s.inT >= 0) { const [x0, y0] = tileC(s.inT), n = HS.people.filter(q => q.task && q.task.k === 'defend' && q.task.seg === s.id).length, a = n * 2.39996, r = n ? 5 + 3 * Math.sqrt(n) : 0, k = hfNearPass(x0 + Math.cos(a) * r, y0 + Math.sin(a) * r, 'in', 2), [x, y] = k >= 0 ? tileC(k) : [x0, y0]; return setTask(p, { k: 'defend', x: x + rr2(-2, 2), y: y + rr2(-2, 2), seg: s.id, dur: 20, tool: 'spear', run: 1 }); } }
-  return setTask(p, { k: 'drill', ...spotXY('drill'), dur: rr2(20, 40), anim: 'drill', tool: HS.R() < 0.5 ? 'spear' : 'carry' });
+  // reserve: during an alarm hold the most threatened section, or an assigned station on the wall (never back to training); otherwise train
+  if (alarm) { const hot = hsHotSeg(), s = hot && hot.inT >= 0 ? hot : HF.stations[p.id % HF.stations.length]; if (s && s.inT >= 0) { const [x0, y0] = tileC(s.inT), n = HS.people.filter(q => q.task && q.task.k === 'defend' && q.task.seg === s.id).length, a = n * 2.39996, r = n ? 5 + 3 * Math.sqrt(n) : 0, k = hfNearPass(x0 + Math.cos(a) * r, y0 + Math.sin(a) * r, 'in', 2), [x, y] = k >= 0 ? tileC(k) : [x0, y0]; return setTask(p, { k: 'defend', x: x + rr2(-2, 2), y: y + rr2(-2, 2), seg: s.id, dur: 20, tool: 'spear', run: 1 }); } }
+  return setTask(p, lfTrainJob(p));
 }
 function hsHotSeg() { let best = null, bn = 0; for (const s of HF.walls) { if (s.gate) continue; const n = s.pressure || 0; if (n > bn || (s.hp <= 0 && bn < 99)) { bn = s.hp <= 0 ? 99 : n; best = s; } } return best; }
 function hsRepairJob(p) {
   let best = null, bd = 1e9;
   for (const s of HF.walls) { if (s.gate || s.hp >= s.max || s.inT < 0 || s.fixer && s.fixer !== p && s.fixer.alive) continue; if ((s.pressure || 0) > 2 && s.hp > 0) continue; const [x, y] = tileC(s.inT), d = Math.hypot(x - p.x, y - p.y) - (s.max - s.hp) * 10; if (d < bd) { bd = d; best = s; } }
   if (!best) return null; best.fixer = p; const [x, y] = tileC(best.inT);
-  if (HS.store.mat > 0 && best.hp > 0 && HS.R() < 0.8) { const w = spotXY('wood'); return { k: 'repair', fetch: 1, x: w.x, y: w.y, spot: w.spot, wx: x, wy: y, seg: best.id, dur: 1e9, tool: '', anim: 'hammer' }; }
+  if (HS.store.mat > 0 && best.hp > 0 && HS.R() < 0.8) { const w = HF.spots.wood2 ? lfWood(p) : spotXY('wood'); return { k: 'repair', fetch: 1, x: w.x, y: w.y, spot: w.spot, wx: x, wy: y, seg: best.id, dur: 1e9, tool: '', anim: 'hammer' }; }
   return { k: 'repair', x, y, seg: best.id, dur: 1e9, tool: 'hammer', anim: 'hammer' };
 }
 
@@ -361,8 +368,8 @@ function hsPerson(p, dt) {
       if (T.k === 'shelter' && HS.alarm <= 0) { if (!T.out) T.out = HS.t + rr2(1, 24); if (HS.t > T.out) { p.vis = true; p.task = null; } }   // leave the church one by one
       else if (T.k === 'sleep' && !((h >= 21.6 || h < 5.4) || (p.role === 'guard' && !onShift(p)))) { p.vis = true; p.task = null; } return; }
     case 'tower': { p.onTower = { t: T.tower, slot: p.post.slot, climb: 0 }; p.variant = 'carry'; return; }
-    case 'bed': p.act = 'lie'; if (p.inj) { p.healT = (p.healT || 0) + dt * (HS.people.some(q => q.role === 'medic' && q.alive && dist(q, p) < 60) ? 1.6 : 0.6); if (p.healT > 120) { p.inj = 0; p.hp = 3; p.healT = 0; p.medic = null; p.act = ''; p.task = null; hsLog('healed', { n: hsName(p) }); } } return;
-    case 'treat': { const pat = T.pat; if (!pat.alive || pat.inj !== 2) { p.task = null; return; } if (dist(p, pat) > 10) { hsGo(p, pat.x, pat.y, 'all', true); return; } p.act = 'kneel'; if (T.t > 4) { pat.st = 'idle'; pat.medic = p; hsBed(pat); p.task = null; } return; }
+    case 'bed': p.act = 'lie'; p.z = 2.4; if (p.inj) { p.healT = (p.healT || 0) + dt * (HS.people.some(q => q.role === 'medic' && q.alive && dist(q, p) < 60) ? 1.6 : 0.6); if (p.healT > 120) { p.inj = 0; p.hp = 3; p.healT = 0; p.medic = null; p.act = ''; p.task = null; hsLog('healed', { n: hsName(p) }); } } return;
+    case 'treat': { const pat = T.pat; if (!pat.alive || pat.inj !== 2) { p.task = null; return; } if (dist(p, pat) > 10) { hsGo(p, pat.x, pat.y, 'all', true); return; } p.act = 'kneel'; if (T.t > 4) { pat.st = 'idle'; pat.medic = p; hsBed(pat); HS.store.medkit = Math.max(0, HS.store.medkit - 1); p.task = null; } return; }
     case 'repair': { const s = HF.walls[T.seg];
       if (T.fetch) { p.act = 'kneel'; if (T.t < 1.6) return; if (HS.store.mat > 0) { HS.store.mat--; T.plank = 1; p.variant = 'plank'; } T.fetch = 0; hsClaim(p, null); T.spot = null; T.x = T.wx; T.y = T.wy; T.t = 0; hsGo(p, T.wx, T.wy, 'in'); return; }
       p.variant = 'hammer'; p.act = 'hammer'; faceTo(p, s); if (T.t > (T.plank ? 1.1 : 1.6)) { T.t = 0; s.hp = Math.min(s.max, s.hp + 1); HS.stats.work.repairHp++; hsSound('hammer', p.x, p.y, 0.4); HS.fx.push({ k: 'dust', x: s.x + rr2(-3, 3), y: s.y + rr2(-2, 2), t: 0.35 }); if (HS.R() < 0.25) hsNoise(s.x, s.y, 110, 'hammer'); if (s.hp > 0 && s.breached && s.hp >= s.max * 0.3) hsCloseBreach(s); if (s.hp >= s.max) { s.fixer = null; HS.stats.repairs++; p.task = null; } } if ((s.pressure || 0) > 2 && !s.breached) { s.fixer = null; p.task = null; } return; }
@@ -377,6 +384,7 @@ function hsPerson(p, dt) {
     case 'serve': return hwServe(p, T);
     case 'build': return hwBuild(p, T, dt);
     case 'respond': return hwRespond(p, T, dt);
+    case 'life': return lfDo(p, T, dt);
     case 'carry': p.act = T.anim || 'stand'; if (T.t > T.dur) p.task = null; return;
     case 'drill': { if (HS.alarm > 0 && p.post && p.post.k === 'reserve' && (HS.tick10 || 0) % 10 === p.id % 10) { const hs = hsHotSeg(); if (hs && hs.inT >= 0) { p.task = null; return; } }   // alarm: leave the drill yard once a section is actually hit
       const i = T.spot ? HF.spots.drill.indexOf(T.spot) : -1; if (i >= 0) p.dir = i < 4 ? 1 : 3; const c = Math.floor((HS.t + p.ph) / 0.9) % 4; p.act = c === 0 ? 'stab' : c === 2 ? 'raise' : 'stand'; if (T.t > T.dur) p.task = null; return; }   // sparring in two facing rows
@@ -522,7 +530,7 @@ function hsCloseBreach(s) {
   s.breached = false; HF.walk[tIdx(s.i, s.j)] &= ~W_BREACH; HF.breaches = Math.max(0, HF.breaches - 1); HF.ver++; HS.dirtyWall = true; hsLog('sealed', {});
   for (const z of HS.zombies) if (tileOfW(z.x, z.y) === tIdx(s.i, s.j) && s.outT >= 0) [z.x, z.y] = tileC(s.outT);
 }
-function hsAlarm(why) { const fresh = HS.alarm <= 0; HS.alarm = 45; if (!fresh) return; hsLog('alarm', { why }, true); hsSound('bell', HF.gate.x, HF.gate.y, 1); for (const p of HS.people) if (p.alive && (p.role === 'kid' || p.role === 'elder' || p.role === 'guard' || p.tier === 2) && !p.exp && !p.rescue && !p.onTower && p.task?.k !== 'shelter' && p.task?.k !== 'bed') p.task = null; }
+function hsAlarm(why) { const fresh = HS.alarm <= 0; HS.alarm = 45; if (!fresh) return; hsLog('alarm', { why }, true); hsSound('bell', HF.gate.x, HF.gate.y, 1); for (const p of HS.people) if (p.alive && (p.role === 'kid' || p.role === 'elder' || p.role === 'guard' || p.tier === 2) && !p.exp && !p.rescue && !p.ride && !p.onTower && p.task?.k !== 'shelter' && p.task?.k !== 'bed') p.task = null; HS.squad = null; }
 
 // ---------------------------------------------------------------- wildlife
 function hsAddWild(k, x, y, o) { x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4); const w = Object.assign({ k, x, y, px: x, py: y, dir: 1, t: 0, path: null, spd: k === 'deer' ? 7 : k === 'rabbit' ? 9 : k === 'dog' ? 8 : 3, ph: HS.R() * 10, stride: 0, flee: 0 }, o || {}); HS.wild.push(w); return w; }
@@ -530,6 +538,12 @@ function hsSpawnHerd() { const [x, y] = hsWildPoint(), n = 2 + Math.floor(HS.R()
 function hsWild(w, dt) {
   w.t += dt;
   if (w.k === 'crows') { w.x += Math.cos(w.ph + HS.t * 0.3) * dt * 10; w.y += Math.sin(w.ph * 1.7 + HS.t * 0.2) * dt * 8; if (w.t > 30) { const c = HS.zombies.find(z => z.st === 'dead'); if (c && HS.R() < 0.5) { w.x = c.x; w.y = c.y - 30; } w.t = 0; } return; }
+  if (w.pen) { const P = w.pen, night = HS.life < 5.6 || HS.life > 20.8; if (!w.path || w.t > (w.wait || 4)) { w.t = 0; w.wait = rr2(2.5, 7); let x = P.x + 2 + HS.R() * (P.w - 4), y = P.y + 2 + HS.R() * (P.d - 4);
+      if (w.trough && HS.pigFood > 0 && !night && HS.R() < 0.7) { x = w.trough[0] + rr2(-5, 5); y = w.trough[1] + rr2(-1.5, 1.5); w.eat = 1; } else w.eat = 0;
+      if ((w.k === 'chicken' || w.k === 'rooster') && HS.t - HS.feedT < 18) { x = P.x + P.w - 4 + rr2(-3, 2); y = P.y + P.d - 4 + rr2(-3, 2); w.wait = rr2(0.6, 1.6); }
+      if (night) { x = P.x + 4 + (w.k === 'pig' ? 2 : 0) + rr2(-1, 1); y = P.y + 4 + rr2(-1, 1); w.sleep = 1; } else w.sleep = 0; w.gx = x; w.gy = y; w.path = 1; }
+    if (w.eat && HS.pigFood > 0) HS.pigFood = Math.max(0, HS.pigFood - dt * 0.0035);
+    const dx = w.gx - w.x, dy = w.gy - w.y, d = Math.hypot(dx, dy); if (d > 0.5) { const s = Math.min(d, w.spd * (HS.t - HS.feedT < 18 && w.k !== 'pig' ? 2.4 : 1) * dt); w.x += dx / d * s; w.y += dy / d * s; w.stride += s; w.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 2) : (dy > 0 ? 1 : 3); } return; }
   if (w.k === 'chicken' || w.k === 'goat') { const home = w.home === 'coop' ? HF.spots.coop[0] : HF.spots.goat[1]; if (!w.path || w.t > 4) { w.t = 0; const x = home.x + rr2(-10, 10), y = home.y + rr2(-7, 7); w.gx = x; w.gy = y; w.path = 1; } const dx = w.gx - w.x, dy = w.gy - w.y, d = Math.hypot(dx, dy); if (d > 0.5) { const s = Math.min(d, w.spd * dt); w.x += dx / d * s; w.y += dy / d * s; w.stride += s; w.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 2) : (dy > 0 ? 1 : 3); } return; }
   if (w.k === 'dog') { const kid = HS.people.find(p => p.alive && p.vis && p.role === 'kid' && p.id % 7 === w.ph % 7 | 0) || HS.people.find(p => p.alive && p.vis && p.role === 'kid'); if (kid) { const d = dist(w, kid); if (d > 16) { if (!w.path || w.t > 2) { w.t = 0; if (d < 90 && HS.t - (w.blk || -99) > 6) w.path = { direct: 1, gx: kid.x + 8, gy: kid.y + 4, mask: 'in' }; else hsGo(w, kid.x + 8, kid.y + 4, 'in'); } if (w.path) { const dir = w.path.direct; if (hsStep(w, dt, d > 50 ? 17 : 11) && dir && dist(w, kid) > 20) w.blk = HS.t; } } } return; }
   // deer / rabbits: graze, flee from infected and people
@@ -561,12 +575,14 @@ function hsStartExpedition() {
   const team = pool.slice(0, Math.min(3, pool.length)); const poi = pickR(HF.pois.filter(q => !q.horde || HS.R() < 0.25));
   const e = { id: HS.stats.exp++, team, poi, ph: 'prep', t: 0, loot: pickR(['food', 'parts', 'medicine', 'seeds', 'radio', 'fuel']), start: team.length, hurt: 0, rescued: false };
   for (const p of team) { hsClaim(p, null); p.exp = e; p.task = { k: 'exp', t: 0 }; p.variant = 'pistol'; p.L.pack2 = 1; const s = spotXY('yard', 4); hsGo(p, s.x, s.y, 'all'); }
+  if (HS.gear > 0) HS.gear--;
+  const H = HS.horses && HS.horses.find(q => q.st === 'paddock' && q.rest <= 0 && !q.groom); if (H && HS.R() < 0.55) { e.horse = H; H.st = 'pack'; H.lead = team[0]; team[0].trail = [[team[0].x, team[0].y]]; HS.Ls.packHorse++; }
   HS.exps.push(e); hsLog('exp.out', { n: team.map(hsName).join(', '), poi: poi.name }); return e;
 }
 function hsExp(e, dt) {
   e.t += dt; e.team = e.team.filter(p => p.alive);
-  if (!e.team.length) { e.ph = 'lost'; HS.stats.expLost++; hsLog('exp.lost', { poi: e.poi.name }, true); return false; }
-  const lead = e.team[0];
+  if (!e.team.length) { if (e.horse) { e.horse.st = 'loose'; e.horse.lead = null; e.horse = null; } e.ph = 'lost'; HS.stats.expLost++; hsLog('exp.lost', { poi: e.poi.name }, true); return false; }
+  const lead = e.team[0]; if (e.horse && e.horse.lead !== lead) { e.horse.lead = lead; lead.trail = [[lead.x, lead.y]]; }
   for (const p of e.team) {             // members fight or flee when infected come close (outside the wall)
     if (p.st === 'down') { p.task = { k: 'down', t: 0 }; continue; }
     if (isInside(p.x, p.y) && e.ph !== 'out' && e.ph !== 'search') continue;
@@ -584,8 +600,9 @@ function hsExp(e, dt) {
       const lost = e.start - e.team.length, hurt = e.team.filter(p => p.inj).length;
       if (lost) { HS.stats.expDead++; hsLog('exp.dead', { poi: e.poi.name, n: lost }, true); } else if (hurt) { HS.stats.expHurt++; hsLog('exp.hurt', { poi: e.poi.name, loot: e.loot }); } else { HS.stats.expOk++; hsLog('exp.ok', { poi: e.poi.name, loot: e.loot }); }
       const out = e.team.filter(p => !isInside(p.x, p.y));
-      if (e.team.length && HS.store) { if (e.loot === 'food' || e.loot === 'seeds') HS.store.food = Math.min(STORE_CAP.food, HS.store.food + 3 + e.team.length); else HS.store.yard = Math.min(STORE_CAP.yard, HS.store.yard + 2 + e.team.length * 2); }
+      if (e.team.length && HS.store) { if (e.loot === 'food' || e.loot === 'seeds') HS.store.food = Math.min(STORE_CAP.food, HS.store.food + 3 + e.team.length); else if (e.loot === 'medicine') HS.store.med = Math.min(STORE_CAP.med, HS.store.med + 3 + e.team.length); else HS.store.yard = Math.min(STORE_CAP.yard, HS.store.yard + 2 + e.team.length * 2); }
       for (const p of e.team) { p.exp = null; p.task = null; p.variant = ''; p.L.pack2 = 0; }
+      if (e.horse) { e.horse.st = 'loose'; e.horse.lead = null; e.horse.unload = 1; e.horse.path = null; e.horse = null; }
       if (out.length) { for (const p of out) { p.arriving = true; p.task = { k: 'arrive', t: 0 }; } HS.arrivals.push({ group: out, t: 0, home: 1 }); }   // stragglers still walk home through the gate
       return false;
     }
@@ -705,7 +722,7 @@ function hsThreat(dt) {
 // idle people that ended up on top of each other step apart (cheap: spatial hash, short radius, walkable tiles only)
 function hsSeparate(dt) {
   for (const p of HS.people) {
-    if (!p.alive || !p.vis || p.onTower || p.path || p.st === 'down' || p.act === 'lie' || p.exp || p.rescue || p.arriving) continue;
+    if (!p.alive || !p.vis || p.onTower || p.path || p.st === 'down' || p.act === 'lie' || p.exp || p.rescue || p.arriving || p.ride || p.z > 0 || (p.task && (p.task.a === 'form' || p.task.a === 'ball'))) continue;
     let fx = 0, fy = 0;
     shNear(SHP, p.x, p.y, 3, q => { if (q === p || q.onTower || !q.vis || q.act === 'lie') return; const dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy), w = (3 - d) / 3; if (d < 0.05) { fx += Math.cos(p.id * 2.4) * w; fy += Math.sin(p.id * 2.4) * w; } else { fx += dx / d * w; fy += dy / d * w; } });
     const m = Math.hypot(fx, fy); if (m < 0.01) continue;
@@ -727,9 +744,10 @@ function hsTick(dt) {
   // noises: infected hear and investigate (outside: straight to the noise; inside noise: the nearest wall section)
   for (const n of HS.noises) shNear(SHZ, n.x, n.y, n.r, z => { if (z.st === 'wander' || z.st === 'idle' || (z.st === 'march' && HS.R() < 0.2)) { if (isInside(n.x, n.y) && !isInside(z.x, z.y)) { let best = null, bd = 1e9; for (const s of HF.walls) { if (s.outT < 0) continue; const d = (s.x - n.x) ** 2 + (s.y - n.y) ** 2; if (d < bd) { bd = d; best = s; } } hsToWall(z, best); } else { z.st = 'investigate'; z.t = 0; hsGo(z, n.x + rr2(-10, 10), n.y + rr2(-10, 10), 'z'); } } });
   HS.noises.length = 0;
-  for (const p of HS.people) { p.px = p.x; p.py = p.y; if (p.arriving) continue; if (p.exp && p.alive && p.st !== 'down') continue; if (p.rescue && p.alive) continue; hsPerson(p, dt); }
+  for (const p of HS.people) { p.px = p.x; p.py = p.y; if (p.arriving) continue; if (p.exp && p.alive && p.st !== 'down') continue; if (p.rescue && p.alive) continue; if (p.ride && p.alive) continue; hsPerson(p, dt); }
   hsSeparate(dt);
   hwTick(dt);
+  lfTick(dt);
   HS.exps = HS.exps.filter(e => hsExp(e, dt));
   HS.rescues = HS.rescues.filter(r => hsRescue(r, dt));
   HS.arrivals = HS.arrivals.filter(a => hsArrive(a, dt));

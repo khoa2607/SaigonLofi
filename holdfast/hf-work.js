@@ -115,22 +115,22 @@ function hwDeliverTask(p) {
   const L = p.load; if (!L) return null;
   if (L.k === 'home') return { k: 'drop', ...hwHomeXY(p, 'porch'), dur: rr2(2, 3.5), into: 'home', tool: p.variant || 'crate' };   // an interrupted errand still ends at home
   const S = HS.store, to = L.k === 'fish' ? (S.kitchen < 4 && HS.R() < 0.4 ? 'kitchen' : 'fish') : L.k === 'food' ? (S.kitchen < 3 && HS.R() < 0.5 ? 'kitchen' : 'food') : L.k;
-  const sp = { food: 'granary', fish: 'smoke', kitchen: 'kitchenIn', mat: 'wood', yard: 'storage', market: 'mkt' }[to];
-  return { k: 'drop', ...spotXY(sp), dur: rr2(2, 3.5), into: to, tool: p.variant || 'crate' };
+  const sp = { food: 'granary', fish: 'smoke', kitchen: 'kitchenIn', mat: 'wood', yard: 'storage', market: 'mkt', tools: 'toolpile', medkit: 'supplyIn', med: 'storage' }[to];
+  if (L.k === 'food' && L.n >= 2) { p.cart = 1; HS.Ls.carts++; return { k: 'drop', ...spotXY(sp), dur: rr2(2, 3.5), into: to, tool: '' }; }   // a full harvest goes by wheelbarrow
+  return { k: 'drop', ...spotXY(sp), dur: rr2(2, 3.5), into: to, tool: p.cart ? '' : (p.variant || 'crate') };
 }
 function hwDrop(p, T) {
   const L = p.load, S = HS.store, W = HS.stats.work;
   if (L && T.into === 'home') HS.stats.work.homeFood++;
   else if (L) { S[T.into] = Math.min(STORE_CAP[T.into] || 99, (S[T.into] || 0) + L.n); W.deliveries++; if (L.k === 'fish') W.fishDelivered += L.n; bubble(p, L.k === 'fish' ? 'fish' : L.k === 'mat' ? 'plank' : L.k === 'food' ? 'wheat' : 'star'); }
-  p.load = null; p.carry = null; p.variant = '';
+  p.load = null; p.carry = null; p.variant = ''; p.cart = 0;
 }
 const HAUL_SP = { food: 'granary', fish: 'smoke', kitchen: 'kitchenIn', mat: 'wood', yard: 'storage', market: 'mkt' };
-function hwHaulJob(p) {   // workers move supplies between buildings when a store needs it
-  const S = HS.store, opts = [];
-  if (S.yard > 0 && S.mat < STORE_CAP.mat - 2) opts.push(['yard', 'mat', 2 + S.yard / 4]);
-  if (S.food > 1 && S.kitchen < 5) opts.push(['food', 'kitchen', 3 - S.kitchen / 3]);
-  if (S.fish > 2 && S.kitchen < 6) opts.push(['fish', 'kitchen', 2]);
-  if (S.food > 4 && S.market < 6) opts.push(['food', 'market', 1.5]);
+const CARTK = { food: 2, fish: 4, yard: 5, mat: 3, kitchen: 1, tools: 5, med: 7, market: 2 };   // handcart loads (hf-art CART_LOAD)
+function hwHaulJob(p, force) {   // workers move supplies between buildings when a store needs it (force = [from, to])
+  const S = HS.store, opts = force ? (S[force[0]] > 0 ? [[force[0], force[1], 1]] : []) : [];
+  if (!force) { if (S.yard > 0 && S.mat < STORE_CAP.mat - 2) opts.push(['yard', 'mat', 2 + S.yard / 4]); if (S.food > 1 && S.kitchen < 5) opts.push(['food', 'kitchen', 3 - S.kitchen / 3]); if (S.fish > 2 && S.kitchen < 6) opts.push(['fish', 'kitchen', 2]); }
+  if (!force) { if (S.food > 4 && S.market < 6) opts.push(['food', 'market', 1.5]); if (S.tools > 1 && S.market < 8) opts.push(['tools', 'market', 1.2]); if (S.med > 0 && S.medkit < 4) opts.push(['med', 'medkit', 1.6]); }
   const busy = new Set(HS.people.filter(q => q.alive && q.task && q.task.k === 'haul' && q !== p).map(q => q.task.from + q.task.to));
   for (let i = opts.length - 1; i >= 0; i--) if (busy.has(opts[i][0] + opts[i][1])) opts.splice(i, 1);   // one hauler per route: no convoys
   if (!opts.length) return null;
@@ -140,11 +140,12 @@ function hwHaulJob(p) {   // workers move supplies between buildings when a stor
 function hwHaul(p, T, dt) {
   const S = HS.store;
   if (T.leg === 0) { p.act = 'kneel'; if (T.t < 1.6) return; if (S[T.from] <= 0) { p.task = null; return; }
-    const n = Math.min(S[T.from], T.from === 'yard' ? 2 : 2); S[T.from] -= n; p.load = { k: T.to, n }; p.variant = T.from === 'yard' ? 'crate' : T.from === 'fish' ? 'bucket' : 'crate'; p.carry = p.variant;
+    const n = Math.min(S[T.from], T.to === 'home' ? 1 : T.from === 'yard' || T.from === 'food' || T.from === 'tools' ? 3 : 2); S[T.from] -= n; p.load = { k: T.to, n };
+    if (n >= 2) { p.cart = CARTK[T.from] || 5; p.variant = ''; p.carry = null; HS.Ls.carts++; } else { p.variant = T.from === 'fish' ? 'bucket' : T.from === 'med' ? 'crate' : 'crate'; p.carry = p.variant; }
     T.leg = 1; const s = T.to === 'home' ? hwHomeXY(p, 'porch') : spotXY(HAUL_SP[T.to]); T.spot = s.spot; hsClaim(p, s.spot); T.x = s.x; T.y = s.y; T.t = 0; hsGo(p, s.x, s.y, 'in'); return; }
   p.act = 'stand'; if (T.t < 1.5) return;
   if (T.to === 'home') HS.stats.work.homeFood++; else S[T.to] = Math.min(STORE_CAP[T.to] || 99, (S[T.to] || 0) + p.load.n); HS.stats.work.hauls++; bubble(p, T.to === 'mat' ? 'plank' : T.to === 'market' ? 'money' : T.to === 'home' ? 'heart' : 'star');
-  p.load = null; p.carry = null; p.variant = ''; p.task = null;
+  p.load = null; p.carry = null; p.variant = ''; p.cart = 0; p.task = null;
 }
 
 // a household errand: a sack from the granary carried home (drains the store, so the pile at the barn rises and falls)
@@ -203,7 +204,7 @@ function hwGuardRespond() {
     } else for (const p of HS.people) {
       if (!p.alive || p.role !== 'guard' || !p.post || p.onTower || p.exp || p.rescue || p.st === 'down' || p.inj || !p.vis) continue;
       const k = p.task ? p.task.k : ''; if (k === 'respond' || k === 'tower' || k === 'gatepost' || k === 'defend' || k === 'fight' || k === 'sleep') continue;
-      if (p.post.k !== 'patrol' && p.post.k !== 'reserve') continue;
+      if (p.post.k !== 'patrol' && (p.post.k !== 'reserve' || !hitting(z))) continue;   // patrols answer approaches; reserves leave the training ground only for real wall attacks
       const d = (p.x - seg.x) ** 2 + (p.y - seg.y) ** 2; if (d < gd) { gd = d; g = p; }
     }
     if (!g) continue;

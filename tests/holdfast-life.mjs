@@ -3,7 +3,7 @@
 // Usage: node tests/holdfast-life.mjs [seconds=1200] [seed=7]
 import { loadHF, ev } from './hf-load.mjs';
 const SECS = +(process.argv[2] || 1200), SEED = +(process.argv[3] || 7);
-const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js'];
+const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js', 'holdfast/hf-life.js'];
 const fails = [], rep = {};
 const check = (name, ok, info) => { rep[name] = { ok: !!ok, info }; if (!ok) fails.push(name + ' ' + JSON.stringify(info)); };
 const J = (c, e) => JSON.parse(ev(c, `JSON.stringify(${e})`));
@@ -38,7 +38,7 @@ function world(seed, danger, pop) { const c = loadHF(FILES); c.hfBuildMap(7); if
     for (const z of HS.zombies) if (!L.born.has(z.id)) { L.born.add(z.id); if (hsInView(z.x, z.y, 0)) L.spawnInView++; if (isInside(z.x, z.y)) L.spawnInside++; }
   })()`;
   const st0 = J(c, 'HS.stats.attacks.minor');
-  for (let s = 0; s < SECS; s++) { for (let i = 0; i < 10; i++) { c.hsTick(0.1); if (i === 9) continue; ev(c, `for (const p of HS.people) if (p.alive && !p.onTower && !p.exp && !p.rescue && !p.arriving && p.vis) { const d = Math.hypot(p.x - p.px, p.y - p.py); if (d > __L.maxStep) __L.maxStep = d; }`); } ev(c, probe); }
+  for (let s = 0; s < SECS; s++) { for (let i = 0; i < 10; i++) { c.hsTick(0.1); if (i === 9) continue; ev(c, `for (const p of HS.people) if (p.alive && !p.onTower && !p.exp && !p.rescue && !p.arriving && p.vis && !p.mount) { const d = Math.hypot(p.x - p.px, p.y - p.py); if (d > __L.maxStep) __L.maxStep = d; }`); } ev(c, probe); }
   const L = J(c, `(() => { const L = __L, med = a => { a = a.slice().sort((x, y) => x - y); return a.length ? +a[a.length >> 1].toFixed(2) : 0; }, pct = (a, q) => { a = a.slice().sort((x, y) => x - y); return a.length ? +a[Math.floor(a.length * q)].toFixed(1) : 0; };
     return { crowdMax: L.crowdMax, standMax: L.standMax, overlapPerS: +(L.overlap / L.n).toFixed(2), cellMaxS: L.cellMax, persistPerMin: +(L.persist / L.n * 60).toFixed(2), unrelatedPerMin: +(L.unrelated / L.n * 60).toFixed(2),
       walk: med(L.walkV), run: med(L.runV), maxStep: +L.maxStep.toFixed(2), stageShareMax: +L.share.toFixed(2), dayShareMax: +(L.dayShare || 0).toFixed(2), gapMed: med(L.gap), gap90: pct(L.gap, 0.9),
@@ -64,7 +64,7 @@ function world(seed, danger, pop) { const c = loadHF(FILES); c.hfBuildMap(7); if
   check('work: cooks cook, serve, people eat', W.cooked >= 8 * k && W.served >= 5 * k && W.eaten >= 25 * k, [W.cooked, W.served, W.eaten]);
   check('work: supplies hauled between buildings', W.hauls >= 20 * k, W.hauls);
   check('work: builders build and salvage materials', W.builds >= 10 * k && W.salvage >= 15 * k, [W.builds, W.salvage]);
-  check('work: stores stay within limits', Object.entries(L.store).every(([s, n]) => n >= 0 && n <= ({ food: 40, fish: 24, kitchen: 10, pot: 3, meals: 16, mat: 24, yard: 18, market: 10 })[s]), L.store);
+  check('work: stores stay within limits', Object.entries(L.store).every(([s, n]) => n >= 0 && n <= ({ food: 40, fish: 24, kitchen: 10, pot: 3, meals: 16, mat: 24, yard: 18, market: 10, tools: 8, med: 10, medkit: 6 })[s]), L.store);
   check('threat: wilderness busy (>= 28 roaming infected on average)', L.zOut >= 28, L.zOut);
   check('threat: frontier band visible from the default camera (>= 8 on average)', L.zBand >= 8, L.zBand);
   check('threat: frequent small encounters (>= 1 per minute)', L.minor >= SECS / 60, L.minor);

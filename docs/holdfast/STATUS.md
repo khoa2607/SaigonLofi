@@ -14,7 +14,7 @@ python -m http.server 8765        # or serve.bat, from the repo root
 | http://localhost:8765/holdfast/ | Holdfast standalone (direct testing) |
 | `holdfast/index.html` via `file://` | Works too (YouTube needs http, as in Saigon) |
 
-**URL parameters** (testing/screenshots): `seed`, `pop` (residents), `hour`, `time=auto|morning|noon|dusk|night`, `wx=auto|clear|rain|wind`, `season=auto|spring|summer|fall|winter`, `danger=calm|standard|grim`, `cam=default|gate|settlement|wall|market|commons|ruins|fields|east|west|exp`, `zoom`, `warp=<seconds>` (fast-forward before the first frame), `attack=<n>` (force a major attack), `exp=1` (start an expedition), `clean=1` (hide UI), `test=1` (in-page self-test), `bench=1` (render benchmark).
+**URL parameters** (testing/screenshots): `seed`, `pop` (residents), `hour`, `time=auto|morning|noon|dusk|night`, `wx=auto|clear|rain|wind`, `season=auto|spring|summer|fall|winter`, `danger=calm|standard|grim`, `cam=default|gate|settlement|wall|market|commons|ruins|fields|east|west|exp|training|stable|hospital|school|graveyard|farmyard|workshop`, `zoom`, `warp=<seconds>` (fast-forward before the first frame), `attack=<n>` (force a major attack), `exp=1` (start an expedition), `clean=1` (hide UI), `test=1` (in-page self-test), `bench=1` (render benchmark).
 
 **Controls (same as Saigon):** drag to pan · wheel / pinch / `+` `−` zoom · Space music · H hide / double-click to show · R rain · N night · 1–4 seasons · B gate view · Esc back to Lofi Worlds · bottom dock (play, track, prev/next, ···, seasons + Auto) with the shared settings panel · VI/EN top-right. See milestone 4 below.
 
@@ -23,9 +23,9 @@ python -m http.server 8765        # or serve.bat, from the repo root
 | Area | What exists |
 |---|---|
 | **World** | Approved 144×144-tile valley: river meander, creek + culvert, curved improvised wall chain (161 sections, 10 towers, straight gate run with HOLDFAST sign), cleared kill-zone (hedgehogs, stumps, wrecks), wilderness (clustered pine/broadleaf groves, meadows, rocky ground, old road with bus + wrecks + power poles, trails, riverbank paths), 6 scavenging POIs (gas station, abandoned houses, collapsed house, farm, radio hill, old-town ruins) |
-| **Settlement** | **59 houses** (3 lot sizes, 13 wall colours, 8 roofs, porches, garages, chimneys, boarded/broken windows, spray tags, solar, water tanks) + newcomers' RV and 2 tents (≈62 dwellings); barracks + drill yard, infirmary + triage tent, workshop/motor pool, church (shelter), school, barn, kitchen + mess tent, 8-stall market, commons with great oak, fire pit, tables, string lights, benches, playground, memorial stones, water tower, wind turbines, 3 greenhouses, coop, goat pen, beehives, 3 docks + smokehouse, 43 crop-field patches, lamp-lit main street, yard props (fences, beds, barrels, laundry, woodpiles, bikes, mailboxes, bins, cars) |
+| **Settlement** | *(milestone 6: re-zoned, 40 houses + training ground, stable, workshop yard, hospital, school campus, graveyard, farmyard — see below.)* Originally **59 houses** (3 lot sizes, 13 wall colours, 8 roofs, porches, garages, chimneys, boarded/broken windows, spray tags, solar, water tanks) + newcomers' RV and 2 tents (≈62 dwellings); barracks + drill yard, infirmary + triage tent, workshop/motor pool, church (shelter), school, barn, kitchen + mess tent, 8-stall market, commons with great oak, fire pit, tables, string lights, benches, playground, memorial stones, water tower, wind turbines, 3 greenhouses, coop, goat pen, beehives, 3 docks + smokehouse, 43 crop-field patches, lamp-lit main street, yard props (fences, beds, barrels, laundry, woodpiles, bikes, mailboxes, bins, cars) |
 | **Art** | Rendered with SaigonLofi's own art system (bake/grade/ink, drawPerson, treeSprite) at Saigon density; pilot materials on every building/prop; per-pixel ground chunks with season palettes and raised grass; cast shadows; zombie/guard/worker looks through drawPerson costume hooks; conifers; animals (deer, rabbits, chickens, goats, dogs, crows) |
-| **Settlers** | 120 desktop / 70 mobile in 3 tiers (16 named, ~74 scheduled workers, ~30 ambient); roles: guards (towers, gate, patrol, reserve, 2 shifts), farmers, fishers, cooks, builders, techs, medics, scavengers, traders, teacher, elders, kids; meals, sleep, school, play, market, chores, carrying, laundry; rain behaviour; alarm → kids/elders shelter in the church; spot claims + phase offsets so nobody moves in lockstep; since milestone 5 every job has a visible outcome (crop plots, stores, meals, planks, repairs), see below |
+| **Settlers** | 120 desktop / 70 mobile in 3 tiers (16 named, scheduled workers, 14 ambient adults/elders); roles (milestone 6): guards 30 (towers, gate, 6 patrols, reserves, 2 shifts), farmers 13, builders 8, techs 4, smiths 2, grooms 3, medics 5, cooks 4, fishers 4, scavengers 9, traders 6, teachers 2, herders 2, elders 8, kids 14, adults 6; meals, sleep, school, play, market, chores, carrying, laundry; rain behaviour; alarm → kids/elders shelter in the church; spot claims + phase offsets so nobody moves in lockstep; since milestone 5 every job has a visible outcome (crop plots, stores, meals, planks, repairs), see below |
 | **Infected** | wander / idle / march (routes R1–R5) / investigate (noise) / chase wildlife / pursue / attack / wall + gate attack / stagger / die / corpse / fade; sound-driven (gunshots attract), group marches, frontier band always populated |
 | **Combat** | Tower snipers (aim, muzzle flash, tracer, hit/miss), gate spearmen, patrol shots, reserve defenders at the hottest section, melee inside breaches; wall sections take damage → damaged sprite → breach (passable) → builders repair → sealed; settlers can be injured (infirmary, medic) or killed (covered body → memorial) |
 | **Expeditions** | prep in the yard → gate opens → out along wilderness paths → search (loot bubble) → return; fighting retreat when spotted, rescue sorties, injuries/deaths/lost teams, stragglers still walk home; chronicle entries |
@@ -163,3 +163,100 @@ Screenshots were taken in headless Chrome to check the crop sprites, piles, bowl
 - "Repairing" houses has no visible damage state to fix — the builder's work shows as plank → hammering → dust/bubble; walls do change sprite when repaired.
 - Tower snipers often drop a small probe before responders arrive, so the response is sometimes seen as guards arriving at a quiet wall.
 - Device tuning only adjusts infected density; it is driven by frame time and has not been tested on a phone.
+
+
+## Milestone 6 — Current-era community expansion
+
+Art style, camera, the shared Saigon UI/audio and the milestone 5 behaviour systems are unchanged. Saigon is untouched. Past/Future are still "soon".
+
+### What was reorganised (and why)
+
+- **The gate yard was outside the wall.** The old site table centred the yard on design `v = 126`, ~90 units in front of the gate, so the trucks, crates, alarm bell, the yard store and the expedition staging point all sat in the cleared ground outside. It is now just inside the gate.
+- **Civic buildings were patched into a tight ring around the green**, so most non-farm activity piled up at the commons while the crop belt (43 plots, 16 farmers) was the only large busy area. Instead of adding more spots there, the settlement was re-zoned (`HSITES` in `hf-map.js`) so each kind of work has its own place.
+- **The footprint was enlarged** by moving the whole wall 30 design units outward (`HWALL`): threat routes, the wrecks in the kill-zone and the camera presets follow it; the frontier band, towers and gate logic are unchanged.
+
+### Layout (design units, see `node tests/holdfast-mapdump.mjs`)
+
+| Zone | Where | Contents |
+|---|---|---|
+| Gate yard | just inside the gate | trucks, crates, alarm bell, hitching rail (3 places), yard store, expedition staging, scavenger gear spots |
+| Training ground | left of the gate, along the wall | barracks, firing range (4 targets + sandbag berm), sparring rows, running track around the ground, flag, army tent, hurdles, weapon-care bench |
+| Market | main street below the gate yard | 8 stalls with live goods on the counters, a queue of 2 in front of each, parked handcart |
+| Stable | right of the gate, west of the creek | stable with dutch stall doors, fenced paddock, trough, hay bales, tack rack; 5 horses |
+| Workshop yard | east of the creek | workshop, forge with chimney and glowing coals, anvil, sawhorse, a wagon on blocks, workbenches, scrap |
+| Hospital | centre-right | two-storey white hospital with red-cross signs and entrance canopy, triage tent, 6 cots in the open, medical crates, stretcher, waiting bench, sheet line, ambulance |
+| Church + graveyard | centre-left | church; picket-fenced graveyard with 20 grave places (crosses and stones), memorial stones, lantern, bench, tree |
+| School campus | left side (replaced ~8 houses) | school, playground (swings, slide, sandbox, seesaw), outdoor class with chalkboard, 4 garden beds, ball field with goals, story bench |
+| Kitchen + commons | centre | unchanged (great oak, fire, tables, mess tent) |
+| Farmyard | lower left by the barn | barn (granary), chicken coop with a fenced run, pig pen with hut and trough, goat pen |
+| Fields, docks, greenhouses, newcomers' camp | as before | the crop belt is unchanged |
+
+Houses: **40** (was 59) — the left side and the civic band became community space. New box models in `hf-art.js` (same pilot language): hospital, stable, rails/pickets on both axes, targets, sandbags, hay, trough, tack rack, forge, anvil, sawhorse, wagon, med tent, cots, med crates, stretcher, lantern, seesaw, chalkboard, goals, pig hut, flag, hurdles, handcart (8 loads), grave markers, scaffolding, wall patches, roof tarps; pig, rooster and horse sprites; night spirits.
+
+### New simulation loops (`holdfast/hf-life.js`)
+
+Every loop has a beginning (fetch / walk), an action (pose, tool, fx) and an outcome that changes the world.
+
+- **Food chain:** farmers harvest into baskets; two harvests go by **wheelbarrow** to the granary or straight to the kitchen; haulers push **handcarts** granary → kitchen and granary → market; the kitchen only cooks what was delivered (verified by a starvation test); eggs and goat milk also go to the kitchen. 13 farmers (was 16), so farming is one big loop among several.
+- **Living market:** traders set up their stalls in the morning (crate from the market pile → goods appear on the counter), restock when a stall runs low, and pack up in the evening (a cloth covers the empty counter). Customers pick the stall with the shortest queue, wait in line, move up, trade (money bubble) and carry a bag home. Stall stock and the market pile rise and fall through the day; the forge's tools are carted to the market too.
+- **Training ground:** off-duty and reserve guards shoot at the targets (quiet practice rounds, tracer, a puff at the target), run laps of the track, march in a 3-5 person column behind a sergeant (footstep following), spar in facing rows, clean weapons. 6 patrols + more reserves (was 8 patrols). **On the alarm bell every training task stops at once and reserves run to the hottest section or to an assigned station on the wall** (they never fall back to training during an alarm).
+- **Stable:** grooms fetch hay to the trough (horses walk over to eat), brush horses (the horse waits while groomed), prepare tack, muck out, and lead horses back from the hitching rail along their own footsteps. Horses graze, amble and drink in the paddock and stand at the stall doors at night (they route around the stable, never through it).
+- **Mounted scouts:** every few minutes in daytime, 1-2 riders (scavengers or reserves) meet their tacked horses at the hitching rail, mount, ride out through the gate to a POI or a stretch of the frontier, look around, and trot home; if infected are close they gallop back with them in tow (the gate is forced open, guards respond) — "bringing danger to the gate". Sometimes they find **a wounded survivor** who walks in and ends up on a hospital cot, or medical supplies. A ride that cannot assemble is called off (no teleporting). Expeditions often take a **pack horse** that is unloaded at the hitching rail on return (+ yard supplies).
+- **Workshop / logistics:** the smiths hammer at the anvil (sparks, quench steam) → tools pile → market; carpentry at the sawhorse turns salvage (or logs) into planks; technicians repair the wagon (progress), work the benches and push carts between stores; scavengers pack expedition gear in the gate yard (expeditions use it).
+- **Construction & repair:** houses wear out (and 1-2 near the fighting are damaged after every attack). A builder carries poles over and **puts up scaffolding**, brings planks (by hand or a handcart of three), climbs onto the platform and **patches the wall hole or re-shingles the tarped roof plank by plank** (the patch fills in on the house), then dismantles the scaffold; the fresh boards stay visible for a while. Builders also top up sandbags at weak wall sections. Wall breaches/damage keep the milestone 5 repair loop (planks + hammer).
+- **Hospital:** injured settlers are fetched by a medic **with a stretcher**, lie on a cot (raised), get medic rounds and heal; residents, workers with a splinter and kids with a scraped knee come for **check-ups** (waiting bench → called to the tent → examined); 1-2 **convalescents** rest on the cots in the daytime; medics restock the medical crates from the yard store (expedition medicine, scout finds) and hang sheets.
+- **School:** morning lessons at the outdoor chalkboard (12 places, the teacher facing the class), a short recess, an afternoon **ball game** on the field (the ball really flies between the players), garden watering with the teacher, and story time on the bench (teacher or an elder) before going home. Kids are no longer "ambient": they keep their own schedule.
+- **Farmyard:** 4 pigs in their pen (they crowd the trough when the herder brings scraps from the kitchen, sleep by the hut at night), 7 hens and a rooster in the coop run (they rush to the feeder at feeding time), eggs collected and carried to the kitchen, goats milked. 2 herders, helped by elders.
+- **Graveyard / memorial:** residents and elders visit (stand or kneel, leave flowers that appear on the grave), an elder tends the paths; a death now adds **a fresh grave with a wooden cross and flowers** and a few neighbours gather. **At night only**, a few small pale spirits drift over the graves near the lantern, fading in and out (render-only, gentle).
+- **Frontier:** milestone 5 behaviour plus: patrols answer approaches and reserves stay for real wall attacks, riders return chased, builders reinforce weak sections, attacks leave repair work behind.
+
+### Activity distribution (Node, 08:00 → 20:00, same zone classifier for both)
+
+Share of visible, awake settlers by zone (`lfZoneOf`; milestone 5 measured on commit 30a7ed5 with the equivalent old site table):
+
+| Zone | Milestone 5 | Milestone 6 (seed 7) |
+|---|---|---|
+| Homes (porches, yards, streets) | 29 % | 16.1 % |
+| Fields | 16 % | 14 % |
+| Commons / green | 9.7 % | 10.7 % |
+| Market | 1.8 % | 7.6 % |
+| Training ground | 2.9 % | 4.6 % |
+| Stable | — | 3.1 % |
+| Workshop yard | 3.5 % | 5.3 % |
+| Hospital | 3.6 % | 6.7 % |
+| School campus | 6.1 % | 8.1 % |
+| Graveyard | 1.5 % | 3.3 % |
+| Farmyard | 5 % (barn + houses nearby) | 2.2 % |
+| Kitchen | 2.9 % | 3.2 % |
+| Frontier (wall, towers, gate yard) | 6.4 % | 8.9 % |
+| Outside (expeditions, riders, arrivals) | 9.2 % | 5.9 % |
+
+Biggest standing group outside meals ≤ 12 (10 on seed 7); the commons averages 11 people outside meal times. Loop counts in one 12-hour day (seed 7): 150 harvests, 76 deliveries, 78 cart trips, 15 pots cooked / 13 served; 37 sales, 18 restocks, 8 pack-ups; 145 practice shots, 13 laps, 2 formation marches; 9 groomings, 5 trough fills, 6 tack-ups, 3 rides (all came back chased); 30 forge pieces, 12 carpentry jobs, 5 wagon sessions; 8 houses damaged, 4 scaffolds, 12 patches, 4 houses finished, 10 sandbag top-ups; 26 check-ups, 2 convalescents; 12 lessons, 8 garden sessions, 186 ball kicks, 2 stories; 6 pig feeds, 10 eggs, 3 milkings; 8 graveyard visits, 6 tending.
+
+### Milestone 6 tests
+
+| Command | Proves | Last result |
+|---|---|---|
+| `node tests/holdfast-community.mjs [seed]` | 36 checks: ≥ 11 community zones busy (≥ 1.5 people on average), no zone > 25 %, fields ≤ 18 %, commons ≤ 12 outside meals, no standing group > 12; food chain (harvest → wheelbarrow/handcart → granary/kitchen/market, cooking needs deliveries — starvation test), market (setup/restock, sales, stock rises and falls, pack-up in the evening, closed at night), training (range, laps, formations; ≥ 4 people on average), **alarm: training stops within 20 s and reserves defend**, stable (feed, brush, tack, lead, muck), rides out and back, workshop (forge, carpentry, wagon, gear), construction (damage → scaffold → patches → finished; reinforcement; **more repairs after an attack**), hospital (check-ups, convalescents, rounds, linen; **an injured settler is fetched with a stretcher, lies on a cot and heals**; ≥ 3 people there on average), school (lessons, garden, ball game, stories), farmyard (pigs/chickens/goats in their pens, feeding, eggs, milk), graveyard (visits, caretaker; **a death adds a fresh grave and a gathering**), frontier, 2 game days (no NaN, stalls closed at night, repairs do not pile up, horses never left outside, rides every day, population viable, traders pack up), deterministic | **PASS** on seeds 7, 13, 21, 29, 37, 45 |
+| `node tests/holdfast-life.mjs 1200 [seed]` | milestone 5's 36 checks on the new layout | **PASS** on seeds 7, 13, 21 |
+| `node tests/holdfast-sim.mjs 3600` | 21 map + 3-day combat checks (map expectations updated: ≥ 38 homes, 8 civic sites incl. the stable) | **PASS** |
+| `node tests/holdfast-warm.mjs 20` | warm start | **PASS** (20 seeds) |
+| `node tests/holdfast-browser.mjs`, `node tests/holdfast-flow.mjs` | page boots with 0 errors, gallery + Saigon smoke, UI flow | **PASS** (both) |
+| `node tests/holdfast-bench.mjs` | real-time render cost through DevTools (software GL) | 1080p **59.4 fps**, loop JS 7.5 / 12.8 ms median / p95 (milestone 5: 7.3 / 12.1); 720p 59.6 fps, 1.1 / 2.7 ms; phone 59.8 fps, 0.6 / 1.3 ms; 60-strong attack at 1080p 59.6 fps in one run and 46.2 fps (11.6 / 14.7 ms) in a second run on the same machine — software rendering here is noisy |
+| `node tests/holdfast-mapdump.mjs` | top-down character map of the layout (diagnostic) | — |
+
+Screenshots were taken in headless Chrome to check each zone, the stall goods, horses, pigs, carts, scaffolds and the night spirits. **Stills do not prove behaviour** — that evidence is the simulation tests above. Nobody has watched the new zones live at 60 fps in a real browser yet.
+
+### Remaining limitations / rough spots
+
+- Fences and pens are visual: rails do not block walking, so a groom can step "through" a rail on the way to a horse (horses themselves stay inside).
+- Horses are side-view sprites (left/right facing only); riders are drawn sitting on the horse without a dedicated riding pose. A rider who is hurt keeps the saddle (no falls).
+- The pushed handcart is a separate sprite placed in front of the person; around corners it can briefly sit beside them.
+- Scaffolds, patches and roof tarps sit on the house's front face only (the lower-left side), so a repair on a house seen from behind is less readable.
+- The wagon in the workshop yard always shows a missing wheel; repair progress is tracked but the sprite does not change.
+- Medical tent, triage cots and the outdoor class are small at the default zoom; they read best one zoom step in.
+- Some loops are rare on unlucky seeds (a graveyard visit or a story may not happen in a given afternoon); the tests use day-level minimums and 6 seeds.
+- Rain pauses outdoor school and market errands (people stay on porches), as in milestone 5.
+- Simulation cost rose to ~0.4-0.7 ms per 0.1 s tick (was 0.3-0.4), still far below a frame budget. The attack scenario's frame rate varied between runs (59.6 and 46.2 fps on software GL); not measured on a real GPU or a phone.
+- `node tests/holdfast-browser.mjs --bench` (the virtual-time benchmark) returns no result in this Chrome build — also on the milestone 5 code — so the numbers above come from `tests/holdfast-bench.mjs`. The benchmark now reports its own errors instead of failing silently.
+- The 'busy zones' and loop counts are day-level averages; any single minute can look quieter (e.g. during a long alarm the training ground empties because the reserves are on the wall, which is intended).

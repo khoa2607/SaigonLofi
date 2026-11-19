@@ -7,6 +7,8 @@
 
 > **Implementation:** the Current-era MVP is built in `holdfast/` (see [STATUS.md](STATUS.md)). The art pilot below was approved and its rules are in use.
 >
+> **Milestone 6 (community expansion) supersedes the positions in §B2 and the house count in §B1.** The wall moved 30 design units outward; the gate yard is inside the gate; the settlement is zoned into a training ground (barracks, range, track), market, stable + paddock, workshop yard (forge, carpentry, wagon), a two-storey hospital with triage tent and cots, church + graveyard (the memorial), a left-side school campus, a farmyard (coop, pig pen, goat pen) and ~40 homes. Horses (mounted scouts, pack horses) are part of the Current era. Night spirits over the graveyard are a gentle ambient detail, not a threat. See [STATUS.md](STATUS.md) "Milestone 6" for the layout table and the loops.
+>
 > **Art pilot:** [`art-pilot/`](art-pilot/README.md) re-renders Holdfast with SaigonLofi's own art system at Saigon's pixel density. If approved, its art rules **supersede §A and §H's "13-px people at 3×"**: Holdfast uses `K = 2` and 1 art px = 1 device px at 1080p, with people about 40 art px tall. The v0.3 mockups below are layout and density diagrams, not final art.
 
 | Mockup | File |

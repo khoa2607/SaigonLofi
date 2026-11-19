@@ -390,6 +390,7 @@ function evTorso(X) {
   if (L.ev === 'builder') { const v = grade(0xe8b83a); rect(cx - 5, tt + 1, cx - 3, lt - 1, v, 6); rect(cx + 2, tt + 1, cx + 4, lt - 1, v, 6, cx + 4, clothSh(v)); rect(cx - 5, tt + 5, cx + 4, tt + 5, grade(0xf4f1e8), 6); rect(cx - 6, lt - 1, cx + 6, lt, grade(0x5a3a24), 6); }
   if (L.ev === 'medic') { const v = grade(0xf2f0ea); rect(cx - 5, tt + 1, cx + 5, lt - 1, v, 6, cx + 3, clothSh(v)); rect(cx - 1, tt + 3, cx + 1, tt + 7, grade(0x3a9a5a), 7); rect(cx - 3, tt + 4, cx + 3, tt + 6, grade(0x3a9a5a), 7); }
   if (L.ev === 'cook') { rect(cx - 4, tt + 3, cx + 4, lt + 3, 0xf4ecda, 6, cx + 2, 0xd8ccb4); }
+  if (L.ev === 'smith') { const a = grade(0x5a3a26); rect(cx - 4, tt + 2, cx + 4, lt + 4, a, 6, cx + 2, clothSh(a)); rect(cx - 5, tt + 1, cx - 4, tt + 3, grade(0x3a2a1c), 6); rect(cx + 4, tt + 1, cx + 5, tt + 3, grade(0x3a2a1c), 6); }
   if (L.pack2 && X.back) { const c = grade(0x6a5a3a); rect(cx - 5, tt + 1, cx + 5, lt - 1, c, 7, cx + 3, clothSh(c)); rect(cx - 4, tt + 3, cx + 4, tt + 4, grade(0x4a3e2a), 7); }
 }
 function evFace(X, ex1, ex2, ey, eh) {
@@ -418,6 +419,12 @@ function evOver(X, hx, hy, raise) {
   if (L.tool === 'cloth' && raise) rect(cx + 2, tt - 14, cx + 9, tt - 6, grade(L.cloth || 0xd9685c), 15, cx + 7, clothSh(grade(L.cloth || 0xd9685c)));
   if (L.tool === 'ball') X.ell(hx + 2, hy + 2, 2.6, 2.6, grade(0xd9534f), 15, grade(0xa83a36), grade(0xf7a0a0));
   if (L.tool === 'bag') { rect(hx - 1, hy + 1, hx + 4, hy + 6, grade(0x6a5a3a), 15, hx + 3, grade(0x4a3e2a)); }
+  if (L.tool === 'hay') { rect(hx - 3, hy - 2, hx + 5, hy + 3, grade(0xe0c878), 15, hx + 4, grade(0xb89a48)); put(hx - 2, hy - 3, grade(0xe8d488), 15); put(hx + 3, hy - 3, grade(0xc8a650), 15); }
+  if (L.tool === 'saddle') { rect(hx - 3, hy - 1, hx + 5, hy + 3, grade(0x6a3a22), 15, hx + 4, grade(0x4a2a18)); rect(hx - 3, hy - 2, hx - 1, hy - 1, grade(0x8a5a34), 15); }
+  if (L.tool === 'brush') { rect(hx, hy - 1, hx + 3, hy + 1, grade(0x8a5a34), 15); rect(hx, hy + 2, hx + 3, hy + 2, grade(0xd8c8a0), 15); }
+  if (L.tool === 'saw') { rect(hx, hy, hx + 9, hy + 1, grade(0xb8bcc0), 15, hx + 8, grade(0x8a8e92)); rect(hx - 2, hy - 1, hx, hy + 2, grade(0x8a5a34), 15); }
+  if (L.tool === 'stretcher') { rect(hx - 9, hy + 1, hx + 9, hy + 1, grade(0x9a6a44), 15); rect(hx - 7, hy, hx + 7, hy, grade(0x8a9a6a), 15); }
+  if (L.tool === 'fork' || L.tool === 'broom') { for (let i = 0; i < 20; i++) put(hx + 1 + Math.round(i * 0.4), hy - 8 + i, grade(0x8a5a34), 15); if (L.tool === 'fork') { for (const dx of [7, 9, 11]) rect(hx + dx, hy + 12, hx + dx, hy + 14, 0x6a6a72, 15); } else rect(hx + 7, hy + 11, hx + 12, hy + 14, grade(0xc8a650), 15, hx + 11, grade(0x9a7a38)); }
 }
 function zombify(gr, L) {
   const gs = grade(L.skin), Z = L.zsk || 0x9aae8c, Zs = mixc(Z, 0x3a5040, 0.42), M = new Map([[gs, Z], [skinSh(gs), Zs], [hiOf(gs), mixc(Z, 0xfff4e2, 0.24)], [mixc(gs, INK, 0.72), mixc(Z, INK, 0.72)], [mixc(skinSh(gs), INK, 0.72), mixc(Zs, INK, 0.72)]]);
@@ -448,6 +455,8 @@ function hfLook(role, R) {
   if (role === 'builder' || role === 'tech') { L.ev = 'builder'; L.hat = R() < 0.6 ? 'cap' : 0; L.hatC = role === 'tech' ? 0x3d4f7a : 0xe8b83a; }
   if (role === 'medic') { L.ev = 'medic'; L.hat = 0; }
   if (role === 'cook') { L.ev = 'cook'; }
+  if (role === 'smith') { L.ev = 'smith'; L.hat = 0; L.sleeve = 'short'; L.top = sp(R, [0x8a7a6a, 0x6a6a6a, 0x9a8a72]); }
+  if (role === 'groom' || role === 'herder') { L.hat = R() < 0.6 ? 'cap' : 'non'; L.hatC = role === 'groom' ? 0x6a4a32 : 0x8a7a5a; L.top = sp(R, [0x7a6a4a, 0x5a6a4a, 0x8a5a3a, 0x6a7a8a]); }
   if (role === 'farmer') { L.hat = R() < 0.6 ? (R() < 0.5 ? 'non' : 'coi') : 'cap'; L.hatC = 0x8a7a5a; }
   if (!L.ev) L.ev = 'x';
   L.b = { top: L.top, sleeve: L.sleeve, hat: L.hat, legs: L.legs }; L.seed = Math.floor(R() * 999);
