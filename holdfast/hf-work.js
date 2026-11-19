@@ -16,7 +16,7 @@ function hwInit() {
   const S = HF.spots, near = (x, y) => { const k = hfNearPass(x, y, 'in', 4); return k >= 0 ? tileC(k) : [x, y]; };
   if (!S.smoke) { const sm = HF.props.find(p => p.kind === 'smokehouse'); spot('smoke', ...near(sm.x + 6, sm.y + 16)); }
   if (!S.kitchenIn) { const kt = HF.buildings.find(b => b.kind === 'kitchen'); spot('kitchenIn', ...near(kt.x + kt.w + 6, kt.y + kt.d - 6)); }
-  if (!S.wood) { const ws = HF.buildings.find(b => b.kind === 'workshop'); spot('wood', ...near(ws.x + ws.w + 8, ws.y + 14)); }   // by the scrap heap, away from the workbenches
+  if (!S.wood) { const ws = HF.buildings.find(b => b.kind === 'workshop'); spot('wood', ...near(ws.x + ws.w + 20, ws.y + ws.d - 2)); }   // the plank pile by the sawhorse, away from the workbenches
   if (!S.mkt) { const st = S.stall; spot('mkt', ...near((st[0].x + st[7].x) / 2, (st[0].y + st[7].y) / 2)); }
   for (const name in S) for (const s of S[name]) { s.nm = name; s.zone = name === 'seat' || name === 'green' || (name === 'bench' && !s.work) ? 'commons' : name === 'play' ? 'play' : name === 'shop' ? 'market' : ''; }
   HS.zoneN = { commons: 0, play: 0, market: 0 };

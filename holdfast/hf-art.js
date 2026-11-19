@@ -178,10 +178,20 @@ function civicModel(b) {
     const S = { wall: 0x8a8a6e, trim: 0xd8d2b8, seed: 3, wins: { 1: winLayout(R, w, 1, 30, { board: 0.1 }), 2: winLayout(R, d, 1) }, door: { f: 1, u: 30, w: 7, h: 13.5, c: 0x4a5a3e }, sign: { f: 1, t: 'BARRACKS', u: 6, v: 14.5, c: 0xf2eee2, bg: 0x4a5a3e } };
     base(); B.push(HB(0, 0, 2.2, w, d, 19, S.wall, sidingP(S))); gable(S.wall, 0x5a6a50, 21.2, S, 5);
     for (let i = 0; i < 8; i++) B.push(HB(4 + i * 3.4, d + 1, 0, 3.2, 2.2, 1.9, 0xb8a47c, sandP), HB(5.6 + i * 3.4, d + 1.2, 1.9, 3.2, 2, 1.8, 0xb8a47c, sandP));
-  } else if (b.kind === 'infirmary') {
-    const S = { wall: 0xeeeae0, trim: 0xd8d2c4, seed: 5, wins: { 1: winLayout(R, w, 1, 18, { board: 0.05 }), 2: winLayout(R, d, 1, undefined, { board: 0.05 }) }, door: { f: 1, u: 18, w: 7, h: 13.5, c: 0x6a8a7a } };
-    base(); B.push(HB(0, 0, 2.2, w, d, 18, S.wall, sidingP(S))); gable(S.wall, 0x6a7478, 20.2, S, 5);
-    B.push(HB(w - 15, d, 9, 11, 0.6, 9, 0xf6f4ee, (f, u, v) => (Math.abs(u - 5.5) < 1.2 && v > 1.4 && v < 7.6) || (Math.abs(v - 4.5) < 1.2 && u > 2.4 && u < 8.6) ? 0x3a9a5a : undefined));
+  } else if (b.kind === 'infirmary') {   // milestone 6: a real two-storey hospital (white, green trim, red cross signs, entrance canopy)
+    const du = Math.round(w * 0.42), S = { wall: 0xf2efe6, trim: 0x5a8a6a, seed: 5, band: 18.5, wins: { 1: winLayout(R, w, 2, du, { board: 0.03, broken: 0.01 }), 2: winLayout(R, d, 2, undefined, { board: 0.03, broken: 0.01 }) }, door: { f: 1, u: du, w: 9, h: 14, c: 0x5a8a6a }, sign: { f: 1, t: 'HOSPITAL', u: du - 9, v: 15.6, c: 0xf6f4ee, bg: 0xb8403a } };
+    for (const fl of [1, 2]) for (const wn of S.wins[fl]) wn.cur = 0xe8f0ec;
+    base(); B.push(HB(0, 0, 2.2, w, d, 34, S.wall, sidingP(S))); gable(S.wall, 0x5a6a64, 36.2, Object.assign({}, S, { wins: {} }), 6);
+    const cross = (f, u, v, W, H) => (Math.abs(u - W / 2) < W * 0.14 && v > H * 0.15 && v < H * 0.85) || (Math.abs(v - H / 2) < H * 0.14 && u > W * 0.15 && u < W * 0.85) ? 0xc8382e : undefined;
+    B.push(HB(w / 2 - 7, d / 2 - 0.3, 49, 14, 0.6, 12, 0xf6f4ee, (f, u, v) => f === 1 ? cross(f, u, v, 14, 12) : undefined), HB(w / 2 - 7.6, d / 2 - 0.4, 48.4, 15.2, 0.8, 0.6, 0x8a8a84));
+    B.push(HB(w - 12, d, 22, 9, 0.6, 9, 0xf6f4ee, (f, u, v) => f === 1 ? cross(f, u, v, 9, 9) : undefined));
+    B.push(HB(du - 3, d, 15.5, 15, 7, 1.2, 0x5a8a6a), HB(du - 2.6, d + 6, 0, 1, 1, 15.5, TRIM), HB(du + 10.6, d + 6, 0, 1, 1, 15.5, TRIM), HB(du - 1, d, 0, 11, 3, 1.4, CONC), HB(du - 2, d + 3, 0, 13, 3, 0.7, CONC));
+  } else if (b.kind === 'stable') {      // milestone 6: horse stable with dutch stall doors, hay loft and sign
+    const wall = 0x8a5a3a, S = { wall, trim: 0xe8dcc4, seed: 17, vert: 1, wear: 0.4, wins: { 1: [], 2: [{ u: d / 2 - 3, v: 10, w: 6, h: 5, k: 'glass', lit: 1 }] }, sign: { f: 1, t: 'STABLE', u: w - 28, v: 13.6, c: 0xf2eee2, bg: 0x5a3a2a } };
+    const sp0 = sidingP(S);
+    base(); B.push(HB(0, 0, 2.2, w, d, 17, wall, (f, u, v, bb, wx, wy) => { if (f === 1) for (let k = 0; k < 4; k++) { const u0 = 4.5 + k * 9; if (u >= u0 && u < u0 + 7 && v < 11.5) { if (u < u0 + 0.6 || u > u0 + 6.4 || v > 10.9) return 0xe8dcc4; if (v > 5.6) return 0x1e1614; return (Math.abs((u - u0) - v * 1.1) < 0.45 || Math.abs((u0 + 7 - u) - v * 1.1) < 0.45) ? 0xe8dcc4 : (u * 2 | 0) % 3 ? 0x7a4a30 : 0x6a3e28; } } return sp0(f, u, v, bb, wx, wy); }));
+    gable(wall, 0x6a5a50, 19.2, Object.assign({}, S, { wins: {} }), 6);
+    B.push(HB(w + 0.1, d / 2 - 3, 21, 0.6, 6, 6, 0x5a3a2a, (f, u, v) => f === 2 && (u < 0.5 || u > 5.5 || v < 0.5 || v > 5.5 || Math.abs(u - v) < 0.4) ? 0xe8dcc4 : undefined));
   } else if (b.kind === 'workshop') {
     const c = 0x8a949a; base(); B.push(HB(0, 0, 2.2, w, d, 22, c, (f, u, v, bb, wx, wy) => { if (f === 1 && ((u > 6 && u < 22) || (u > 30 && u < 46)) && v < 15) return doorPix({ w: 16, h: 15, k: 'roll' }, (u - 6) % 24, v, { trim: 0x6a6a64 }); if (f === 1 && v > 17 && v < 21 && u > 4 && u < 4 + textW('WORKSHOP') + 2) return textAt('WORKSHOP', u - 5, v - 17.4) ? 0xf2c94c : 0x3a3a3a; return corrP(c, 0.5, 4)(f, u, v, bb, wx, wy); }));
     for (let k = 0; k < 3; k++) B.push(HB(-1, -1 + k * 2, 24.2 + k * 1.2, w + 2, d + 2 - k * 4, 1.2, 0x7a8a94, corrP(0x7a8a94, 0.5, 9)));
@@ -217,12 +227,12 @@ function civicModel(b) {
 }
 // ---------------------------------------------------------------- props
 const PROPS = {
-  truck: (o) => { const c = o.c; return [...carBoxes(c, 0), HB(19, 0.5, 1.6, 9, 8, 6, mixc(c, HINK, 0.15), (f) => f === 0 ? mixc(c, HINK, 0.4) : undefined), HB(20, 1.5, 7.6, 7, 3, 3, 0x9a8a62), HB(23, 4.5, 7.6, 3, 3, 4, 0x7a5a3a)]; },
+  truck: (o) => { const c = o.c; if (o.cross) return [...carBoxes(c, 0), HB(19, 0.5, 1.6, 9, 8, 9, 0xeeeae0, (f, u, v, b) => { if (f === 0) return 0xd8d4ca; const W = f === 1 ? b.w : b.d; return (Math.abs(u - W / 2) < 0.8 && v > 2.5 && v < 7.5) || (Math.abs(v - 5) < 0.8 && u > W / 2 - 2.6 && u < W / 2 + 2.6) ? 0xc8382e : v < 1 ? 0x9a968c : undefined; })]; return [...carBoxes(c, 0), HB(19, 0.5, 1.6, 9, 8, 6, mixc(c, HINK, 0.15), (f) => f === 0 ? mixc(c, HINK, 0.4) : undefined), HB(20, 1.5, 7.6, 7, 3, 3, 0x9a8a62), HB(23, 4.5, 7.6, 3, 3, 4, 0x7a5a3a)]; },
   car: (o) => carBoxes(o.c, o.wreck),
   bus: () => [HB(0, 0, 0, 44, 12, 15, 0xb8963e, (f, u, v, b) => { if (f === 0) return vnoise(u / 4, v / 3) > 0.55 ? RUST : 0xa8863a; if (v > 7 && v < 12 && (u % 5) > 1 && f === 1) return hs(Math.floor(u / 5), 2) < 0.5 ? 0x1e1a1e : 0x3a4048; if (vnoise(u / 3, v / 2) > 0.6) return mixc(0xb8963e, RUST, 0.6); if (v < 2) return 0x2a2626; return undefined; })],
   crates: () => [HB(0, 0, 0, 5, 5, 4, 0xc98a4a, (f, u, v) => f !== 0 && (v | 0) % 2 === 0 ? 0xa8703a : undefined), HB(5.5, 0.5, 0, 5, 5, 4, 0x6a7a5a, (f, u, v) => f !== 0 && (v | 0) % 2 === 0 ? 0x5a6a4a : undefined), HB(2.5, 0.5, 4, 5, 5, 3.6, 0xc98a4a)],
   bell: () => [HB(0, 0, 0, 1.4, 1.4, 24, WOOD_D, woodP), HB(-2, 0, 22, 6, 1.4, 1.4, WOOD_D), HB(1.4, 0.2, 17, 2, 1, 4, 0xc8a040, (f, u, v) => v < 0.6 ? 0x8a6a2a : undefined)],
-  stall: (o) => { const c = o.c; return [HB(0, 0, 0, 12, 7, 5, 0x8a6a4a, (f, u) => f !== 0 && (u | 0) % 4 === 0 ? 0x6b4f34 : undefined), HB(0.5, 0.5, 5, 11, 6, 1.6, 0x6b4f34, (f, u, v) => { const h = hash2(u * 1.3 + o.v * 7, v * 1.3 + f); return h < 0.3 ? [0xd9534f, 0xf2c94c, 0x58994f, 0xf08a2b, 0x9a6a44][(h * 17 | 0) % 5] : undefined; }), HB(0, 0, 0, 0.8, 0.8, 13, WOOD_D), HB(11.2, 0, 0, 0.8, 0.8, 13, WOOD_D), HB(0, 6.2, 0, 0.8, 0.8, 11, WOOD_D), HB(11.2, 6.2, 0, 0.8, 0.8, 11, WOOD_D), HB(-1, -1, 13, 14, 9, 1.2, c, (f, u) => f === 0 ? ((u / 2.4 | 0) % 2 ? c : 0xf4f1e8) : mixc(c, HINK, 0.2))]; },
+  stall: (o) => { const c = o.c; return [HB(0, 0, 0, 12, 7, 5, 0x8a6a4a, (f, u) => f !== 0 && (u | 0) % 4 === 0 ? 0x6b4f34 : undefined), HB(0.5, 0.5, 5, 11, 6, 0.6, 0x6b4f34, (f, u, v) => f === 0 && (u | 0) % 3 === 0 ? 0x5a4028 : undefined), HB(0, 0, 0, 0.8, 0.8, 13, WOOD_D), HB(11.2, 0, 0, 0.8, 0.8, 13, WOOD_D), HB(0, 6.2, 0, 0.8, 0.8, 11, WOOD_D), HB(11.2, 6.2, 0, 0.8, 0.8, 11, WOOD_D), HB(-1, -1, 13, 14, 9, 1.2, c, (f, u) => f === 0 ? ((u / 2.4 | 0) % 2 ? c : 0xf4f1e8) : mixc(c, HINK, 0.2))]; },
   tent: (o) => { const c = o.c, B = []; for (let k = 0; k < 4; k++) B.push(HB(k * 1.6, 0, k * 2.2, 14 - k * 3.2, 12, 2.2, c, canvasP(c), { k })); return B; },
   messtent: () => { const c = 0xd8ccae, B = []; for (const [x, y] of [[0, 0], [38, 0], [0, 24], [38, 24]]) B.push(HB(x, y, 0, 1, 1, 15, WOOD_D)); for (let k = 0; k < 4; k++) B.push(HB(-1, -1 + k * 3, 15 + k * 2, 41, 27 - k * 6, 2, c, canvasP(c))); return B; },
   firepit: () => { const B = []; for (let a = 0; a < 8; a++) B.push(HB(Math.cos(a / 8 * TAU) * 5 - 1, Math.sin(a / 8 * TAU) * 5 - 1, 0, 2, 2, 1.6, 0x8a847c, stoneP)); B.push(HB(-3, -0.6, 0, 6, 1.2, 1.2, 0x5a3a2a), HB(-0.6, -3, 0, 1.2, 6, 1.2, 0x6a4a32)); return B; },
@@ -246,7 +256,7 @@ const PROPS = {
   fence: (o) => [HB(0, 0, 0, o.w, 0.8, 7, TRIM, (f, u, v) => { if (f === 0) return TRIM; if (v > 5.4 && (u % 2) > 1.1) return -1; if ((u % 2) > 1.1 && v > 1.4 && v < 5.4) return -1; if (v < 1.2) return mixc(TRIM, 0x6a5a4a, 0.4); return hs(u * 2, v) > 0.9 ? 0xc8c0ae : undefined; })],
   bed: (o) => [HB(0, 0, 0, 8, 16, 3.2, 0x8a5e3a, soilBedP(CROPS[o.v % 4]))],
   barrel: () => [HB(0, 0, 0, 4.4, 4.4, 8, 0x3d6f9a, (f, u, v) => f !== 0 && (Math.abs(v - 2) < 0.4 || Math.abs(v - 6) < 0.4) ? 0x2e5274 : undefined)],
-  laundry: (o) => { const B = [HB(0, 0, 0, 1, 1, 17, WOOD_D), HB(o.w, 0, 0, 1, 1, 17, WOOD_D), HB(0, 0.2, 16, o.w + 1, 0.4, 0.4, 0xe8e2d4)]; const cs = [0xd9685c, 0xf4f1e8, 0x3d6fb5, 0xf2c94c, 0x9fd8b4, 0x8a5ab8]; for (let i = 0; i * 6 + 6 < o.w; i++) { const c = cs[(i + (o.x | 0)) % cs.length]; B.push(HB(2 + i * 6, 0, 9 + (i % 2), 4.6 - (i % 2), 0.5, 7 - (i % 2) * 2, c, (f, u) => f === 1 && (u * 2 | 0) % 3 === 0 ? mixc(c, HINK, 0.15) : undefined)); } return B; },
+  laundry: (o) => { if (o.along === 'y') { const B = [HB(0, 0, 0, 1, 1, 17, WOOD_D), HB(0, o.w, 0, 1, 1, 17, WOOD_D), HB(0.2, 0, 16, 0.4, o.w + 1, 0.4, 0xe8e2d4)]; for (let i = 0; i * 6 + 6 < o.w; i++) B.push(HB(0, 2 + i * 6, 9 + (i % 2), 0.5, 4.6 - (i % 2), 7 - (i % 2) * 2, i % 2 ? 0xe8ece8 : 0xf4f1e8)); return B; } const B = [HB(0, 0, 0, 1, 1, 17, WOOD_D), HB(o.w, 0, 0, 1, 1, 17, WOOD_D), HB(0, 0.2, 16, o.w + 1, 0.4, 0.4, 0xe8e2d4)]; const cs = o.white ? [0xf4f1e8, 0xe8ece8, 0xf4f1e8, 0xdce6e0] : [0xd9685c, 0xf4f1e8, 0x3d6fb5, 0xf2c94c, 0x9fd8b4, 0x8a5ab8]; for (let i = 0; i * 6 + 6 < o.w; i++) { const c = cs[(i + (o.x | 0)) % cs.length]; B.push(HB(2 + i * 6, 0, 9 + (i % 2), 4.6 - (i % 2), 0.5, 7 - (i % 2) * 2, c, (f, u) => f === 1 && (u * 2 | 0) % 3 === 0 ? mixc(c, HINK, 0.15) : undefined)); } return B; },
   woodpile: () => [HB(0, 0, 0, 14, 5, 6, WOOD, (f, u, v) => f === 2 ? ((Math.hypot((u % 2.2) - 1.1, (v % 2.2) - 1.1) < 0.8) ? 0xc8a06a : 0x6a4a32) : f === 0 ? WOOD_L : (v % 2.2 < 0.4 ? 0x5a3e2a : vnoise(u, v) > 0.5 ? WOOD : WOOD_D))],
   bike: () => [HB(0, 0, 0, 9, 0.6, 3, 0x2a2626, (f, u) => (u > 2 && u < 7) ? -1 : undefined), HB(2, 0, 3, 6, 0.6, 1, 0xb84a3a), HB(7, 0, 3, 1, 0.6, 3, 0x3a3a3a)],
   mailbox: () => [HB(0, 0, 0, 0.8, 0.8, 8, WOOD_D), HB(-1.2, -0.6, 8, 3.2, 2.2, 2.6, 0x5a6a7a)],
@@ -261,8 +271,63 @@ const PROPS = {
   mast: () => [HB(0, 0, 0, 3, 3, 90, 0xb84a3a, (f, u, v) => { if (f === 0) return 0x8a3a2a; if ((u + v * 0.8) % 2.4 < 0.6 || (u - v * 0.8 + 40) % 2.4 < 0.6 || u < 0.5 || u > 2.5) return ((v / 12) | 0) % 2 ? 0xe8e2d4 : 0xb84a3a; return -1; })],
   shed: () => [HB(0, 0, 0, 14, 12, 10, 0x8a949a, corrP(0x8a949a, 0.7, 6)), HB(-1, -1, 10, 16, 14, 1.4, 0x6a7a84, corrP(0x6a7a84, 0.7, 7))],
   dock: (o) => [HB(0, 0, 1, 6, o.len, 1.6, WOOD, plankP, { along: 'y' }), HB(0, o.len - 1, -4, 1, 1, 6, WOOD_D), HB(5, o.len - 1, -4, 1, 1, 6, WOOD_D), HB(0, o.len * 0.5, -4, 1, 1, 6, WOOD_D), HB(5, o.len * 0.5, -4, 1, 1, 6, WOOD_D)],
+  // ---- milestone 6 props (same box + painter language as the approved pilot)
+  rail: (o) => railBoxes(o.w, o.along, 0),
+  picket: (o) => railBoxes(o.w, o.along, 1),
+  hitch: () => [HB(0, 0, 0, 1.2, 1.2, 7.5, WOOD_D, woodP), HB(16.8, 0, 0, 1.2, 1.2, 7.5, WOOD_D, woodP), HB(8.4, 0, 0, 1.2, 1.2, 7.5, WOOD_D, woodP), HB(-0.4, 0, 6.2, 18.8, 1, 1.2, WOOD, woodP)],
+  handcart: (o) => cartBoxes('x', o.load || 0),
+  target: () => [HB(0.6, 0.8, 0, 0.8, 0.8, 4, WOOD_D), HB(3.6, 0.8, 0, 0.8, 0.8, 4, WOOD_D), HB(0, 1.2, 3.4, 5, 0.6, 5.4, 0xf2ece0, (f, u, v) => { if (f !== 1) return 0xc8b89a; const r = Math.hypot(u - 2.5, v - 2.7); return r < 0.7 ? 0xc8382e : r < 1.5 ? 0xf2ece0 : r < 2.2 ? 0xc8382e : r < 2.5 ? 0x3a3030 : 0xf2ece0; })],
+  sandbags: () => [HB(0, 0, 0, 9, 3, 2.2, 0xb8a47c, sandP), HB(1, 0.3, 2.2, 7, 2.6, 2, 0xb8a47c, sandP), HB(2.4, 0.5, 4.2, 4.4, 2.2, 1.8, 0xb8a47c, sandP)],
+  trough: () => [HB(0, 0, 0, 9, 3, 2.6, WOOD_D, plankP, { along: 'x' }), HB(0.6, 0.6, 2.6, 7.8, 1.8, 0.1, 0x5a96ae, (f, u) => (u * 3 | 0) % 7 === 0 ? 0x9ac8d8 : undefined)],
+  hay: () => { const bale = (x, y, z) => HB(x, y, z, 5, 3.6, 2.8, 0xd8bc6a, (f, u, v) => { if (f === 0) return hs(u * 3, v * 3) > 0.7 ? 0xc8a650 : 0xe0c878; if (Math.abs(u - 1.4) < 0.25 || Math.abs(u - 3.6) < 0.25) return 0x8a6a34; return hs(u * 4, v * 5) > 0.75 ? 0xb89a48 : undefined; }); return [bale(0, 0, 0), bale(5.2, 0, 0), bale(0, 4, 0), bale(5.2, 4, 0), bale(2.6, 2, 2.8)]; },
+  tack: () => [HB(0, 0, 0, 1, 1, 8, WOOD_D), HB(11, 0, 0, 1, 1, 8, WOOD_D), HB(0, 0.1, 6.6, 12, 0.8, 0.8, WOOD), HB(1.5, -1, 4.2, 4, 2.6, 2.4, 0x6a3a22, (f, u, v) => v > 1.8 ? 0x8a5a34 : undefined), HB(6.5, -1, 4.2, 4, 2.6, 2.4, 0x5a3220, (f, u, v) => v > 1.8 ? 0x7a4a2c : undefined), HB(2, 0.6, 1, 0.5, 0.4, 3.4, 0x3a2a20)],
+  forge: () => [HB(0, 0, 0, 10, 8, 5, 0x8a847c, stoneP), HB(1.5, 1.5, 5, 7, 5, 0.6, 0x3a2a24, (f, u, v) => vnoise(u * 2, v * 2) > 0.5 ? 0xff9a3a : 0xc8501e, { em: 0xff8a30 }), HB(6, 1, 5, 3.4, 3.4, 16, 0x9e5040, brickP), HB(-1.5, -1.5, 13, 14, 12, 1.2, 0x7a8a94, corrP(0x7a8a94, 0.7, 2)), HB(-1, 9.6, 0, 1, 1, 13, WOOD_D), HB(11.6, 9.6, 0, 1, 1, 13, WOOD_D), HB(10.5, 4, 1, 3, 3.6, 2, 0x6a4a32, (f, u, v) => f === 0 ? 0x4a3226 : undefined)],
+  anvil: () => [HB(0, 0, 0, 2.4, 1.6, 2.6, 0x6a4a32, woodP), HB(-0.8, -0.2, 2.6, 4, 2, 1.4, 0x3a3a42, (f) => f === 0 ? 0x5a5a64 : undefined)],
+  sawhorse: () => [HB(0, 0, 0, 0.8, 3, 4, WOOD_D), HB(9, 0, 0, 0.8, 3, 4, WOOD_D), HB(-1, 0.6, 4, 12, 1.8, 0.8, WOOD_L, plankP, { along: 'x' }), HB(1, -2, 0, 7, 2, 1.6, WOOD, plankP, { along: 'x' })],
+  wagon: () => { const B = [HB(0, 0, 4, 18, 9, 1.2, WOOD, plankP, { along: 'x' }), HB(0, 0, 5.2, 18, 0.8, 3, WOOD_D, plankP, { along: 'x' }), HB(0, 8.2, 5.2, 18, 0.8, 3, WOOD_D, plankP, { along: 'x' }), HB(17.2, 0, 5.2, 0.8, 9, 3, WOOD_D)];
+    for (const [x, y] of [[3, -0.8], [3, 9], [13, -0.8]]) B.push(HB(x - 2.5, y, 0, 5, 0.8, 5, 0x5a4030, (f, u, v) => { const r = Math.hypot(u - 2.5, v - 2.5); return r > 2.5 ? -1 : r > 1.9 || r < 0.6 || Math.abs(u - 2.5) < 0.3 || Math.abs(v - 2.5) < 0.3 ? 0x4a3426 : -1; }));
+    B.push(HB(11, 9.2, 0, 4, 2, 3.2, 0x8a847c, stoneP), HB(12, 10.4, 0, 5, 0.8, 5, 0x5a4030, (f, u, v) => f === 0 ? 0x5a4030 : undefined), HB(-7, 2.4, 3.6, 7, 0.8, 0.8, WOOD_D), HB(-7, 5.8, 3.6, 7, 0.8, 0.8, WOOD_D)); return B; },
+  medtent: () => { const c = 0xeeeae0, B = []; for (let k = 0; k < 4; k++) B.push(HB(k * 2.2, 0, k * 2.6, 18 - k * 4.4, 16, 2.6, c, canvasP(c), { k })); B.push(HB(5, 16, 1.5, 8, 0.4, 7.5, 0xf6f4ee, (f, u, v) => f === 1 && ((Math.abs(u - 4) < 1.1 && v > 0.8 && v < 6.7) || (Math.abs(v - 3.75) < 1.1 && u > 0.8 && u < 7.2)) ? 0xc8382e : undefined)); return B; },
+  cot: () => [HB(0, 0, 0, 0.6, 0.6, 2, 0x6a6a64), HB(5.4, 0, 0, 0.6, 0.6, 2, 0x6a6a64), HB(0, 2.6, 0, 0.6, 0.6, 2, 0x6a6a64), HB(5.4, 2.6, 0, 0.6, 0.6, 2, 0x6a6a64), HB(0, 0, 2, 6, 3.2, 0.7, 0x7a8a6a, (f, u) => f === 0 && u < 1.6 ? 0xf2efe6 : undefined)],
+  medcrates: () => { const cr = (x, y, z) => HB(x, y, z, 4, 3.6, 3.2, 0xeeeae0, (f, u, v, b) => { const W = f === 1 ? b.w : b.d; if (f === 0) return 0xe0dcd2; return (Math.abs(u - W / 2) < 0.45 && Math.abs(v - 1.6) < 1.2) || (Math.abs(v - 1.6) < 0.45 && Math.abs(u - W / 2) < 1.2) ? 0xc8382e : v < 0.4 ? 0xb8b4aa : undefined; }); return [cr(0, 0, 0), cr(4.4, 0.3, 0), cr(2, 0.2, 3.2)]; },
+  stretcher: () => [HB(0, 0, 0.5, 10, 0.6, 0.6, WOOD), HB(0, 3, 0.5, 10, 0.6, 0.6, WOOD), HB(1.5, 0.3, 0.9, 7, 3, 0.2, 0x8a9a6a)],
+  lantern: () => [HB(-0.5, -0.5, 0, 1, 1, 11, 0x3a3a38), HB(-1.4, -1.4, 11, 2.8, 2.8, 2.6, 0xffe4a0, null, { em: 0xffd88a }), HB(-1.8, -1.8, 13.6, 3.6, 3.6, 0.8, 0x3a3a38)],
+  seesaw: () => [HB(4.4, 0.6, 0, 1.2, 1.6, 2.6, 0xb84a3a), HB(0, 0.8, 1.6, 10, 1.2, 0.6, 0xf2c94c), HB(0, 0.6, 2.2, 0.6, 1.6, 1.4, 0x3d6f9a), HB(9.4, 0.6, 1, 0.6, 1.6, 1.4, 0x3d6f9a)],
+  chalk: () => [HB(0.6, 0.6, 0, 0.8, 0.8, 11, WOOD_D), HB(8.6, 0.6, 0, 0.8, 0.8, 11, WOOD_D), HB(0, 1, 4, 10, 0.6, 7, 0x3a5a44, (f, u, v) => { if (f !== 1) return WOOD; if (u < 0.5 || u > 9.5 || v < 0.5 || v > 6.5) return WOOD; return textAt('ABC', u - 1.4, v - 3.6) || (v < 2.4 && v > 1.8 && u > 2 && u < 8 && (u * 3 | 0) % 4) ? 0xe8ece0 : undefined; })],
+  goal: () => [HB(0, 0, 0, 0.8, 0.8, 6.5, 0xf2f0ea), HB(0, 9, 0, 0.8, 0.8, 6.5, 0xf2f0ea), HB(0, 0, 6.5, 0.8, 9.8, 0.8, 0xf2f0ea), HB(1.8, 0.4, 0, 0.3, 9, 6.6, 0xd8d6d0, (f, u, v) => ((u + v) % 1.6 < 0.3 || (u - v + 20) % 1.6 < 0.3) ? 0xd8d6d0 : -1)],
+  pighut: () => [HB(0, 0, 0, 9, 7, 5, 0x8a6a4a, plankP, { along: 'y' }), HB(-0.8, -0.8, 5, 10.6, 8.6, 1.4, 0x7a8a94, corrP(0x7a8a94, 0.7, 4)), HB(3, 6.9, 0, 3.4, 0.3, 3.2, 0x2a1e1a)],
+  flag: () => [HB(-0.5, -0.5, 0, 1, 1, 30, 0xb8b4aa), HB(0.5, -0.2, 22, 9, 0.4, 6, 0x4e6a3e, (f, u, v) => f === 1 && Math.abs(v - 3) < 0.7 ? 0xe8dcc0 : (u + v * 0.6) % 4 < 0.4 ? 0x3e5a30 : undefined), HB(-1.5, -1.5, 0, 3, 3, 0.8, 0x8a847c, stoneP)],
+  hurdle: () => [HB(0, 0, 0, 0.8, 0.8, 4, WOOD_D), HB(8, 0, 0, 0.8, 0.8, 4, WOOD_D), HB(-0.4, -0.2, 3.2, 9.6, 1.2, 1.2, 0x9a6a44, woodP)],
   lights: () => []
 };
+// ranch rails (o.w long, along 'x' or 'y'): posts every 6 units; pickets: a white picket fence for the graveyard
+function railBoxes(len, along, picket) {
+  const B = [], ax = along !== 'y', post = (t) => B.push(ax ? HB(t, 0, 0, 0.9, 0.9, picket ? 6 : 7.5, picket ? 0xe8e2d4 : WOOD_D, picket ? undefined : woodP) : HB(0, t, 0, 0.9, 0.9, picket ? 6 : 7.5, picket ? 0xe8e2d4 : WOOD_D, picket ? undefined : woodP));
+  for (let t = 0; t <= len + 0.01; t += 6) post(Math.min(t, len - 0.9));
+  if (picket) { const pp = (f, u, v) => { if (f === 0) return 0xe8e2d4; if ((u % 1.6) > 0.95) return -1; if (v > 4.6 && (u % 1.6) > 0.65) return -1; if (v < 1) return 0xb8b0a0; return hs(u * 2, v) > 0.9 ? 0xc8c0ae : undefined; }; B.push(ax ? HB(0, 0.1, 0, len, 0.6, 5.4, 0xeeeae0, pp) : HB(0.1, 0, 0, 0.6, len, 5.4, 0xeeeae0, pp)); }
+  else for (const z of [2.6, 5.4]) B.push(ax ? HB(0, 0.1, z, len, 0.6, 0.9, WOOD, woodP) : HB(0.1, 0, z, 0.6, len, 0.9, WOOD, woodP));
+  return B;
+}
+// a two-wheeled handcart (tray along x or y) with an optional load: 1 produce, 2 sacks, 3 planks, 4 fish, 5 crates, 6 hay, 7 med supplies
+const CART_LOAD = { 1: [0x6aa244, 0xd9534f], 2: [0xd8c08a, 0xc0a874], 3: [0xc49a64, 0x9a7446], 4: [0xc8d4dc, 0x6a7a84], 5: [0xc98a4a, 0xa8703a], 6: [0xe0c878, 0xb89a48], 7: [0xeeeae0, 0xc8382e] };
+function cartBoxes(along, load) {
+  const ax = along !== 'y', L = (x, y, z, w, d, h, c, p, e) => ax ? HB(x, y, z, w, d, h, c, p, e) : HB(y, x, z, d, w, h, c, p, e);
+  const wheel = (f, u, v) => { const r = Math.hypot(u - 1.6, v - 1.6); return r > 1.6 ? -1 : r > 1.1 || Math.abs(u - 1.6) < 0.25 ? 0x3a2e28 : -1; };
+  const B = [L(0, 0, 2.2, 9, 5, 0.8, WOOD, plankP, { along: ax ? 'x' : 'y' }), L(0, 0, 3, 9, 0.6, 1.8, WOOD_D), L(0, 4.4, 3, 9, 0.6, 1.8, WOOD_D), L(8.4, 0, 3, 0.6, 5, 1.8, WOOD_D),
+    L(2.8, -0.7, 0, 3.2, 0.6, 3.2, 0x3a2e28, ax ? wheel : undefined), L(2.8, 5.1, 0, 3.2, 0.6, 3.2, 0x3a2e28, ax ? wheel : undefined), L(-5, 0.6, 3.6, 5.2, 0.6, 0.6, WOOD_D), L(-5, 3.8, 3.6, 5.2, 0.6, 0.6, WOOD_D), L(8, 2.2, 0, 0.7, 0.7, 2.4, WOOD_D)];
+  const c = CART_LOAD[load]; if (c) B.push(L(0.8, 0.7, 3.4, 7.4, 3.6, load === 3 ? 1.6 : 2.2, c[0], (f, u, v) => (hs(Math.floor(u * 1.5), Math.floor(v * 1.5) + f) > 0.6 ? c[1] : undefined)), L(2, 1.2, 5.6, 4.6, 2.6, load === 3 ? 0.8 : 1.2, c[0], (f, u, v) => (hs(Math.floor(u * 2) + 5, Math.floor(v * 2)) > 0.55 ? c[1] : undefined)));
+  return B;
+}
+// a grave marker: 0 wooden cross, 1 rounded stone, 2 flat stone, 3 a stone cross; fresh = a dirt mound with flowers
+function graveBoxes(v, fresh) {
+  const B = [];
+  if (fresh) B.push(HB(-1.6, 0.6, 0, 3.4, 5.2, 0.9, 0x6a4e34, (f, u, v2) => hs(u * 3, v2 * 3) > 0.85 ? 0xd9685c : hs(u * 3 + 1, v2 * 3) > 0.9 ? 0xf2e6a0 : undefined));
+  if (v === 0 || fresh) B.push(HB(-0.4, -0.3, 0, 0.8, 0.6, 6, WOOD, woodP), HB(-1.8, -0.3, 3.8, 3.6, 0.6, 0.8, WOOD, woodP));
+  else if (v === 1) B.push(HB(-1.6, -0.5, 0, 3.2, 1, 4.6, 0xa49e94, (f, u, vv) => f === 1 && vv > 3.6 && (u < 0.5 || u > 2.7) ? -1 : stoneP(f, u, vv, null, u, vv)));
+  else if (v === 2) B.push(HB(-1.8, -0.5, 0, 3.6, 1.2, 3.2, 0x96908a, stoneP));
+  else B.push(HB(-0.5, -0.4, 0, 1, 0.8, 5.6, 0xb8b2a6, stoneP), HB(-1.7, -0.4, 3.4, 3.4, 0.8, 1, 0xb8b2a6, stoneP), HB(-1.4, -0.6, 0, 2.8, 1.2, 0.8, 0x8a847c, stoneP));
+  return B;
+}
 function carBoxes(c, wreck) {
   const bodyP = (f, u, v, b) => { if (f === 0) return vnoise(u / 3, v / 3) > 0.6 && wreck ? mixc(c, RUST, 0.5) : mixc(c, 0xfff1d6, 0.12); let k = c; if (wreck && vnoise(u / 2.5, v / 2) > 0.58) k = mixc(k, RUST, 0.55); if (v < 1) k = mixc(k, HINK, 0.4); if (f === 1 && Math.abs(u - b.w * 0.5) < 0.25) k = mixc(k, HINK, 0.35); return k; };
   return [HB(1, 0.5, 0, 3, 1, 3, 0x2a2628), HB(14, 0.5, 0, 3, 1, 3, 0x2a2628), HB(1, 8.5, 0, 3, 1, 3, 0x2a2628), HB(14, 8.5, 0, 3, 1, 3, 0x2a2628), HB(0, 0, 1.6, 19, 9, 5, c, bodyP),

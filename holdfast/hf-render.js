@@ -108,19 +108,21 @@ function hrBuildStatics(progress) {
     if (b.kind === 'house') { const L = HF.lots[b.lot]; const o = { w: L.w, d: L.d, floors: L.floors, wall: L.wall, roof: L.roof, seed: L.seed, porch: L.porch, garage: L.garage, solar: L.seed % 4 === 0 }; boxes = () => { const bx = suburbHouse(o); H = o.H; if (o.chim) HR.smokers.push([b.x + o.chim[0], b.y + o.chim[1], o.chim[2], L.seed]); return bx; }; }
     else boxes = () => { const bx = civicModel(b); if (b.chim) HR.smokers.push([b.x + b.chim[0], b.y + b.chim[1], b.chim[2], b.seed]); return bx; };
     const spr = bakeCached(key, boxes, true);
-    addStatic(spr, b.x, b.y, 0, { em: 1 }); castShadow(b.x, b.y, b.w, b.d, b.kind === 'block' ? b.h : b.kind === 'church' ? 34 : b.kind === 'house' ? (HF.lots[b.lot].floors * 18 + 10) : 26);
+    addStatic(spr, b.x, b.y, 0, { em: 1 }); castShadow(b.x, b.y, b.w, b.d, b.kind === 'block' ? b.h : b.kind === 'church' ? 34 : b.kind === 'infirmary' ? 44 : b.kind === 'house' ? (HF.lots[b.lot].floors * 18 + 10) : 26);
   }
   // props
   for (const p of HF.props) {
     if (p.kind === 'lights') continue;
     const f = PROPS[p.kind]; if (!f) continue;
-    const key = 'p' + p.kind + '|' + (p.c || '') + '|' + (p.w || '') + '|' + (p.v || '') + '|' + (p.r ? p.r.toFixed(1) : '') + (p.kind === 'laundry' ? (p.x | 0) : '') + '|' + ss;
-    const spr = bakeCached(key, () => f(p), p.kind === 'messtent' || p.kind === 'gasstation' || p.kind === 'bus' || p.kind === 'greenhouse' || p.kind === 'watertower');
-    addStatic(spr, p.x, p.y, 0, { em: p.kind === 'lamp' || p.kind === 'rv' });
+    const key = 'p' + p.kind + '|' + (p.c || '') + '|' + (p.w || '') + '|' + (p.v || '') + '|' + (p.r ? p.r.toFixed(1) : '') + (p.kind === 'laundry' ? (p.x | 0) : '') + '|' + (p.along || '') + (p.cross ? 'c' : '') + (p.white ? 'w' : '') + '|' + ss;
+    const spr = bakeCached(key, () => f(p), p.kind === 'messtent' || p.kind === 'gasstation' || p.kind === 'bus' || p.kind === 'greenhouse' || p.kind === 'watertower' || p.kind === 'medtent' || p.kind === 'forge' || p.kind === 'wagon');
+    addStatic(spr, p.x, p.y, 0, { em: p.kind === 'lamp' || p.kind === 'rv' || p.kind === 'forge' || p.kind === 'lantern' });
     if (p.kind === 'lamp') HR.lights.push([...ISO(p.x, p.y, 24), 26, 'rgba(255,214,140,', 0.7, 1]);
     if (p.kind === 'drumfire') HR.lights.push([...ISO(p.x, p.y, 8), 40, 'rgba(255,150,70,', 0.85, 2, p]);
     if (p.kind === 'firepit') HR.lights.push([...ISO(p.x, p.y, 4), 64, 'rgba(255,150,70,', 1, 3, p]);
-    if (['truck', 'car', 'bus', 'gasstation', 'watertower', 'greenhouse', 'barn', 'messtent', 'rv', 'shed', 'smokehouse', 'coop', 'stall', 'silo'].includes(p.kind)) castShadow(p.x, p.y, p.bw || 10, p.bd || 8, p.kind === 'watertower' ? 46 : p.kind === 'stall' ? 13 : 12);
+    if (p.kind === 'forge') HR.lights.push([...ISO(p.x + 5, p.y + 4, 6), 46, 'rgba(255,140,60,', 0.9, 2, p]);
+    if (p.kind === 'lantern') HR.lights.push([...ISO(p.x, p.y, 12), 30, 'rgba(255,210,140,', 0.75, 2, p]);
+    if (['truck', 'car', 'bus', 'gasstation', 'watertower', 'greenhouse', 'barn', 'messtent', 'rv', 'shed', 'smokehouse', 'coop', 'stall', 'silo', 'medtent', 'forge', 'wagon', 'hay', 'pighut'].includes(p.kind)) castShadow(p.x, p.y, p.bw || 10, p.bd || 8, p.kind === 'watertower' ? 46 : p.kind === 'stall' ? 13 : 12);
   }
   for (const d of HF.docks) addStatic(bakeCached('dock' + d.len, () => PROPS.dock(d)), d.x, d.y, -6);
   // wall pieces

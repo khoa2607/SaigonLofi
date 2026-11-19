@@ -12,18 +12,18 @@ function world(seed) { const c = loadHF(FILES); c.hfBuildMap(seed); c.hsInit({ s
 {
   const c = world(SEED);
   const m = JSON.parse(ev(c, `JSON.stringify({ lots: HF.lots.length, walls: HF.walls.length, towers: HF.towers.length, gateIn: HF.gate.inTile, gateOut: HF.gate.outTile, pois: HF.pois.length, routes: HF.routes.length, fields: HF.fields.length, docks: HF.docks.length,
-    civic: ['barracks','infirmary','workshop','church','school','barn','kitchen'].filter(k => HF.buildings.some(b => b.kind === k)).length,
+    civic: ['barracks','infirmary','workshop','church','school','barn','kitchen','stable'].filter(k => HF.buildings.some(b => b.kind === k)).length,
     leaks: (()=>{let n=0;for(let k=0;k<HN*HN;k++){if(!(HF.walk[k]&W_IN))continue;const i=k%HN,j=(k/HN)|0;for(let d=0;d<8;d++){const ii=i+DX8[d],jj=j+DY8[d];if(inMap(ii,jj)&&(HF.walk[tIdx(ii,jj)]&W_OUT))n++;}}return n;})(),
     gateLink: (()=>{ const f = hfFlow('all', HF.gate.outTile); return f[HF.gate.inTile] > 0; })(),
     outReach: (()=>{ const f = hfFlow('out', HF.gate.outTile); return HF.routes.every(r => f[tileOfW(r.pts[r.pts.length-1][0], r.pts[r.pts.length-1][1])] >= 0 || hfNearPass(r.pts[r.pts.length-1][0], r.pts[r.pts.length-1][1], 'out', 6) >= 0); })() })`));
   rep.map = m;
-  check('map: ~62 homes (>=55 houses + RV/tents)', m.lots >= 55, m.lots);
+  check('map: >= 38 homes (+ RV/tents; milestone 6 gave the left side to the school campus)', m.lots >= 38, m.lots);
   check('map: curved wall chain', m.walls >= 140, m.walls);
   check('map: 10 towers', m.towers === 10, m.towers);
   check('map: gate has inside+outside tiles', m.gateIn >= 0 && m.gateOut >= 0, [m.gateIn, m.gateOut]);
   check('map: wall seals inside from outside (no leaks)', m.leaks === 0, m.leaks);
   check('map: gate connects inside to outside', m.gateLink);
-  check('map: civic sites', m.civic === 7, m.civic);
+  check('map: civic sites', m.civic === 8, m.civic);
   check('map: wilderness POIs + 5 routes', m.pois >= 6 && m.routes === 5, [m.pois, m.routes]);
   check('map: fields + docks', m.fields > 20 && m.docks === 3, [m.fields, m.docks]);
 }

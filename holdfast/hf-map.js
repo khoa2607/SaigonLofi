@@ -10,7 +10,8 @@ const inMap = (i, j) => i >= 0 && j >= 0 && i < HN && j < HN;
 
 // ---------------------------------------------------------------- geography (design units, approved v0.3 map)
 const HCLEAR = 50, HGREEN = [480, 334];
-const wallV = u => 212 + 55 * ((u - 480) / 440) ** 2;
+const HWALL = 30;                                            // milestone 6: the wall moved 30 design units outward (larger community footprint)
+const wallV = u => 212 - HWALL + 55 * ((u - 480) / 440) ** 2;
 const riverSide = (v, s) => 480 + s * (474 + Math.max(0, 300 - v) ** 2 / 300);
 const roadU = v => 480 + 34 * Math.sin((212 - v) / 75);
 const streamU = v => 655 + 18 * Math.sin(v / 31) + Math.max(0, v - 270) * 1.05;
@@ -32,10 +33,11 @@ function zoneAt(u, v) {
   return { z: Z_WILD, d, inside: true };
 }
 // civic sites (design-unit rectangles) and other reserved ground inside the wall
+// Milestone 6 layout: zones spread over the whole bend so activity is not concentrated at the green and the fields.
 const HSITES = {
-  yard: [392, 568, 0, 252], market: [424, 538, 252, 298], barracks: [318, 404, 236, 286], infirmary: [552, 624, 230, 280],
-  workshop: [594, 694, 272, 310], church: [330, 400, 296, 344], school: [580, 652, 316, 352], play: [388, 446, 352, 388],
-  kitchen: [522, 594, 338, 380], barn: [258, 334, 370, 404], memorial: [286, 322, 334, 356], newcomers: [690, 760, 236, 270]
+  yard: [408, 556, 190, 228], market: [420, 540, 228, 292], training: [226, 404, 202, 274], stable: [562, 656, 194, 264],
+  workshop: [682, 806, 214, 284], infirmary: [562, 664, 262, 336], church: [328, 398, 286, 340], graveyard: [302, 394, 340, 392],
+  school: [146, 300, 288, 374], kitchen: [522, 594, 338, 380], barn: [258, 336, 380, 418], farmyard: [170, 256, 376, 444], newcomers: [800, 874, 244, 292]
 };
 function reservedAt(u, v) {
   if (((u - HGREEN[0]) / 104) ** 2 + ((v - HGREEN[1]) / 52) ** 2 < 1) return 'green';
@@ -45,6 +47,7 @@ function reservedAt(u, v) {
   if (v < wallV(u) + 12) return 'lane';
   return null;
 }
+const LAWN_SITES = new Set(['school', 'graveyard', 'farmyard', 'infirmary', 'church', 'stable', 'newcomers']);
 const isField = (u, v, d) => d < 0.92 && v > 446 && Math.abs(u - 480) > 9;
 
 // ---------------------------------------------------------------- ground kinds per tile
@@ -75,7 +78,7 @@ function hfBuildMap(seed) {
     else if (Z.z === Z_WILD) g = HF.wood[k] > 0.56 ? GK.FOREST : hfNoise(i, j, 7) > 0.6 ? GK.MEADOW : GK.WGRASS;
     else if (Z.z === Z_SETTLE) {
       const rs = reservedAt(u, v);
-      g = isField(u, v, Z.d) ? GK.FIELD : rs === 'green' ? GK.GREEN : rs === 'main' ? GK.MAIN : rs === 'lane' ? GK.LANE : rs === 'stream' ? GK.LAWN : rs ? GK.PLAZA : GK.LAWN;
+      g = isField(u, v, Z.d) ? GK.FIELD : rs === 'green' ? GK.GREEN : rs === 'main' ? GK.MAIN : rs === 'lane' ? GK.LANE : rs === 'stream' || LAWN_SITES.has(rs) ? GK.LAWN : rs ? GK.PLAZA : GK.LAWN;
     }
     // rocky ground, roads, trails (outside)
     if (Z.z === Z_WILD && (((u - 690) / 60) ** 2 + ((v - 30) / 30) ** 2 < 1 || ((u - 250) / 40) ** 2 + ((v - 140) / 18) ** 2 < 1)) g = GK.ROCK;
@@ -149,26 +152,28 @@ const HOUSE_ROOFS = [0x5c5658, 0x6e5446, 0x4e5a64, 0x5f6e56, 0x8a5440, 0x58606a,
 const NAMES = ['Lan', 'Minh', 'Bảo', 'Hà', 'Tuấn', 'Mai', 'Dũng', 'Linh', 'Ba Sáu', 'Khoa', 'Thảo', 'Hùng', 'Vy', 'Phúc', 'Ngọc', 'Sơn', 'Ruth', 'Amos', 'Ines', 'Theo'];
 
 function hfBuildSettlement(R) {
-  // ---- civic buildings at the approved sites (world-axis aligned footprints)
-  const C = siteC;
-  let [x, y] = C('barracks'); addB({ kind: 'barracks', x: x - 34, y: y - 14, w: 68, d: 26, seed: 3 });
-  [x, y] = C('infirmary'); addB({ kind: 'infirmary', x: x - 26, y: y - 18, w: 46, d: 32, seed: 5 });
-  addP('tent', x + 22, y + 14, { c: 0xe8e2d0, block: 1, bw: 14, bd: 12 });
-  [x, y] = C('workshop'); addB({ kind: 'workshop', x: x - 30, y: y - 24, w: 58, d: 42, seed: 7 });
-  [x, y] = C('church'); addB({ kind: 'church', x: x - 18, y: y - 30, w: 34, d: 54, seed: 9, door: [x - 1, y + 28] });
-  [x, y] = C('school'); addB({ kind: 'school', x: x - 26, y: y - 16, w: 50, d: 28, seed: 11 });
-  [x, y] = C('barn'); addB({ kind: 'barn', x: x - 24, y: y - 18, w: 46, d: 34, seed: 13 });
-  [x, y] = C('kitchen'); addB({ kind: 'kitchen', x: x - 16, y: y - 26, w: 30, d: 24, seed: 15 });
-  addP('messtent', x - 26, y + 2, { block: 1, bw: 40, bd: 26 });
-  // ---- gate yard
-  [x, y] = C('yard');
-  addP('truck', x + 20, y - 4, { c: 0x6a4a3a, block: 1, bw: 20, bd: 10 }); addP('truck', x - 46, y - 2, { c: 0x5a6e5a, block: 1, bw: 20, bd: 10 });
-  addP('crates', x - 22, y + 10); addP('crates', x + 46, y + 8); addP('bell', x - 8, y + 14, { block: 1, bw: 3, bd: 3 });
-  spot('yard', x - 6, y + 4); spot('yard', x + 4, y + 8); spot('yard', x + 10, y + 2); spot('storage', x - 18, y + 18);
-  // ---- market: stalls along both sides of the main street
-  [x, y] = C('market');
+  // helpers in design units: a building centred on (u, v), a prop or a spot at (u, v); world-relative offsets are used for things attached to a building
+  const Bd = (kind, u, v, w, d, o) => { const [x, y] = d2w(u, v); return addB(Object.assign({ kind, x: Math.round(x - w / 2), y: Math.round(y - d / 2), w, d }, o)); };
+  const Pu = (kind, u, v, o) => { const [x, y] = d2w(u, v); return addP(kind, x, y, o); };
+  const Su = (name, u, v, o) => { const [x, y] = d2w(u, v); spot(name, x, y, o); };
+  const rails = (kind, x, y, w, d, gap) => {    // a fenced rectangle (world axes); gap = [side, from, to] leaves an opening
+    for (const [side, ax, ay, len, along] of [['n', x, y, w, 'x'], ['s', x, y + d, w, 'x'], ['w', x, y, d, 'y'], ['e', x + w, y, d, 'y']]) {
+      if (gap && gap[0] === side) { if (gap[1] > 0) addP(kind, ax, ay, { w: gap[1], along }); const r = len - gap[2]; if (r > 0) addP(kind, along === 'x' ? ax + gap[2] : ax, along === 'y' ? ay + gap[2] : ay, { w: r, along }); }
+      else addP(kind, ax, ay, { w: len, along });
+    }
+  };
+  let x, y;
+  // ---- gate yard, just inside the gate: expedition staging, trucks, crates, alarm bell, hitching rail for the riders
+  Pu('truck', 424, 212, { c: 0x6a4a3a, block: 1, bw: 20, bd: 10 }); Pu('truck', 532, 210, { c: 0x5a6e5a, block: 1, bw: 20, bd: 10 });
+  Pu('crates', 446, 222); Pu('crates', 538, 223); Pu('bell', 466, 204, { block: 1, bw: 3, bd: 3 });
+  [x, y] = d2w(512, 205); addP('hitch', x, y, { block: 1, bw: 18, bd: 2 }); for (let k = 0; k < 3; k++) spot('hitch', x + 3 + k * 6, y + 6, { k });
+  Su('yard', 474, 214); Su('yard', 482, 218); Su('yard', 490, 214); Su('storage', 452, 227); Su('gear', 438, 219); Su('gear', 446, 215);
+  // ---- market: stalls along both sides of the main street, a parked handcart, queues in front of each stall
+  [x, y] = d2w(480, 262);
   const STC = [0xd9534f, 0x3d6fb5, 0xf2c94c, 0x58994f, 0x8a5ab8, 0xf08a4b, 0x4fa3a0, 0xc94f6a];
-  for (let k = 0; k < 8; k++) { const sx = x - 40 + (k % 4) * 22, sy = y - 20 + Math.floor(k / 4) * 30; addP('stall', sx, sy, { c: STC[k], block: 1, bw: 12, bd: 8, v: k }); spot('stall', sx + 6, sy + 12, { k }); spot('shop', sx + 6, sy + 18); }
+  HF.stalls = [];
+  for (let k = 0; k < 8; k++) { const sx = x - 40 + (k % 4) * 22, sy = y - 20 + Math.floor(k / 4) * 30; addP('stall', sx, sy, { c: STC[k], block: 1, bw: 12, bd: 8, v: k }); HF.stalls.push({ k, x: sx, y: sy }); spot('stall', sx + 6, sy - 4, { k, dir: 1 }); spot('shop', sx + 6, sy + 13, { k }); spot('queue', sx + 3, sy + 18, { k }); spot('queue', sx + 9, sy + 22, { k }); }
+  addP('handcart', x + 40, y - 10, { block: 1, bw: 10, bd: 5 }); addP('crates', x - 56, y + 4);
   // ---- commons on the green: great oak, fire, long tables, string lights, benches
   [x, y] = d2w(HGREEN[0], HGREEN[1]);
   HF.oak = { x, y }; HF.trees.push({ x, y: y - 2, spc: 'oak', v: 0, big: 1 }); occupy(x - 4, y - 4, 8, 8, 3);
@@ -177,29 +182,74 @@ function hfBuildSettlement(R) {
   addP('lights', x, y + 10, { w: 90, d: 60 });
   for (const [ox, oy] of [[-40, -20], [40, -26], [-30, 40], [56, 10]]) { addP('bench', x + ox, y + oy); spot('bench', x + ox + 4, y + oy + 4); }
   for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; spot('green', x + Math.cos(a) * 34, y + Math.sin(a) * 34); }
-  // ---- playground + school seats
-  [x, y] = C('play'); addP('swings', x - 10, y - 6); addP('slide', x + 14, y + 6); addP('sandbox', x - 16, y + 14);
+  // ---- training ground: barracks, sparring rows, a firing range with targets and a sandbag berm, a running track around it all
+  const ba = Bd('barracks', 290, 250, 68, 26, { seed: 3 });
+  addP('rack', ba.x + ba.w - 8, ba.y + ba.d + 4); addP('bench', ba.x + 4, ba.y + ba.d + 8); spot('clean', ba.x + 8, ba.y + ba.d + 12, { dir: 3 }); spot('clean', ba.x + 13, ba.y + ba.d + 12, { dir: 3 });
+  HF.range = [];
+  for (let k = 0; k < 4; k++) { const u = 340 + k * 13; Pu('target', u, 229, { block: 1, bw: 3, bd: 3 }); const [tx, ty] = d2w(u, 229); HF.range.push({ x: tx + 1, y: ty + 1, z: 9 }); Su('range', u, 254, { k, dir: 3 }); }
+  for (let k = 0; k < 6; k++) Pu('sandbags', 334 + k * 10, 222);
+  for (let k = 0; k < 8; k++) Su('drill', 336 + (k % 4) * 12, k < 4 ? 263 : 270, { dir: k < 4 ? 1 : 3 });
+  Pu('flag', 404, 236); Pu('tent', 246, 270, { c: 0x6a7a4a, block: 1, bw: 14, bd: 12 }); Pu('crates', 392, 262); Pu('hurdle', 300, 216); Pu('hurdle', 236, 236); Pu('hurdle', 360, 279);
+  HF.track = [[236, 222], [322, 220], [402, 216], [406, 246], [404, 278], [320, 280], [236, 280], [232, 250]].map(([u, v]) => d2w(u, v));
+  // ---- stable + paddock (west of the creek): horses, hay, trough, tack rack
+  const st = Bd('stable', 590, 228, 44, 26, { seed: 17 });
+  const pdx = st.x + st.w + 6, pdy = st.y - 6, pdw = 34, pdd = 32; HF.paddock = { x: pdx, y: pdy, w: pdw, d: pdd, gate: [pdx, pdy + 14] };
+  rails('rail', pdx, pdy, pdw, pdd, ['w', 10, 18]);
+  addP('trough', pdx + pdw - 12, pdy + pdd - 7, { block: 1, bw: 9, bd: 3 }); spot('feed', pdx + pdw - 8, pdy + pdd + 4, { dir: 3 }); HF.trough = [pdx + pdw - 8, pdy + pdd - 9];
+  addP('hay', st.x - 14, st.y + 6, { block: 1, bw: 10, bd: 8 }); spot('hay', st.x - 6, st.y + 18);
+  addP('tack', st.x + 6, st.y + st.d + 3); spot('tack', st.x + 10, st.y + st.d + 9, { dir: 3 });
+  spot('groom', pdx + 10, pdy + 12); spot('groom', pdx + 22, pdy + 20); HF.stallsH = [0, 1, 2, 3].map(k => [st.x + 8 + k * 9, st.y + st.d + 7]);
+  // ---- workshop yard (east of the creek): workshop, forge, carpentry, a wagon being repaired
+  const ws = Bd('workshop', 746, 252, 62, 42, { seed: 7 });
+  for (let k = 0; k < 4; k++) spot('bench', ws.x + 26 + k * 10, ws.y + ws.d + 8, { work: 1 });
+  addP('car', ws.x + 30, ws.y + ws.d + 16, { c: 0x4a6a8a, block: 1, bw: 19, bd: 9 }); addP('scrap', ws.x + ws.w + 4, ws.y + ws.d - 2);
+  addP('forge', ws.x + ws.w + 6, ws.y - 2, { block: 1, bw: 14, bd: 12 }); addP('anvil', ws.x + ws.w + 10, ws.y + 15, { block: 1, bw: 3, bd: 2 }); spot('forge', ws.x + ws.w + 16, ws.y + 18, { dir: 2 }); HF.forge = { x: ws.x + ws.w + 11, y: ws.y + 4 };
+  addP('sawhorse', ws.x + ws.w + 6, ws.y + ws.d - 14, { block: 1, bw: 10, bd: 3 }); spot('saw', ws.x + ws.w + 11, ws.y + ws.d - 7, { dir: 3 });
+  addP('wagon', ws.x + 2, ws.y + ws.d + 8, { block: 1, bw: 18, bd: 10 }); spot('wagonfix', ws.x + 10, ws.y + ws.d + 22); spot('wagonfix', ws.x + 24, ws.y + ws.d + 14);
+  // ---- hospital: the big white building, a triage tent, cots in the sun, supplies, an ambulance
+  const inf = Bd('infirmary', 610, 292, 72, 34, { seed: 5 });
+  addP('medtent', inf.x + inf.w + 5, inf.y + 2, { block: 1, bw: 18, bd: 16 }); spot('exam', inf.x + inf.w + 12, inf.y + 23, { dir: 3 }); spot('medic', inf.x + inf.w + 17, inf.y + 23, { dir: 2 });
+  for (let k = 0; k < 6; k++) { const cx = inf.x + 42 + (k % 3) * 9, cy = inf.y + inf.d + 9 + Math.floor(k / 3) * 9; addP('cot', cx, cy); spot('bed', cx + 3, cy + 1.6); }
+  spot('medic', inf.x + 38, inf.y + inf.d + 13); spot('medic', inf.x + 60, inf.y + inf.d + 24);
+  addP('medcrates', inf.x + inf.w + 3, inf.y + inf.d + 4); addP('stretcher', inf.x + 22, inf.y + inf.d + 16);
+  addP('bench', inf.x + 4, inf.y + inf.d + 6); spot('wait', inf.x + 6, inf.y + inf.d + 10, { dir: 1 }); spot('wait', inf.x + 11, inf.y + inf.d + 10, { dir: 1 });
+  addP('laundry', inf.x + inf.w + 26, inf.y + 6, { w: 22, white: 1, along: 'y' });
+  addP('truck', inf.x + inf.w + 8, inf.y + inf.d + 16, { c: 0xe8e4da, cross: 1, block: 1, bw: 20, bd: 10 });
+  HF.supply = [inf.x + inf.w + 6, inf.y + inf.d + 12];
+  // ---- church and its graveyard (the memorial lives there now)
+  [x, y] = d2w(362, 312); const ch = addB({ kind: 'church', x: x - 18, y: y - 30, w: 34, d: 54, seed: 9, door: [x - 1, y + 28] }); spot('shelter', ch.door[0], ch.door[1]);
+  [x, y] = d2w(348, 368); const gx = x - 32, gy = y - 22, gw = 64, gd = 44; HF.graveyard = { x: gx, y: gy, w: gw, d: gd };
+  rails('picket', gx, gy, gw, gd, ['s', 26, 38]);
+  HF.graves = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 7; c++) { if (r === 1 && c === 3) continue; const qx = gx + 6 + c * 8.6, qy = gy + 8 + r * 12; HF.graves.push({ x: qx, y: qy, v: (c * 7 + r * 3) % 4, used: (c * 5 + r * 11) % 9 < 6 }); occupy(qx - 1, qy - 1, 3, 3, 3); }
+  HF.memorial = { x: gx + 33, y: gy + 22, stones: 3 }; addP('memorial', gx + 25, gy + 18, { block: 1, bw: 16, bd: 6 });
+  addP('lantern', gx + 24, gy + gd + 3); addP('bench', gx + 40, gy + gd + 6); HF.trees.push({ x: gx - 4, y: gy + 6, spc: 'me', v: 3 });
+  for (let k = 0; k < 4; k++) spot('mourn', gx + 12 + k * 13, gy + 31 + (k % 2) * 3, { dir: 3 }); spot('tend', gx + 20, gy + 20); spot('tend', gx + 46, gy + 9);
+  // ---- school campus (left side): school, playground, outdoor class with a chalkboard, garden beds, a ball field
+  Bd('school', 198, 306, 56, 30, { seed: 11 });
+  [x, y] = d2w(256, 322); addP('swings', x - 10, y - 6); addP('slide', x + 14, y + 6); addP('sandbox', x - 16, y + 14); addP('seesaw', x + 2, y + 22);
   for (let k = 0; k < 12; k++) spot('play', x - 22 + (k % 4) * 14, y - 12 + Math.floor(k / 4) * 12);
-  const sc = HF.buildings.find(b => b.kind === 'school'); for (let k = 0; k < 8; k++) spot('class', sc.x + 6 + (k % 4) * 9, sc.y + sc.d + 10 + Math.floor(k / 4) * 7, { dir: 3 });
-  spot('teach', sc.x + 22, sc.y + sc.d + 4);
-  // ---- infirmary beds, church shelter, barracks drill, workshop stations, kitchen stations
-  const inf = HF.buildings.find(b => b.kind === 'infirmary'); for (let k = 0; k < 6; k++) spot('bed', inf.x + 50 + (k % 3) * 7, inf.y + 6 + Math.floor(k / 3) * 9);
-  spot('medic', inf.x + 30, inf.y + inf.d + 6);
-  const ch = HF.buildings.find(b => b.kind === 'church'); spot('shelter', ch.door[0], ch.door[1]);
-  const ba = HF.buildings.find(b => b.kind === 'barracks'); for (let k = 0; k < 8; k++) spot('drill', ba.x + 8 + (k % 4) * 14, ba.y + ba.d + 12 + Math.floor(k / 4) * 10); addP('rack', ba.x + ba.w - 8, ba.y + ba.d + 4);
-  const ws = HF.buildings.find(b => b.kind === 'workshop'); for (let k = 0; k < 5; k++) spot('bench', ws.x + 6 + k * 11, ws.y + ws.d + 8, { work: 1 });
-  addP('car', ws.x + ws.w - 6, ws.y + ws.d + 10, { c: 0x4a6a8a, block: 1, bw: 19, bd: 9 }); addP('scrap', ws.x - 10, ws.y + 12); addP('scrap', ws.x + ws.w + 4, ws.y + 4);
-  const kt = HF.buildings.find(b => b.kind === 'kitchen'); for (let k = 0; k < 4; k++) spot('cook', kt.x + 4 + k * 8, kt.y + kt.d + 6); addP('drumfire', kt.x + kt.w + 6, kt.y + kt.d + 2);
-  const bn = HF.buildings.find(b => b.kind === 'barn'); spot('granary', bn.door[0], bn.door[1]);
-  // ---- memorial stones, newcomers' RV + tents
-  [x, y] = C('memorial'); HF.memorial = { x, y, stones: 3 }; addP('memorial', x - 8, y - 6, { block: 1, bw: 16, bd: 10 }); spot('mourn', x, y + 10);
-  [x, y] = C('newcomers'); addP('rv', x - 20, y - 6, { block: 1, bw: 28, bd: 11 }); addP('tent', x + 16, y - 8, { c: 0x5a7a9a, block: 1, bw: 14, bd: 12 }); addP('tent', x + 16, y + 10, { c: 0x6a8a5a, block: 1, bw: 14, bd: 12 }); spot('camp', x, y + 18);
-  // ---- utilities: water tower, wind turbines, greenhouses, coop, goats, beehives
+  [x, y] = d2w(198, 344); addP('chalk', x - 4, y - 12, { block: 1, bw: 10, bd: 2 }); spot('teach', x + 2, y - 6, { dir: 1 });
+  for (let k = 0; k < 8; k++) spot('class', x - 8 + (k % 4) * 6, y + 4 + Math.floor(k / 4) * 7, { dir: 3 });
+  [x, y] = d2w(170, 362); for (let k = 0; k < 4; k++) { addP('bed', x + k * 11, y, { v: k }); spot('garden', x + 4 + k * 11, y + 19); }
+  [x, y] = d2w(258, 360); addP('goal', x - 26, y - 4, { block: 1, bw: 2, bd: 9 }); addP('goal', x + 26, y - 4, { block: 1, bw: 2, bd: 9 }); HF.ball = { x, y };
+  for (let k = 0; k < 6; k++) spot('ball', x - 16 + (k % 3) * 16, y - 6 + Math.floor(k / 3) * 12);
+  // ---- kitchen + mess tent
+  [x, y] = siteC('kitchen'); const kt = addB({ kind: 'kitchen', x: x - 16, y: y - 26, w: 30, d: 24, seed: 15 });
+  addP('messtent', x - 26, y + 2, { block: 1, bw: 40, bd: 26 });
+  for (let k = 0; k < 4; k++) spot('cook', kt.x + 4 + k * 8, kt.y + kt.d + 6); addP('drumfire', kt.x + kt.w + 6, kt.y + kt.d + 2);
+  // ---- barn (granary) and the farmyard: chicken coop with a run, pig pen, goat pen
+  const bn = Bd('barn', 298, 398, 46, 34, { seed: 13 }); spot('granary', bn.door[0], bn.door[1]);
+  [x, y] = d2w(200, 392); addP('coop', x, y, { block: 1, bw: 14, bd: 10 }); HF.coopRun = { x: x - 4, y: y + 12, w: 26, d: 16 }; rails('rail', x - 4, y + 12, 26, 16, ['n', 2, 12]);
+  spot('coop', x + 30, y + 20); spot('egg', x + 8, y + 13);
+  [x, y] = d2w(236, 422); HF.pigPen = { x, y, w: 26, d: 20 }; rails('rail', x, y, 26, 20); addP('pighut', x + 2, y + 2, { block: 1, bw: 9, bd: 7 }); addP('trough', x + 14, y + 15, { block: 1, bw: 9, bd: 3 }); spot('pigfeed', x + 18, y + 25, { dir: 3 }); HF.pigTrough = [x + 18, y + 13];
+  [x, y] = d2w(192, 426); addP('pen', x, y); HF.goatPen = { x: x + 2, y: y + 2, w: 21, d: 11 }; for (let k = 0; k < 3; k++) spot('goat', x + 5 + k * 7, y + 7); spot('milk', x + 12, y + 19, { dir: 3 });
+  // ---- newcomers' RV + tents
+  [x, y] = siteC('newcomers'); addP('rv', x - 20, y - 6, { block: 1, bw: 28, bd: 11 }); addP('tent', x + 16, y - 8, { c: 0x5a7a9a, block: 1, bw: 14, bd: 12 }); addP('tent', x + 16, y + 10, { c: 0x6a8a5a, block: 1, bw: 14, bd: 12 }); spot('camp', x, y + 18);
+  // ---- utilities: water tower, wind turbines, greenhouses, beehives
   const putU = (k, u, v, o) => { const [px, py] = d2w(u, v); addP(k, px, py, o); return [px, py]; };
-  putU('watertower', 232, 430, { block: 1, bw: 12, bd: 12 }); putU('turbine', 818, 420); putU('turbine', 842, 360);
+  putU('watertower', 298, 434, { block: 1, bw: 12, bd: 12 }); putU('turbine', 818, 420); putU('turbine', 842, 360);
   for (const [u, v] of [[692, 404], [730, 410], [716, 432]]) putU('greenhouse', u, v, { block: 1, bw: 26, bd: 16 });
-  putU('coop', 196, 352, { block: 1, bw: 14, bd: 10 }); spot('coop', ...d2w(204, 366));
-  putU('pen', 250, 384); for (let k = 0; k < 3; k++) spot('goat', ...d2w(244 + k * 8, 386));
   for (let k = 0; k < 3; k++) putU('hive', 770 + k * 7, 330 + k * 6);
   // ---- docks and smokehouse
   for (const [u, v] of [[480, 498], [226, 466], [740, 466]]) {
@@ -299,7 +349,7 @@ function hfBuildOutside(R) {
   for (let v = -100; v < 196; v += 30) { const [x, y] = put(roadU(v) + 16, v); addP('pole', x, y); }
   // cleared ground: stumps, hedgehogs, wrecks pushed out as obstacles
   for (let u = 70; u < 900; u += 18) { const wv = wallV(u); const [hx, hy] = put(u + R() * 8 - 4, wv - 22 + R() * 6 - 3); addP('hedgehog', hx, hy); const [sx, sy] = put(u + R() * 16 - 8, wv - 8 - R() * 36); const k = tIdx(Math.floor(sx / HT), Math.floor(sy / HT)); if (inMap(Math.floor(sx / HT), Math.floor(sy / HT)) && HF.zone[k] === Z_CLEAR && HF.gk[k] !== GK.ROAD) addP('stump', sx, sy); }
-  for (const [u, v, c] of [[398, 190, 0x60707a], [586, 172, 0x8a4a3a], [300, 200, 0x7a7a6a]]) { const [x, y] = put(u, v); addP('car', x, y, { c, wreck: 1, block: 1, bw: 19, bd: 9 }); }
+  for (const [u, v, c] of [[398, 190 - HWALL, 0x60707a], [586, 172 - HWALL, 0x8a4a3a], [300, 200 - HWALL, 0x7a7a6a]]) { const [x, y] = put(u, v); addP('car', x, y, { c, wreck: 1, block: 1, bw: 19, bd: 9 }); }
   // rocks
   for (let n = 0; n < 26; n++) { const [x, y] = put(690 + (R() - 0.5) * 110, 30 + (R() - 0.5) * 50); addP('rock', x, y, { r: 3 + R() * 4 }); }
   for (let n = 0; n < 8; n++) { const [x, y] = put(250 + (R() - 0.5) * 70, 140 + (R() - 0.5) * 24); addP('rock', x, y, { r: 2 + R() * 3 }); }
@@ -321,11 +371,11 @@ function hfBuildOutside(R) {
   }
   // threat routes R1..R5: polylines in design units from the map edge / POIs to the wall (R6 river is visual only)
   const route = (name, pts) => HF.routes.push({ name, pts: pts.map(q => put(q[0], q[1])) });
-  route('R1', [[500, -60], [roadU(0), 0], [roadU(120), 120], [480, 200]]);
-  route('R2', [[300, -10], [trailL(40), 40], [trailL(140), 140], [300, 204]]);
-  route('R3', [[700, -20], [trailR(60), 60], [trailR(160), 160], [650, 212]]);
-  route('R4', [[riverSide(120, -1) + 40, 120], [riverSide(200, -1) + 40, 200], [80, 258]]);
-  route('R5', [[riverSide(120, 1) - 40, 120], [riverSide(200, 1) - 40, 200], [880, 258]]);
+  route('R1', [[500, -60], [roadU(0), 0], [roadU(120), 120], [480, 200 - HWALL]]);
+  route('R2', [[300, -10], [trailL(40), 40], [trailL(140), 140], [300, 204 - HWALL]]);
+  route('R3', [[700, -20], [trailR(60), 60], [trailR(160), 160 - HWALL / 2], [650, 212 - HWALL]]);
+  route('R4', [[riverSide(120, -1) + 40, 120], [riverSide(200, -1) + 40, 200 - HWALL], [80, 258 - HWALL]]);
+  route('R5', [[riverSide(120, 1) - 40, 120], [riverSide(200, 1) - 40, 200 - HWALL], [880, 258 - HWALL]]);
   // spawn points: route heads + map-edge forest tiles far outside
   for (const r of HF.routes) HF.spawns.push({ x: r.pts[0][0], y: r.pts[0][1], route: r.name });
 }

@@ -13,7 +13,7 @@ function world(seed, danger, pop) { const c = loadHF(FILES); c.hfBuildMap(7); if
 {
   const c = world(SEED);
   // the camera looks at the default view: nothing may spawn inside it
-  ev(c, `(() => { const [x, y] = d2w(482, 262), sx = x - y, sy = (x + y) / 2; HS.view = { x0: sx - 240, y0: sy - 135, x1: sx + 240, y1: sy + 135 }; })()`);
+  ev(c, `(() => { const [x, y] = d2w(482, 236), sx = x - y, sy = (x + y) / 2; HS.view = { x0: sx - 240, y0: sy - 135, x1: sx + 240, y1: sy + 135 }; })()`);
   ev(c, `globalThis.__L = { n: 0, crowdMax: 0, overlap: 0, pairs: new Map(), persist: 0, unrelated: 0, cells: new Map(), cellMax: 0, walkV: [], runV: [], maxStep: 0, plotSt: [], share: 0, zOut: 0, zBand: 0, born: new Set(HS.zombies.map(z => z.id)), spawnInView: 0, spawnInside: 0, lastSeen: new Map(), gap: [] };
     globalThis.__GROUP = new Set(['shelter', 'defend', 'exp', 'rescue', 'arrive', 'respond', 'fight', 'eat']);`);
   const probe = `(() => { const L = __L; L.n++;
