@@ -17,7 +17,7 @@ This repository is the **live Lofi Worlds web app**: a world gallery plus two pa
 | Shared UI | `css/lofi-ui.css`, `js/dock.js`, `js/i18n.js`, `js/audio.js`, `js/yt.js` | Saigon's UI extracted verbatim; Holdfast uses the same markup/ids with its own palette (`holdfast/hf-theme.css`). |
 | Shared art system | `js/core.js` (`bake` box models, `grade`, ink, `gridCanvas`, K = 2 art px per world unit), `js/art.js` (`drawPerson`, trees, bubbles) | All art is drawn by code at load time. Holdfast uses these read-only. |
 | SaigonLofi world | `js/main.js`, `js/city.js`, `js/build.js`, `js/eras.js`, `js/sim.js`, `js/river.js`, `js/landmarks.js`, `js/fx.js`, `js/tet.js`, `js/events.js`, `js/costumes.js`, `js/dance.js` | Isometric Saigon street corner across four eras. See `README.md`. |
-| Holdfast world (branch `design/holdfast-world`) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI) | Opened from the gallery in a frame. Two timelines on the same map: Current (infected) and Past (`hf-past-art.js` art, `hf-past.js` simulation; `HF.era`, `?era=past`); Future is a "soon" tab. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
+| Holdfast world (on `main`; see Parallel development below) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI), `hf-world.js` (world contexts, background preparation) | Opened from the gallery in a frame. Two timelines on the same map: Current (infected) and Past (`hf-past-art.js` art, `hf-past.js` simulation; `HF.era`, `?era=past`), switched **in the page** by a crossfade between two lazily created world contexts (no reload; `hf-world.js`, `hfSwitchEra` in `hf-main.js`); Future is a "soon" tab. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
 | Tests | `tests/*.mjs` | Node only (no packages) + an installed Chrome/Edge for browser checks. See below. |
 
 Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, then `http://localhost:8765/` (YouTube needs http).
@@ -62,10 +62,25 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 
 ## Workflow
 
-- Work on the feature branch (`design/holdfast-world` for Holdfast). Never merge into `main` without the owner's approval.
+- Work on your own feature branch (see Parallel development below). Never merge into `main` without the owner's approval.
 - Commit in small, verified milestones; push the branch after each milestone.
 - Do not commit secrets, temporary screenshots, test reports, browser profiles, `node_modules` or other generated output.
   Curated screenshots live in `docs/holdfast/screenshots/` and are only replaced deliberately.
 - Never store API keys or credentials in the repository.
 - Update `docs/holdfast/STATUS.md` (and the design doc when the scope changes) with every Holdfast milestone: what exists,
   measured results, tests run, and an honest list of limitations.
+
+## Parallel development (Claude Opus ∥ Codex)
+
+Two agents work on Holdfast at the same time from the **same baseline commit** (`main` after the coordination docs; gameplay baseline `2b37501`). Full contract: `docs/holdfast/PARALLEL-DEVELOPMENT.md`; Codex's instructions: `AGENTS.md`. The three documents agree; the contract wins if they differ.
+
+| Agent | Branch | Owns |
+|---|---|---|
+| **Claude Opus** | `feature/holdfast-future` | the entire **Future** timeline: futuristic architecture and environmental art; robots, drones and mechanical enemies; Future simulation and community activities; Future combat, defense and effects; Future audio; Future tests and docs (`hf-future*.js`, `tests/holdfast-future*.mjs`, `docs/holdfast/FUTURE-*.md`); the **minimal shared integration hooks** the third era needs |
+| **Codex** | `feature/holdfast-current-past` | Current and Past timelines: improvements and bugs, zombie and dinosaur art and animation, Current/Past behaviour, combat, weather, environment, their tests and docs (`hf-past*.js`, `STATUS.md` sections) |
+
+Claude must **not**: change Current/Past behaviour unnecessarily; rewrite zombie or dinosaur systems; push to `feature/holdfast-current-past`; merge into `main` without the owner's approval; alter SaigonLofi.
+
+Shared code (`hf-world.js`, `hf-sim.js`, `hf-work.js`, `hf-life.js`, `hf-render.js`, `hf-main.js`, `hf-map.js`, `hf-audio.js`, `hf-art.js` dispatch lines, `holdfast/index.html`, `hf-theme.css`, test helpers) has no exclusive owner: keep changes minimal, isolated and backward-compatible; prefer era modules/adapters (`hf-future*.js` + one dispatch line); run `holdfast-sim`, `-past`, `-corpse`, `-world`, `-transition` (Current and Past must be unchanged); log each change in `docs/holdfast/shared-changes/future.md`; never merge or overwrite the other branch.
+
+Third-era integration points you will extend (and Codex will not): the era normalisation in `hfBuildMapG`; the **implicit "else = Current"** after every `HF.era === 'past'` check (add an explicit `'future'` branch *before* the fall-through everywhere, or Future will silently run Current code); `hwPrepare` / `HW_ENV` / `hfFadeTo` / `hfSwitchEra` / `hfApplyEraUI` / `ERA_ARIA` / the `#eras` tab (the switching assumes exactly two eras); script tags in `holdfast/index.html`; per-world renderer state must be added to `HR_WORLD_KEYS`; module-level state is forbidden (it leaks between worlds). Document Future in `docs/holdfast/FUTURE-STATUS.md`, not in `STATUS.md`. Do not start Future work without the owner's Future prompt.
