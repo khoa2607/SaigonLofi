@@ -2,7 +2,7 @@
 // Usage: node tests/holdfast-warm.mjs [seeds=8]
 import { loadHF, ev } from './hf-load.mjs';
 const SEEDS = +(process.argv[2] || 8);
-const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js'];
+const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js'];
 const fails = [], rep = {};
 const check = (name, ok, info) => { rep[name] = { ok: !!ok, info }; if (!ok) fails.push(name + ' ' + JSON.stringify(info)); };
 const J = (c, e) => JSON.parse(ev(c, `JSON.stringify(${e})`));

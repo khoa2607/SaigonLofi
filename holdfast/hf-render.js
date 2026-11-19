@@ -44,9 +44,10 @@ function hrGround(wx, wy, ss) {
     case GK.PLAZA: c = vn > 0.55 ? 0xb4a07c : 0xa8946e; if (n > 0.92) c = 0x9a8460; if (n < 0.05) c = 0xc8b48e; if (vnoise(wx / 12, wy / 12) > 0.66) c = mixc(c, G[0], 0.5); break;
     case GK.STREET: { const lx = wx % HT, ly = wy % HT; c = vn > 0.6 ? 0x9a8c74 : 0xa89a80; if (n > 0.94) c = 0x8a7c66; if ((lx > 2.5 && lx < 3.3) || (lx > 5 && lx < 5.8)) c = mixc(c, 0x6a5e4c, 0.25); if (hash2(wx, wy * 2) > 0.92) c = mixc(c, G[0], 0.6); break; }
     case GK.MAIN: { c = vn > 0.6 ? 0x5a5452 : 0x645e5a; if (n > 0.95) c = 0x76706a; if (Math.abs(vnoise(wx / 8, wy / 8) - 0.5) < 0.016) c = 0x3a3434; const pa = vnoise(wx / 10 + 3, wy / 10 + 8); if (pa > 0.7) c = mixc(c, 0x2e2a2c, 0.5); if (Math.abs(u - 480) > 9.3) c = 0xb8b0a0; break; }
-    case GK.FIELD: { const cr3 = HF.crop[k] || 1, row = wy % 3.2; const cols = [[0x4f8a3a, 0x6aa244], [0x5a9a40, 0x8ab84e], [0xc8a84a, 0xd8bc5a], [0x4a7a3a, 0x6a9a44], [0x8a9a3a, 0xa8b04a]][cr3 - 1];
+    case GK.FIELD: { const row = wy % 3.2;
       if ((wx % 40) < 1 || (wy % 40) < 1) { c = 0x8a7454; break; }
-      if (row < 1.3) { c = n > 0.5 ? 0x6a4a32 : 0x5e4230; } else { c = n > 0.55 ? cols[1] : cols[0]; if (ss === 'winter') c = n > 0.5 ? 0x7a6a5a : 0xe4e8ec; else if (ss === 'fall' && cr3 !== 3) c = mixc(c, 0xc8a050, 0.5); else if (ss === 'spring') c = mixc(c, 0x5a4232, 0.4); }
+      c = row < 1.3 ? (n > 0.5 ? 0x5e4230 : 0x543a2a) : (n > 0.55 ? 0x7a5a3c : 0x6e5036);
+      if (ss === 'winter' && vnoise(wx / 4, wy / 4) > 0.56) c = n > 0.5 ? 0xe4e8ec : 0xd8dee4;
       return c; }
     case GK.GREEN: c = vn > 0.58 ? mixc(G[1], 0xa8d070, 0.15) : mixc(G[0], 0xa8d070, 0.12); if (n > 0.92) c = G[2]; break;
     case GK.FARBANK: c = vn > 0.55 ? G[1] : G[0]; if (n > 0.92) c = G[2]; break;
@@ -226,6 +227,8 @@ function hrFrame(alpha, now) {
   for (const [wx, wy] of HR.waterPts) { const p = ISO(wx, wy); if (p[0] < x0 - 4 || p[0] > x0 + uw + 4 || p[1] < y0 - 4 || p[1] > y0 + uh + 4) continue; const ph = hash2(wx, wy) * 6.28, s = Math.sin(t * 1.6 + ph); if (s > 0.6) g.fillRect(Math.round((p[0] + Math.sin(t * 0.7 + ph) * 3) * K) / K, Math.round(p[1] * K) / K, s > 0.85 ? 1.5 : 1, 0.5); }
   // gather drawables
   const D = [], cull = (x, y, w, h) => x + w < x0 || x > x0 + uw || y + h < y0 || y > y0 + uh;
+  if (HS.plots) for (const P of HS.plots) { const sp = hrPlotSprite(P); if (cull(sp.x, sp.y, sp.w, sp.h)) continue; g.drawImage(sp.c, sp.x, sp.y, sp.w, sp.h); }
+  hrStores(D, cull);
   for (const s of HR.statics) { if (cull(s.x, s.y, s.w, s.h)) continue; D.push(s); }
   const L = HR.lerp = alpha;
   for (const p of HS.people) actorDraw(D, p, false, L, cull);
@@ -262,6 +265,68 @@ function hrFrame(alpha, now) {
 function hrGlow(g, x, y, r, c, a) { const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c + a + ')'); rg.addColorStop(1, c + '0)'); g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); }
 function stringPt(t) { const o = HF.oak, a = t * TAU, x = o.x + 20 + Math.cos(a) * 40, y = o.y + 26 + Math.sin(a) * 26; return ISO(x, y, 15 + Math.abs(Math.sin(a * 4)) * -3); }
 
+// ---------------------------------------------------------------- crop plots (live: stage, planting / harvest progress, season)
+// One small pixel sprite per plot, re-made only when what it shows changes (a stage, a fifth of a planting or harvest, the season).
+const CROP_MATURE = {   // [leaf, leaf light, fruit/head] for the five crop kinds of the map
+  1: [0x6a8a3a, 0x8aa04a, 0xd8bc5a], 2: [0x4f8a3a, 0x6aa244, 0xe8c84a], 3: [0x6a9a44, 0x9cc46e, 0xb8d88a], 4: [0x4a7a3a, 0x6a9a44, 0xd9534f], 5: [0x5a8a3a, 0x7aa64a, 0xe8a03a] };
+function hrPlotSprite(P) {
+  const ss = HR.season, step = P.st === 5 || P.st === 0 ? Math.floor(clamp(P.prog, 0, 1) * 5) : 0, key = P.st + '|' + step + '|' + (P.stub ? 1 : 0) + '|' + ss;
+  if (P._spr && P._spr.key === key) return P._spr;
+  const X0 = P.ci * HT, Y0 = P.cj * HT, S5 = 5 * HT, sxMin = X0 - (Y0 + S5), syMin = (X0 + Y0) / 2 - 9, W = Math.ceil(2 * S5 * K) + 4, H = Math.ceil((S5 + 10) * K) + 2;
+  const g = new Int32Array(W * H).fill(-1), set = (x, y, c) => { if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + x] = c; };
+  const tint = c => grade(ss === 'winter' ? mixc(c, 0xdfe6ea, 0.3) : ss === 'fall' ? mixc(c, 0xc8a050, 0.28) : ss === 'spring' ? mixc(c, 0x8ac85a, 0.12) : c);
+  const order = P.tiles.slice().sort((a, b) => (a % HN + ((a / HN) | 0)) - (b % HN + ((b / HN) | 0))), cut = Math.round(order.length * step / 5), state = new Map();
+  order.forEach((k, i) => state.set(k, P.st === 5 ? (i < cut ? 'stub' : 'mature') : P.st === 0 ? (i < cut ? 'planted' : (P.stub ? 'stub' : 'soil')) : CROP[P.st]));
+  const pts = [];
+  for (const k of P.tiles) { const st = state.get(k); if (st === 'soil') continue; const ti = k % HN, tj = (k / HN) | 0;
+    for (let r = Math.floor(tj * HT / 3.2); r * 3.2 < (tj + 1) * HT; r++) { const wy = r * 3.2 + 2.25; if (wy < tj * HT || wy >= (tj + 1) * HT) continue;
+      for (let wx = ti * HT + 1 + (r % 2); wx < (ti + 1) * HT; wx += 2) { if ((wx % 40) < 1.2 || (wy % 40) < 1.2) continue; pts.push([wx, wy, st, hash2(wx * 3, wy * 3)]); } } }
+  pts.sort((a, b) => (a[0] + a[1]) - (b[0] + b[1]));
+  const M = CROP_MATURE[P.crop] || CROP_MATURE[1];
+  for (const [wx, wy, st, h] of pts) {
+    const px = Math.round(((wx - wy) - sxMin) * K), py = Math.round(((wx + wy) / 2 - syMin) * K);
+    if (st === 'stub') { if (h < 0.55) { set(px, py - 1, grade(0xc8b070)); if (h < 0.25) set(px + 1, py, grade(0xa8905a)); } }
+    else if (st === 'planted') { set(px - 1, py, grade(0x8a6a48)); set(px, py, grade(0x8a6a48)); set(px, py - 1, grade(0x9a7a56)); if (h < 0.3) set(px + 1, py - 1, grade(0x6a8a3a)); }
+    else if (st === 'sprout') { const c1 = tint(0x6aa244), c2 = tint(0x8ac85a); set(px, py - 1, c1); set(px, py - 2, c2); if (h < 0.6) set(px - 1, py - 2, c2); }
+    else if (st === 'growing') { const c1 = tint(0x4f8a3a), c2 = tint(0x6aa244), c3 = tint(0x8ab84e); for (let j = 1; j <= 3; j++) set(px, py - j, c1); set(px - 1, py - 2, c2); set(px + 1, py - 3, c2); set(px - 1, py - 4, c3); set(px, py - 4, c3); if (h < 0.5) set(px + 1, py - 1, c2); }
+    else {   // mature, by crop kind
+      const L1 = tint(M[0]), L2 = tint(M[1]), F = grade(ss === 'winter' ? mixc(M[2], 0xdfe6ea, 0.2) : M[2]);
+      if (P.crop === 1) { for (const dx of [-1, 0, 1]) { const hh = 5 + ((h * 7 + dx) & 1); for (let j = 1; j < hh; j++) set(px + dx, py - j, j > hh - 3 ? F : L2); } }
+      else if (P.crop === 2) { for (let j = 1; j <= 8; j++) set(px, py - j, L1); set(px - 1, py - 3, L2); set(px + 1, py - 5, L2); set(px - 2, py - 6, L2); set(px + 1, py - 4, F); set(px + 1, py - 3, F); set(px, py - 9, grade(0xd8c890)); }
+      else if (P.crop === 3) { for (let j = 1; j <= 3; j++) for (let dx = -1; dx <= 1; dx++) set(px + dx, py - j, j === 2 && dx === 0 ? F : L2); set(px - 2, py - 1, L1); set(px + 2, py - 1, L1); set(px, py - 4, L1); }
+      else if (P.crop === 4) { for (let j = 1; j <= 4; j++) for (let dx = -1; dx <= 1; dx++) if (j < 4 || dx === 0) set(px + dx, py - j, (j + dx) % 2 ? L1 : L2); set(px - 1, py - 2, F); set(px + 1, py - 3, F); if (h < 0.5) set(px, py - 1, F); }
+      else { for (let dx = -2; dx <= 2; dx++) set(px + dx, py - 1, dx % 2 ? L1 : L2); set(px - 1, py - 2, L2); set(px + 1, py - 2, L1); if (h < 0.6) { set(px, py - 1, F); set(px + 1, py - 1, F); set(px, py - 2, F); } }
+    }
+  }
+  const s = gridCanvas(g, W, H, null, K); P._spr = { key, c: s.c, x: sxMin, y: syMin, w: s.w, h: s.h }; return P._spr;
+}
+// ---------------------------------------------------------------- stores: piles that grow and shrink with HS.store
+const STOCK_BOX = {
+  food: () => [HB(0, 0, 0, 3.6, 3, 2.4, 0xd8c08a, (f, u, v) => f === 0 && v > 2 ? 0xc0a874 : undefined), HB(0.7, 0.5, 2.4, 2.2, 2, 0.9, 0xc8b07a)],
+  kitchen: () => [HB(0, 0, 0, 4, 4, 3.2, 0xc98a4a, (f, u, v) => f !== 0 && (v | 0) % 2 === 0 ? 0xa8703a : undefined), HB(0.5, 0.5, 3.2, 3, 3, 0.5, 0x8ab84e)],
+  fish: () => [HB(0, 0, 0, 4.4, 3.4, 2, 0x6a7a84), HB(0.4, 0.4, 2, 3.6, 2.6, 0.5, 0xc8d4dc, (f, u, v) => f === 2 && (u | 0) % 2 ? 0x9aaab4 : undefined)],
+  mat: () => [HB(0, 0, 0, 10, 2.4, 1.1, 0xb08458, (f, u, v) => f !== 2 && (u % 3.3) < 0.4 ? 0x8a6440 : undefined)],
+  yard: () => [HB(0, 0, 0, 4.6, 3.2, 2.8, 0x5a6a4a, (f, u, v) => f !== 0 && Math.abs(v - 1.4) < 0.3 ? 0x4a5a3a : undefined)],
+  market: () => [HB(0, 0, 0, 3.4, 3.4, 2.2, 0xb8904a, (f, u, v) => f !== 0 && (v | 0) % 2 ? 0x9a7638 : undefined), HB(0.5, 0.5, 2.2, 2.4, 2.4, 0.7, 0xd9534f)],
+  bowl: () => [HB(0, 0, 0, 1.6, 1.6, 0.8, 0xf2ece0), HB(0.3, 0.3, 0.8, 1, 1, 0.1, 0xd8a04a)]
+};
+const STOCK_PER = { food: 6.7, kitchen: 1.7, fish: 4, mat: 4, yard: 3, market: 1.7 };   // 6 items = a full store, so every delivery or withdrawal can show
+function hrStores(D, cull) {
+  const S = HS.store, A = HS.storeAt; if (!S || !A) return;
+  const push = (spr, x, y, z, dd) => { const p = ISO(x, y, z); if (cull(p[0] - spr.ax, p[1] - spr.ay, spr.w, spr.h)) return; D.push({ c: spr.c, e: spr.e, x: p[0] - spr.ax, y: p[1] - spr.ay, w: spr.w, h: spr.h, d: x + y + (dd || 0) }); };
+  for (const kind in STOCK_PER) {
+    const at = A[kind]; if (!at) continue; const n = Math.min(6, Math.ceil((S[kind] || 0) / STOCK_PER[kind])); if (!n) continue;
+    const spr = bakeCached('stk' + kind + HR.season, STOCK_BOX[kind]);
+    for (let i = 0; i < n; i++) { if (kind === 'mat') push(spr, at[0] - 5, at[1] + (i % 2) * 0.3, i * 1.1, i * 0.01); else push(spr, at[0] - 6 + (i % 3) * 4.8, at[1] - 2 + Math.floor(i / 3) * 4.4, 0); }
+  }
+  // meals served on the mess tables
+  if (S.meals > 0) {
+    if (!HR.tables) { HR.tables = HF.props.filter(p => p.kind === 'table'); HR.bowlAt = []; for (let s = 0; s < 4; s++) for (const t of HR.tables) for (const side of [1.4, 4.6]) HR.bowlAt.push([t, 2.6 + s * 5, side]); }
+    const tk = (_bk.get('ptable|||||' + HR.season) || { key: 12 }).key, bowl = bakeCached('stkbowl' + HR.season, STOCK_BOX.bowl);
+    for (let i = 0; i < Math.min(S.meals, HR.bowlAt.length); i++) { const [t, ox, oy] = HR.bowlAt[(i * 7) % HR.bowlAt.length]; push(bowl, t.x + ox, t.y + oy, 4.4, tk + 0.05 - ox - oy); }
+  }
+}
+
 // people + infected -> drawables
 const POSE_ACT = { sit: 5, kneel: 5, talk: 7, stir: 7, fish: 7, hang: 6, raise: 6, stab: 7, look: 0, stand: 0 };
 function actorDraw(D, a, isZ, L, cull) {
@@ -277,17 +342,21 @@ function actorDraw(D, a, isZ, L, cull) {
   let pose = 0; const tt = HS.t + (a.ph || 0), moving = Math.hypot(a.x - a.px, a.y - a.py) > 0.01;
   if (moving) pose = 1 + Math.floor(a.stride / (isZ ? 2.4 : 3.2)) % 4;
   else if (isZ) pose = a.st === 'attack' || a.st === 'wall' || a.st === 'gate' ? (Math.floor(tt / 0.32) % 2 ? 6 : 7) : 0;
-  else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
+  else { const act = a.act; if (act === 'hammer' || act === 'hoe' || act === 'drill') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0; else if (act === 'reap') pose = Math.floor(tt / 0.55) % 2 ? 6 : 5; else if (act === 'water') pose = Math.floor(tt / 1.3) % 3 ? 6 : 0; else if (act === 'jump') pose = 1 + Math.floor(tt * 6) % 4; else if (act === 'talk') pose = Math.floor(tt / 1.7) % 3 ? 7 : 0; else pose = POSE_ACT[act] || 0; }
   const variant = isZ ? '' : (a.variant || (a.role === 'guard' ? 'sling' : ''));
   const s = sheetFor(a, variant), row = DIR_ROW[a.dir];
   D.push({ c: s.c, e: s.e, sx: pose * CW, sy: row * CH, sw: CW, shh: CH, x: Math.round((p[0] - PW / 2) * K) / K, y: Math.round((p[1] - PFOOT - (pose === 5 ? 2 : 0)) * K) / K, w: PW, h: PH, d: x + y + (z ? 15 : 0), sh: z ? null : [p[0], p[1], 4.2], blink: isZ && a.stT > 0,
-    over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && a.task.anim === 'fish') ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') { g.fillStyle = 'rgba(232,226,212,0.8)'; for (let i = 0; i < 12; i++) g.fillRect(p[0] + 9 + i * 0.9, p[1] - 20 + i * 1.4 + Math.sin(HS.t * 2) * 0.5, 0.5, 0.5); } } : null });
+    over: (a.bub && typeof BUB !== 'undefined' && BUB[a.bub]) || (!isZ && a.task && a.task.k === 'work' && (a.task.anim === 'fish' || a.task.anim === 'stir')) ? (g) => { if (a.bub && BUB[a.bub]) g.drawImage(BUB[a.bub], p[0] - 7, p[1] - 44, 14, 14); if (a.task && a.task.anim === 'fish' && a.act === 'fish') { g.fillStyle = 'rgba(232,226,212,0.8)'; for (let i = 0; i < 12; i++) g.fillRect(p[0] + 9 + i * 0.9, p[1] - 20 + i * 1.4 + Math.sin(HS.t * 2) * 0.5, 0.5, 0.5); }
+      if (a.act === 'stir') for (let k = 0; k < 3; k++) { const q = ((HS.t * 0.6 + k / 3 + a.ph) % 1); g.fillStyle = 'rgba(236,232,226,' + (0.55 * (1 - q)).toFixed(2) + ')'; const r = 1 + q * 2.5; g.fillRect(Math.round((p[0] + 4 + Math.sin(HS.t * 2 + k) * 1.2) * K) / K - r / 2, p[1] - 14 - q * 12, r, r); } } : null });
 }
 function hrFx(g, t, now) {
   for (const f of HS.fx) {
     if (f.k === 'tracer') { const a = ISO(f.x0, f.y0, f.z0), b = ISO(f.x1, f.y1, f.z1); g.fillStyle = '#fff2c4'; const n = Math.max(4, Math.hypot(b[0] - a[0], b[1] - a[1]) / 1.4 | 0); for (let i = 0; i < n; i++) { if (i % 3 === 2) continue; const q = i / n; g.fillRect(Math.round((a[0] + (b[0] - a[0]) * q) * K) / K, Math.round((a[1] + (b[1] - a[1]) * q) * K) / K, 0.5, 0.5); } }
     else if (f.k === 'flash') { const p = ISO(f.x, f.y, f.z); g.fillStyle = '#ffd36a'; g.fillRect(p[0] - 1.5, p[1] - 1, 3, 2); g.fillRect(p[0] - 0.5, p[1] - 2, 1, 4); }
     else if (f.k === 'dust') { const p = ISO(f.x, f.y), r = 2 + (0.6 - f.t) * 8; g.fillStyle = 'rgba(176,156,128,' + (f.t * 1.2).toFixed(2) + ')'; g.fillRect(p[0] - r, p[1] - r * 0.6, r * 2, r * 1.0); }
+    else if (f.k === 'chaff') { const p = ISO(f.x, f.y, 3 + (0.6 - f.t) * 10); g.fillStyle = '#e8cc72'; g.fillRect(p[0], p[1], 0.5, 0.5); g.fillRect(p[0] + 1.5, p[1] + 1, 0.5, 0.5); g.fillRect(p[0] - 1, p[1] + 1.5, 0.5, 0.5); }
+    else if (f.k === 'water') { const p = ISO(f.x, f.y, f.t * 10); g.fillStyle = 'rgba(150,200,230,0.9)'; g.fillRect(p[0], p[1], 0.5, 1); g.fillRect(p[0] + 1, p[1] + 1, 0.5, 1); }
+    else if (f.k === 'splash') { const p = ISO(f.x, f.y), r = 1.5 + (0.7 - f.t) * 6; g.fillStyle = 'rgba(236,244,248,' + (f.t * 1.2).toFixed(2) + ')'; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; g.fillRect(p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r * 0.5, 0.5, 0.5); } }
     else if (f.k === 'hit') { const p = ISO(f.x, f.y, 12); g.fillStyle = f.h ? '#ffb0a0' : '#f8f4e8'; g.fillRect(p[0] - 1, p[1] - 1, 2, 2); g.fillRect(p[0] + 2, p[1] - 3, 1, 1); g.fillRect(p[0] - 3, p[1] + 1, 1, 1); }
   }
   // chimney smoke

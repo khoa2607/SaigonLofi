@@ -4,6 +4,12 @@
 const HINK = 0x2b1a16, WOOD = 0x9a6a44, WOOD_D = 0x6e4a32, WOOD_L = 0xc49a64, RUST = 0x9a4a2a, GALV = 0x9aa0a4, CONC = 0xa8a294, TRIM = 0xf0ead8;
 const hs = (a, b) => hash2(a * 13.1 + 7, b * 7.3 + 3);
 const HB = (x, y, z, w, d, h, c, p, e) => box(x, y, z, w, d, h, c, p, e);
+// Holdfast-only work bubbles, added to Saigon's icon table at runtime before initIcons() (Saigon's own files are unchanged)
+if (typeof ICON_SRC !== 'undefined') Object.assign(ICON_SRC, {
+  fish: ['........', '..BBB...', '.BWBBB.B', 'BBBBBBBB', '.BBBBB.B', '..BBB...', '........', '........'],
+  wheat: ['...Y....', '..YtY.Y.', '...Y.YtY', '..YtY.Y.', '...t.Yt.', '...t.t..', '....tt..', '........'],
+  plank: ['........', 'TTTTTTT.', 'tttttttt', '........', '.TTTTTTT', 'tttttttt', '........', '........']
+});
 
 // ---------------------------------------------------------------- painters
 function sidingP(S) {

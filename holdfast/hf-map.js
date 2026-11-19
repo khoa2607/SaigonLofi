@@ -380,7 +380,7 @@ function hfFlow(mask, target, maxN) {
       d[m] = dk + (a && b ? 3 : 2); q[t++] = m;
     }
   }
-  if (_flow.size > 260) { let old = null, ot = 1e18; for (const [kk, v] of _flow) if (v.t < ot) { ot = v.t; old = kk; } _flow.delete(old); }
+  if (_flow.size > 360) { let old = null, ot = 1e18; for (const [kk, v] of _flow) if (v.t < ot) { ot = v.t; old = kk; } _flow.delete(old); }
   _flow.set(key, { d, t: Date.now() }); return d;
 }
 const DX8 = [1, -1, 0, 0, 1, 1, -1, -1], DY8 = [0, 0, 1, -1, 1, -1, 1, -1];

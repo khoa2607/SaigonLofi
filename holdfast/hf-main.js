@@ -110,6 +110,7 @@ function hfLoop(now) {
   if (document.hidden || HFG.asleep) { HFG.last = now; return; }             // only the visible world simulates
   const dt = Math.min(0.25, (now - HFG.last) / 1000); HFG.last = now;
   const t0 = performance.now();
+  HS.view = { x0: HR.cx - HR.vw / K / 2, y0: HR.cy - HR.vh / K / 2, x1: HR.cx + HR.vw / K / 2, y1: HR.cy + HR.vh / K / 2 };   // the director never spawns infected on screen
   HFG.acc += dt * HFG.speed; let steps = 0;
   while (HFG.acc >= 0.1 && steps < 6) { hsTick(0.1); HFG.acc -= 0.1; steps++; }
   if (steps === 6) HFG.acc = 0;
@@ -120,6 +121,8 @@ function hfLoop(now) {
   if (HS.dirtyWall || (HR.tick % 20 === 0)) { HS.dirtyWall = false; hrRefreshWalls(); }
   hrFrame(HFG.acc / 0.1, now);
   const ft = performance.now() - t0; HR.ft.push(ft); if (HR.ft.length > 120) HR.ft.shift();
+  // device tuning: a slow machine gets fewer roaming infected (never below half), a fast one recovers the full density
+  if (HR.tick % 240 === 0 && HR.ft.length >= 120) { const avg = HR.ft.reduce((a, b) => a + b, 0) / HR.ft.length, top = clamp(HS.target / 120, 0.6, 1); if (avg > 14) HS.zScale = Math.max(0.5, HS.zScale - 0.1); else if (avg < 7 && HS.zScale < top) HS.zScale = Math.min(top, HS.zScale + 0.05); }
   if (now - HFG.ui > 250) { HFG.ui = now; hfStatus(); dockUpdate(); dockViz(); }
   haFrame(dt, hfView());
 }

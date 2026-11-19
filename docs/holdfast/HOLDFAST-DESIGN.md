@@ -159,10 +159,10 @@ Like Saigon keeps a steady stream of traffic and pedestrians, Holdfast keeps **m
 
 | Tier | Example (Current era) | Frequency (Standard danger) |
 |---|---|---|
-| **Micro** | A sniper drops a lone infected. Zombies chase a deer. A walker rattles the fence. A guard spots something and calls it in. | **Every 45–120 s** |
+| **Micro** | A sniper drops a lone infected. Zombies chase a deer. A walker rattles the fence. A guard spots something and calls it in. | **Every 25–55 s** (milestone 5; was 45–120 s) |
 | **Minor** | A group of 3–6 gathers at a trail mouth and is thinned at the cleared ground. Expedition contact. A culvert probe. | Every 4–8 min |
-| **Medium** | A pack hits a flank tower, a panel is damaged and the repair crew is deployed. A rescue sortie. | Every 12–20 min |
-| **Major attack** | A coordinated push on 2 routes: gate fight, flank breach attempt, all towers firing. 2–4 min long. | Every 30–45 min |
+| **Medium** | A pack hits a flank tower, a panel is damaged and the repair crew is deployed. A rescue sortie. | Every 6–10 min (was 12–20) |
+| **Major attack** | A coordinated push on 2 routes: gate fight, flank breach attempt, all towers firing. 2–4 min long. | Every 18–28 min (was 30–45) |
 | **Siege** | A horde from the ruins, a breach, and defenders holding the gap. 4–6 min. | About every 2 hours |
 
 **Tension model:** the director tracks `tension (0–1)`. Micro events nudge it up, quiet time decays it, and large events require high tension plus a cooldown since the last large event. After a Major or Siege, **Recovery** (repairs, infirmary, cleanup, burn pile, memorial, shared meal) runs *on top of* normal life. It doesn't replace it.
