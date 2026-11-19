@@ -278,12 +278,11 @@ function lfTraderJob(p, h) {
   const other = HS.stalls[(k + 6) % 8]; const tgt = (!st.open || st.stock <= 1) ? st : (k < 2 && (!other.open || other.stock <= 1) && h < 17) ? other : st;
   const tW = { x: HF.spots.stall[tgt.k].x, y: HF.spots.stall[tgt.k].y, spot: HF.spots.stall[tgt.k] };
   if ((!tgt.open || tgt.stock <= 1) && h < 17.3 && (S.market > 0 || S.food > 3 || S.tools > 0)) return lfChain('setup', [
-    lfLeg(pile, 2.2, 'kneel', '', () => { const n = Math.min(3, S.market > 0 ? S.market : 2); if (S.market > 0) S.market -= n; else if (S.tools > 0) S.tools--; else S.food -= 2; T_n = n; }, { carry: 'crate' }),
-    lfLeg(tW, 3.5, 'kneel', 'crate', () => { const was = tgt.open; tgt.open = true; tgt.stock = Math.min(5, tgt.stock + Math.max(2, T_n)); if (was) HS.Ls.restock++; else HS.Ls.setup++; }, { carry: '', dir: 1 })]);
+    lfLeg(pile, 2.2, 'kneel', '', () => { const n = Math.min(3, S.market > 0 ? S.market : 2); if (S.market > 0) S.market -= n; else if (S.tools > 0) S.tools--; else S.food -= 2; HS.Tn = n; }, { carry: 'crate' }),
+    lfLeg(tW, 3.5, 'kneel', 'crate', () => { const was = tgt.open; tgt.open = true; tgt.stock = Math.min(5, tgt.stock + Math.max(2, HS.Tn)); if (was) HS.Ls.restock++; else HS.Ls.setup++; }, { carry: '', dir: 1 })]);
   if (!st.open) return null;
   return { k: 'life', a: 'sell', stall: st.k, ...stallW, dur: rr2(30, 55) };
 }
-let T_n = 2;
 function lfShopTask(p) {         // a customer: the open stall with the shortest queue
   let best = null, bs = 1e9;
   for (const s of HS.stalls) { if (!s.open || s.stock <= 0) continue; const front = HF.spots.shop[s.k], q = HF.spots.queue.filter(x => x.k === s.k), n = (HS.spots.get(front) || 0) + q.reduce((a, x) => a + (HS.spots.get(x) || 0), 0); if (n >= 3) continue; const sc = n + Math.hypot(front.x - p.x, front.y - p.y) / 300 + HS.R() * 0.5; if (sc < bs) { bs = sc; best = s; } }

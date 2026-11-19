@@ -1,6 +1,12 @@
 'use strict';
 // ===== Holdfast — renderer: baked ground chunks, depth-sorted sprites, Saigon-style light, weather, water, fx =====
-const HR = { cv: null, g: null, lc: null, lg: null, aps: 1, zoom: 0, vw: 0, vh: 0, cx: 0, cy: 0, chunks: new Map(), statics: [], season: 'summer', wallSpr: new Map(), sheets: new Map(), lying: new Map(), anim: new Map(), parts: [], dirty: true, lastT: 0, fps: 60, ft: [], drawn: 0, tick: 0 };
+// HR holds (a) renderer + camera state shared by every timeline (canvas, zoom, camera, weather particles, frame timing) and
+// (b) the build output of the timeline currently on screen: statics, ground chunks, sprite sheets... (HR_WORLD_KEYS). Each timeline owns its own
+// copy of (b); hf-world.js swaps it in and out. `season` is the season (b) was built for.
+const HR = { cv: null, g: null, lc: null, lg: null, aps: 1, zoom: 0, vw: 0, vh: 0, cx: 0, cy: 0, parts: [], dirty: true, lastT: 0, fps: 60, ft: [], drawn: 0, tick: 0 };
+const HR_WORLD_KEYS = ['chunks', 'statics', 'shadows', 'lights', 'smokers', 'waterPts', 'gate', 'shadowsDone', 'dyn', 'sheets', 'lying', 'anim', 'season', 'tables', 'bowlAt'];
+function hrNewWorld(season) { return { chunks: new Map(), statics: [], shadows: [], lights: [], smokers: [], waterPts: [], gate: null, shadowsDone: false, dyn: [], sheets: new Map(), lying: new Map(), anim: new Map(), season: season || 'summer', tables: undefined, bowlAt: undefined }; }
+Object.assign(HR, hrNewWorld('summer'));
 const CHU = 256;                         // ground chunk size in iso units (512 art px)
 const KF_AMB = [[0, 0x4a4c86], [4.6, 0x4a4c86], [5.5, 0x8676a6], [6.3, 0xf2b9a2], [7.4, 0xffe9cf], [9, 0xfff8ea], [15.6, 0xfff6e2], [17, 0xffe2b4], [18, 0xf6aa7c], [18.8, 0xa97c9c], [19.7, 0x5c5e9a], [21, 0x4a4c86], [24, 0x4a4c86]];
 function hrAmbient(h) { let i = 0; while (i < KF_AMB.length - 2 && KF_AMB[i + 1][0] <= h) i++; const a = KF_AMB[i], b = KF_AMB[i + 1]; return mixc(a[1], b[1], clamp((h - a[0]) / (b[0] - a[0]), 0, 1)); }
@@ -60,15 +66,17 @@ function hrGround(wx, wy, ss) {
   if (ss === 'fall' && (z === Z_WILD || z === Z_SETTLE) && n > 0.97) c = [0xd9822a, 0xc0622a, 0xe8b03a][(n * 997 | 0) % 3];
   return c;
 }
-function hrBakeChunk(ci, cj) {
+function hrBakeChunk(ci, cj) { const g = hrBakeChunkG(ci, cj); let r; while (!(r = g.next()).done); return r.value; }
+function* hrBakeChunkG(ci, cj) {
   const key = ci + ',' + cj + ',' + HR.season; if (HR.chunks.has(key)) return HR.chunks.get(key);
   const W = CHU * K, cv = mk(W, W), g = cv.getContext('2d'), img = g.createImageData(W, W), d = img.data, GC = new Map(), ss = HR.season;
   const sx0 = -HW + ci * CHU, sy0 = cj * CHU;
-  for (let py = 0; py < W; py++) for (let px = 0; px < W; px++) {
+  for (let py = 0; py < W; py++) { if ((py & 31) === 0 && slDue()) yield; for (let px = 0; px < W; px++) {
     const sx = sx0 + (px + 0.5) / K, sy = sy0 + (py + 0.5) / K, wx = sy + sx / 2, wy = sy - sx / 2;
     const c0 = hrGround(wx, wy, ss); let c = GC.get(c0); if (c === undefined) { c = grade(c0); GC.set(c0, c); }
     const o = (py * W + px) * 4; d[o] = c >> 16 & 255; d[o + 1] = c >> 8 & 255; d[o + 2] = c & 255; d[o + 3] = 255;
-  }
+  } }
+  if (slDue()) yield;
   // grass tufts / weeds rising above the ground plane
   const tuft = (sx, sy, cols, n) => { const px = Math.round((sx - sx0) * K), py = Math.round((sy - sy0) * K); for (let q = 0; q < n; q++) { const bx = px + q - (n >> 1), hg = 2 + ((q * 7 + px) % 3); for (let j = 0; j < hg; j++) { const yy = py - j, xx = bx + (j > 1 && q % 2 ? 1 : 0); if (xx < 0 || yy < 0 || xx >= W || yy >= W) continue; const c = grade(j === hg - 1 ? cols[2] : j === 0 ? cols[0] : cols[1]), o = (yy * W + xx) * 4; d[o] = c >> 16 & 255; d[o + 1] = c >> 8 & 255; d[o + 2] = c & 255; } } };
   if (ss !== 'winter') {
@@ -95,16 +103,19 @@ function castShadow(x, y, w, d, h) { const k = h * 0.85, c = [[x, y], [x + w, y]
 
 // ---------------------------------------------------------------- statics
 const _bk = new Map();
-function bakeCached(key, fn, slice) { let s = _bk.get(key); if (!s) { s = bake(fn(), slice ? { slice: 24, snow: HR.season === 'winter' } : { snow: HR.season === 'winter' && !key.startsWith('wall') }); _bk.set(key, s); } return s; }
+// the art code reads HF.era while baking (hf-art.js / hf-past-art.js), so the cache key carries the era: the two timelines never share a sprite
+function bakeCached(key, fn, slice) { const k = HF.era + '|' + key; let s = _bk.get(k); if (!s) { s = bake(fn(), slice ? { slice: 24, snow: HR.season === 'winter' } : { snow: HR.season === 'winter' && !key.startsWith('wall') }); _bk.set(k, s); } return s; }
 function addStatic(spr, ox, oy, extraD, opt) {
   const list = Array.isArray(spr) ? spr : [spr], p = ISO(ox, oy);
   for (const s of list) { const e = { c: s.c, e: s.e, x: p[0] - s.ax, y: p[1] - s.ay, w: s.w, h: s.h, d: ox + oy + (s.key || 0) + (extraD || 0), em: opt && opt.em, ref: opt && opt.ref }; HR.statics.push(e); }
 }
-function hrBuildStatics(progress) {
+function hrBuildStatics(progress) { for (const _ of hrBuildStaticsG()); }
+function* hrBuildStaticsG() {
   HR.statics = []; HR.shadows = []; HR.lights = []; HR.smokers = []; HR.waterPts = [];
   const ss = HR.season;
   // buildings
   for (const b of HF.buildings) {
+    if (slDue()) yield;
     let boxes, key = 'b' + b.id + ss, H = 24;
     if (b.kind === 'house') { const L = HF.lots[b.lot]; const o = { w: L.w, d: L.d, floors: L.floors, wall: L.wall, roof: L.roof, seed: L.seed, porch: L.porch, garage: L.garage, solar: L.seed % 4 === 0 }; boxes = () => { const bx = suburbHouse(o); H = o.H; if (o.chim) HR.smokers.push([b.x + o.chim[0], b.y + o.chim[1], o.chim[2], L.seed]); return bx; }; }
     else boxes = () => { const bx = civicModel(b); if (b.chim) HR.smokers.push([b.x + b.chim[0], b.y + b.chim[1], b.chim[2], b.seed]); return bx; };
@@ -113,6 +124,7 @@ function hrBuildStatics(progress) {
   }
   // props
   for (const p of HF.props) {
+    if (slDue()) yield;
     if (p.kind === 'lights') continue;
     const f = (HF.era === 'past' && PPROPS[p.kind]) || PROPS[p.kind]; if (!f) continue;
     const key = 'p' + p.kind + '|' + (p.c || '') + '|' + (p.w || '') + '|' + (p.v || '') + '|' + (p.r ? p.r.toFixed(1) : '') + (p.kind === 'laundry' ? (p.x | 0) : '') + '|' + (p.along || '') + (p.cross ? 'c' : '') + (p.white ? 'w' : '') + '|' + ss;
@@ -128,13 +140,15 @@ function hrBuildStatics(progress) {
   }
   for (const d of HF.docks) addStatic(bakeCached('dock' + d.len, () => PROPS.dock(d)), d.x, d.y, -6);
   // wall pieces
-  hrBuildWalls();
+  if (slDue()) yield;
+  yield* hrBuildWallsG();
   // towers
   const TB = towerBoxes(), tb = bakeCached('tower-b' + ss, () => TB.back), tf = bakeCached('tower-f' + ss, () => TB.front);
   for (const t of HF.towers) { addStatic(tb, t.x, t.y, -0.5); addStatic(tf, t.x, t.y, 36); castShadow(t.x, t.y, 18, 18, 66); if (HF.era !== 'past') HR.lights.push([...ISO(t.x + 16, t.y + 4, 66), 34, 'rgba(255,206,130,', 0.75, 1]); }
   if (!HR.nil) HR.nil = mk(1, 1);
   // trees
   for (const t of HF.trees) {
+    if (slDue()) yield;
     const s = hfTree(t.spc, ss, t.v); const p = ISO(t.x, t.y);
     HR.statics.push({ c: s.c, e: s.e, x: p[0] - s.ax * (t.big ? 1 : 1), y: p[1] - s.ay, w: s.w, h: s.h, d: t.x + t.y, tree: 1, rad: s.rad || 10, tx: t.x, ty: t.y });
     if (t.big) { const s2 = hfTree('me', ss, 2); HR.statics.push({ c: s2.c, e: s2.e, x: p[0] - s2.ax + 14, y: p[1] - s2.ay - 6, w: s2.w, h: s2.h, d: t.x + t.y + 0.1, tree: 1 }); }
@@ -153,9 +167,11 @@ function hrWallShape(s) {
   return out.join('');
 }
 function hrWallState(s) { return s.breached || s.hp <= 0 ? 2 : s.hp < s.max * 0.55 ? 1 : 0; }
-function hrBuildWalls() {
+function hrBuildWalls() { for (const _ of hrBuildWallsG()); }
+function* hrBuildWallsG() {
   HR.statics = HR.statics.filter(e => !e.wall);
   for (const s of HF.walls) {
+    if (slDue()) yield;
     if (s.gate) continue;
     const shape = hrWallShape(s), st = hrWallState(s), key = 'wall' + s.kind + s.seed + shape + st + s.h;
     const spr = bakeCached(key, () => wallBoxes(s, shape.split(''), st));
@@ -205,9 +221,37 @@ function hrResize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 3), cw = window.innerWidth, ch = window.innerHeight, pw = cw * dpr, ph = ch * dpr;
   const base = Math.max(1, Math.round(Math.sqrt(pw * ph / (560 * 315)) / K * 0.83)), aps = clamp(base + HR.zoom, 1, 6); HR.zoom = aps - base; HR.aps = aps;
   HR.vw = Math.ceil(pw / aps); HR.vh = Math.ceil(ph / aps);
-  for (const c of [HR.cv, HR.lc]) { c.width = HR.vw; c.height = HR.vh; }
-  HR.cv.style.width = (HR.vw * aps / dpr) + 'px'; HR.cv.style.height = (HR.vh * aps / dpr) + 'px';
-  HR.g.imageSmoothingEnabled = false; HR.lg.imageSmoothingEnabled = false; HR.dirty = true;
+  for (const c of [HR.cv, HR.lc, HR.fcv]) if (c) { c.width = HR.vw; c.height = HR.vh; }
+  for (const c of [HR.cv, HR.fcv]) if (c) { c.style.width = (HR.vw * aps / dpr) + 'px'; c.style.height = (HR.vh * aps / dpr) + 'px'; }
+  HR.g.imageSmoothingEnabled = false; HR.lg.imageSmoothingEnabled = false; if (HR.fg) HR.fg.imageSmoothingEnabled = false; HR.dirty = true;
+}
+
+// ---------------------------------------------------------------- preparing a timeline in the background (hf-world.js): every one of these yields when its slice is used up
+// sprite sheets are the first-frame cost of a freshly built timeline (hundreds of drawPerson calls): bake them ahead, nearest to the camera first
+function* hrPrewarmG() {
+  const cx = HR.cx, cy = HR.cy, d = a => { const p = ISO(a.x, a.y); return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) * 2; };
+  const all = HS.people.filter(p => p.alive).concat(HS.zombies.filter(z => z.st !== 'dead')).sort((a, b) => d(a) - d(b));
+  for (const a of all) {
+    if (a.L && a.L.ev === 'dino') dinoSheet(a.L); else if (a.L) sheetFor(a, a.role === 'guard' && a.post ? 'sling' : (a.variant || ''));
+    if (slDue()) yield;
+  }
+  if (HF.era === 'past') for (const sp of ['raptor', 'compy', 'dilo', 'pachy', 'ptero']) for (let m = 0; m < DSPEC[sp].col.length; m++) for (const sd of [0, 37]) { dinoSheet({ sp, morph: m, seed: sd }); if (slDue()) yield; }
+}
+// the timeline being left keeps only the ground chunks in view (a handful of MB instead of every chunk it ever baked): coming back to it needs no ground re-bake
+function hrTrimChunks() {
+  const uw = HR.vw / K, uh = HR.vh / K, x0 = HR.cx - uw / 2, y0 = HR.cy - uh / 2, keep = new Set();
+  const ci0 = Math.floor((x0 + HW) / CHU), ci1 = Math.floor((x0 + uw + HW) / CHU), cj0 = Math.floor(y0 / CHU), cj1 = Math.floor((y0 + uh) / CHU);
+  for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) keep.add(ci + ',' + cj + ',' + HR.season);
+  for (const k of [...HR.chunks.keys()]) if (!keep.has(k)) HR.chunks.delete(k);
+}
+// the ground chunks the first frame will draw (the idle baker fills the ring around them afterwards)
+function* hrPrebakeViewG() {
+  const uw = HR.vw / K, uh = HR.vh / K, x0 = HR.cx - uw / 2, y0 = HR.cy - uh / 2;
+  const ci0 = Math.floor((x0 + HW) / CHU), ci1 = Math.floor((x0 + uw + HW) / CHU), cj0 = Math.floor(y0 / CHU), cj1 = Math.floor((y0 + uh) / CHU);
+  for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) {
+    if (ci < 0 || cj < 0 || ci >= Math.ceil(2 * HW / CHU) || cj >= Math.ceil(HW / CHU)) continue;
+    yield* hrBakeChunkG(ci, cj);
+  }
 }
 function hrClampCam() { HR.cx = clamp(HR.cx, -HW + 200, HW - 200); HR.cy = clamp(HR.cy, 140, HW - 140); }
 function hrCenterOn(x, y) { const p = ISO(x, y); HR.cx = p[0]; HR.cy = p[1]; hrClampCam(); }
@@ -247,8 +291,8 @@ function hrFrame(alpha, now) {
   const G0 = HR.gate; if (G0) { const o = HF.gate.open * 11, p1 = ISO(G0.x - o, G0.y), p2 = ISO(G0.x + 12 + o, G0.y), lf = G0.leaf; D.push({ c: lf.c, e: lf.e, x: p1[0] - lf.ax, y: p1[1] - lf.ay, w: lf.w, h: lf.h, d: G0.x + G0.y + 0.25 }, { c: lf.c, e: lf.e, x: p2[0] - lf.ax, y: p2[1] - lf.ay, w: lf.w, h: lf.h, d: G0.x + G0.y + 12.25 }); }
   D.sort((a, b) => a.d - b.d);
   // soft contact shadows first (trees + actors), then sprites
-  for (const s of D) { if (s.sh) { const sp = shadowSprite(s.sh[2]); g.drawImage(sp, s.sh[0] - sp.width / K / 2, s.sh[1] - sp.height / K / 2, sp.width / K, sp.height / K); } else if (s.tree) { if (!s.rad) continue; const sp = shadowSprite(s.rad * 0.8); const p = ISO(s.tx + 3, s.ty + 2); g.drawImage(sp, p[0] - sp.width / K / 2, p[1] - sp.height / K / 2, sp.width / K, sp.height / K); } }
-  for (const s of D) { if (s.blink && Math.floor(now / 70) % 2) continue; if (s.sx !== undefined) g.drawImage(s.c, s.sx, s.sy, s.sw, s.shh, s.x, s.y, s.w, s.h); else g.drawImage(s.c, s.x, s.y, s.w, s.h); if (s.over) s.over(g); }
+  for (const s of D) { if (s.sh) { const sp = shadowSprite(s.sh[2]); if (s.alpha) g.globalAlpha = s.alpha; g.drawImage(sp, s.sh[0] - sp.width / K / 2, s.sh[1] - sp.height / K / 2, sp.width / K, sp.height / K); if (s.alpha) g.globalAlpha = 1; } else if (s.tree) { if (!s.rad) continue; const sp = shadowSprite(s.rad * 0.8); const p = ISO(s.tx + 3, s.ty + 2); g.drawImage(sp, p[0] - sp.width / K / 2, p[1] - sp.height / K / 2, sp.width / K, sp.height / K); } }
+  for (const s of D) { if (s.blink && Math.floor(now / 70) % 2) continue; if (s.alpha) g.globalAlpha = s.alpha; if (s.sx !== undefined) g.drawImage(s.c, s.sx, s.sy, s.sw, s.shh, s.x, s.y, s.w, s.h); else g.drawImage(s.c, s.x, s.y, s.w, s.h); if (s.alpha) g.globalAlpha = 1; if (s.over) s.over(g); }
   HR.drawn = D.length;
   // string lights over the green, fx, smoke, bubbles
   hrFx(g, t, now);
@@ -348,8 +392,8 @@ function actorDraw(D, a, isZ, L, cull) {
   if (!isZ && a.cart) { const ax = a.dir === 0 || a.dir === 2, cs = bakeCached('cart' + (ax ? 'x' : 'y') + a.cart + HR.season, () => cartBoxes(ax ? 'x' : 'y', a.cart)), ox = a.dir === 0 ? 6 : a.dir === 2 ? -14 : -2.5, oy = a.dir === 1 ? 6 : a.dir === 3 ? -14 : -2.5, cp = ISO(x + ox, y + oy); D.push({ c: cs.c, e: cs.e, x: cp[0] - cs.ax, y: cp[1] - cs.ay, w: cs.w, h: cs.h, d: x + ox + y + oy + 4 }); }
   // fallen: lying sprite (settlers covered by a sheet)
   if ((isZ && a.st === 'dead') || (!isZ && (!a.alive || a.st === 'down' || a.act === 'lie'))) {
-    const s = lyingFor(a, !isZ && !a.alive), fade = isZ && a.corpseT < 0 ? clamp(1 + a.corpseT / 5, 0, 1) : 1; if (fade <= 0) return;
-    D.push({ c: s.c, e: s.e, x: Math.round((p[0] - CH / K / 2) * K) / K, y: Math.round((p[1] - CW / K + 3) * K) / K, w: CH / K, h: CW / K, d: x + y + (z ? 2 : -2), sh: z ? null : [p[0], p[1], 6] });
+    const s = lyingFor(a, !isZ && !a.alive), fade = isZ ? corpseAlpha(a) : 1; if (fade <= 0) return;
+    D.push({ c: s.c, e: s.e, x: Math.round((p[0] - CH / K / 2) * K) / K, y: Math.round((p[1] - CW / K + 3) * K) / K, w: CH / K, h: CW / K, d: x + y + (z ? 2 : -2), sh: z ? null : [p[0], p[1], 6], alpha: fade < 1 ? fade : 0 });
     return;
   }
   let pose = 0; const tt = HS.t + (a.ph || 0), moving = Math.hypot(a.x - a.px, a.y - a.py) > 0.01;
@@ -525,18 +569,19 @@ function mkGhost() {   // two frames: a little sheet ghost with a wavy hem and d
 const _dsh = new Map();
 function dinoSheet(L) { const key = L.sp + '|' + (L.morph || 0) + '|' + (L.seed || 0); let s = _dsh.get(key); if (!s) { const D = dinoGrid(L); s = gridCanvas(D.g, D.W, D.H, null, K); _dsh.set(key, s); } return s; }
 function dinoDraw(D, a, L, cull) {
-  const S = DSPEC[a.L.sp], x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, alt = a.fly && a.st !== 'dead' ? (a.alt || 0) : 0, p = ISO(x, y, alt), w = S.W / K, h = S.H / K;
-  if (a.st === 'dead' && (a.corpseT < 0 || a.gone)) return;
+  const S = DSPEC[a.L.sp], x = a.px + (a.x - a.px) * L, y = a.py + (a.y - a.py) * L, alt = a.fly ? (a.alt || 0) : 0, p = ISO(x, y, alt), w = S.W / K, h = S.H / K;
+  if (a.st === 'dead' && (a.corpseT <= 0 || a.gone)) return;
   if (cull(p[0] - w / 2, p[1] - h, w, h + 4 + alt)) return;
   const sh = dinoSheet(a.L), tt = HS.t + (a.ph || 0), moving = Math.hypot(a.x - a.px, a.y - a.py) > 0.01; let pose = 0;
-  if (a.st === 'dead') pose = 8;
+  const dead = a.st === 'dead', fade = dead ? corpseAlpha(a) : 1;
+  if (dead) pose = a.dyingT > 0 && !a.fly ? (a.dyingT > (a.hp0 >= 12 ? 0.9 : 0.5) ? 7 : 8) : 8;   // a short rear-up / collapse, then the stationary body
   else if (a.fly) pose = a.fs === 'swoop' ? 6 : 1 + Math.floor(tt * (a.fs === 'leave' ? 7 : 5)) % 4;
   else if (a.roarAt && HS.t - a.roarAt < 1.8) pose = 7;
   else if (moving) pose = 1 + Math.floor(a.stride / Math.max(2.4, w / 6)) % 4;
   else if (a.st === 'attack' || a.st === 'wall' || a.st === 'gate') pose = Math.floor(tt / 0.42) % 2 ? 6 : 0;
   else if (a.st === 'idle' || a.st === 'circle') pose = Math.floor(tt / 2.3) % 3 === 0 ? 5 : 0;
   const flip = a.dir === 1 || a.dir === 2;
-  D.push({ c: sh.c, e: sh.e, sx: pose * S.W, sy: flip ? S.H : 0, sw: S.W, shh: S.H, x: Math.round((p[0] - w / 2) * K) / K, y: Math.round((p[1] - h + 1) * K) / K, w, h, d: x + y + (alt ? 40 : 0), sh: alt ? null : [p[0], p[1], Math.max(4, w * 0.28)], blink: a.stT > 0 && S.W < 80 });
+  D.push({ c: sh.c, e: sh.e, sx: pose * S.W, sy: flip ? S.H : 0, sw: S.W, shh: S.H, x: Math.round((p[0] - w / 2) * K) / K, y: Math.round((p[1] - h + 1) * K) / K, w, h, d: x + y + (alt ? 40 : 0), sh: alt ? null : [p[0], p[1], Math.max(4, w * 0.28)], blink: !dead && a.stT > 0 && S.W < 80, alpha: fade < 1 ? fade : 0 });
   if (alt) { const gp = ISO(x, y); D.push({ c: HR.nil, x: gp[0], y: gp[1], w: 0.01, h: 0.01, d: x + y - 1, sh: [gp[0], gp[1], Math.max(3, w * 0.22)] }); }
 }
 function wildDino(D, w, L, cull, t) {

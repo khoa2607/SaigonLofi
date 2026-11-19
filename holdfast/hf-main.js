@@ -70,7 +70,7 @@ async function hfBoot() {
   const simSeed = Q.get('seed') || Q.get('simseed') ? (+(Q.get('simseed') || Q.get('seed')) * 3 + 1) : ((Date.now() % 1000003) * 2654435761 >>> 0) % 2147483647;
   const era = Q.get('era') === 'past' || Q.get('era') === 'current' ? Q.get('era') : hfPref('era', 'current');   // milestone 8: the timeline tab (PAST / CURRENT)
   hfBuildMap(seed, era); await prog(0.1);
-  if (HF.era === 'past') { $('eraSub').dataset.i18n = 'hf.sub.past'; $('streetOn').dataset.i18nAttr = 'title:hf.world.t.past'; document.body.classList.add('era-past'); $('c').setAttribute('aria-label', 'Holdfast, the Past: a palisaded tribe in a river bend, in the age of dinosaurs'); applyStatic(); }
+  hfApplyEraUI(HF.era);
   HS.danger = Q.get('danger') || hfPref('danger', 'standard');
   HS.timeMode = Q.get('time') || hfPref('time', 'auto'); HS.wxMode = Q.get('wx') || hfPref('wx', 'auto');
   HS.autoSeason = Q.get('season') === 'auto' || (!Q.get('season') && !!hfPref('autoSeason', false)); HS.season = SEASONS.includes(Q.get('season')) ? Q.get('season') : hfPref('season', 'summer'); if (!SEASONS.includes(HS.season)) HS.season = 'summer';
@@ -78,7 +78,7 @@ async function hfBoot() {
   HFG.first = hfFirstState();                         // what the very first frame will show (read by tests/holdfast-flow.mjs)
   HS.sound = (k, x, y, v) => haEvent(k, x, y, v); HS.onEvent = e => hfOnEvent(e);
   initIcons(); await prog(0.2);
-  HR.cv = $('c'); HR.g = HR.cv.getContext('2d'); HR.lc = mk(4, 4); HR.lg = HR.lc.getContext('2d'); HR.season = HS.season;
+  HR.cv = $('c'); HR.g = HR.cg = HR.cv.getContext('2d'); HR.lc = mk(4, 4); HR.lg = HR.lc.getContext('2d'); HR.season = HS.season;
   hrBuildStatics(); await prog(0.7);
   if (HF.era === 'past') { for (const z of HS.zombies) dinoSheet(z.L); for (const sp of ['raptor', 'compy', 'dilo', 'pachy', 'ptero']) for (let m = 0; m < DSPEC[sp].col.length; m++) for (const sd of [0, 37]) dinoSheet({ sp, morph: m, seed: sd }); await prog(0.8); }   // the common sheets are ready before the first frame
   HR.zoom = Q.get('zoom') ? +Q.get('zoom') : hfPref('zoom', 0); hrResize();
@@ -95,10 +95,19 @@ async function hfBoot() {
   await prog(1);
   hfUIBuild(); if (Q.get('clean')) document.body.classList.add('clean');
   $('load').classList.add('done'); if (Q.get('warp') || Q.get('test') || Q.get('bench')) $('load').hidden = true; else setTimeout(() => $('load').hidden = true, 700);
+  hwRegister(HF.era, { seed, simSeed, pop });                                       // the timeline built above is the first context; the other one is prepared on demand
+  HR.fcv = $('cfade'); HR.fg = HR.fcv.getContext('2d'); hrResize();
   HFG.booted = true; HFG.last = performance.now(); requestAnimationFrame(hfLoop);
-  setInterval(hfIdleBake, 120);
+  setInterval(hfIdleBake, 40);
   if (MW.AU.playing) haStart(MW);
   if (Q.get('test')) hfSelfTest(); if (Q.get('bench')) hfBench();
+}
+// what changes on the page when the timeline on screen changes: the subtitle, the world-sound hint, the page class and the canvas description
+const ERA_ARIA = { past: 'Holdfast, the Past: a palisaded tribe in a river bend, in the age of dinosaurs', current: 'Holdfast: a walled settlement in a river bend, living through a zombie apocalypse' };
+function hfApplyEraUI(era) {
+  const past = era === 'past';
+  $('eraSub').dataset.i18n = past ? 'hf.sub.past' : 'hf.sub'; $('streetOn').dataset.i18nAttr = past ? 'title:hf.world.t.past' : 'title:hf.world.t';
+  document.body.classList.toggle('era-past', past); $('c').setAttribute('aria-label', ERA_ARIA[era]); applyStatic();
 }
 // a summary of the world as it is the instant it is built: proof that nobody starts at a shared spawn point
 function hfFirstState() {
@@ -123,32 +132,58 @@ function hfCamTo(n) { const c = CAMS[n] || CAMS.default, [x, y] = d2w(c[0], c[1]
 function hfToggleGate() { HFG.gateView = !HFG.gateView; hfCamTo(HFG.gateView ? 'gate' : 'default'); if (HFG.gateView) hfTicker(t('hf.view.gate.t'), true); hfUI(); }
 
 // ---------------------------------------------------------------- loop
+// One animation loop, started once. Normally it steps the timeline on screen; during a crossfade it steps both (the one leaving keeps living
+// until it has faded out, and is then left frozen), drawing the leaving one into the overlay canvas and the arriving one into the page canvas.
+function hfStepWorld(era, dt, now, target, primary) {
+  hwEnter(era); const W = HWD.worlds[era];
+  HR.g = target;
+  HS.view = { x0: HR.cx - HR.vw / K / 2, y0: HR.cy - HR.vh / K / 2, x1: HR.cx + HR.vw / K / 2, y1: HR.cy + HR.vh / K / 2 };   // the director never spawns infected on screen
+  W.acc += dt * HFG.speed; let steps = 0;
+  while (W.acc >= 0.1 && steps < 6) { hsTick(0.1); W.acc -= 0.1; steps++; }
+  if (steps === 6) W.acc = 0;
+  if (primary) {
+    if (HS.autoSeason && !_seasonBusy) { HFG.seasonT += dt; if (HFG.seasonT > 150) { HFG.seasonT = 0; HS.season = SEASONS[(SEASONS.indexOf(HS.season) + 1) % 4]; hfUI(); } }
+    if (HS.season !== HR.season) hfSeasonChange();
+  }
+  if (HS.dirtyWall || (HR.tick % 20 === 0)) { HS.dirtyWall = false; hrRefreshWalls(); }
+  hrFrame(W.acc / 0.1, now);
+}
 function hfLoop(now) {
   requestAnimationFrame(hfLoop);
   if (document.hidden || HFG.asleep) { HFG.last = now; return; }             // only the visible world simulates
   const dt = Math.min(0.25, (now - HFG.last) / 1000); HFG.last = now;
-  const t0 = performance.now();
-  HS.view = { x0: HR.cx - HR.vw / K / 2, y0: HR.cy - HR.vh / K / 2, x1: HR.cx + HR.vw / K / 2, y1: HR.cy + HR.vh / K / 2 };   // the director never spawns infected on screen
-  HFG.acc += dt * HFG.speed; let steps = 0;
-  while (HFG.acc >= 0.1 && steps < 6) { hsTick(0.1); HFG.acc -= 0.1; steps++; }
-  if (steps === 6) HFG.acc = 0;
-  if (HS.autoSeason && !_seasonBusy) { HFG.seasonT += dt; if (HFG.seasonT > 150) { HFG.seasonT = 0; HS.season = SEASONS[(SEASONS.indexOf(HS.season) + 1) % 4]; hfUI(); } }
-  if (HS.season !== HR.season) hfSeasonChange();
+  const t0 = performance.now(), F = TR.fade;
   if (HFG.tween) { const [tx, ty] = HFG.tween; HR.cx += (tx - HR.cx) * 0.09; HR.cy += (ty - HR.cy) * 0.09; hrClampCam(); if (Math.abs(tx - HR.cx) + Math.abs(ty - HR.cy) < 0.6) { HFG.tween = null; hfSave(); } }
   if (HFG.follow && HFG.follow.alive) { const p = ISO(HFG.follow.x, HFG.follow.y); HR.cx += (p[0] - HR.cx) * 0.06; HR.cy += (p[1] - HR.cy) * 0.06; }
-  if (HS.dirtyWall || (HR.tick % 20 === 0)) { HS.dirtyWall = false; hrRefreshWalls(); }
-  hrFrame(HFG.acc / 0.1, now);
+  try {
+    if (F) {
+      const k = clamp((now - F.t0) / F.dur, 0, 1);
+      F.skip = (F.skip || 0) + dt;                                            // the leaving timeline is fading out: it is drawn every other frame (its simulation catches up in the same step)
+      if ((F.n = (F.n || 0) + 1) % 2 === 1) { hfStepWorld(F.from, F.skip, now, HR.fg, false); F.skip = 0; }   // ... into the overlay
+      hfStepWorld(F.to, dt, now, HR.cg, true);                                // the arriving one, drawn into the page canvas
+      HR.fcv.style.opacity = String(1 - k * k * (3 - 2 * k));                 // smoothstep
+      if (k >= 1) hfEndFade();
+    } else hfStepWorld(HWD.shown, dt, now, HR.cg, true);
+  } finally { HR.g = HR.cg; hwEnter(HWD.shown); }                             // the UI, audio and event handlers always talk to the timeline on screen
   const ft = performance.now() - t0; HR.ft.push(ft); if (HR.ft.length > 120) HR.ft.shift();
   // device tuning: a slow machine gets fewer roaming infected (never below half), a fast one recovers the full density
   if (HR.tick % 240 === 0 && HR.ft.length >= 120) { const avg = HR.ft.reduce((a, b) => a + b, 0) / HR.ft.length, top = clamp(HS.target / 120, 0.6, 1); if (avg > 14) HS.zScale = Math.max(0.5, HS.zScale - 0.1); else if (avg < 7 && HS.zScale < top) HS.zScale = Math.min(top, HS.zScale + 0.05); }
   if (now - HFG.ui > 250) { HFG.ui = now; hfStatus(); dockUpdate(); dockViz(); }
   haFrame(dt, hfView());
 }
-// idle-time ground baking: the chunks in a ring around the camera, nearest first, so panning never stalls on a bake
+// idle-time ground baking: the chunks in a ring around the camera, nearest first, so panning never stalls on a bake.
+// A chunk is 512x512 per-pixel work (30-170 ms in one go), so it is baked in ~5 ms slices between frames (hrBakeChunkG), never as one long task.
+let _idleBake = null;
 function hfIdleBake() {
-  if (document.hidden || HFG.asleep || _seasonBusy) return; const ci0 = Math.floor((HR.cx + HW) / CHU), cj0 = Math.floor(HR.cy / CHU); let best = null, bd = 1e9;
-  for (let dj = -2; dj <= 2; dj++) for (let di = -3; di <= 3; di++) { const ci = ci0 + di, cj = cj0 + dj; if (ci < 0 || cj < 0 || ci >= Math.ceil(2 * HW / CHU) || cj >= Math.ceil(HW / CHU) || HR.chunks.has(ci + ',' + cj + ',' + HR.season)) continue; const d = di * di + dj * dj * 2; if (d < bd) { bd = d; best = [ci, cj]; } }
-  if (best) hrBakeChunk(best[0], best[1]);
+  if (document.hidden || HFG.asleep || _seasonBusy || TR.busy && !TR.fade && HWD.cur !== HWD.shown) return;
+  if (_idleBake && (_idleBake.era !== HWD.shown || _idleBake.season !== HR.season || HWD.cur !== HWD.shown)) _idleBake = null;      // the world changed under a half-baked chunk: drop it
+  if (!_idleBake) {
+    const ci0 = Math.floor((HR.cx + HW) / CHU), cj0 = Math.floor(HR.cy / CHU); let best = null, bd = 1e9;
+    for (let dj = -2; dj <= 2; dj++) for (let di = -3; di <= 3; di++) { const ci = ci0 + di, cj = cj0 + dj; if (ci < 0 || cj < 0 || ci >= Math.ceil(2 * HW / CHU) || cj >= Math.ceil(HW / CHU) || HR.chunks.has(ci + ',' + cj + ',' + HR.season)) continue; const d = di * di + dj * dj * 2; if (d < bd) { bd = d; best = [ci, cj]; } }
+    if (!best) return; _idleBake = { era: HWD.shown, season: HR.season, g: hrBakeChunkG(best[0], best[1]) };
+  }
+  SL.t0 = performance.now(); SL.ms = 5; SL.on = true; let r; try { r = _idleBake.g.next(); } finally { SL.on = false; SL.ms = 6; }
+  if (r.done) _idleBake = null;
 }
 function hfView() {   // what the camera sees, for audio beds
   const x0 = HR.cx - HR.vw / K / 2, y0 = HR.cy - HR.vh / K / 2, uw = HR.vw / K, uh = HR.vh / K; let people = 0, zombies = 0, water = 0, river = 0;
@@ -161,7 +196,7 @@ let _seasonBusy = false;
 async function hfSeasonChange() {
   if (_seasonBusy) return; _seasonBusy = true; hfTicker(t('hf.season.busy', { s: t('season.' + HS.season).toLowerCase() }), true);
   await new Promise(r => setTimeout(r, 30));
-  HR.season = HS.season; HR.sheets.clear(); HR.shadowsDone = false; hrBuildStatics(); hfSave(); _seasonBusy = false;
+  HR.season = HS.season; HR.sheets.clear(); HR.shadowsDone = false; hrBuildStatics(); HWD.worlds[HWD.cur].staticsSeason = HS.season; hfSave(); _seasonBusy = false;
 }
 
 // ---------------------------------------------------------------- input: drag, wheel, pinch, keys (Saigon's: drag to pan, wheel/+/- zoom, H hide, Space music, R rain, N night, 1-4 seasons, B view, Esc gallery)
@@ -188,11 +223,47 @@ function hfInput() {
     else if (k >= '1' && k <= '4') hfSet('season', SEASONS[+k - 1]);
   });
 }
-// the timeline tabs: the same valley is rebuilt in the other age (a reload of this frame; the gallery's radio keeps playing)
+// ---------------------------------------------------------------- timeline switching (PAST <-> CURRENT), in the page: no reload, no loading screen
+// A request queues the destination; hfTransitions() (one at a time) prepares it in the background while the current timeline stays on screen
+// (first time: map, people and sprites are built in short slices, see hf-world.js), then crossfades. Camera, zoom, music and YouTube are not
+// touched; the environment (time, weather, season, danger) carries over. Clicks during a transition only change the *latest request*.
+const TR = { want: null, busy: false, fade: null, ms: 1200, count: 0, last: null };
 function hfSwitchEra(era) {
-  if (era === HF.era || (era !== 'past' && era !== 'current')) return;
-  hfTicker(t('tl.switch'), true); try { const s = JSON.parse(localStorage.getItem('holdfast') || '{}'); s.era = era; localStorage.setItem('holdfast', JSON.stringify(s)); } catch (e) { }
-  const u = new URL(location.href); u.searchParams.set('era', era); setTimeout(() => location.replace(u.toString()), 60);
+  if (era !== 'past' && era !== 'current') return;
+  if (TR.want === era || (!TR.busy && era === HWD.shown)) return;
+  TR.want = era; hfUI();                                  // the tab shows the request at once
+  if (!TR.busy) hfTransitions();
+}
+async function hfTransitions() {
+  TR.busy = true;
+  try {
+    while (TR.want && TR.want !== HWD.shown) {
+      const era = TR.want; hfTicker(t('tl.switch'), true); hfUI();
+      const ok = await hwPrepare(era, () => TR.want !== era);                // the viewer keeps watching; nothing visible changes yet
+      if (!ok || TR.want !== era) continue;                                  // withdrawn (the viewer clicked back): the loop re-reads the latest request
+      while (HFG.asleep) await new Promise(r => setTimeout(r, 150));         // the gallery has the world hidden: fade when it is back
+      if (TR.want !== era) continue;
+      await hfFadeTo(era);
+    }
+  } catch (e) { HFG.errs.push('transition: ' + String(e && e.stack || e).slice(0, 300)); }
+  finally { TR.busy = false; if (TR.want && TR.want !== HWD.shown) hfTransitions(); else { TR.want = null; hfUI(); } }
+}
+function hfFadeTo(era) {
+  return new Promise(resolve => {
+    const from = HWD.shown;
+    HFG.follow = null;                                                       // a followed person belongs to the timeline being left
+    hwActivate(era);                                                         // the destination adopts the viewer's environment and becomes the timeline the UI talks to
+    hfApplyEraUI(era); hfLogUI(); hfUI(); hfSave();
+    HR.fcv.style.opacity = '1'; HR.fcv.style.visibility = 'visible';
+    HR.fg.drawImage(HR.cv, 0, 0);                                            // the overlay starts as the last frame of the leaving timeline: the first crossfade frame equals what was on screen
+    TR.fade = { from, to: era, t0: performance.now(), dur: TR.ms, resolve }; TR.count++; TR.last = { from, to: era, camera: [HR.cx, HR.cy], zoom: HR.zoom };
+  });
+}
+function hfEndFade() {
+  const F = TR.fade; TR.fade = null;
+  HR.fcv.style.opacity = '0'; HR.fcv.style.visibility = 'hidden';
+  hwWith(F.from, hrTrimChunks);                                              // the timeline left behind is frozen; it keeps only the ground in view (the rest of its chunks, the big memory, is re-baked in the background if it is ever wanted)
+  HFG.last = performance.now(); hfSave(); hfUI(); hfLogUI(); F.resolve();
 }
 function hfZoom(d) { const old = HR.zoom; HR.zoom += d; hrResize(); if (HR.zoom !== old) hfSave(); }
 function hfExit() { hfSave(); if (EMBED) { try { window.parent.postMessage({ hf: 'exit', lang: LANG.cur }, '*'); return; } catch (e) { } } location.href = '../index.html'; }
@@ -200,7 +271,7 @@ function hfExit() { hfSave(); if (EMBED) { try { window.parent.postMessage({ hf:
 window.addEventListener('message', e => {
   const d = e.data; if (!d || !d.hf) return;
   if (d.hf === 'sleep') { HFG.asleep = true; haSilence(true); hfSave(); }
-  else if (d.hf === 'wake') { HFG.asleep = false; HFG.last = performance.now(); HFG.acc = 0; if (d.lang && d.lang !== LANG.cur) setLang(d.lang); hrResize(); haSilence(false); if (MW.AU.playing) haStart(MW); dockSyncSliders(); hfUI(); }
+  else if (d.hf === 'wake') { HFG.asleep = false; HFG.last = performance.now(); for (const w of Object.values(HWD.worlds)) w.acc = 0; if (d.lang && d.lang !== LANG.cur) setLang(d.lang); hrResize(); haSilence(false); if (MW.AU.playing) haStart(MW); dockSyncSliders(); hfUI(); }
 });
 
 // ---------------------------------------------------------------- UI (state -> the shared controls)
@@ -217,7 +288,8 @@ function hfUI() {
   $('autoSeason').setAttribute('aria-pressed', !!HS.autoSeason);
   $('wxRainL').textContent = t(HS.season === 'winter' ? 'wx.snow' : 'wx.rain');
   const vb = $('viewRiver'); vb.textContent = t(HFG.gateView ? 'hf.view.back' : 'hf.view.gate'); vb.title = t(HFG.gateView ? 'hf.view.back.t' : 'hf.view.gate.t');
-  document.querySelectorAll('#eras [data-tl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tl === HF.era));
+  document.querySelectorAll('#eras [data-tl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tl === (TR.want || HF.era)));
+  $('eras').setAttribute('aria-busy', TR.busy ? 'true' : 'false');
   $('logToggle').textContent = t($('log').hidden ? 'hf.journal.show' : 'hf.journal.hide'); $('logToggle').setAttribute('aria-pressed', !$('log').hidden);
   dockUpdate(); hfStatus();
 }
@@ -246,7 +318,7 @@ function hfStatus() {
   const html = `${t('season.' + HS.season)} · ${hh}:${mm} · ${wx}${m}`; if (HFG.statusHtml !== html) { HFG.statusHtml = html; $('status').innerHTML = html; }
 }
 function hfTicker(text, force) { const now = performance.now() / 1000; if (!force && now - HFG.tickT < 5.5) return; HFG.tickT = now; const el = $('ticker'); HFG.tickFn = typeof text === 'function' ? text : () => text; el.textContent = HFG.tickFn(); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
-function hfOnEvent(e) { if (!HFG.booted) return; if (!$('log').hidden) hfLogUI(); if (e.bad || e.k === 'exp.ok' || e.k === 'arrived' || e.k === 'rescue') hfTicker(() => logText(e), !!e.bad); }
+function hfOnEvent(e) { if (!HFG.booted || HWD.cur !== HWD.shown) return; if (!$('log').hidden) hfLogUI(); if (e.bad || e.k === 'exp.ok' || e.k === 'arrived' || e.k === 'rescue') hfTicker(() => logText(e), !!e.bad); }
 // journal: a nonsequential list of what recently happened, stamped with the hour and "yesterday"/"N days ago" (never an absolute day number)
 function hfLogUI() {
   const ol = $('log'); if (ol.hidden) return; ol.innerHTML = '';
@@ -287,5 +359,5 @@ function hfBench0() {
   const tick = (ts) => { iv.push(ts - lt); lt = ts; if (ts - t0 < 5000) requestAnimationFrame(tick); else { const a = iv.slice(2).sort((x, y) => x - y); R.raf = { frames: a.length, fps: +(1000 / (a.reduce((s, v) => s + v, 0) / a.length)).toFixed(1), medianMs: +a[a.length >> 1].toFixed(1), p95Ms: +a[Math.floor(a.length * 0.95)].toFixed(1), loopJs: hfFps() }; $('hfTest').textContent = JSON.stringify(R); document.title = 'HFBENCH done'; } };
   requestAnimationFrame(tick);
 }
-window.HFAPI = { HS, HF, HR, HFG, HA, MW, LOCAL_LW, era: hfSwitchEra, ui: hfUI, gate: hfToggleGate, ticker: hfTicker, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition, exit: hfExit };
+window.HFAPI = { HS, HF, HR, HFG, HA, MW, LOCAL_LW, HWD, TR, era: hfSwitchEra, ui: hfUI, gate: hfToggleGate, ticker: hfTicker, set: hfSet, cam: hfCamPreset, zoom: hfZoom, major: hsMajor, exp: hsStartExpedition, exit: hfExit };
 hfBoot().catch(e => { HFG.errs.push(String(e.stack || e).slice(0, 300)); const el = $('hfTest'); el.textContent = JSON.stringify({ ok: false, boot: String(e.stack || e).slice(0, 600) }); document.title = 'HFTEST FAIL boot'; $('loadT').textContent = 'Error: ' + e.message; });

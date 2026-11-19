@@ -131,7 +131,7 @@ function pastFly(z, dt) {
         else if (q.alive) { HS.Ps.swoopPeople++; bubble(q, 'ex'); if (HS.R() < 0.25) hsHurt(q, z); }
         hsNoise(z.x, z.y, 120, 'swoop'); } return true; }
     case 'climb': { fly(z.x + DIRV[z.dir][0] * 40, z.y + DIRV[z.dir][1] * 40, 48, z.spd); if (z.t > 2.5) { z.fs = HS.R() < 0.4 ? 'circle' : 'leave'; z.t = 0; z.cdur = rr2(4, 8); } return true; }
-    case 'leave': { const e = z.exit || (z.exit = pastFlyExit(z)); if (fly(e[0], e[1], 54, z.spd * 1.1) < 10) { z.st = 'dead'; z.corpseT = -9; z.gone = 1; } return true; }
+    case 'leave': { const e = z.exit || (z.exit = pastFlyExit(z)); if (fly(e[0], e[1], 54, z.spd * 1.1) < 10) { z.st = 'dead'; z.corpseT = 0; z.gone = 1; } return true; }   // flew away: removed (not a corpse)
   }
   return true;
 }

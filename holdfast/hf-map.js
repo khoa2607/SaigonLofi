@@ -52,23 +52,33 @@ const isField = (u, v, d) => d < 0.92 && v > 446 && Math.abs(u - 480) > 9;
 
 // ---------------------------------------------------------------- ground kinds per tile
 const GK = { WGRASS: 0, FOREST: 1, MEADOW: 2, ROCK: 3, ROAD: 4, TRAIL: 5, CLEARED: 6, LAWN: 7, GREEN: 8, PLAZA: 9, STREET: 10, FIELD: 11, YARD: 12, WATER: 13, SAND: 14, STREAM: 15, FARBANK: 16, LANE: 17, MAIN: 18 };
-const HF = {
-  zone: new Uint8Array(HN * HN), gk: new Uint8Array(HN * HN), walk: new Uint8Array(HN * HN), inside: new Uint8Array(HN * HN),
-  wood: new Float32Array(HN * HN), occ: new Uint8Array(HN * HN), crop: new Uint8Array(HN * HN),
-  walls: [], wallAt: new Int16Array(HN * HN).fill(-1), gate: null, towers: [], buildings: [], props: [], trees: [], lots: [],
-  spots: {}, pois: [], routes: [], spawns: [], fields: [], docks: [], ver: 0
-};
+// A world's map state is created by hfNewHF(); each timeline (PAST / CURRENT) owns one (see hf-world.js).
+let _hfWid = 0;
+function hfNewHF() {
+  return {
+    zone: new Uint8Array(HN * HN), gk: new Uint8Array(HN * HN), walk: new Uint8Array(HN * HN), inside: new Uint8Array(HN * HN),
+    wood: new Float32Array(HN * HN), occ: new Uint8Array(HN * HN), crop: new Uint8Array(HN * HN),
+    walls: [], wallAt: new Int16Array(HN * HN).fill(-1), gate: null, towers: [], buildings: [], props: [], trees: [], lots: [],
+    spots: {}, pois: [], routes: [], spawns: [], fields: [], docks: [], ver: 0, wid: ++_hfWid
+  };
+}
+const HF = hfNewHF();
+// Cooperative time slicing: long builders are generators that `yield` when the current slice (SL.ms) is used up, so a timeline can be
+// prepared in the background without freezing the page. SL.on is false for synchronous callers (tests, first boot): no yield ever happens.
+const SL = { on: false, t0: 0, ms: 6 };
+const slDue = () => SL.on && performance.now() - SL.t0 > SL.ms;
 // walk flags
 const W_IN = 1, W_OUT = 2, W_GATE = 4, W_BREACH = 8, W_DOCK = 16;
 
 function hfNoise(x, y, s) { return vnoise(x / s + 11.3, y / s + 4.7); }
 
-function hfBuildMap(seed, era) {
+function hfBuildMap(seed, era) { for (const _ of hfBuildMapG(seed, era)); return HF; }
+function* hfBuildMapG(seed, era) {
   HF.era = era === 'past' ? 'past' : 'current';                // milestone 8: the same valley in another age (hf-past*.js)
   const R = mulberry32(seed || 7);
   HF.R = R;
   // 1) zones + ground per tile
-  for (let j = 0; j < HN; j++) for (let i = 0; i < HN; i++) {
+  for (let j = 0; j < HN; j++) { if (slDue()) yield; for (let i = 0; i < HN; i++) {
     const k = tIdx(i, j), [u, v] = w2d(i * HT + 4, j * HT + 4), Z = zoneAt(u, v);
     HF.zone[k] = Z.z; HF.wood[k] = hfNoise(i, j, 9) * 0.7 + hfNoise(i + 40, j, 3.5) * 0.3;
     let g = GK.WGRASS;
@@ -88,13 +98,12 @@ function hfBuildMap(seed, era) {
     else if (Z.z === Z_WILD && v < 290 && (Math.abs(u - (riverSide(v, -1) + 40)) < 2.5 || Math.abs(u - (riverSide(v, 1) - 40)) < 2.5)) g = GK.TRAIL;
     if (Z.z !== Z_RIVER && Z.z !== Z_FAR && v < 470 && Math.abs(u - streamU(v)) < 4.2 && (Z.z === Z_SETTLE || Z.z === Z_CLEAR || (Z.z === Z_WILD && Z.inside !== false))) g = GK.STREAM;
     HF.gk[k] = g;
-  }
-  hfBuildWall();
-  hfBuildSettlement(R);
-  hfBuildOutside(R);
-  hfBuildWalk();
-  if (HF.era === 'past') pastMap();
-  return HF;
+  } }
+  if (slDue()) yield; hfBuildWall();
+  if (slDue()) yield; yield* hfBuildSettlementG(R);
+  if (slDue()) yield; hfBuildOutside(R);
+  if (slDue()) yield; hfBuildWalk();
+  if (slDue()) yield; if (HF.era === 'past') pastMap();
 }
 
 // ---------------------------------------------------------------- wall: a 4-connected tile chain along the arch, straight run at the gate
@@ -153,7 +162,8 @@ const HOUSE_WALLS = [0xe6dcc2, 0x9fbc8e, 0x8fb0cc, 0xe8c878, 0xd8d6cc, 0xe0a898,
 const HOUSE_ROOFS = [0x5c5658, 0x6e5446, 0x4e5a64, 0x5f6e56, 0x8a5440, 0x58606a, 0x9a4a3a, 0x4a5a4a];
 const NAMES = ['Lan', 'Minh', 'Bảo', 'Hà', 'Tuấn', 'Mai', 'Dũng', 'Linh', 'Ba Sáu', 'Khoa', 'Thảo', 'Hùng', 'Vy', 'Phúc', 'Ngọc', 'Sơn', 'Ruth', 'Amos', 'Ines', 'Theo'];
 
-function hfBuildSettlement(R) {
+function hfBuildSettlement(R) { for (const _ of hfBuildSettlementG(R)); }
+function* hfBuildSettlementG(R) {
   // helpers in design units: a building centred on (u, v), a prop or a spot at (u, v); world-relative offsets are used for things attached to a building
   const Bd = (kind, u, v, w, d, o) => { const [x, y] = d2w(u, v); return addB(Object.assign({ kind, x: Math.round(x - w / 2), y: Math.round(y - d / 2), w, d }, o)); };
   const Pu = (kind, u, v, o) => { const [x, y] = d2w(u, v); return addP(kind, x, y, o); };
@@ -294,7 +304,9 @@ function hfBuildSettlement(R) {
   // greedy packing: scan tiles in rows, drop a 7x6-tile lot wherever it fits (streets on the lot's top/left edges)
   const cand = [];
   for (const [cw, cd, small] of [[CWt, CDt, 0], [6, 5, 1], [5, 5, 2]]) for (let tj = 0; tj <= HN - cd; tj++) for (let ti = 0; ti <= HN - cw; ti++) cand.push([ti, tj, cw, cd, small]);
+  let _ci = 0;
   for (const [ti, tj, cw, cd, small] of cand) {
+    if ((++_ci & 1023) === 0 && slDue()) yield;
     const x0 = ti * HT, y0 = tj * HT;
     let fits = true;
     for (let j = tj; j < tj + cd && fits; j++) for (let i = ti; i < ti + cw; i++) { const k = tIdx(i, j); if (lotm[k] || HF.occ[k] || HF.wallAt[k] >= 0 || !settleTile(k) || reservedTile(k)) { fits = false; break; } }
@@ -324,6 +336,7 @@ function hfBuildSettlement(R) {
     spot('porch', hx + 6, hy + d + 9, { lot: lot.id }); spot('yardwork', hx + w * 0.5, hy - 6, { lot: lot.id });
     if (R() < 0.55) HF.trees.push({ x: x0 + 6 + R() * 6, y: y0 + cd * HT - 6, spc: R() < 0.5 ? 'me' : 'fruit', v: Math.floor(R() * 6) });
   }
+  if (slDue()) yield;
   // ---- lamp posts + fruit trees along main street, bank trees
   for (let v = 254; v < 520; v += 26) { const [px, py] = d2w(491, v); addP('lamp', px, py); }
   for (let n = 0; n < 70; n++) {
@@ -436,7 +449,7 @@ function hfPass(k, mask) {
 }
 const _flow = new Map();
 function hfFlow(mask, target, maxN) {
-  const key = mask + '|' + target + '|' + (mask === 'z' ? HF.ver : 0);
+  const key = HF.wid + '|' + mask + '|' + target + '|' + (mask === 'z' ? HF.ver : 0);
   let f = _flow.get(key); if (f) { f.t = performance.now ? Date.now() : 0; return f.d; }
   const d = new Int16Array(HN * HN).fill(-1), q = new Int32Array(HN * HN); let h = 0, t = 0;
   const tg = Array.isArray(target) ? target : [target]; for (const k of tg) { d[k] = 0; q[t++] = k; }
@@ -449,11 +462,11 @@ function hfFlow(mask, target, maxN) {
       d[m] = dk + (a && b ? 3 : 2); q[t++] = m;
     }
   }
-  if (_flow.size > 360) { let old = null, ot = 1e18; for (const [kk, v] of _flow) if (v.t < ot) { ot = v.t; old = kk; } _flow.delete(old); }
+  if (_flow.size > 720) { let old = null, ot = 1e18; for (const [kk, v] of _flow) if (v.t < ot) { ot = v.t; old = kk; } _flow.delete(old); }
   _flow.set(key, { d, t: Date.now() }); return d;
 }
 const DX8 = [1, -1, 0, 0, 1, 1, -1, -1], DY8 = [0, 0, 1, -1, 1, -1, 1, -1];
-function hfFlowClear(maskPrefix) { for (const k of [..._flow.keys()]) if (!maskPrefix || k.startsWith(maskPrefix)) _flow.delete(k); }
+function hfFlowClear(maskPrefix) { const w = HF.wid + '|'; for (const k of [..._flow.keys()]) if (k.startsWith(w) && (!maskPrefix || k.startsWith(w + maskPrefix))) _flow.delete(k); }
 const tileOfW = (x, y) => { const i = clamp(Math.floor(x / HT), 0, HN - 1), j = clamp(Math.floor(y / HT), 0, HN - 1); return j * HN + i; };
 const tileC = k => [(k % HN) * HT + 4, ((k / HN) | 0) * HT + 4];
 // nearest tile passable for mask (spiral search)

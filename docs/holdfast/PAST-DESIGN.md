@@ -9,8 +9,7 @@ the same code. Only what stands on that geography (art), who lives there (looks,
 
 ## How it plugs in
 
-- One flag, `HF.era` (`'current'` | `'past'`), chosen before the map is built (`?era=past`, or the PAST tab, which reloads the
-  frame with the era and remembers it). Every era-specific branch checks it, so the Current timeline's code paths and random
+- One flag, `HF.era` (`'current'` | `'past'`), chosen before the map is built (`?era=past`, or the PAST tab, which since milestone 8.1 crossfades to it in the page, no reload, and remembers it). Every era-specific branch checks it, so the Current timeline's code paths and random
   sequences are untouched.
 - New files: `holdfast/hf-past-art.js` (prehistoric models, people, dinosaurs; DOM-free) and `holdfast/hf-past.js`
   (dinosaur behaviour, fire, rituals, torches, traps; DOM-free). Existing files get small hooks only.

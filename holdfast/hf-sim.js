@@ -3,12 +3,16 @@
 const DAY_SEC = 1200;                                   // one in-game day = 20 real minutes
 const DANGER = { calm: { n: 0.55, die: 0.06, iv: 1.4 }, standard: { n: 1, die: 0.2, iv: 1 }, grim: { n: 1.6, die: 0.5, iv: 0.75 } };
 const FIXED_H = { morning: 8, noon: 12.5, dusk: 18.6, night: 22.5 };
-const HS = {
+// A world's simulation state is created by hsNewHS(); each timeline (PAST / CURRENT) owns one (see hf-world.js).
+function hsNewHS() {
+  return {
   t: 0, day: 1, hour: 6.5, life: 6.5, timeMode: 'auto', wxMode: 'auto', weather: 'clear', season: 'summer', danger: 'standard',
   people: [], zombies: [], wild: [], fx: [], noises: [], log: [], exps: [], rescues: [], arrivals: [], spots: new Map(),
   alarm: 0, alarmT: 0, mode: 'peace', target: 120, floor: 90, R: null, next: {}, stats: { shots: 0, kills: 0, deaths: 0, injuries: 0, arrivals: 0, exp: 0, expLost: 0, expOk: 0, expHurt: 0, expDead: 0, rescues: 0, breaches: 0, repairs: 0, attacks: { minor: 0, medium: 0, major: 0, siege: 0 }, zInside: 0, breachMax: 0 },
-  onEvent: null, sound: null, pid: 0, zid: 0
-};
+  onEvent: null, sound: null, pid: 0, zid: 0, Tn: 2
+  };
+}
+const HS = hsNewHS();
 const SEASONS = ['spring', 'summer', 'fall', 'winter'];
 const Z_WANDER = 20, Z_BAND = 12;                      // roaming infected kept alive in the wilderness / in the band the default camera sees (x danger x device)
 const ROLE_MIX = [['guard', 30], ['farmer', 13], ['builder', 8], ['tech', 4], ['smith', 2], ['groom', 3], ['medic', 5], ['cook', 4], ['fisher', 4], ['scav', 9], ['trader', 6], ['teacher', 2], ['herder', 2], ['elder', 8], ['kid', 14], ['adult', 6]];   // milestone 6: work spread over every zone
@@ -18,7 +22,8 @@ function hsLog(k, p, bad) { const e = { day: HS.day, h: HS.hour, k, p: p || {}, 
 function hsSound(k, x, y, v) { if (HS.sound) HS.sound(k, x, y, v); }
 
 // ---------------------------------------------------------------- setup
-function hsInit(opt) {
+function hsInit(opt) { for (const _ of hsInitG(opt)); }
+function* hsInitG(opt) {
   opt = opt || {}; if (HF.era === 'past') pastPre(); HS.R = mulberry32(opt.seed || 11); HS.seed0 = opt.seed || 11; HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
   HS.people = []; HS.zombies = []; HS.wild = []; HS.fx = []; HS.noises = []; HS.log = []; HS.exps = []; HS.rescues = []; HS.arrivals = [];
   HS.spots.clear(); HS.vacant = []; HS.alarm = 0; HS.mode = 'peace'; HS.recoverT = 0; HS.stats.exp = 0;
@@ -28,11 +33,13 @@ function hsInit(opt) {
   HS.weather = HS.wxMode !== 'auto' ? HS.wxMode : (HS.R() < 0.8 ? 'clear' : 'wind');
   HF.breaches = 0; HS.zScale = HS.zScale || clamp(HS.target / 120, 0.6, 1); HS.view = null;
   hwInit();                                             // crop plots, stores, delivery points, spot zones
-  lfInit();                                             // milestone 6: horses, stalls, repairs, graves, farmyard animals, zone spots
+  if (slDue()) yield;
+  lfInit();
+  if (slDue()) yield;                                             // milestone 6: horses, stalls, repairs, graves, farmyard animals, zone spots
   const scale = HS.target / 120, roles = [];
   for (const [r, n] of ROLE_MIX) for (let i = 0; i < Math.max(r === 'teacher' ? 1 : 1, Math.round(n * scale)); i++) roles.push(r);
   while (roles.length > HS.target) roles.splice(roles.findIndex(r => r === 'adult' || r === 'trader'), 1);
-  roles.forEach((r, i) => hsAddPerson(r, null, i));
+  for (let i = 0; i < roles.length; i++) { hsAddPerson(roles[i], null, i); if (slDue()) yield; }
   // tiers: 16 named (rich routines + chronicle), ~25% ambient (simple loops), the rest scheduled workers
   const named = new Set(['guard', 'scav', 'medic', 'builder', 'farmer', 'teacher', 'elder', 'cook', 'fisher', 'groom', 'smith', 'herder']);
   let n = 0; for (const p of HS.people) if (n < Math.round(16 * scale) && named.has(p.role) && (p.role !== 'guard' || n % 3 === 0)) { p.tier = 0; p.name = NAMES[n % NAMES.length]; n++; }
@@ -55,7 +62,7 @@ function hsInit(opt) {
   const now = HS.t, iv = DANGER[HS.danger].iv;
   if (HF.era === 'past') pastInit();
   HS.next = { minor: now + rr2(30, 70), medium: now + rr2(6, 10) * 60 * iv, major: now + rr2(18, 28) * 60 * iv, siege: now + rr2(100, 140) * 60 * iv, exp: now + rr2(30, 60), wx: now + 300, arrive: now + 240, act: 0 };
-  hsWarmStart();
+  yield* hsWarmStartG();
 }
 function hsWildPoint() { for (let n = 0; n < 200; n++) { const k = Math.floor(HS.R() * HN * HN); if (HF.walk[k] & W_OUT && (HF.gk[k] === GK.MEADOW || HF.gk[k] === GK.WGRASS) && hsFarFromWall(k, 12)) return tileC(k); } return tileC(HF.gate.outTile); }
 function hsFarFromWall(k, n) { const [x, y] = tileC(k); const [u, v] = w2d(x, y); return v < wallV(u) - n * 4; }
@@ -130,11 +137,12 @@ function hsWarmExp() {
   else { put(poi[0], poi[1], 'all'); e.ph = 'back'; for (let n = 0, N = Math.floor(R() * 700); n < N && e.ph === 'back'; n++) hsExp(e, 0.1); }
   g.open = 0; g.users = 0; g.force = 0; for (const p of e.team) { p.px = p.x; p.py = p.y; }
 }
-function hsWarmStart() {
+function hsWarmStart() { for (const _ of hsWarmStartG()); }
+function* hsWarmStartG() {
   const R = HS.R, n = DANGER[HS.danger].n;
   HS.life = lifeHour();
-  for (const p of HS.people) if (p.role !== 'guard') hsSettle(p);
-  for (const p of HS.people) if (p.role === 'guard') hsSettle(p);
+  for (const p of HS.people) if (p.role !== 'guard') { hsSettle(p); if (slDue()) yield; }
+  for (const p of HS.people) if (p.role === 'guard') { hsSettle(p); if (slDue()) yield; }
   hsWarmExp();
   // infected: scattered over the wilderness, not all moving at once; sometimes a small group is already marching in
   for (const z of HS.zombies) { z.ph = R() * 10; if (R() < 0.3) { z.st = 'idle'; z.idle = rr2(2, 8); z.t = R() * z.idle; } else z.t = R() * 4; }
@@ -195,6 +203,8 @@ function faceTo(a, b) { const dx = b.x - a.x, dy = b.y - a.y; a.dir = Math.abs(d
 // ---------------------------------------------------------------- spatial hash
 const SH_C = 32, SH_N = Math.ceil(HW / SH_C);
 let SHZ = [], SHP = [];
+// the spatial hashes are rebuilt at the start of every tick; a freshly installed world (hf-world.js) must never see the previous world's entities in them
+function shReset() { SHZ = []; SHP = []; }
 function shBuild() { SHZ = new Array(SH_N * SH_N); SHP = new Array(SH_N * SH_N); for (const z of HS.zombies) if (z.st !== 'dead') shAdd(SHZ, z); for (const p of HS.people) if (p.alive && p.vis) shAdd(SHP, p); }
 function shAdd(H, a) { const i = clamp((a.x / SH_C) | 0, 0, SH_N - 1), j = clamp((a.y / SH_C) | 0, 0, SH_N - 1), k = j * SH_N + i; (H[k] || (H[k] = [])).push(a); }
 function shNear(H, x, y, r, fn) { const i0 = clamp(((x - r) / SH_C) | 0, 0, SH_N - 1), i1 = clamp(((x + r) / SH_C) | 0, 0, SH_N - 1), j0 = clamp(((y - r) / SH_C) | 0, 0, SH_N - 1), j1 = clamp(((y + r) / SH_C) | 0, 0, SH_N - 1); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const c = H[j * SH_N + i]; if (c) for (const a of c) if ((a.x - x) ** 2 + (a.y - y) ** 2 <= r * r) fn(a); } }
@@ -216,11 +226,32 @@ function hsShoot(a, z, from, range, base) {
   if (hit) hsHitZ(z, a, HS.R() < 0.18 ? 9 : 1); else HS.fx.push({ k: 'dust', x: tx, y: ty, t: 0.4 });
   return true;
 }
+// ---- infected / dinosaur death lifecycle: alive -> dying (a short collapse slide; flyers fall) -> corpse (stationary, fully visible) -> fade -> removed.
+// corpseT is the REMAINING life of the body; the last CORPSE_FADE seconds fade it out, at 0 it is removed from HS.zombies.
+// Large dinosaurs keep their bodies longer. A body is never hit "back to life" or given a fresh timer: hsKillZ is idempotent.
+const CORPSE_FADE = 6;
+function hsCorpseLife(z) { if (!z.L || z.L.ev !== 'dino') return rr2(90, 150); return clamp((38 + (z.hp0 || 4) * 7) * rr2(0.88, 1.12), 40, 210); }
+function hsKillZ(z) {
+  if (z.st === 'dead') return false;
+  z.st = 'dead'; z.stT = 0; z.path = null; z.tgt = null; z.prey = null; z.charging = 0; z.ram = 0; z.toWallAt = 0; z.fall = 0;
+  z.dyingT = z.fly ? 0 : (z.L && z.L.ev === 'dino' ? ((z.hp0 || 4) >= 12 ? 1.3 : 0.8) : 0.5);
+  z.corpseT = hsCorpseLife(z); z.deadAt = HS.t; HS.stats.kills++;
+  HS.fx.push({ k: 'dust', x: z.x, y: z.y, t: 0.6 }); hsSound('fall', z.x, z.y, z.hp0 >= 12 ? 0.9 : 0.6);
+  return true;
+}
 function hsHitZ(z, a, dmg) {
+  if (z.st === 'dead') return;                              // already a body: nothing to hit, and the corpse timer must not restart
   z.hp -= dmg; z.st2 = 'stagger'; z.stT = z.stag != null ? z.stag : 0.45; const dx = z.x - a.x, dy = z.y - a.y, d = Math.hypot(dx, dy) || 1, kb = z.stag != null ? 2 + z.stag * 10 : 6; z.kx = dx / d * kb; z.ky = dy / d * kb;
   HS.fx.push({ k: 'hit', x: z.x, y: z.y, t: 0.2 });
-  if (z.hp <= 0) { z.st = 'dead'; z.corpseT = rr2(90, 150); z.path = null; HS.stats.kills++; HS.fx.push({ k: 'dust', x: z.x, y: z.y, t: 0.6 }); hsSound('fall', z.x, z.y, 0.6); }
+  if (z.hp <= 0) hsKillZ(z);
 }
+// per-tick life of a body: the collapse slide, a flyer's fall, then the countdown (a falling flyer's countdown starts when it lands)
+function hsDeadTick(z, dt) {
+  if (z.dyingT > 0) { z.dyingT -= dt; if (!z.fly) { const nx = z.x + z.kx * dt * 2, ny = z.y + z.ky * dt * 2; if (hfPass(tileOfW(nx, ny), 'z')) { z.x = nx; z.y = ny; } } z.kx *= 0.82; z.ky *= 0.82; }
+  if (z.fly && z.alt > 0) { z.fall = (z.fall || 0) + 70 * dt; z.alt = Math.max(0, z.alt - z.fall * dt); if (z.alt <= 0) { z.dyingT = 0.5; HS.fx.push({ k: 'dust', x: z.x, y: z.y, t: 0.6 }); } return; }
+  z.corpseT -= dt;
+}
+const corpseAlpha = z => clamp(z.corpseT / CORPSE_FADE, 0, 1);
 function hsHurt(p, z) {
   if (!p.alive || p.st === 'dead') return;
   if (p.mount) { p.inj = 1; HS.fx.push({ k: 'hit', x: p.x, y: p.y, t: 0.25, h: 1 }); hsSound('hurt', p.x, p.y, 0.6); if (p.ride) p.ride.chased = true; return; }   // a rider keeps the saddle and gallops home
@@ -444,7 +475,7 @@ function hsRouteGroup(n, routeName, targetSeg, tag) {
   return zs;
 }
 function hsZ(z, dt) {
-  if (z.st === 'dead') { z.corpseT -= dt; return; }
+  if (z.st === 'dead') { hsDeadTick(z, dt); return; }
   if (z.stT > 0) { z.stT -= dt; z.x += z.kx * dt * 2; z.y += z.ky * dt * 2; z.kx *= 0.8; z.ky *= 0.8; if (!hfPass(tileOfW(z.x, z.y), 'z')) { z.x -= z.kx * dt * 2; z.y -= z.ky * dt * 2; } return; }
   if (z.delay > 0) { z.delay -= dt; return; }
   if (z.cool > 0) z.cool -= dt;
@@ -762,7 +793,7 @@ function hsTick(dt) {
   for (const w of HS.wild) { w.px = w.x; w.py = w.y; hsWild(w, dt); }
   hsGate(dt);
   // cleanup: corpses fade, the dead are carried to the memorial
-  HS.zombies = HS.zombies.filter(z => z.st !== 'dead' || z.corpseT > -5);
+  HS.zombies = HS.zombies.filter(z => z.st !== 'dead' || (z.corpseT > 0 && !z.gone));           // expired bodies leave the simulation
   if (HS.zombies.length > 160) HS.zombies = HS.zombies.filter(z => z.st !== 'dead' || z.corpseT > 20);
   for (const p of HS.people) if (!p.alive && p.deadT < 0 && !p.gone) { p.gone = true; if (HF.memorial) HF.memorial.stones++; }
   HS.people = HS.people.filter(p => !p.gone);
