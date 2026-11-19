@@ -1,7 +1,7 @@
 // Holdfast dock geometry + navigation + river activities. Node only, deterministic.
 // Usage: node tests/holdfast-docks.mjs [seed=7]
 import { loadHF, ev } from './hf-load.mjs';
-const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-past-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js', 'holdfast/hf-life.js', 'holdfast/hf-past.js'];
+const FILES = ['js/core.js', 'js/art.js', 'holdfast/hf-map.js', 'holdfast/hf-art.js', 'holdfast/hf-past-art.js', 'holdfast/hf-future-art.js', 'holdfast/hf-sim.js', 'holdfast/hf-work.js', 'holdfast/hf-life.js', 'holdfast/hf-past.js', 'holdfast/hf-future.js'];
 const SEED = +(process.argv[2] || 7), fails = [];
 const check = (name, ok, info) => { console.log((ok ? 'PASS ' : 'FAIL ') + name, info === undefined ? '' : ' ' + JSON.stringify(info)); if (!ok) fails.push(name); };
 
@@ -12,22 +12,32 @@ function audit(era) {
     const start = at(0), end = at(d.len), before = at(-8), target = tileOfW(end.x, end.y), flow = hfFlow('in', target), approach = tileOfW(before.x, before.y);
     let continuous = true; for (let t = 0; t <= d.len; t += 2) { const p = dockPoint(d, t); if (!(HF.walk[tileOfW(p[0], p[1])] & W_DOCK)) continuous = false; }
     const fish = HF.spots.fish.slice(i * 2, i * 2 + 2).map(s => { const k = tileOfW(s.x, s.y); return { dock: !!(HF.walk[k] & W_DOCK), reachable: flow[k] >= 0, water: HF.gk[k] === GK.WATER }; });
-    return { i, axis: d.axis, len: d.len, start, end, before, continuous, approachReachable: flow[approach] >= 0, fish, art: PROPS.dock(d).length };
+    const art = (HF.era === 'future' ? FPROPS.dock : PROPS.dock)(d);
+    return { i, x: d.x, y: d.y, dx: d.dx, dy: d.dy, axis: d.axis, len: d.len, start, end, before, continuous, approachReachable: flow[approach] >= 0, fish, art: art.length };
   })`);
   const moor = ev(c, `HF.moor.map(m => ({ i: m.i, water: HF.gk[tileOfW(m.bx, m.by)] === GK.WATER, dockEnd: !!(HF.walk[tileOfW(m.x, m.y)] & W_DOCK), dist: +m.dist.toFixed(1) }))`);
   const river = ev(c, `({ bathe: HF.spots.bathe.length, wash: HF.spots.wash.length, bankfish: HF.spots.bankfish.length, dry: [...HF.spots.bathe, ...HF.spots.wash, ...HF.spots.bankfish].every(s => HF.gk[tileOfW(s.x, s.y)] !== GK.WATER && !(HF.walk[tileOfW(s.x, s.y)] & W_DOCK)) })`);
   const boat = ev(c, `(() => {
-    const M = HF.cargoMoor, pool = HS.people.filter(p => ['trader','tech','adult','farmer'].includes(p.role)); pool.forEach(p => { p.task = null; p.load = null; p.inj = 0; });
-    const b = lfBoatLaunch(0); b.kind = 'cargo'; b.moor = M; b.fwd = true; b.s = M.s - 2; b.st = 'go'; b.t = 0; b.spd = 10; lfBoat(b, 0.3);
-    const arrived = b.st === 'moored', called = !!b.crew, end = called && b.crew.task && b.crew.task.legs[0];
-    for (let n = 0; n < 1000; n++) hsTick(0.1);
-    return { arrived, called, endDock: !!(end && (HF.walk[tileOfW(end.x, end.y)] & W_DOCK)), delivered: HS.Ls.cargoDeliver > 0, departed: b.st === 'go' && !b.moor };
+    HS.next.minor = HS.next.medium = HS.next.major = HS.next.siege = HS.next.act = HS.next.pack = 1e9; if (HS.nextF) for (const k in HS.nextF) HS.nextF[k] = 1e9; HS.zombies = [];
+    const run = kind => {
+      HS.alarm = 0; HS.boats = []; const med = kind === 'med', M = med ? HF.medMoor : HF.cargoMoor, before = med ? HS.Ls.medDeliver : HS.Ls.cargoDeliver;
+      const want = med ? ['medic'] : ['trader','tech','adult','farmer']; HS.people.filter(p => want.includes(p.role)).forEach(p => { p.task = null; p.load = null; p.inj = 0; p.exp = p.ride = p.rescue = null; });
+      const b = lfBoatLaunch(0); b.kind = kind; b.moor = M; b.fwd = true; b.s = M.s - 2; b.st = 'go'; b.t = 0; b.spd = 10; lfBoat(b, 0.3);
+      const arrived = b.st === 'moored', called = !!b.crew, end = called && b.crew.task && b.crew.task.legs[0];
+      for (let n = 0; n < 1000; n++) hsTick(0.1);
+      const delivered = (med ? HS.Ls.medDeliver : HS.Ls.cargoDeliver) > before;
+      return { arrived, called, endDock: !!(end && (HF.walk[tileOfW(end.x, end.y)] & W_DOCK)), delivered, departed: b.st === 'go' && !b.moor };
+    };
+    return { cargo: run('cargo'), med: run('med') };
   })()`);
   return { geom, moor, river, boat };
 }
 
-for (const era of ['current', 'past']) {
-  const A = audit(era), tag = era.toUpperCase();
+const audits = Object.fromEntries(['current', 'past', 'future'].map(era => [era, audit(era)]));
+const dockSig = A => A.geom.map(d => [d.x, d.y, d.dx, d.dy, d.axis, d.len]);
+check('ALL ERAS: dock centre lines are exactly identical', JSON.stringify(dockSig(audits.current)) === JSON.stringify(dockSig(audits.past)) && JSON.stringify(dockSig(audits.current)) === JSON.stringify(dockSig(audits.future)), Object.fromEntries(Object.entries(audits).map(([era, A]) => [era, dockSig(A)])));
+for (const era of ['current', 'past', 'future']) {
+  const A = audits[era], tag = era.toUpperCase();
   check(tag + ': three docks follow west/centre/east bank normals', A.geom.map(d => d.axis).join() === 'xy,y,x', A.geom.map(d => [d.axis, d.len]));
   check(tag + ': every landward end is on dry walkable land', A.geom.every(d => d.start.g !== 13 && (d.start.w & 1) && d.before.g !== 13), A.geom.map(d => [d.start.g, d.start.w, d.before.g]));
   check(tag + ': every outer end extends over water', A.geom.every(d => d.end.g === 13 && (d.end.w & 16)), A.geom.map(d => [d.end.g, d.end.w]));
@@ -36,7 +46,7 @@ for (const era of ['current', 'past']) {
   check(tag + ': dock artwork exists for all three orientations', A.geom.every(d => d.art >= 5), A.geom.map(d => d.art));
   check(tag + ': moorings are in open water beside dock ends', A.moor.every(m => m.water && m.dockEnd), A.moor);
   check(tag + ': bathing, washing and bank-fishing spots stay on dry bank', A.river.bathe >= 3 && A.river.wash >= 3 && A.river.bankfish >= 4 && A.river.dry, A.river);
-  check(tag + ': cargo boat arrives, calls dock crew, unloads and departs', Object.values(A.boat).every(Boolean), A.boat);
+  check(tag + ': cargo and medical boats arrive, call dock crew, unload and depart', Object.values(A.boat).every(run => Object.values(run).every(Boolean)), A.boat);
 }
 
 console.log(fails.length ? '\nFAIL\n - ' + fails.join('\n - ') : '\nPASS');
