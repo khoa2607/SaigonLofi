@@ -20,8 +20,12 @@ const fails = [], rep = {};
 const check = (k, ok, info) => { rep[k] = { ok: !!ok, info }; if (!ok) fails.push(k + ' ' + JSON.stringify(info)); };
 try {
   // 1) in-page self test (zones, camera, weather, time, no console errors)
-  const st = grab(run('holdfast/index.html?test=1&warp=60', ['--dump-dom']).stdout || '', 'hfTest');
+  const st = grab(run('holdfast/index.html?test=1&warp=60&era=current', ['--dump-dom']).stdout || '', 'hfTest');
   check('holdfast self-test', st && st.ok, st);
+  // 1b) the PAST timeline boots and passes the same in-page self-test (milestone 8)
+  const sp = grab(run('holdfast/index.html?test=1&warp=60&era=past', ['--dump-dom']).stdout || '', 'hfTest');
+  check('holdfast PAST self-test', sp && sp.ok && sp.era === 'past', sp);
+  run('holdfast/index.html?test=1&era=current', ['--dump-dom']);   // leave the remembered era on Current for the checks below
   // 2) gallery integration + Saigon smoke
   const pr = grab(run('tests/holdfast-probe.html', ['--dump-dom'], 1400, 900, 120000).stdout || '', 'out');
   rep.probe = pr; const g = pr && pr.gallery, sg = pr && pr.saigon;

@@ -80,6 +80,7 @@ async function hfBoot() {
   initIcons(); await prog(0.2);
   HR.cv = $('c'); HR.g = HR.cv.getContext('2d'); HR.lc = mk(4, 4); HR.lg = HR.lc.getContext('2d'); HR.season = HS.season;
   hrBuildStatics(); await prog(0.7);
+  if (HF.era === 'past') { for (const z of HS.zombies) dinoSheet(z.L); for (const sp of ['raptor', 'compy', 'dilo', 'pachy', 'ptero']) for (let m = 0; m < DSPEC[sp].col.length; m++) for (const sd of [0, 37]) dinoSheet({ sp, morph: m, seed: sd }); await prog(0.8); }   // the common sheets are ready before the first frame
   HR.zoom = Q.get('zoom') ? +Q.get('zoom') : hfPref('zoom', 0); hrResize();
   const saved = hfPref('cam', null);
   if (Q.get('cam') || !saved) hfCamPreset(Q.get('cam') || 'default'); else { HR.cx = saved[0]; HR.cy = saved[1]; hrClampCam(); }
@@ -272,7 +273,7 @@ function hfSelfTest() {
     chk('noZoutside', HS.zombies.every(z => z.st === 'dead' || z.fly || !isInside(z.x, z.y) || HF.breaches > 0 || HF.gate.open > 0));
     chk('errors', HFG.errs.length === 0, HFG.errs);
   } catch (e) { R.ok = false; R.exc = String(e.stack || e).slice(0, 400); }
-  R.stats = HS.stats; R.fps = hfFps();
+  R.stats = HS.stats; R.fps = hfFps(); R.era = HF.era; if (HF.era === 'past') R.past = { dinos: HS.zombies.filter(z => z.st !== 'dead').length, species: [...new Set(HS.zombies.map(z => z.L.sp))].length, torches: HF.torches.length, fires: HF.fires.length };
   $('hfTest').textContent = JSON.stringify(R); document.title = 'HFTEST ' + (R.ok ? 'PASS' : 'FAIL');
 }
 function hfFps() { const a = HR.ft.slice().sort((x, y) => x - y); return a.length ? { median: +a[a.length >> 1].toFixed(2), p95: +a[Math.floor(a.length * 0.95)].toFixed(2), n: a.length } : null; }

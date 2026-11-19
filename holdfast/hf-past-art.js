@@ -257,7 +257,9 @@ const PPROPS = {
   spit: () => [HB(0, 0, 0, 1, 1, 7, LOG_D), HB(9, 0, 0, 1, 1, 7, LOG_D), HB(-0.5, 0.2, 6.2, 11, 0.6, 0.6, LOG_L), HB(3, -0.6, 4.2, 4, 2.2, 2, 0x9a4a2a, (f, u, v) => vnoise(u * 2, v) > 0.5 ? 0xb8642e : undefined), ...PPROPS.drumfire().map(b => Object.assign(b, { x: b.x + 5, y: b.y + 0.5 }))],
   stones: () => { const B = []; for (let i = 0; i < 7; i++) { const a = i / 7 * TAU; B.push(HB(Math.cos(a) * 9 - 1.2, Math.sin(a) * 6 - 0.8, 0, 2.4, 1.6, 6 + (i % 3) * 2.4, 0x9a948a, stoneP)); } return B; },
   fern: (o) => { const B = [], c = [0x4a7a3a, 0x5a8a42, 0x6a9a4a][(o.v || 0) % 3]; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; B.push(HB(Math.cos(a) * 2.6 - 1, Math.sin(a) * 2 - 0.6, 0.6 + (i % 2) * 0.6, 2.6, 1.4, 1.4, c)); } B.push(HB(-1, -1, 0, 2, 2, 2.4, mixc(c, 0xfff0d0, 0.15))); return B; },
-  torchpost: () => PPROPS.lamp()
+  torchpost: () => PPROPS.lamp(),
+  // already wooden / natural in the Current art (posts, rails, hay, a sandpit, stumps): reused as they are (rails + wattle via railBoxes)
+  hitch: () => PROPS.hitch(), hurdle: () => PROPS.hurdle(), rail: (o) => railBoxes(o.w, o.along, 0), picket: (o) => railBoxes(o.w, o.along, 1), hay: () => PROPS.hay(), tack: () => PROPS.tack(), sandbox: () => PROPS.sandbox(), pen: () => PROPS.pen(), stump: () => PROPS.stump()
 };
 
 // ---------------------------------------------------------------- palisade, watch platforms with fire beacons, the log gate
@@ -362,6 +364,7 @@ const PHAIR = [0x1d1a24, 0x2b2028, 0x3b2a24, 0x5a3a24, 0x6a4a2e, 0x8a5a3a], PFUR
 function pastLook(role, R) {
   const kid = role === 'kid', type = kid ? 'kid' : role === 'elder' ? (R() < 0.5 ? 'oldman' : 'oldlady') : R() < 0.5 ? 'worker' : 'youth';
   const L = randLook(type);
+  L.fem = type === 'oldlady' ? true : type === 'oldman' ? false : R() < 0.5;   // decided by the seeded stream (randLook's own pick is not)
   Object.assign(L, { past: 1, ev: 'tribe', role, carry: null, tie: 0, mask: 0, kq: false, pattern: 0, pack: 0, glasses: false, apron: 0, blush: R() < 0.4 });
   L.top = sp(R, HIDE); L.bot = sp(R, [0x6a4a30, 0x5a3e28, 0x7a5434, 0x8a6240, 0x4a3a2a]); L.shoe = sp(R, [0x6a4a30, 0x5a3e28, 0x7a5a3a]);
   L.hair = sp(R, PHAIR); L.fur = sp(R, PFUR); L.scarfC = L.fur; L.legs = 'short'; L.sleeve = R() < 0.55 ? 'none' : 'short'; L.oneSh = !kid && R() < 0.45; L.dress = 0; L.hat = 0; L.hatC = sp(R, [OCHRE, 0x3a5a7a, 0x8a3a24, 0xe0b04a, 0x5a7a3a]);
@@ -540,7 +543,7 @@ function drawDino(L, pose) {
     else { const hx = 74 + hdx, hy = 16; cap(X(58), YB(30), X(hx - 2), YH(hy + 2), 4.2 * s, 3.2 * s, { belly: 1 }); cap(X(hx - 2), YH(hy - 3), X(hx - 17), YH(hy - 11), 2 * s, 1.4 * s, { c: acc }); disc(X(hx), YH(hy), 5 * s, {}); cap(X(hx + 1), YH(hy + 1), X(hx + 11), YH(hy + 4), 3.4 * s, 2.6 * s, {}); line(X(hx + 6), YH(hy + 5), X(hx + 12), YH(hy + 5.5), mixc(base, ink, 0.5)); eye(X(hx + 1), YH(hy - 1), Math.max(1, Math.round(s))); }
   } else if (S.kind === 'brachio') {
     const s = W / 100, gy = H - 2, X = u => u * s, Y = v => gy - (113 - v) * s, bob = walk ? -Math.abs(Math.sin(ph)) * 0.8 : 0, YB = v => Y(v + (dark ? 14 : 0)) + bob, hdy = pose === 5 ? 30 : pose === 7 ? -3 : 0;
-    const leg = (x, top, r, far, off) => { if (dark) return; const st = walk ? Math.sin(ph + off) * 4 : 0; cap(X(x), YB(top), X(x + st), Y(111), r * s, r * 0.9 * s, { shade: far ? 0.3 : 0 }); cap(X(x + st - 2), Y(112), X(x + st + 3), Y(112), 1.6 * s, 1.4 * s, { c: mixc(base, ink, 0.35) }); };
+    const leg = (x, top, r, far, off) => { if (dark) return; const st = walk ? Math.sin(ph + off + Math.PI / 4) * 4 : 0; cap(X(x), YB(top), X(x + st), Y(111), r * s, r * 0.9 * s, { shade: far ? 0.3 : 0 }); cap(X(x + st - 2), Y(112), X(x + st + 3), Y(112), 1.6 * s, 1.4 * s, { c: mixc(base, ink, 0.35) }); };
     leg(30, 78, 6, true, Math.PI); leg(62, 74, 6.5, true, 0);
     cap(X(26), YB(78), X(2), YB(98), 7 * s, 1.5 * s, { belly: 1 });
     oval(X(46), YB(77), 24 * s, 13 * s, { belly: 1 }); oval(X(56), YB(72), 14 * s, 12 * s, { belly: 1 });

@@ -17,7 +17,7 @@ This repository is the **live Lofi Worlds web app**: a world gallery plus two pa
 | Shared UI | `css/lofi-ui.css`, `js/dock.js`, `js/i18n.js`, `js/audio.js`, `js/yt.js` | Saigon's UI extracted verbatim; Holdfast uses the same markup/ids with its own palette (`holdfast/hf-theme.css`). |
 | Shared art system | `js/core.js` (`bake` box models, `grade`, ink, `gridCanvas`, K = 2 art px per world unit), `js/art.js` (`drawPerson`, trees, bubbles) | All art is drawn by code at load time. Holdfast uses these read-only. |
 | SaigonLofi world | `js/main.js`, `js/city.js`, `js/build.js`, `js/eras.js`, `js/sim.js`, `js/river.js`, `js/landmarks.js`, `js/fx.js`, `js/tet.js`, `js/events.js`, `js/costumes.js`, `js/dance.js` | Isometric Saigon street corner across four eras. See `README.md`. |
-| Holdfast world (branch `design/holdfast-world`) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI) | Opened from the gallery in a frame. Only the Current era exists; Past/Future are "soon" tabs. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
+| Holdfast world (branch `design/holdfast-world`) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI) | Opened from the gallery in a frame. Two timelines on the same map: Current (infected) and Past (`hf-past-art.js` art, `hf-past.js` simulation; `HF.era`, `?era=past`); Future is a "soon" tab. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
 | Tests | `tests/*.mjs` | Node only (no packages) + an installed Chrome/Edge for browser checks. See below. |
 
 Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, then `http://localhost:8765/` (YouTube needs http).
@@ -34,7 +34,8 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
   cocoa ink outline, warm grade); new things must match it.
 - Do not change SaigonLofi gameplay or the shared UI behaviour when working on Holdfast. Saigon files are used read-only
   (shared CSS/JS changes need an explicit reason and a parity check: `tests/ui-snapshot.mjs`).
-- Do not implement Holdfast's Past or Future eras without an approved scope.
+- Do not implement Holdfast's Future era without an approved scope. The Past (approved, milestone 8) lives behind `HF.era === 'past'`;
+  every Past branch must leave the Current timeline's behaviour and random sequence unchanged (`tests/holdfast-past.mjs` checks the map).
 
 ## Code rules
 
@@ -49,6 +50,7 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 
 | Command | What |
 |---|---|
+| `node tests/holdfast-past.mjs [seed]` | Milestone 8 (PAST): same valley as Current, prehistoric art for every building/prop, tribe looks, 15 dinosaur species (sprites + roles), packs, chargers, apex, flyers, traps, fire (torches, beacons, fire-keeper, dance), activity spread, determinism, Current untouched |
 | `node tests/holdfast-m7.mjs [seed]` | Milestone 7: zombie archetypes (from `holdfast/zombie.webp`), church / school / riverside graveyard layout, bathing, washing, bank fishing, supply + red-cross medical boats, determinism |
 | `node tests/holdfast-community.mjs [seed]` | Milestone 6: zone distribution, crowding, food chain, market, training + alarm, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, frontier, 2-day stability, determinism |
 | `node tests/holdfast-life.mjs [secs] [seed]` | Milestone 5: congestion, synchrony, walking speed, crop cycles, visible work, infected density |

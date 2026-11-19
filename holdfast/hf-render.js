@@ -486,7 +486,7 @@ function repBoxes(r, step) {
     B.push(HB(0, -0.2, 3.5, 9, 0.6, 9.5, 0x2a2024, (f, u, v) => { if (f !== 1) return 0x5a4a40; const row = Math.floor(v / 2.4); if (row < rows) return (v % 2.4) < 0.4 ? 0x9a7446 : hs(Math.floor(u / 3), row) > 0.5 ? fresh : 0xc8a070; const edge = Math.min(u, 9 - u, v, 9.5 - v); return edge < 0.9 + hs(u * 2, v * 2) * 0.8 ? (hs(u, v) > 0.5 ? 0x8a6a4a : 0x6a4a34) : 0x1e1618; }));
   } else {
     const d = Lt.d, s = (d + 3) / 12, Hh = r.H;
-    for (let k = 0; k < 3; k++) B.push(HB(0, 1.5 - (k + 1) * s - 0.05, Hh + (k + 1) * 2.3 - 0.1, 10, s + 0.1, 0.35, k < rows ? 0x8a6a50 : 0x3d6f9a, (f, u, v) => k < rows ? ((u % 2.6) < 0.35 ? 0x5a4434 : undefined) : ((u * 1.3 + k) % 3 < 0.4 ? 0x2e5274 : undefined)));
+    for (let k = 0; k < 3; k++) B.push(HB(0, 1.5 - (k + 1) * s - 0.05, Hh + (k + 1) * 2.3 - 0.1, 10, s + 0.1, 0.35, k < rows ? (HF.era === 'past' ? 0xd4b46c : 0x8a6a50) : (HF.era === 'past' ? 0x8a6240 : 0x3d6f9a), (f, u, v) => k < rows ? ((u % 2.6) < 0.35 ? (HF.era === 'past' ? 0x8a6a34 : 0x5a4434) : undefined) : ((u * 1.3 + k) % 3 < 0.4 ? (HF.era === 'past' ? 0x5a3e28 : 0x2e5274) : undefined)));   // Past: a hide over the hole, fresh thatch
   }
   if (r.st < 2) B.push(HB(0.5, 1.4, 0, 6, 2.6, 1.1, 0x8a6a4a, (f, u, v) => hs(u * 2, v * 2) > 0.6 ? 0x6a4a34 : hs(u * 3, v) > 0.85 ? 0xc49a64 : undefined), HB(7, 2, 0, 3, 1.4, 0.7, 0xb8a47c));
   return B;
@@ -540,7 +540,7 @@ function dinoDraw(D, a, L, cull) {
   if (alt) { const gp = ISO(x, y); D.push({ c: HR.nil, x: gp[0], y: gp[1], w: 0.01, h: 0.01, d: x + y - 1, sh: [gp[0], gp[1], Math.max(3, w * 0.22)] }); }
 }
 function wildDino(D, w, L, cull, t) {
-  if (!w.L) w.L = { sp: w.k === 'deer' ? 'para' : w.k, morph: Math.floor(hash2(w.ph * 13, 3) * 2), seed: (Math.floor(w.ph) % 4) * 37 };
+  if (!w.L) w.L = { sp: w.k === 'deer' ? 'para' : w.k, morph: Math.floor(hash2(w.ph * 13, 3) * 2), seed: (Math.floor(w.ph) % 2) * 37 };
   const S = DSPEC[w.L.sp], x = w.px + (w.x - w.px) * L, y = w.py + (w.y - w.py) * L, p = ISO(x, y), ww = S.W / K, hh = S.H / K; if (cull(p[0] - ww / 2, p[1] - hh, ww, hh + 2)) return;
   const moving = Math.hypot(w.x - w.px, w.y - w.py) > 0.004, pose = moving ? 1 + Math.floor(w.stride / Math.max(2.6, ww / 6)) % 4 : (Math.floor((t + w.ph) / 3) % 3 === 0 ? 5 : 0), flip = w.dir === 1 || w.dir === 2, sh = dinoSheet(w.L);
   D.push({ c: sh.c, e: sh.e, sx: pose * S.W, sy: flip ? S.H : 0, sw: S.W, shh: S.H, x: Math.round((p[0] - ww / 2) * K) / K, y: Math.round((p[1] - hh + 1) * K) / K, w: ww, h: hh, d: x + y, sh: [p[0], p[1], Math.max(5, ww * 0.28)] });

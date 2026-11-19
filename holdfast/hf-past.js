@@ -13,13 +13,14 @@ function pastMap() {
     else if (p.kind === 'firepit') HF.fires.push({ k: 'pit', x: p.x, y: p.y, z: 1.5, r: 3.6 });
     else if (p.kind === 'drumfire') HF.fires.push({ k: 'camp', x: p.x, y: p.y, z: 1, r: 2.2 });
     else if (p.kind === 'forge') HF.fires.push({ k: 'hearth', x: p.x + 5, y: p.y + 4, z: 3.6, r: 2 });
+    else if (p.kind === 'watertower') HF.fires.push({ k: 'beacon', x: p.x + 5.3, y: p.y + 5.3, z: 38.8, r: 4.2, great: 1 });
   }
   // house campfires (every third home), the sacred fire bowl and the dance ring at the Ancestor Hall, the cookhouse spit
   const ok = (x, y) => { const k = tileOfW(x, y); return hfPass(k, 'in') && !HF.occ[k] && HF.zone[k] === Z_SETTLE; };
   HF.buildings.filter(b => b.kind === 'house').forEach((b, i) => { if (i % 3) return; for (const [dx, dy] of [[b.w + 7, b.d + 9], [-7, b.d + 9], [b.w / 2, b.d + 16]]) { const x = b.x + dx, y = b.y + dy; if (ok(x, y)) { addP('campfire', x, y); HF.fires.push({ k: 'camp', x, y, z: 1, r: 2.2, home: b.id }); break; } } });
   const ch = HF.buildings.find(b => b.kind === 'church');
   if (ch) { const bx = ch.x + ch.w / 2 + 2, by = ch.y + ch.d + 22; addP('brazier', bx, by); HF.sacred = { x: bx, y: by }; HF.fires.push({ k: 'sacred', x: bx, y: by, z: 6.5, r: 3.4 });
-    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU, s = near(bx + Math.cos(a) * 15, by + Math.sin(a) * 11, 2); if (s) HF.ring.push({ x: s[0], y: s[1], a }); }
+    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU, x = bx + Math.cos(a) * 16, y = by + Math.sin(a) * 12; if (hfPass(tileOfW(x, y), 'in')) HF.ring.push({ x, y, a }); else { const s = near(x, y, 2); if (s) HF.ring.push({ x: s[0], y: s[1], a }); } }
     const st = near(bx - 8, by - 2, 3); HF.drumAt = st ? { x: st[0], y: st[1] } : { x: bx - 8, y: by }; }
   const kt = HF.buildings.find(b => b.kind === 'kitchen'); if (kt) { const x = kt.x + kt.w + 5, y = kt.y + kt.d * 0.4; addP('spit', x, y); HF.fires.push({ k: 'spit', x: x + 5, y: y + 0.5, z: 1, r: 2.2 }); }
   for (const t of HF.towers) HF.fires.push({ k: 'beacon', x: t.x + 15, y: t.y + 3.5, z: 51.5, r: 3.4, tower: t.id });
@@ -31,17 +32,17 @@ function pastMap() {
 // ---------------------------------------------------------------- dinosaur roster: stats + behaviour flags (art in hf-past-art.js DSPEC)
 const DSTAT = {
   compy:  { hp: 1, spd: [8, 9.5], sight: 0.9, bite: 0.5, acool: 0.9, stag: 0.5 },
-  raptor: { hp: 3, spd: [7, 8.4], sight: 1.25, bite: 1.1, acool: 1.1, stag: 0.4, pack: 1 },
-  utah:   { hp: 5, spd: [6.4, 7.6], sight: 1.2, bite: 1.3, acool: 1.2, stag: 0.35, pack: 1 },
-  dilo:   { hp: 4, spd: [4.8, 5.6], sight: 1.3, bite: 1, acool: 1.4, stag: 0.4, circ: 1 },
-  pachy:  { hp: 5, spd: [4.6, 5.4], sight: 1, bite: 0.8, acool: 1.6, stag: 0.3, chg: 1, wd: 1.2 },
-  carno:  { hp: 8, spd: [5, 6], sight: 1.1, bite: 1.4, acool: 1.5, stag: 0.25, chg: 1, wd: 1.5 },
+  raptor: { hp: 4, spd: [7, 8.4], sight: 1.25, bite: 1.1, acool: 1.1, stag: 0.4, pack: 1 },
+  utah:   { hp: 6, spd: [6.4, 7.6], sight: 1.2, bite: 1.3, acool: 1.2, stag: 0.35, pack: 1 },
+  dilo:   { hp: 5, spd: [4.8, 5.6], sight: 1.3, bite: 1, acool: 1.4, stag: 0.4, circ: 1 },
+  pachy:  { hp: 6, spd: [4.6, 5.4], sight: 1, bite: 0.8, acool: 1.6, stag: 0.3, chg: 1, wd: 1.2 },
+  carno:  { hp: 9, spd: [5, 6], sight: 1.1, bite: 1.4, acool: 1.5, stag: 0.25, chg: 1, wd: 1.5 },
   trike:  { hp: 12, spd: [3.4, 4], sight: 0.8, bite: 0.9, acool: 2, stag: 0.15, chg: 1, wd: 2.2 },
   ankylo: { hp: 14, spd: [2.4, 3], sight: 0.7, bite: 0.7, acool: 2.2, stag: 0.1, wd: 2.4, weak: 1 },
   allo:   { hp: 12, spd: [4.6, 5.4], sight: 1.2, bite: 1.6, acool: 1.6, stag: 0.15, wd: 1.8 },
   spino:  { hp: 14, spd: [4, 4.8], sight: 1.1, bite: 1.6, acool: 1.7, stag: 0.12, wd: 1.8 },
   trex:   { hp: 26, spd: [4.4, 5], sight: 1.4, bite: 2.2, acool: 1.8, stag: 0.05, wd: 3, apex: 1 },
-  ptero:  { hp: 3, spd: [13, 15], sight: 1, bite: 0.6, acool: 2, stag: 0.3, fly: 1 }
+  ptero:  { hp: 4, spd: [13, 15], sight: 1, bite: 0.6, acool: 2, stag: 0.3, fly: 1 }
 };
 const DCAT = { compy: 'small', raptor: 'pack', utah: 'pack', dilo: 'stalker', pachy: 'charger', carno: 'charger', trike: 'charger', ankylo: 'breaker', allo: 'heavy', spino: 'heavy', trex: 'apex', ptero: 'flyer' };
 const DCAP = { allo: 2, spino: 1, trike: 3, ankylo: 3, carno: 3, utah: 6, trex: 1, ptero: 3 };
@@ -59,12 +60,12 @@ function pastPickSpecies(o) {
 function pastAddDino(x, y, o) {
   x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4);
   const sp = pastPickSpecies(o), D = DSTAT[sp], S = DSPEC[sp];
-  const L = { ev: 'dino', sp, morph: Math.floor(HS.R() * S.col.length), seed: Math.floor(HS.R() * 4) * 37 };   // a few stripe seeds per morph keep the sheet cache small
+  const L = { ev: 'dino', sp, morph: Math.floor(HS.R() * S.col.length), seed: Math.floor(HS.R() * 4) % 2 * 37 };   // a few stripe seeds per morph keep the sheet cache small
   const z = Object.assign({ id: HS.zid++, L, x, y, px: x, py: y, dir: 1, st: 'wander', hp: D.hp, hp0: D.hp, spd: rr2(D.spd[0], D.spd[1]), t: 0, path: null, stride: 0, ph: HS.R() * 10, cool: 0, seg: -1, st2: '', stT: 0, kx: 0, ky: 0, idle: 0, route: null, rp: 0, lane: rr2(-3, 3),
     sight: D.sight, bite: D.bite, acool: D.acool, stag: D.stag, wd: D.wd, chg: D.chg, circ: D.circ, cat: DCAT[sp], alt: 0 }, o || {});
   delete z.sp;
   HS.zombies.push(z); HS.Ps.spawned[sp] = (HS.Ps.spawned[sp] || 0) + 1;
-  if (D.fly) { z.fly = 1; z.st = 'fly'; z.fs = 'in'; z.alt = 46; }
+  if (D.fly) { z.fly = 1; z.st = 'fly'; z.fs = 'in'; z.alt = 46; z.home = [x, y]; }   // a flyer leaves the way it came
   // pack species arrive with company: compies in threes, raptors in packs (behind a leader)
   if (!z.noPack && (sp === 'compy' || ((sp === 'raptor' || sp === 'utah') && (!o || !o.st) && HS.R() < 0.6))) {
     const n = sp === 'compy' ? 2 + Math.floor(HS.R() * 2) : 1 + Math.floor(HS.R() * 3);
@@ -89,9 +90,10 @@ function pastZ(z, dt) {
   // stake traps along the kill-zone: a dinosaur that blunders into one is wounded
   if (!z.fly && HF.traps && HF.zone[tileOfW(z.x, z.y)] === Z_CLEAR) for (const tr of HF.traps) { if (tr.cd > HS.t || Math.abs(tr.x - z.x) > 5 || Math.abs(tr.y - z.y) > 5) continue; tr.cd = HS.t + 25; HS.Ps.trapHits++; hsHitZ(z, { x: tr.x, y: tr.y }, z.cat === 'small' || z.cat === 'pack' ? 2 : 3); hsSound('stab', z.x, z.y, 0.5); if (z.st === 'dead') return true; }
   if (z.fly) return pastFly(z, dt);
+  if (z.L.sp === 'compy' && (z.st === 'wall' || z.st === 'gate')) { z.st = 'wander'; z.seg = -1; z.path = null; return true; }   // little compies skitter about the edge; they never worry a palisade
   // fire: at night the smaller hunters shy away from a lit beacon or torch near the wall
-  if (hsDark() && (z.cat === 'pack' || z.cat === 'small' || z.cat === 'stalker') && (z.st === 'wall' || z.st === 'gate' || z.st === 'pursue') && HS.R() < dt * 0.25) {
-    const f = pastFireNear(z.x, z.y, 46); if (f) { HS.Ps.fireScare++; z.st = 'wander'; z.tgt = null; z.seg = -1; const dx = z.x - f.x, dy = z.y - f.y, d = Math.hypot(dx, dy) || 1; z.path = { direct: 1, gx: z.x + dx / d * 50, gy: z.y + dy / d * 50, mask: 'z' }; bubbleZ(z); return true; } }
+  if (hsDark() && (z.cat === 'pack' || z.cat === 'small' || z.cat === 'stalker') && (z.st === 'wall' || z.st === 'gate' || z.st === 'pursue' || z.st === 'march' || z.st === 'investigate' || z.st === 'pack') && HS.R() < dt * 0.35) {
+    const f = pastFireNear(z.x, z.y, 60); if (f) { HS.Ps.fireScare++; z.st = 'wander'; z.tgt = null; z.seg = -1; const dx = z.x - f.x, dy = z.y - f.y, d = Math.hypot(dx, dy) || 1; z.path = { direct: 1, gx: z.x + dx / d * 50, gy: z.y + dy / d * 50, mask: 'z' }; bubbleZ(z); return true; } }
   // the apex roars: heard across the valley, herbivores scatter, the curious come
   if (z.L.sp === 'trex' && HS.t > (z.roarT || 0)) { z.roarT = HS.t + rr2(18, 40); z.roarAt = HS.t; HS.Ps.roars++; hsSound('roar', z.x, z.y, 1); hsNoise(z.x, z.y, 260, 'roar'); for (const w of HS.wild) if (w.k === 'deer' && Math.hypot(w.x - z.x, w.y - z.y) < 220) { w.flee = 4; const dx = w.x - z.x, dy = w.y - z.y, d = Math.hypot(dx, dy) || 1; w.fx = w.x + dx / d * 90; w.fy = w.y + dy / d * 90; } }
   // stalkers circle and watch before they close in
@@ -108,14 +110,16 @@ function pastZ(z, dt) {
   return false;
 }
 function bubbleZ(z) { z.scared = HS.t; }
-function pastFireNear(x, y, r) { for (const f of HF.fires) if (pastFireLit(f) && (f.x - x) ** 2 + (f.y - y) ** 2 < r * r) return f; for (const t of HF.torches) if (t.lit && (t.x - x) ** 2 + (t.y - y) ** 2 < r * r) return t; return null; }
+function pastFireNear(x, y, r) { for (const f of HF.fires) { const rr = f.k === 'beacon' ? r * 1.6 : r; if (pastFireLit(f) && (f.x - x) ** 2 + (f.y - y) ** 2 < rr * rr) return f; }   // a beacon's blaze reaches further for (const t of HF.torches) if (t.lit && (t.x - x) ** 2 + (t.y - y) ** 2 < r * r) return t;
+  if (hsDark()) for (const p of HS.people) if (p.alive && p.role === 'guard' && p.post && p.post.k === 'patrol' && !p.onTower && (p.x - x) ** 2 + (p.y - y) ** 2 < r * r) return p;   // night patrols carry torches along the palisade
+  return null; }
 function pastFireLit(f) { const h = HS.hour, night = h < 6.4 || h > 18.2;
   if (f.k === 'beacon') return HS.alarm > 0 || night; if (f.k === 'sacred') return true; if (f.k === 'camp') return night || h > 17; if (f.k === 'pit') return night || h > 16.5 || h < 8 || mealTime(HS.life);
   if (f.k === 'spit') return h > 6 && h < 21; if (f.k === 'hearth') return h > 7 && h < 18.5; return false; }
 
 // ---------------------------------------------------------------- flyers: pteranodons cross the wall, scout, swoop on livestock and on people in the open, flee when hit
 function pastFly(z, dt) {
-  z.t += dt; const hurt = z.hp <= z.hp0 - 2;
+  z.t += dt; const hurt = z.hp <= z.hp0 - 3;
   if (hurt && z.fs !== 'leave') { z.fs = 'leave'; z.t = 0; HS.Ps.flyerDriven++; }
   const fly = (x, y, alt, sp) => { const dx = x - z.x, dy = y - z.y, d = Math.hypot(dx, dy); if (d > 0.5) { const s = Math.min(d, sp * dt); z.x += dx / d * s; z.y += dy / d * s; z.stride += s; z.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 2) : (dy > 0 ? 1 : 3); } z.alt += clamp(alt - z.alt, -26 * dt, 20 * dt); return d; };
   switch (z.fs) {
@@ -138,7 +142,7 @@ function pastFlyPrey(z) {
   for (const p of HS.people) { if (!p.alive || !p.vis || p.onTower || p.z > 0) continue; const k = tileOfW(p.x, p.y); if (HF.gk[k] !== GK.FIELD && isInside(p.x, p.y)) continue; const d = (p.x - z.x) ** 2 + (p.y - z.y) ** 2; if (d < bd * 0.8) { bd = d; best = p; } }
   return best;
 }
-function pastFlyExit(z) { const c = [[20, 20], [HW - 20, 20], [20, HW * 0.45], [HW * 0.45, 20]]; let b = c[0], bd = 1e9; for (const q of c) { const d = (q[0] - z.x) ** 2 + (q[1] - z.y) ** 2; if (d < bd) { bd = d; b = q; } } return b; }
+function pastFlyExit(z) { if (z.home) return z.home; const c = [[20, 20], [HW - 20, 20], [20, HW * 0.45], [HW * 0.45, 20]]; let b = c[0], bd = 1e9; for (const q of c) { const d = (q[0] - z.x) ** 2 + (q[1] - z.y) ** 2; if (d < bd) { bd = d; b = q; } } return b; }
 
 // ---------------------------------------------------------------- herbivores: stegosaurs and the occasional giant browse far out in the wilds (never flee, never hunt)
 function pastHerb(w, dt) {
@@ -149,25 +153,28 @@ function pastHerb(w, dt) {
 // ---------------------------------------------------------------- setup + per-tick life of the tribe: torches, beacons, sacred fire, the evening dance, flyers, the apex
 function pastPre() {
   HS.Ps = { spawned: {}, packs: 0, rams: 0, charges: 0, circles: 0, roars: 0, trapHits: 0, fireScare: 0, weakSeek: 0, wallDmg: {}, swoops: 0, raids: 0, swoopPeople: 0, flyerScout: 0, flyerDriven: 0, flyers: 0, apex: 0,
-    arrows: 0, fireArrows: 0, lit: 0, autoLit: 0, out: 0, dance: 0, drum: 0, tend: 0, beaconT: 0, keeperRounds: 0, gateRams: 0 };
+    arrows: 0, fireArrows: 0, lit: 0, autoLit: 0, out: 0, dance: 0, drum: 0, tend: 0, beaconT: 0, keeperRounds: 0, gateRams: 0, drumStart: 0 };
 }
 function pastInit() {
-  const el = HS.people.filter(p => p.role === 'elder'); HS.keeper = el.find(p => p.tier !== 0) || el[0] || null; if (HS.keeper) HS.keeper.fireKeeper = 1;
-  for (let i = 0; i < 3; i++) { const [x, y] = hsWildPoint(); if (hsFarFromWall(tileOfW(x, y), 20)) hsAddWild('stego', x, y, { big: 1, spd: 2.2 }); }
+  const ad = HS.people.filter(p => (p.role === 'trader' || p.role === 'adult') && p.tier === 1), el = HS.people.filter(p => p.role === 'elder'); HS.keeper = ad[0] || el.find(p => p.tier !== 0) || el[0] || null; if (HS.keeper) HS.keeper.fireKeeper = 1;   // an able adult: the bell does not send them to shelter, so the torches are lit even in an alarm
+  for (let i = 0; i < 3; i++) for (let n = 0; n < 40; n++) { const [x, y] = hsWildPoint(); if (hsFarFromWall(tileOfW(x, y), 20)) { hsAddWild('stego', x, y, { big: 1, spd: 2.2 }); break; } }
   for (let i = 0; i < 2; i++) for (let n = 0; n < 40; n++) { const [x, y] = hsWildPoint(); if (hsFarFromWall(tileOfW(x, y), 34)) { hsAddWild('brachio', x, y, { big: 1, spd: 1.6 }); break; } }
   const h = HS.hour; for (const t of HF.torches) t.lit = h > 19.2 || h < 6.2 ? 1 : 0;
   HS.nextP = { fly: HS.t + rr2(40, 90), apex: HS.t + rr2(240, 420), dance: 0, tend: HS.t + rr2(30, 90), torch: 0, drum: 0 };
 }
+// the torch round matters more than an everyday chore (never more than sleep, shelter, an injury or a meal already served)
+const pastKeeperOk = p => !!p && p.alive && p.vis && !p.exp && !p.rescue && !p.ride && !p.onTower && !p.arriving && p.st !== 'down' && !p.inj && !(p.task && (['sleep', 'shelter', 'bed', 'down', 'eat', 'conv', 'checkup', 'respond'].includes(p.task.k) || p.task.torchRound || p.task.dance || p.task.drum || ['conv', 'packup', 'setup', 'sell', 'buy'].includes(p.task.a)));
 const pastFree = p => p.alive && p.vis && !p.exp && !p.rescue && !p.ride && !p.onTower && !p.arriving && p.st !== 'down' && !p.inj && (!p.task || p.task.k === 'sit' || p.task.k === 'chat' || p.task.k === 'walk' || (p.task.k === 'life' && p.task.a === 'stand' && !p.task.story));
 function pastTick(dt) {
   const h = HS.hour, N = HS.nextP, P = HS.Ps, dark = h < 6.4 || h > 18.2;
   if (HS.alarm > 0 || dark) P.beaconT += dt;
   // dusk: the fire-keeper walks the torch round (the nearest unlit torch next); a late round lights itself
+  for (const t of HF.torches) if (t.claimed && !(t.by && t.by.alive && t.by.task && t.by.task.torchRound)) t.claimed = 0;   // an interrupted round (an alarm, bedtime): the next one picks the torch up
   if (h > 18 && h < 21.5 && HS.t > N.torch) { N.torch = HS.t + 6;
     const unlit = HF.torches.filter(t => !t.lit && !t.claimed);
-    if (unlit.length) { const k = HS.keeper && HS.keeper.alive && pastFree(HS.keeper) ? HS.keeper : HS.people.find(p => (p.role === 'elder' || p.role === 'adult') && pastFree(p) && p.tier !== 0);
+    if (unlit.length) { const k = pastKeeperOk(HS.keeper) ? HS.keeper : HS.people.find(p => (p.role === 'adult' || p.role === 'trader' || (p.role === 'elder' && HS.alarm <= 0)) && p.tier !== 0 && pastKeeperOk(p));
       if (k) { const legs = []; let cx = k.x, cy = k.y; const left = unlit.slice();
-        while (legs.length < 6 && left.length) { let bi = 0, bd = 1e9; left.forEach((t, i) => { const d = (t.sx - cx) ** 2 + (t.sy - cy) ** 2; if (d < bd) { bd = d; bi = i; } }); const t = left.splice(bi, 1)[0]; t.claimed = 1; cx = t.sx; cy = t.sy;
+        while (legs.length < 6 && left.length) { let bi = 0, bd = 1e9; left.forEach((t, i) => { const d = (t.sx - cx) ** 2 + (t.sy - cy) ** 2; if (d < bd) { bd = d; bi = i; } }); const t = left.splice(bi, 1)[0]; t.claimed = 1; t.by = k; cx = t.sx; cy = t.sy;
           legs.push({ x: t.sx, y: t.sy, dur: 2.2, anim: 'raise', tool: 'torch', face: { x: t.x, y: t.y }, out: () => { t.lit = 1; t.claimed = 0; P.lit++; HS.fx.push({ k: 'spark', x: t.x, y: t.y, t: 0.35 }); } }); }
         setTask(k, Object.assign(lfChain('chain', legs), { torchRound: 1 })); P.keeperRounds++; } } }
   if (h > 20.6 && h < 21) for (const t of HF.torches) if (!t.lit) { t.lit = 1; t.claimed = 0; P.autoLit++; }
@@ -177,18 +184,19 @@ function pastTick(dt) {
   if (h > 18.8 && h < 20.8 && HS.alarm <= 0 && HS.weather !== 'rain' && HF.ring.length && HS.t > N.dance) { N.dance = HS.t + rr2(8, 16);
     const dancers = HS.people.filter(p => p.task && p.task.dance).length;
     if (dancers < 8) { const used = new Set(HS.people.filter(p => p.task && p.task.dance).map(p => p.task.ring)); const free = HF.ring.map((s, i) => i).filter(i => !used.has(i));
-      const q = HS.people.find(p => p.role !== 'guard' && p.tier !== 0 && pastFree(p) && Math.hypot(p.x - HF.sacred.x, p.y - HF.sacred.y) < 380);
-      if (q && free.length) { const i = pickR(free), s = HF.ring[i]; setTask(q, Object.assign(lfChain('chain', [{ x: s.x, y: s.y, dur: rr2(25, 45), anim: q.role === 'kid' || HS.R() < 0.6 ? 'jump' : 'raise', tool: '', face: HF.sacred, out: () => { P.dance++; bubble(q, 'note'); } }]), { dance: 1, ring: i })); } }
-    if (!HS.people.some(p => p.task && p.task.drum) && HF.drumAt) { const d = HS.people.find(p => p.role === 'elder' && pastFree(p)); if (d) setTask(d, Object.assign(lfChain('chain', [{ x: HF.drumAt.x, y: HF.drumAt.y, dur: rr2(40, 70), anim: 'hammer', tool: '', face: HF.sacred, snd: 'drum', out: () => { P.drum++; } }]), { drum: 1 })); } }
+      const qs = HS.people.filter(p => p.role !== 'guard' && p.tier !== 0 && pastFree(p) && Math.hypot(p.x - HF.sacred.x, p.y - HF.sacred.y) < 420).slice(0, 3);
+      for (const q of qs) { if (!free.length) break; const i = free.splice(Math.floor(HS.R() * free.length), 1)[0], s = HF.ring[i]; setTask(q, Object.assign(lfChain('chain', [{ x: s.x, y: s.y, dur: rr2(40, 70), anim: q.role === 'kid' || HS.R() < 0.6 ? 'jump' : 'raise', tool: '', face: HF.sacred, out: () => { P.dance++; bubble(q, 'note'); } }]), { dance: 1, ring: i })); } }
+    if (!HS.people.some(p => p.task && p.task.drum) && HF.drumAt) { const d = HS.people.find(p => p.role !== 'guard' && p.role !== 'kid' && p.tier !== 0 && !p.fireKeeper && pastFree(p)); if (d) { P.drumStart++; } if (d) setTask(d, Object.assign(lfChain('chain', [{ x: HF.drumAt.x, y: HF.drumAt.y, dur: rr2(40, 70), anim: 'hammer', tool: '', face: HF.sacred, snd: 'drum', out: () => { P.drum++; } }]), { drum: 1 })); } }
   // by day an elder kneels at the sacred fire and feeds it
-  if (h > 8 && h < 17.5 && HS.t > N.tend && HF.sacred) { N.tend = HS.t + rr2(70, 140); const e = HS.people.find(p => p.role === 'elder' && pastFree(p)); if (e) { const s = HF.ring[0] || HF.sacred; setTask(e, lfChain('chain', [{ x: s.x, y: s.y, dur: rr2(12, 20), anim: 'kneel', tool: 'plank', face: HF.sacred, fx: 'spark', fxr: 1.2, out: () => { P.tend++; } }])); } }
+  if (h > 8 && h < 17.5 && HS.t > N.tend && HF.sacred) { N.tend = HS.t + rr2(50, 100); const e = HS.people.find(p => (p.role === 'elder' || (p.role === 'adult' && p.tier !== 0)) && pastFree(p)); if (e) { const s = HF.ring[0] || HF.sacred; setTask(e, lfChain('chain', [{ x: s.x, y: s.y, dur: rr2(12, 20), anim: 'kneel', tool: 'plank', face: HF.sacred, fx: 'spark', fxr: 1.2, out: () => { P.tend++; } }])); } }
   // pteranodons come over every minute or two in daylight (never more than three at once)
-  if (HS.t > N.fly) { N.fly = HS.t + rr2(55, 120) * DANGER[HS.danger].iv; if (h > 6.5 && h < 19.5 && HS.zombies.filter(z => z.fly && z.st !== 'dead').length < 3) { const s = pastFlySpawn(); if (s) { pastAddDino(s[0], s[1], { sp: 'ptero' }); P.flyers++; } } }
+  if (HS.t > N.fly) { N.fly = HS.t + rr2(55, 120) * DANGER[HS.danger].iv; if (h > 6.5 && h < 19.5 && HS.zombies.filter(z => z.fly && z.st !== 'dead').length < 3) { const goal = pastFlyGoal(), s = pastFlySpawn(goal); if (s) { pastAddDino(s[0], s[1], { sp: 'ptero', goal }); P.flyers++; } } }
   // the apex: a tyrant walks the frontier now and then; sometimes it goes for the palisade
   if (HS.t > N.apex) { N.apex = HS.t + rr2(420, 700) * DANGER[HS.danger].iv; if (!HS.zombies.some(z => z.st !== 'dead' && z.L.sp === 'trex')) { const z = pastBandSpawn('trex'); if (z) { P.apex++; hsLog('trex', {}, true); if (HS.R() < 0.45) z.toWallAt = HS.t + rr2(30, 90); } } }
   for (const z of HS.zombies) if (z.toWallAt && HS.t > z.toWallAt && z.st !== 'dead') { z.toWallAt = 0; hsToWall(z, hsTowerSeg()); }
 }
-function pastFlySpawn() { for (let n = 0; n < 20; n++) { const e = pickR([[rr2(60, HW - 60), 12], [12, rr2(60, HW * 0.5)], [rr2(60, HW * 0.5), 12]]); if (!hsInView(e[0], e[1], 40)) return e; } return null; }
+// they come in from beyond the target, away from the palisade and its watch platforms (over the river or the far fields)
+function pastFlySpawn(goal) { const [cx, cy] = d2w(HGREEN[0], HGREEN[1] - 60); for (let n = 0; n < 20; n++) { const a = Math.atan2(goal.y - cy, goal.x - cx) + rr2(-0.5, 0.5), r = rr2(380, 520), e = [clamp(goal.x + Math.cos(a) * r, 8, HW - 8), clamp(goal.y + Math.sin(a) * r, 8, HW - 8)]; if (!hsInView(e[0], e[1], 40)) return e; } return null; }
 function pastBandSpawn(sp) { for (let n = 0; n < 40; n++) { const u = rr2(200, 760), v = wallV(u) - rr2(90, 150), [x, y] = d2w(u, v), k = tileOfW(x, y); if (!hfPass(k, 'out') || hsInView(x, y)) continue; const z = pastAddDino(x, y, { sp, noPack: 1 }); z.band = 1; return z; } return null; }
 // arrows instead of bullets: a quieter shot (smaller noise), a visible arrow (a fire arrow at night), hunters on expeditions throw spears
 function pastShoot(a, z, from, range) {
@@ -197,6 +205,6 @@ function pastShoot(a, z, from, range) {
   HS.stats.shots++; HS.Ps.arrows++; if (night && from.z > 30) HS.Ps.fireArrows++; hsNoise(a.x, a.y, 110, 'shot'); hsSound('shot', a.x, a.y, from.z ? 0.9 : 0.7);
   const tx = hit ? z.x : z.x + rr2(-7, 7), ty = hit ? z.y : z.y + rr2(-7, 7), tz = z.fly ? z.alt : hit ? 10 : 0, spear = !from.z || from.z < 20;
   HS.fx.push({ k: 'arrow', x0: from.x, y0: from.y, z0: from.z || 12, x1: tx, y1: ty, z1: tz, t: 0.32, T: 0.32, fire: night && !spear ? 1 : 0, spear: spear && a.exp ? 1 : 0 });
-  if (hit) hsHitZ(z, a, HS.R() < 0.14 ? 6 : 1 + (night && !spear ? 1 : 0)); else HS.fx.push({ k: 'dust', x: tx, y: ty, t: 0.4 });
+  if (hit) hsHitZ(z, a, z.fly ? 1 : HS.R() < 0.14 ? 6 : 1 + (night && !spear ? 1 : 0)); else HS.fx.push({ k: 'dust', x: tx, y: ty, t: 0.4 });
   return true;
 }
