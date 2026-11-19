@@ -6,6 +6,7 @@
 <title>Sài Gòn qua năm tháng — lofi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Pixelify+Sans:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lofi-ui.css">
 <style>
 /* look: enamel street-name plates (blue + white) for the eras, a cream "radio" card for the music */
 :root {
@@ -17,112 +18,24 @@
 html, body { height: 100%; margin: 0; background: #2a2622; color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 500; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 #cv { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
 #cv:active { cursor: grabbing; }
-button { font: inherit; cursor: pointer; border: 0; }
-button:focus-visible, input:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 
-/* --- era plate --- */
-#hud { position: absolute; left: 14px; top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: calc(100% - 28px); }
-#eras { background: var(--plate); border: 3px solid var(--white); outline: 3px solid var(--plate); border-radius: 8px; padding: 6px 8px 7px; box-shadow: 4px 5px 0 var(--shadow); }
-#eras .cap { color: var(--white); font-size: 10.5px; font-weight: 700; letter-spacing: 2.4px; text-transform: uppercase; opacity: .85; padding: 0 2px 4px; }
-#eras .tabs { display: flex; gap: 5px; }
-#eras button { min-width: 58px; min-height: 40px; padding: 0 8px; background: var(--plate-2); color: var(--white); font-weight: 800; font-size: 17px; letter-spacing: .5px; border-radius: 5px; border: 2px solid transparent; }
-#eras button:hover { border-color: var(--white); }
-#eras button[aria-pressed="true"] { background: var(--white); color: var(--plate); }
-#info { background: var(--cream); border-radius: 6px; padding: 5px 10px 6px; box-shadow: 3px 4px 0 var(--shadow); pointer-events: none; }
-#eraSub { font-weight: 700; font-size: 13px; }
-#status { font-size: 12px; color: var(--soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-#ticker { background: var(--ink); color: var(--cream); border-radius: 6px; padding: 6px 11px; font-size: 13px; opacity: 0; pointer-events: none; max-width: min(420px, 100%); }
-#ticker.show { animation: tick 5.5s ease both; }
-@keyframes tick { 0% { opacity: 0; transform: translateX(-6px); } 6%, 85% { opacity: .96; transform: none; } 100% { opacity: 0; } }
-
-/* --- music card --- */
-#dock { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(560px, calc(100% - 28px)); background: var(--cream); border-radius: 12px; border-top: 7px solid var(--tile); box-shadow: 4px 6px 0 var(--shadow); padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
-.row { display: flex; gap: 7px; align-items: center; }
-#dock button { min-height: 40px; padding: 0 11px; background: var(--paper); color: var(--ink); font-weight: 700; border-radius: 8px; box-shadow: 0 2px 0 #cdb98f; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
-#dock button:hover { background: #e6d3aa; }
-#dock button[aria-pressed="true"] { background: var(--leaf); color: var(--white); box-shadow: 0 2px 0 #2c6238; }
-#dock button svg { width: 18px; height: 18px; fill: currentColor; }
-#play { width: 48px; min-height: 48px !important; border-radius: 50% !important; background: var(--tile) !important; color: var(--white) !important; box-shadow: 0 3px 0 #8f3c26 !important; flex: none; position: relative; padding: 0 !important; }
-#play .ipause { display: none; } #play.playing .ipause { display: block; } #play.playing .iplay { display: none; }
-#hint { position: absolute; left: -2px; bottom: 58px; white-space: nowrap; padding: 5px 10px; font-size: 12.5px; font-weight: 700; background: var(--sun); color: var(--ink); border-radius: 6px; pointer-events: none; animation: bob 1.6s ease-in-out infinite; }
-#hint.gone { display: none; }
-@keyframes bob { 50% { transform: translateY(-4px); } }
-.trk { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
-.trk .names { min-width: 0; flex: 1; }
-#tname { font-weight: 800; font-size: 16px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#tnum { font-size: 11.5px; color: var(--soft); }
-#viz { width: 60px; height: 21px; image-rendering: pixelated; flex: none; }
-.sq { width: 42px; padding: 0 !important; flex: none; }
-.seg { display: flex; gap: 5px; flex: 1; min-width: 0; }
-.seg button { flex: 1; min-width: 0; padding: 0 5px !important; }
-.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-#panel { display: flex; flex-direction: column; gap: 8px; padding-top: 9px; border-top: 2px dashed #cdb98f; }
-#panel[hidden] { display: none; }
-.lab { width: 74px; flex: none; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--soft); }
-.sl { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--soft); min-width: 0; }
-input[type=range] { width: 100%; height: 24px; margin: 0; accent-color: var(--tile); }
-#ytUrl { flex: 1; min-width: 0; height: 40px; padding: 0 10px; font: inherit; color: var(--ink); background: var(--white); border: 2px solid #cdb98f; border-radius: 8px; -webkit-user-select: text; user-select: text; }
-#ytMsg { font-size: 12px; color: var(--soft); min-height: 16px; } #ytMsg.bad { color: #a8321e; font-weight: 700; }
-/* YouTube player: kept visible, 200x200 is the minimum size YouTube asks for */
-#ytbox { position: absolute; right: 14px; bottom: 14px; width: 212px; background: var(--cream); border-radius: 10px; border-top: 7px solid var(--plate); box-shadow: 4px 6px 0 var(--shadow); padding: 6px; }
-#ytbox[hidden] { display: none; }
-#ytbox .bar { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--soft); padding: 0 2px 5px; }
-#ytOff { min-height: 28px; padding: 0 8px; background: var(--paper); color: var(--ink); font-weight: 700; border-radius: 6px; font-size: 12px; }
-#ytplayer, #ytbox iframe { display: block; width: 200px; height: 200px; border: 0; background: #1c1a18; }
 #fade { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--card, #f6ead0); color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .45s ease; text-align: center; padding: 16px; }
 #fade.on { opacity: 1; }
 #fadeT { font-weight: 800; font-size: 44px; line-height: 1; letter-spacing: 1px; color: var(--plate); }
 #fadeS { font-size: 15px; font-weight: 700; }
 #fadeBar { width: min(240px, 60%); height: 8px; margin-top: 8px; background: rgba(51, 38, 31, .16); border-radius: 4px; overflow: hidden; }
 #fadeB { height: 100%; width: 0; background: var(--tile); }
-body.clean #hud, body.clean #dock, body.clean #lang { display: none; }
-@media (min-width: 900px) { #dock { width: min(600px, calc(100% - 480px)); min-width: 520px; } }
-@media (max-width: 700px) { #ytbox { bottom: auto; top: 14px; } .lab { width: 100%; } .wrap { flex-wrap: wrap; } #eras button { min-width: 50px; font-size: 15px; } #prev { display: none; } .seg.two { flex-wrap: wrap; } .seg.two button { flex: 1 1 40%; } }
-@media (prefers-reduced-motion: reduce) { #hint { animation: none; } #fade { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #fade { transition: none; } }
 
-/* ===== art redesign: cocoa-ink outlines, cream paper, wooden era sign, chunky pixel shadows (matches the new sprites) ===== */
 :root { --ink: #2b1a16; --cream: #fbead0; --paper: #f7d9af; --peach: #f9b574; --clay: #c8734f; --brown: #513733; --wood: #8a5a3e; --jade: #4f8e8a; --soft: #7a5a48;
   --tile: #c8734f; --leaf: #4f8e8a; --sun: #f9b574; --white: #fff6e6; --plate: #6e4430; --plate-2: #8a5a3e; --shadow: #2b1a16;
   --font: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 html, body { background: #2b1a16; }
-#eras { background: repeating-linear-gradient(180deg, #8a5a3e 0 9px, #7c4f36 9px 11px); border: 3px solid var(--ink); outline: 0; border-radius: 6px; box-shadow: inset 0 2px 0 #b07a54, 0 4px 0 var(--ink); padding: 6px 8px 8px; }
-#eras .cap { color: var(--cream); letter-spacing: 1.6px; font-size: 12px; font-weight: 800; text-shadow: 0 2px 0 var(--ink); opacity: 1; }
-#eras button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 -3px 0 #e2b884, 0 2px 0 var(--ink); font-weight: 800; }
-#eras button:hover { border-color: var(--ink); background: #fde6c2; }
-#eras button[aria-pressed="true"] { background: var(--peach); color: var(--ink); box-shadow: inset 0 3px 0 #d98f52; transform: translateY(2px); }
-#info { background: var(--cream); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 2px 0 #fff6e6, 0 3px 0 var(--ink); }
-#eraSub { font-weight: 800; color: var(--brown); }
-#ticker { background: var(--brown); color: var(--cream); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 3px 0 var(--ink); font-weight: 700; }
-#dock { background: var(--cream); border: 3px solid var(--ink); border-top: 3px solid var(--ink); border-radius: 6px; box-shadow: inset 0 3px 0 #fff6e6, inset 0 -4px 0 #ecc894, 0 5px 0 var(--ink); }
-#dock button { background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 -3px 0 #e2b884, 0 2px 0 var(--ink); font-weight: 700; }
-#dock button:hover { background: #fde6c2; }
-#dock button[aria-pressed="true"] { background: var(--jade); color: var(--cream); box-shadow: inset 0 3px 0 #3a6e6a; transform: translateY(2px); }
-#play { background: var(--clay) !important; border: 3px solid var(--ink) !important; box-shadow: inset 0 -4px 0 #95523e, 0 3px 0 var(--ink) !important; }
-#hint { background: var(--peach); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 2px 0 var(--ink); }
-#tname { color: var(--brown); }
-#panel { border-top: 2px dashed #c49a6c; }
-.lab { color: var(--soft); }
-#ytUrl { border: 2px solid var(--ink); border-radius: 4px; background: #fff6e6; }
-#ytbox { background: var(--cream); border: 3px solid var(--ink); border-top: 3px solid var(--ink); border-radius: 6px; box-shadow: 0 5px 0 var(--ink); }
-#ytOff { border: 2px solid var(--ink); background: var(--paper); }
 #fade { background: radial-gradient(circle at 50% 42%, #fbead0, #f2cf9c); }
 #fadeT { color: var(--brown); font-weight: 800; text-shadow: 0 3px 0 #e8b47a; }
 #fadeBar { height: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #f2d6aa; }
 #fadeB { background: repeating-linear-gradient(90deg, var(--clay) 0 6px, #b05f40 6px 8px); }
 
-/* --- language toggle (top-right) --- */
-#lang { position: absolute; right: 14px; top: 14px; z-index: 5; display: flex; gap: 0; background: var(--cream); border: 2px solid var(--ink); border-radius: 4px; box-shadow: inset 0 2px 0 #fff6e6, 0 3px 0 var(--ink); overflow: hidden; }
-#lang button { min-width: 38px; min-height: 32px; padding: 0 8px; background: var(--paper); color: var(--brown); font-weight: 800; font-size: 13px; letter-spacing: .6px; }
-#lang button + button { border-left: 2px solid var(--ink); }
-#lang button:hover { background: #fde6c2; }
-#lang button[aria-pressed="true"] { background: var(--clay); color: var(--cream); box-shadow: inset 0 3px 0 #95523e; }
-#lang button:focus-visible { outline-offset: -3px; }
-/* longer English labels wrap or truncate instead of breaking the buttons */
-.seg button { overflow: hidden; text-overflow: ellipsis; }
-.lab { overflow-wrap: anywhere; }
-@media (max-width: 700px) { #ytbox { top: 56px; } #dock { max-height: calc(100% - 66px); overflow-y: auto; } }   /* keep the open panel clear of the language toggle */
-@media (max-width: 480px) { html[lang="en"] .seg button { padding: 0 2px !important; gap: 3px; font-size: 11px; } }
-@media (max-width: 380px) { html[lang="en"] .seg button { font-size: 10.5px; gap: 2px; padding: 0 1px !important; } html[lang="en"] .seg .dot { width: 7px; height: 7px; } #lang { right: 8px; top: 8px; } #lang button { min-width: 30px; padding: 0 5px; } }
 
 /* ===== Lofi Worlds main menu ("windows at dusk") ===== */
 #menu { position: fixed; inset: 0; z-index: 60; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; color: #fbead0; font-family: 'Baloo 2', system-ui, sans-serif; font-variant-ligatures: none; -webkit-user-select: none; user-select: none;
@@ -172,8 +85,6 @@ body.menu #hud, body.menu #dock, body.menu #lang, body.menu #ytbox { visibility:
 .mcard.peek .mtip { opacity: 1; }
 .mcard.zoom { z-index: 10; } .mcard.zoom .mart { transition: transform .55s cubic-bezier(.6, 0, .3, 1), box-shadow .3s; box-shadow: 0 0 0 2px #f9b574, 0 0 80px rgba(249, 181, 116, .6); } .mcard.zoom .mbadge, .mcard.zoom .menter { opacity: 0; }
 .mfoot { position: relative; z-index: 2; text-align: center; padding: 0 16px 36px; font-size: 13px; color: #8f7a6c; }
-#toMenu { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 8px; background: var(--cream); color: var(--brown); border: 2px solid var(--ink); border-radius: 18px; box-shadow: 0 3px 0 var(--ink); font-weight: 800; font-size: 13px; }
-#toMenu i { width: 14px; height: 14px; border-radius: 50%; background: #f9b574; box-shadow: inset -3px -3px 0 #d98f52; }
 @media (max-width: 1060px) { #mgal { grid-template-columns: repeat(2, 300px); } }
 @media (max-width: 720px) {
   .mhdr { padding: 12px 16px; background: rgba(29, 21, 32, .88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(251, 234, 208, .08); }
@@ -191,7 +102,7 @@ body.menu #hud, body.menu #dock, body.menu #lang, body.menu #ytbox { visibility:
 }
 /* Holdfast opens in its own frame above everything; the shared YouTube player must stay visible above it */
 #hfFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9000; background: #1d1a20; }
-body.hfopen #ytbox { visibility: visible; position: fixed; z-index: 9500; top: 64px; right: 14px; bottom: auto; }
+body.hfopen #ytbox { visibility: visible; position: fixed; z-index: 9500; }   /* same bottom-right spot as in Saigon (the shared rules place it) */
 body.hfopen #hud, body.hfopen #dock, body.hfopen #lang { visibility: hidden; }
 </style>
 </head>

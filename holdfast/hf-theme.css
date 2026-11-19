@@ -1,0 +1,48 @@
+/* Holdfast theme: the shared Lofi Worlds UI (../css/lofi-ui.css) in Holdfast's field-notebook palette.
+   Layout, sizes, positions and behaviour all come from the shared sheet; only colours, the world canvas and the loading card live here. */
+:root { --ink: #2b1a16; --cream: #ede4cf; --paper: #ddd2b8; --peach: #e8a33c; --clay: #b0583a; --brown: #3b3228; --wood: #4b4a40; --jade: #6f7a4f; --soft: #7d7258;
+  --tile: #b0583a; --leaf: #6f7a4f; --sun: #e8a33c; --white: #f5eedb; --plate: #3a3933; --plate-2: #4b4a40; --shadow: #2b1a16;
+  --font: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #1d1a20; color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 500; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+#c { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
+#c.drag { cursor: grabbing; }
+
+/* decorative tints that the shared sheet hard-codes in Saigon's peach/teal: re-tinted for Holdfast's olive, rust and bone */
+#eras { background: repeating-linear-gradient(180deg, #4b4a40 0 9px, #42413a 9px 11px); box-shadow: inset 0 2px 0 #69685b, 0 4px 0 var(--ink); }
+#eras button { box-shadow: inset 0 -3px 0 #c4b793, 0 2px 0 var(--ink); }
+#eras button:hover { background: #f1e8d2; }
+#eras button[aria-pressed="true"] { box-shadow: inset 0 3px 0 #b97f23; }
+#eras button[aria-disabled="true"] { opacity: .72; cursor: not-allowed; }
+#dock { box-shadow: inset 0 3px 0 #f6efdc, inset 0 -4px 0 #cfc29e, 0 5px 0 var(--ink); }
+#dock button { box-shadow: inset 0 -3px 0 #c4b793, 0 2px 0 var(--ink); }
+#dock button:hover { background: #f1e8d2; }
+#dock button[aria-pressed="true"] { box-shadow: inset 0 3px 0 #55603a; }
+#play { box-shadow: inset 0 -4px 0 #8a4129, 0 3px 0 var(--ink) !important; }
+#panel { border-top: 2px dashed #b3a37e; }
+#ytUrl, #lang { background: #f6efdc; }
+#lang button { background: var(--paper); box-shadow: none; }
+#lang button:hover { background: #f1e8d2; }
+#lang button[aria-pressed="true"] { background: var(--clay); box-shadow: inset 0 3px 0 #8a4129; }
+#toMenu i { background: var(--peach); box-shadow: inset -3px -3px 0 #b97f23; }
+#info, #ticker { box-shadow: 0 3px 0 var(--ink); }
+#ticker { background: var(--brown); }
+#status .alarm { color: #b0583a; font-weight: 800; }
+#hint { background: var(--peach); }
+
+/* Holdfast's journal lives inside the shared settings panel */
+#log { list-style: none; margin: 0; padding: 0; max-height: 168px; overflow-y: auto; font-size: 13px; line-height: 1.3; -webkit-user-select: text; user-select: text; }
+#log[hidden] { display: none; }
+#log li { padding: 4px 0; border-bottom: 1px dashed #b3a37e; color: var(--ink); }
+#log li .tm { color: var(--soft); font-size: 11px; font-weight: 700; margin-right: 6px; }
+#log li.bad { color: #8a3424; }
+#log li.none { color: var(--soft); border: 0; font-style: italic; }
+
+/* loading card (Holdfast's own, same pattern as Saigon's) */
+#load { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(circle at 50% 42%, #ede4cf, #cfc29e); z-index: 50; transition: opacity .6s; }
+#load.done { opacity: 0; pointer-events: none; }
+#load b { font-family: 'Pixelify Sans', monospace; font-size: 38px; letter-spacing: 5px; color: var(--brown); text-shadow: 0 3px 0 #b3a37e; }
+#load span { font-size: 15px; font-weight: 700; color: var(--ink); }
+#load .p { width: min(240px, 60%); height: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #d8ccaa; overflow: hidden; }
+#load .p i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--clay) 0 6px, #8a4129 6px 8px); transition: width .2s; }
+@media (prefers-reduced-motion: reduce) { #load { transition: none; } }

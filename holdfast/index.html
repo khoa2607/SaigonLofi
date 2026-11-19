@@ -2,126 +2,66 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Holdfast — Edge of Survival</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Pixelify+Sans:wght@700&display=swap" rel="stylesheet">
-<style>
-:root { --canvas: #2b2a28; --canvas2: #36342f; --paper: #ede4cf; --paper2: #ddd2b8; --ink: #2b1a16; --amber: #e8a33c; --olive: #6f7a4f; --rust: #b0583a; --soft: #8a7f6a; }
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #1d1a20; font-family: 'Baloo 2', system-ui, sans-serif; color: var(--paper); -webkit-tap-highlight-color: transparent; }
-#c { position: fixed; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
-#c.drag { cursor: grabbing; }
-button { font: inherit; color: inherit; cursor: pointer; }
-.tape { background: var(--canvas); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 3px 0 var(--ink); }
-#plate { position: fixed; left: 14px; top: 12px; display: flex; flex-direction: column; gap: 6px; }
-#plate .name { display: flex; align-items: baseline; gap: 10px; padding: 4px 12px 2px; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 3px; box-shadow: 0 3px 0 var(--ink); transform: rotate(-0.6deg); }
-#plate .name b { font-family: 'Pixelify Sans', monospace; font-size: 22px; letter-spacing: 3px; }
-#plate .name span { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--rust); }
-#tl { display: flex; gap: 4px; }
-#tl button { padding: 2px 10px 0; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; background: var(--canvas); border: 2px solid var(--ink); border-radius: 3px; box-shadow: 0 2px 0 var(--ink); color: var(--soft); }
-#tl button small { display: block; font-size: 9px; font-weight: 700; letter-spacing: .5px; margin-top: -4px; }
-#tl button.on { background: var(--amber); color: var(--ink); }
-#tl button[aria-disabled="true"] { opacity: .75; cursor: not-allowed; }
-#tr { position: fixed; right: 14px; top: 12px; display: flex; gap: 6px; }
-#tr button { height: 34px; min-width: 34px; padding: 0 10px; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 3px; box-shadow: 0 3px 0 var(--ink); font-weight: 800; font-size: 14px; }
-#status { position: fixed; left: 14px; top: 92px; padding: 2px 10px 0; font-size: 13px; font-weight: 700; letter-spacing: .5px; background: rgba(43,42,40,.82); border: 2px solid var(--ink); border-radius: 3px; }
-#status .alarm { color: #ff9a7a; }
-#bar { position: fixed; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
-#bar button { width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper); color: var(--ink); font-size: 14px; font-weight: 800; box-shadow: 0 2px 0 var(--ink); }
-#bar #mPlay { width: 42px; height: 42px; background: var(--amber); }
-#bar .tr { display: flex; flex-direction: column; margin-left: 4px; min-width: 120px; max-width: 220px; }
-#bar .tr b { font-size: 14px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#bar .tr i { font-style: normal; font-size: 11px; color: var(--soft); letter-spacing: .6px; text-transform: uppercase; }
-#br { position: fixed; right: 14px; bottom: 14px; display: flex; gap: 6px; }
-#br button { width: 42px; height: 42px; border: 2px solid var(--ink); border-radius: 3px; background: var(--paper); color: var(--ink); font-size: 18px; font-weight: 800; box-shadow: 0 3px 0 var(--ink); position: relative; }
-#br button .dot { position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--rust); display: none; }
-#br button.new .dot { display: block; }
-.card { position: fixed; right: 14px; bottom: 66px; width: 330px; max-height: calc(100% - 140px); overflow-y: auto; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 4px 0 var(--ink); padding: 10px 12px; }
-.card[hidden] { display: none; }
-.card h3 { margin: 4px 0 2px; font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--rust); }
-.seg { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
-.seg button { flex: 1; min-width: 52px; padding: 2px 4px 0; font-size: 13px; font-weight: 700; background: var(--paper2); border: 2px solid var(--ink); border-radius: 3px; }
-.seg button[aria-pressed="true"] { background: var(--olive); color: var(--paper); }
-.row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
-.row input[type=range] { flex: 1; accent-color: var(--rust); }
-.row input[type=text] { flex: 1; min-width: 0; padding: 4px 6px; font: inherit; font-size: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #fffaf0; }
-.row button { padding: 2px 8px 0; font-weight: 800; background: var(--paper2); border: 2px solid var(--ink); border-radius: 3px; }
-#ytMsg { font-size: 11px; color: var(--soft); margin: 2px 0 6px; }
-#ytMsg.bad { color: var(--rust); }
-#chron ol { list-style: none; margin: 0; padding: 0; font-size: 13px; line-height: 1.3; }
-#chron li { padding: 4px 0; border-bottom: 1px dashed #c2b596; }
-#chron li .tm { color: var(--soft); font-size: 11px; font-weight: 700; margin-right: 6px; }
-#chron li.bad { color: #8a3424; }
-#chron .torn { height: 8px; margin: -10px -12px 6px; background: linear-gradient(135deg, transparent 33%, var(--paper) 34%) 0 0/10px 8px, linear-gradient(225deg, transparent 33%, var(--paper) 34%) 0 0/10px 8px; }
-#ytbox { position: fixed; right: 14px; top: 60px; width: 212px; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; box-shadow: 0 4px 0 var(--ink); padding: 6px; }
-#ytbox[hidden] { display: none; }
-#ytbox .bar { display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; padding: 0 2px 5px; }
-#ytplayer, #ytbox iframe { display: block; width: 200px; height: 200px; border: 0; background: #1c1a18; }
-#load { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: #1d1a20; z-index: 50; transition: opacity .6s; }
-#load.done { opacity: 0; pointer-events: none; }
-#load b { font-family: 'Pixelify Sans', monospace; font-size: 34px; letter-spacing: 5px; color: var(--paper); }
-#load span { font-size: 14px; color: var(--soft); letter-spacing: 1px; }
-#load .p { width: 220px; height: 10px; border: 2px solid var(--paper); border-radius: 2px; } #load .p i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .2s; }
-#toast { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); padding: 3px 14px 1px; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 3px; box-shadow: 0 3px 0 var(--ink); font-weight: 700; font-size: 14px; opacity: 0; transition: opacity .4s; pointer-events: none; max-width: 70vw; text-align: center; }
-#toast.on { opacity: 1; }
-#toast.bad { background: #f2c4b0; }
-body.clean #ui { display: none; }
-body.hideui #ui > *:not(#br) { display: none; }
-#hint { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 12px; color: var(--paper); opacity: .7; letter-spacing: .5px; pointer-events: none; }
-@media (max-width: 700px) {
-  #plate .name b { font-size: 17px; } #plate .name span { display: none; } #tl button { padding: 1px 6px 0; font-size: 11px; }
-  #status { top: 80px; font-size: 12px; } #bar .tr { display: none; } #bar { padding: 4px 6px; } #hint { display: none; }
-  #tr button.wide span { display: none; } .card { left: 10px; right: 10px; width: auto; bottom: 64px; } #ytbox { top: 110px; }
-}
-</style>
+<!-- the same stylesheet SaigonLofi uses for its dock, language toggle and HUD plates; hf-theme.css only supplies Holdfast's palette -->
+<link rel="stylesheet" href="../css/lofi-ui.css">
+<link rel="stylesheet" href="hf-theme.css">
 </head>
 <body>
 <canvas id="c" aria-label="Holdfast: a walled settlement in a river bend, living through a zombie apocalypse"></canvas>
-<div id="ui">
-  <div id="plate">
-    <div class="name"><b>HOLDFAST</b><span data-i18n="hf.tag">Edge of Survival</span></div>
-    <div id="tl" role="tablist" data-i18n-attr="aria-label:hf.tl">
-      <button role="tab" aria-disabled="true" data-tl="past"><span data-i18n="hf.past">PAST</span><small data-i18n="hf.soon">soon</small></button>
-      <button role="tab" aria-selected="true" class="on" data-tl="current"><span data-i18n="hf.current">CURRENT</span><small>&nbsp;</small></button>
-      <button role="tab" aria-disabled="true" data-tl="future"><span data-i18n="hf.future">FUTURE</span><small data-i18n="hf.soon">soon</small></button>
-    </div>
+<!-- ===== controls: identical structure, ids and placement to SaigonLofi (language top-right, plates top-left, music dock bottom-centre, YouTube box bottom-right) ===== -->
+<div id="lang" role="group" aria-label="Ngôn ngữ giao diện" data-i18n-attr="aria-label:lang.group"><button data-lang="vi" lang="vi" aria-pressed="true" title="Tiếng Việt" data-i18n-attr="title:lang.vi">VI</button><button data-lang="en" lang="en" aria-pressed="false" title="English" data-i18n-attr="title:lang.en">EN</button></div>
+<div id="hud">
+  <button id="toMenu" data-i18n-attr="title:menu.back.t;aria-label:menu.back.t"><i></i><span data-i18n="menu.back">Lofi Worlds</span></button>
+  <div id="eras" role="group" aria-label="Dòng thời gian" data-i18n-attr="aria-label:hf.tl">
+    <div class="cap" data-i18n="hf.cap">Holdfast — Bên bờ sinh tồn</div>
+    <div class="tabs"><button data-tl="past" aria-disabled="true"><span data-i18n="hf.past">QUÁ KHỨ</span></button><button data-tl="current" aria-pressed="true"><span data-i18n="hf.current">HIỆN TẠI</span></button><button data-tl="future" aria-disabled="true"><span data-i18n="hf.future">TƯƠNG LAI</span></button></div>
   </div>
-  <div id="status" aria-live="polite"></div>
-  <div id="tr">
-    <button id="bFull" data-i18n-attr="title:hf.full;aria-label:hf.full">⛶</button>
-    <button id="bBack" class="wide" data-i18n-attr="title:menu.back.t"><span data-i18n="menu.back">Lofi Worlds</span> ⌂</button>
-  </div>
-  <div id="bar" class="tape">
-    <button id="mPrev" data-i18n-attr="title:prev;aria-label:prev">⏮</button>
-    <button id="mPlay" data-i18n-attr="title:play;aria-label:play">▶</button>
-    <button id="mNext" data-i18n-attr="title:next;aria-label:next">⏭</button>
-    <div class="tr"><b id="mTrack">—</b><i id="mState"></i></div>
-  </div>
-  <div id="br">
-    <button id="bChron" data-i18n-attr="title:hf.chron;aria-label:hf.chron">📓<span class="dot"></span></button>
-    <button id="bMore" data-i18n-attr="title:more;aria-label:more">···</button>
-  </div>
-  <div id="chron" class="card" hidden><div class="torn"></div><h3 data-i18n="hf.chron">Day chronicle</h3><ol id="log"></ol></div>
-  <div id="panel" class="card" hidden>
-    <h3 data-i18n="hf.time">Time</h3><div class="seg" id="sTime"></div>
-    <h3 data-i18n="hf.wx">Weather</h3><div class="seg" id="sWx"></div>
-    <h3 data-i18n="hf.season">Season</h3><div class="seg" id="sSeason"></div>
-    <h3 data-i18n="hf.danger">Danger</h3><div class="seg" id="sDanger"></div>
-    <h3 data-i18n="hf.sound">Sound</h3>
-    <div class="row"><span data-i18n="hf.music">Music</span><input id="vMus" type="range" min="0" max="1" step="0.05"></div>
-    <div class="row"><span data-i18n="hf.amb">Ambient</span><input id="vAmb" type="range" min="0" max="1" step="0.05"><button id="bMute" data-i18n="hf.mute">Mute</button></div>
-    <h3>YouTube</h3>
-    <div class="row"><input id="ytUrl" type="text" placeholder="https://youtube.com/playlist?list=…"><button id="ytGo" data-i18n="hf.load">Load</button></div>
-    <div id="ytMsg"></div>
-    <h3 data-i18n="hf.view">View</h3>
-    <div class="row"><button id="zOut">−</button><button id="zIn">+</button><button id="bHide" data-i18n="hf.hide">Hide panel (H)</button></div>
-    <div class="seg" id="sLang"><button data-lang="vi">Tiếng Việt</button><button data-lang="en">English</button></div>
-  </div>
-  <div id="ytbox" hidden><div class="bar"><span>YouTube</span><button id="ytOff" data-i18n="yt.off">Tắt</button></div><div id="ytplayer"></div></div>
-  <div id="toast"></div>
-  <div id="hint" data-i18n="hf.hint">drag to look around · wheel to zoom · Esc for Lofi Worlds</div>
+  <div id="info"><div id="eraSub" data-i18n="hf.sub">Khu định cư bên khúc sông</div><div id="status">—</div></div>
+  <div id="ticker" role="status" aria-live="polite"></div>
 </div>
+<div id="dock">
+  <div class="row">
+    <button id="play" aria-label="Bật / tắt nhạc" data-i18n-attr="aria-label:play"><span id="hint" data-i18n="hint">Bấm để bật nhạc</span>
+      <svg class="iplay" viewBox="0 0 12 12"><path d="M3.5 1.5v9l7-4.5z"/></svg>
+      <svg class="ipause" viewBox="0 0 12 12"><rect x="2.5" y="1.5" width="2.6" height="9"/><rect x="6.9" y="1.5" width="2.6" height="9"/></svg>
+    </button>
+    <div class="trk"><div class="names"><div id="tname">Cà phê sữa đá</div><div id="tnum">bản 1/6</div></div><canvas id="viz" width="40" height="14"></canvas></div>
+    <button id="prev" class="sq" aria-label="Bài trước" data-i18n-attr="aria-label:prev"><svg viewBox="0 0 12 12"><rect x="1.5" y="2" width="2" height="8"/><path d="M10.5 2v8l-6-4z"/></svg></button>
+    <button id="next" class="sq" aria-label="Bài kế tiếp" data-i18n-attr="aria-label:next"><svg viewBox="0 0 12 12"><path d="M1.5 2v8l6-4z"/><rect x="8.5" y="2" width="2" height="8"/></svg></button>
+    <button id="more" class="sq" aria-label="Mở bảng tuỳ chỉnh" data-i18n-attr="aria-label:more" aria-expanded="false"><svg viewBox="0 0 12 12"><circle cx="2.5" cy="6" r="1.4"/><circle cx="6" cy="6" r="1.4"/><circle cx="9.5" cy="6" r="1.4"/></svg></button>
+  </div>
+  <div class="row">
+    <div class="seg" role="group" aria-label="Chọn mùa" data-i18n-attr="aria-label:season.group">
+      <button data-season="spring"><span class="dot" style="background:#f39abf"></span><span data-i18n="season.spring">Xuân</span></button><button data-season="summer"><span class="dot" style="background:#6fb03c"></span><span data-i18n="season.summer">Hạ</span></button><button data-season="fall"><span class="dot" style="background:#e0853a"></span><span data-i18n="season.fall">Thu</span></button><button data-season="winter"><span class="dot" style="background:#bfd8ee"></span><span data-i18n="season.winter">Đông</span></button>
+    </div>
+    <button id="autoSeason" aria-pressed="false" title="Tự chuyển mùa sau mỗi 2 phút rưỡi" data-i18n-attr="title:autoSeason.t" data-i18n="autoSeason">Tự đổi</button>
+  </div>
+  <div id="panel" hidden>
+    <div class="row wrap"><div class="lab">YouTube</div><input id="ytUrl" type="url" inputmode="url" placeholder="Dán link playlist YouTube…" aria-label="Đường dẫn playlist YouTube" data-i18n-attr="placeholder:yt.ph;aria-label:yt.aria"><button id="ytGo" data-i18n="yt.go">Phát</button></div>
+    <div class="row"><div class="lab"></div><div id="ytMsg">Dán playlist rồi bấm Phát. Nhạc lofi của game vẫn giữ nguyên.</div></div>
+    <div class="row wrap"><div class="lab" data-i18n="time.lab">Giờ</div><div class="seg" role="group" aria-label="Thời gian trong ngày" data-i18n-attr="aria-label:time.group">
+      <button data-time="auto" data-i18n="time.auto">Tự chạy</button><button data-time="morning" data-i18n="time.morning">Sáng</button><button data-time="noon" data-i18n="time.noon">Trưa</button><button data-time="dusk" data-i18n="time.dusk">Chiều tà</button><button data-time="night" data-i18n="time.night">Đêm</button></div></div>
+    <!-- the "event" row of Saigon holds Holdfast's one world-specific setting: how dangerous the valley is -->
+    <div class="row wrap"><div class="lab" data-i18n="hf.danger">Nguy hiểm</div><div class="seg" role="group" aria-label="Mức nguy hiểm" data-i18n-attr="aria-label:hf.danger.g">
+      <button data-danger="calm" data-i18n="d.calm">Yên ả</button><button data-danger="standard" data-i18n="d.standard">Tiêu chuẩn</button><button data-danger="grim" data-i18n="d.grim">Khắc nghiệt</button></div></div>
+    <div class="row wrap"><div class="lab" data-i18n="wx.lab">Thời tiết</div><div class="seg" role="group" aria-label="Thời tiết" data-i18n-attr="aria-label:wx.group">
+      <button data-wx="auto" data-i18n="wx.auto">Tự nhiên</button><button data-wx="clear" data-i18n="wx.clear">Quang</button><button data-wx="rain"><span id="wxRainL" data-i18n="wx.rain">Mưa</span></button><button data-wx="wind" data-i18n="wx.wind">Gió</button></div></div>
+    <div class="row wrap"><div class="lab" data-i18n="hf.world.lab">Âm thế giới</div><button id="streetOn" aria-pressed="true" title="Tiếng súng, chuông báo động, tiếng búa… tách riêng khỏi nhạc" data-i18n-attr="title:hf.world.t">Bật</button><label class="sl" for="vStreet"><span data-i18n="hf.world.vol">Tiếng trong thung lũng</span><input id="vStreet" type="range" min="0" max="100"></label></div>
+    <div class="row wrap"><div class="lab" data-i18n="vol.lab">Âm lượng</div>
+      <label class="sl" for="vMusic"><span data-i18n="vol.music">Nhạc</span><input id="vMusic" type="range" min="0" max="100"></label>
+      <label class="sl" for="vAmb"><span data-i18n="vol.amb">Âm nền</span><input id="vAmb" type="range" min="0" max="100"></label>
+      <label class="sl" for="vVinyl"><span data-i18n="vol.vinyl">Đĩa than</span><input id="vVinyl" type="range" min="0" max="100"></label></div>
+    <div class="row wrap"><div class="lab" data-i18n="view.lab">Khung nhìn</div><div class="seg two">
+      <button id="viewRiver" title="Bay tới cổng thành (phím B)" data-i18n-attr="title:hf.view.gate.t">Cổng thành</button><button id="zout" data-i18n="zout">Thu nhỏ</button><button id="zin" data-i18n="zin">Phóng to</button><button id="full" data-i18n="full">Toàn màn hình</button><button id="hide" data-i18n="hide">Ẩn bảng</button></div></div>
+    <div class="row wrap"><div class="lab" data-i18n="hf.journal">Nhật ký</div><button id="logToggle" aria-pressed="false" aria-controls="log" data-i18n="hf.journal.show">Xem</button></div>
+    <ol id="log" hidden></ol>
+  </div>
+</div>
+<div id="ytbox" hidden><div class="bar"><span>YouTube</span><button id="ytOff" title="Tắt YouTube, quay về nhạc lofi của game" data-i18n-attr="title:yt.off.t" data-i18n="yt.off">Tắt</button></div><div id="ytplayer"></div></div>
 <div id="load"><b>HOLDFAST</b><span id="loadT">…</span><div class="p"><i id="loadB"></i></div></div>
 <pre id="hfTest" hidden></pre>
 <!-- SaigonLofi platform + art system (read-only), then Holdfast -->
@@ -130,6 +70,7 @@ body.hideui #ui > *:not(#br) { display: none; }
 <script src="../js/art.js"></script>
 <script src="../js/audio.js"></script>
 <script src="../js/yt.js"></script>
+<script src="../js/dock.js"></script>
 <script src="hf-map.js"></script>
 <script src="hf-art.js"></script>
 <script src="hf-sim.js"></script>

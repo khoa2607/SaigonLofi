@@ -156,6 +156,7 @@ function menuEnter(card) {
   setTimeout(() => {
     if (card.dataset.world === 'holdfast') { $m('menu').classList.add('leaving'); hfOpen(); setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520); return; }
     $m('menu').classList.add('leaving'); document.body.classList.remove('menu'); G.menu = false; document.title = t('title');
+    for (const [id, k] of [['vMusic', 'music'], ['vAmb', 'amb'], ['vVinyl', 'vinyl'], ['vStreet', 'street']]) { const e = $m(id); if (e) e.value = AU.vol[k] * 100; }
     if (!MENU.entered) { MENU.entered = true; boot().then(() => { if (typeof updateUI === 'function') updateUI(); }); } else if (typeof updateUI === 'function') updateUI();
     setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520);
   }, 560);
@@ -181,12 +182,16 @@ function menuStart() {
 // ---------------------------------------------------------------- Holdfast: a separate world in its own frame, sharing this page's radio
 // Only one world simulates at a time: Saigon sleeps (G.menu stays true) while Holdfast is open; closing the frame disposes Holdfast.
 window.LW = { AU, YTS, TRACKS, audioInit, audioPlay, audioPause, nextTrack, setVol, ytLoad, ytOff, ytToggle, ytNext, ytVolume, setLang };
+function hfBedsOff() { try { for (const b of [AU.rainBed, AU.windBed, AU.humBed, AU.murBed, AU.cicBed]) if (b) b.g.gain.setTargetAtTime(0, AU.ctx.currentTime, 0.3); } catch (e) { } }   // Saigon's city beds would otherwise keep droning under Holdfast
 function hfOpen() {
-  let f = $m('hfFrame'); if (!f) { f = document.createElement('iframe'); f.id = 'hfFrame'; f.title = 'Holdfast'; f.allow = 'autoplay; fullscreen'; f.src = 'holdfast/index.html?embed=1'; document.body.appendChild(f); }
+  let f = $m('hfFrame'); hfBedsOff();
+  if (!f) { f = document.createElement('iframe'); f.id = 'hfFrame'; f.title = 'Holdfast'; f.allow = 'autoplay; fullscreen'; f.src = 'holdfast/index.html?embed=1'; document.body.appendChild(f); }
+  else { f.style.display = ''; try { f.contentWindow.postMessage({ hf: 'wake', lang: LANG.cur }, '*'); } catch (e) { } }      // the world was kept alive in memory: it resumes where it was
   G.menu = true; document.body.classList.remove('menu'); document.body.classList.add('hfopen'); document.title = t('w.holdfast'); setTimeout(() => { try { f.focus(); } catch (e) { } }, 600);
 }
 function hfClose(lang) {
-  const f = $m('hfFrame'); if (f) f.remove(); document.body.classList.remove('hfopen');
+  const f = $m('hfFrame'); if (f) { try { f.contentWindow.postMessage({ hf: 'sleep' }, '*'); } catch (e) { } f.style.display = 'none'; }   // hidden, not destroyed: no restart on re-entry; a hidden frame does not tick
+  document.body.classList.remove('hfopen');
   if (lang && lang !== LANG.cur) setLang(lang);
   menuShow(true);
 }

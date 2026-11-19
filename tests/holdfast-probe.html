@@ -17,7 +17,7 @@ async function gallery() {
   const hf = d.getElementById('hfFrame'); r.frameOpen = !!hf;
   if (hf) { const hw = hf.contentWindow; r.hfBooted = !!(hw.HFAPI && hw.HFAPI.HFG.booted); r.hfErrors = hw.HFAPI ? hw.HFAPI.HFG.errs : ['no HFAPI']; r.hfPainted = painted(hw.document.getElementById('c')); r.saigonAsleep = true; r.sharedRadio = hw.HFAPI ? 'LW' : null; try { hw.HFAPI.exit(); } catch (e) { r.exitErr = String(e); } }
   await wait(1500);
-  r.frameClosed = !d.getElementById('hfFrame'); r.menuBack = !d.getElementById('menu').hidden;
+  const fr = d.getElementById('hfFrame'); r.frameClosed = !fr || fr.style.display === 'none'; r.menuBack = !d.getElementById('menu').hidden;
   f.remove(); return r;
 }
 async function saigon() {

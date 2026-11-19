@@ -4,7 +4,7 @@ const DAY_SEC = 1200;                                   // one in-game day = 20 
 const DANGER = { calm: { n: 0.55, die: 0.06, iv: 1.4 }, standard: { n: 1, die: 0.2, iv: 1 }, grim: { n: 1.6, die: 0.5, iv: 0.75 } };
 const FIXED_H = { morning: 8, noon: 12.5, dusk: 18.6, night: 22.5 };
 const HS = {
-  t: 0, day: 1, hour: 6.5, life: 6.5, timeMode: 'auto', wxMode: 'auto', weather: 'clear', seasonMode: 'auto', season: 'summer', danger: 'standard',
+  t: 0, day: 1, hour: 6.5, life: 6.5, timeMode: 'auto', wxMode: 'auto', weather: 'clear', season: 'summer', danger: 'standard',
   people: [], zombies: [], wild: [], fx: [], noises: [], log: [], exps: [], rescues: [], arrivals: [], spots: new Map(),
   alarm: 0, alarmT: 0, mode: 'peace', target: 120, floor: 90, R: null, next: {}, stats: { shots: 0, kills: 0, deaths: 0, injuries: 0, arrivals: 0, exp: 0, expLost: 0, expOk: 0, expHurt: 0, expDead: 0, rescues: 0, breaches: 0, repairs: 0, attacks: { minor: 0, medium: 0, major: 0, siege: 0 }, zInside: 0, breachMax: 0 },
   onEvent: null, sound: null, pid: 0, zid: 0
@@ -20,7 +20,11 @@ function hsSound(k, x, y, v) { if (HS.sound) HS.sound(k, x, y, v); }
 function hsInit(opt) {
   opt = opt || {}; HS.R = mulberry32(opt.seed || 11); HS.target = opt.pop || 120; HS.floor = Math.round(HS.target * 0.75);
   HS.people = []; HS.zombies = []; HS.wild = []; HS.fx = []; HS.noises = []; HS.log = []; HS.exps = []; HS.rescues = []; HS.arrivals = [];
-  HS.t = 0; HS.day = 1; HS.hour = HS.life = opt.hour || 7.5;
+  HS.spots.clear(); HS.vacant = []; HS.alarm = 0; HS.mode = 'peace'; HS.recoverT = 0; HS.stats.exp = 0;
+  // the viewer arrives at an arbitrary daytime moment of an ongoing world (a seeded hour unless one is asked for): no "day 1"
+  HS.t = 0; HS.day = 1; HS.hour = HS.life = opt.hour != null ? opt.hour : 7 + HS.R() * 10;
+  if (HS.timeMode !== 'auto' && opt.hour == null) HS.hour = HS.life = FIXED_H[HS.timeMode];   // a remembered fixed time of day applies from the first frame
+  HS.weather = HS.wxMode !== 'auto' ? HS.wxMode : (HS.R() < 0.8 ? 'clear' : 'wind');
   HF.breaches = 0;
   const scale = HS.target / 120, roles = [];
   for (const [r, n] of ROLE_MIX) for (let i = 0; i < Math.max(r === 'teacher' ? 1 : 1, Math.round(n * scale)); i++) roles.push(r);
@@ -35,7 +39,7 @@ function hsInit(opt) {
   const guards = HS.people.filter(p => p.role === 'guard'); let gi = 0;
   for (const t of HF.towers) for (let s = 0; s < (t.main ? 2 : 1); s++) { const g = guards[gi++]; if (g) { g.post = { k: 'tower', t: t.id, slot: s }; g.shift = gi % 2; } }
   for (let s = 0; s < 4; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'gate', slot: s }; g.shift = s % 2; } }
-  for (let s = 0; s < 8; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'patrol', wp: Math.floor(HS.R() * HF.patrol.length), dirn: s % 2 ? 1 : -1 }; g.shift = s % 2; } }
+  for (let s = 0; s < 8; s++) { const g = guards[gi++]; if (g) { g.post = { k: 'patrol', wp: Math.floor((s + HS.R() * 0.8) / 8 * HF.patrol.length), dirn: s % 2 ? 1 : -1 }; g.shift = s % 2; } }   // spread along the wall
   while (gi < guards.length) { const g = guards[gi++]; g.post = { k: 'reserve' }; g.shift = gi % 2; }
   // night shift guards also cover towers at night (swap duties)
   // initial wildlife + infected
@@ -46,9 +50,10 @@ function hsInit(opt) {
   for (let i = 0; i < 2; i++) hsAddWild('dog', HF.oak.x + 10 + i * 8, HF.oak.y + 20);
   for (let i = 0; i < 3; i++) hsAddWild('crows', ...hsWildPoint());
   for (let i = 0; i < Math.round(16 * DANGER[HS.danger].n); i++) hsSpawnWanderer();
+  for (let i = 0; i < Math.round(7 * DANGER[HS.danger].n); i++) hsSpawnBand(true);     // the frontier is already busy
   const now = HS.t, iv = DANGER[HS.danger].iv;
   HS.next = { minor: now + rr2(30, 70), medium: now + rr2(12, 20) * 60 * iv, major: now + rr2(30, 45) * 60 * iv, siege: now + rr2(100, 140) * 60 * iv, exp: now + rr2(30, 60), wx: now + 300, arrive: now + 240, act: 0 };
-  hsLog('start', {});
+  hsWarmStart();
 }
 function hsWildPoint() { for (let n = 0; n < 200; n++) { const k = Math.floor(HS.R() * HN * HN); if (HF.walk[k] & W_OUT && (HF.gk[k] === GK.MEADOW || HF.gk[k] === GK.WGRASS) && hsFarFromWall(k, 12)) return tileC(k); } return tileC(HF.gate.outTile); }
 function hsFarFromWall(k, n) { const [x, y] = tileC(k); const [u, v] = w2d(x, y); return v < wallV(u) - n * 4; }
@@ -73,6 +78,63 @@ function hsPickSpot(name, near) {
   return best;
 }
 const claim = (s, d) => HS.spots.set(s, Math.max(0, (HS.spots.get(s) || 0) + d));
+
+// ---------------------------------------------------------------- warm start: Holdfast is already alive when the viewer arrives
+// Nobody spawns at a shared entrance and walks to work. Each settler runs its normal schedule once and is then placed *inside*
+// that activity (at the post, in the field, at the dock, part-way along a walk); infected and wildlife are spread over the
+// valley; an expedition may be at any stage. Deterministic for a given seed, a few milliseconds, no simulated warm-up.
+function hsPlace(a, x, y, mask) {
+  const k = hfNearPass(x, y, mask, 8); if (k < 0) return false;
+  if (hfPass(tileOfW(x, y), mask)) { a.x = x; a.y = y; } else [a.x, a.y] = tileC(k);
+  a.px = a.x; a.py = a.y; a.path = null; a.dir = Math.floor(HS.R() * 4); return true;
+}
+function hsAdvance(a, frac, speed) {      // walk `frac` of the way along the current path (follows the flow field: never through a wall)
+  const P = a.path; if (!P) return true; const d0 = P.f[tileOfW(a.x, a.y)]; if (d0 < 0) return true;
+  const want = Math.max(0, frac) * d0 / 2.2 * HT; let moved = 0;
+  for (let n = 0; n < 600 && moved < want; n++) { const x0 = a.x, y0 = a.y; if (hsStep(a, 0.1, speed)) return true; moved += Math.hypot(a.x - x0, a.y - y0); }
+  a.px = a.x; a.py = a.y; return false;
+}
+function hsSettle(p) {
+  const R = HS.R; p.task = null; p.path = null; p.stride = R() * 30; hsThink(p);
+  const T = p.task; if (!T) return;
+  if (T.k === 'tower') { const t = T.tower, slot = p.post.slot ? [t.x + 13, t.y + 7] : [t.x + 7, t.y + 13]; p.x = slot[0]; p.y = slot[1]; p.z = 48.2; p.px = p.x; p.py = p.y; p.path = null; T.ph = 'do'; p.onTower = { t, slot: p.post.slot, climb: 1 }; p.variant = 'carry'; p.cool = R() * 3; return; }
+  if (T.k === 'patrol') { const n = HF.patrol.length, prev = (p.post.wp - p.post.dirn + n) % n, [px, py] = tileC(HF.patrol[prev]); p.x = px; p.y = py; hsGo(p, T.x, T.y, 'in'); if (p.path) { T.ph = 'go'; hsAdvance(p, R() * 0.9, p.spd); } p.px = p.x; p.py = p.y; p.cool = R() * 2; return; }
+  const P = p.path;
+  if (!P) { T.t = T.dur < 1e8 ? R() * T.dur * 0.9 : 0; return; }
+  const transit = (T.k === 'walk' || T.k === 'play' ? 0.7 : T.k === 'carry' ? 0.4 : T.k === 'gatepost' || T.k === 'work' || T.k === 'repair' || T.k === 'treat' ? 0 : 0.2) > R();   // posts and workplaces: already there
+  if (transit) { hsAdvance(p, 0.1 + R() * 0.8, p.spd); if (p.path) return; }
+  if (!hsPlace(p, P.gx, P.gy, 'in')) hsPlace(p, ...tileC(P.tk), 'in');
+  T.ph = 'do'; T.t = T.dur < 1e8 ? R() * T.dur * 0.9 : 0; p.path = null;
+}
+function hsWarmExp() {
+  const R = HS.R, e = R() < 0.85 ? hsStartExpedition() : null; if (!e) return;
+  const q = R(), ph = q < 0.2 ? 'prep' : q < 0.5 ? 'out' : q < 0.75 ? 'search' : 'back', poi = e.poi.spots[0], g = HF.gate;
+  const put = (x, y, mask) => { for (const p of e.team) { hsPlace(p, x + rr2(-6, 6), y + rr2(-6, 6), mask); p.task = { k: 'exp', t: 0 }; p.px = p.x; p.py = p.y; } };
+  g.open = 1;                                           // the gate is not the story here: nobody waits at it during the fast-forward
+  if (ph === 'prep') { const s = HF.spots.yard[0]; put(s.x, s.y, 'in'); e.t = R() * 25; }
+  else if (ph === 'out') { const [x, y] = tileC(g.outTile); put(x, y + 14, 'all'); e.ph = 'out'; for (let n = 0, N = Math.floor(R() * 800); n < N && e.ph === 'out'; n++) hsExp(e, 0.1); }
+  else if (ph === 'search') { put(poi[0], poi[1], 'all'); e.ph = 'search'; e.t = R() * 15; }
+  else { put(poi[0], poi[1], 'all'); e.ph = 'back'; for (let n = 0, N = Math.floor(R() * 700); n < N && e.ph === 'back'; n++) hsExp(e, 0.1); }
+  g.open = 0; g.users = 0; g.force = 0; for (const p of e.team) { p.px = p.x; p.py = p.y; }
+}
+function hsWarmStart() {
+  const R = HS.R, n = DANGER[HS.danger].n;
+  HS.life = lifeHour();
+  for (const p of HS.people) if (p.role !== 'guard') hsSettle(p);
+  for (const p of HS.people) if (p.role === 'guard') hsSettle(p);
+  hsWarmExp();
+  // infected: scattered over the wilderness, not all moving at once; sometimes a small group is already marching in
+  for (const z of HS.zombies) { z.ph = R() * 10; if (R() < 0.3) { z.st = 'idle'; z.idle = rr2(2, 8); z.t = R() * z.idle; } else z.t = R() * 4; }
+  if (R() < 0.55 * Math.min(1, n)) {
+    const zs = hsRouteGroup(Math.round(rr2(3, 5) * n), pickR(['R1', 'R2', 'R3', 'R4', 'R5']), null, 'minor');
+    for (const z of zs) { const r = z.route, i = 1 + Math.floor(R() * Math.max(1, r.pts.length - 2)), k = hfNearPass(r.pts[i][0] + rr2(-10, 10), r.pts[i][1] + rr2(-10, 10), 'out', 8); if (k >= 0) { [z.x, z.y] = tileC(k); z.rp = i + 1; z.delay = 0; } }
+  }
+  for (const w of HS.wild) { w.t = R() * 5; w.ph = R() * 10; }
+  // one beat so every actor has chosen its pose and facing before the first frame; the chronicle starts empty (nothing "began")
+  for (let i = 0; i < 2; i++) hsTick(0.05);
+  HS.t = 0; HS.log = []; HS.next.minor = rr2(25, 70); HS.next.exp = rr2(40, 120);
+  for (const a of [...HS.people, ...HS.zombies, ...HS.wild]) { a.px = a.x; a.py = a.y; }
+}
 
 // ---------------------------------------------------------------- movement
 function hsGo(a, x, y, mask, run) {
@@ -278,13 +340,14 @@ function towerGuard(p, dt) {
 
 // ---------------------------------------------------------------- infected
 function hsAddZ(x, y, o) {
+  x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4);
   const L = hfZombieLook(HS.R);
   const z = Object.assign({ id: HS.zid++, L, x, y, px: x, py: y, dir: 1, st: 'wander', hp: HS.R() < 0.35 ? 4 : 3, spd: rr2(3.2, 4.6), t: 0, path: null, stride: 0, ph: HS.R() * 10, cool: 0, seg: -1, st2: '', stT: 0, kx: 0, ky: 0, idle: 0, route: null, rp: 0, lane: rr2(-3, 3) }, o || {});
   HS.zombies.push(z); return z;
 }
 function hsBand(z) { const [u, v] = w2d(z.x, z.y); const wv = wallV(u); return v < wv - 20 && v > wv - 160 && u > 150 && u < 810; }
-function hsSpawnBand() {   // enter from the forest edge (never inside the wall), then wander along the frontier
-  for (let n = 0; n < 40; n++) { const u = rr2(170, 790), v = wallV(u) - rr2(110, 170), [x, y] = d2w(u, v), k = tileOfW(x, y); if (!hfPass(k, 'out')) continue; const z = hsAddZ(x, y); z.band = 1; return z; }
+function hsSpawnBand(warm) {   // runtime: enter from the forest edge (never inside the wall); warm start: already anywhere along the frontier
+  for (let n = 0; n < 40; n++) { const u = rr2(170, 790), v = wallV(u) - (warm ? rr2(40, 150) : rr2(110, 170)), [x, y] = d2w(u, v), k = tileOfW(x, y); if (!hfPass(k, 'out')) continue; const z = hsAddZ(x, y); z.band = 1; return z; }
   return null;
 }
 function hsSpawnWanderer() { for (let n = 0; n < 60; n++) { const [x, y] = hsWildPoint(); if (!hsFarFromWall(tileOfW(x, y), 18)) continue; return hsAddZ(x + rr2(-6, 6), y + rr2(-6, 6)); } return null; }
@@ -368,7 +431,7 @@ function hsCloseBreach(s) {
 function hsAlarm(why) { const fresh = HS.alarm <= 0; HS.alarm = 45; if (!fresh) return; hsLog('alarm', { why }, true); hsSound('bell', HF.gate.x, HF.gate.y, 1); for (const p of HS.people) if (p.alive && (p.role === 'kid' || p.role === 'elder' || p.role === 'guard' || p.tier === 2) && !p.exp && !p.rescue && !p.onTower && p.task?.k !== 'shelter' && p.task?.k !== 'bed') p.task = null; }
 
 // ---------------------------------------------------------------- wildlife
-function hsAddWild(k, x, y, o) { const w = Object.assign({ k, x, y, px: x, py: y, dir: 1, t: 0, path: null, spd: k === 'deer' ? 7 : k === 'rabbit' ? 9 : k === 'dog' ? 8 : 3, ph: HS.R() * 10, stride: 0, flee: 0 }, o || {}); HS.wild.push(w); return w; }
+function hsAddWild(k, x, y, o) { x = clamp(x, 4, HW - 4); y = clamp(y, 4, HW - 4); const w = Object.assign({ k, x, y, px: x, py: y, dir: 1, t: 0, path: null, spd: k === 'deer' ? 7 : k === 'rabbit' ? 9 : k === 'dog' ? 8 : 3, ph: HS.R() * 10, stride: 0, flee: 0 }, o || {}); HS.wild.push(w); return w; }
 function hsSpawnHerd() { const [x, y] = hsWildPoint(), n = 2 + Math.floor(HS.R() * 4), lead = hsAddWild('deer', x, y); lead.herd = lead; for (let i = 1; i < n; i++) hsAddWild('deer', x + rr2(-12, 12), y + rr2(-12, 12), { herd: lead }); }
 function hsWild(w, dt) {
   w.t += dt;
@@ -536,8 +599,9 @@ function hsThreat(dt) {
 // ---------------------------------------------------------------- main tick
 function hsTick(dt) {
   HS.t += dt;
-  if (HS.timeMode === 'auto') { HS.hour += dt * 24 / DAY_SEC; if (HS.hour >= 24) { HS.hour -= 24; HS.day++; hsLog('dawn', { d: HS.day }); if (HS.seasonMode === 'auto' && HS.day % 2 === 1) HS.season = SEASONS[(SEASONS.indexOf(HS.season) + 1) % 4]; } }
-  else HS.hour = FIXED_H[HS.timeMode];
+  // the internal clock only drives light and schedules (HS.day is a rollover counter, never shown); seasons change on the UI's own timer
+  if (HS.timeMode === 'auto') { HS.hour += dt * 24 / DAY_SEC; if (HS.hour >= 24) { HS.hour -= 24; HS.day++; hsLog('dawn', {}); } }
+  else { const df = ((FIXED_H[HS.timeMode] - HS.hour + 36) % 24) - 12; HS.hour = (HS.hour + clamp(df, -dt * 7, dt * 7) + 24) % 24; }   // glide to the chosen hour like Saigon, no lighting pop
   HS.life = lifeHour();
   if (HS.wxMode !== 'auto') HS.weather = HS.wxMode;
   shBuild();

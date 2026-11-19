@@ -29,7 +29,7 @@ try {
   check('gallery: shared radio bridge', g && g.bridge);
   check('gallery: Holdfast opens in frame and boots', g && g.frameOpen && g.hfBooted && g.hfPainted > 50, g && [g.frameOpen, g.hfBooted, g.hfPainted]);
   check('gallery: Holdfast has no console errors', g && Array.isArray(g.hfErrors) && g.hfErrors.length === 0, g && g.hfErrors);
-  check('gallery: back to gallery disposes the frame', g && g.frameClosed && g.menuBack, g && [g.frameClosed, g.menuBack]);
+  check('gallery: back to gallery hides (keeps alive) the frame', g && g.frameClosed && g.menuBack, g && [g.frameClosed, g.menuBack]);
   check('saigon: still boots and paints', sg && sg.booted && sg.painted > 50 && sg.menuHidden, sg);
   // 3) benchmark (headless software rendering: pessimistic vs a real GPU)
   if (has('--bench')) { for (const [w, h, q] of [[1920, 1080, ''], [1280, 720, ''], [390, 844, '&pop=70']]) { const b = grab(run(`holdfast/index.html?bench=1&frames=180&warp=30${q}`, ['--dump-dom'], w, h).stdout || '', 'hfTest'); rep['bench ' + w + 'x' + h] = b; } }
