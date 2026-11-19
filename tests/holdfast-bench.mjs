@@ -1,5 +1,5 @@
 // Holdfast real-time performance measurement through the Chrome DevTools protocol (Node 22+ global WebSocket, no npm packages).
-// Usage: node tests/holdfast-bench.mjs [--gpu] [--chrome=PATH] [--era=past]
+// Usage: node tests/holdfast-bench.mjs [--gpu] [--chrome=PATH] [--era=past|future]
 import fs from 'fs'; import os from 'os'; import path from 'path'; import { spawn } from 'child_process'; import { fileURLToPath } from 'url';
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), args = process.argv.slice(2), opt = k => (args.find(a => a.startsWith('--' + k + '=')) || '').split('=')[1];
 const CHROME = [opt('chrome'), process.env.CHROME, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium'].filter(Boolean).find(p => fs.existsSync(p));
@@ -13,7 +13,7 @@ async function measure(w, h, q) {
   const ver = await (await fetch(`http://127.0.0.1:${port2}/json/version`)).json(), ws = new WebSocket(ver.webSocketDebuggerUrl);
   await new Promise(r => ws.onopen = r); let id = 0; const pend = new Map(); ws.onmessage = m => { const d = JSON.parse(m.data); if (d.id && pend.has(d.id)) { pend.get(d.id)(d.result); pend.delete(d.id); } };
   const send = (method, params, sessionId) => new Promise(r => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method, params, sessionId })); });
-  const { targetId } = await send('Target.createTarget', { url: `http://127.0.0.1:${port}/holdfast/index.html?bench=1&frames=180&warp=30&era=${opt('era') === 'past' ? 'past' : 'current'}${q}` });
+  const { targetId } = await send('Target.createTarget', { url: `http://127.0.0.1:${port}/holdfast/index.html?bench=1&frames=180&warp=30&era=${['past', 'future'].includes(opt('era')) ? opt('era') : 'current'}${q}` });
   const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
   let out = null; for (let i = 0; i < 240 && !out; i++) { await new Promise(r => setTimeout(r, 500)); const r = await send('Runtime.evaluate', { expression: "document.title === 'HFBENCH done' ? document.getElementById('hfTest').textContent : ''", returnByValue: true }, sessionId); if (r && r.result && r.result.value) out = JSON.parse(r.result.value); }
   ws.close(); ch.kill(); await new Promise(r => setTimeout(r, 500)); fs.rmSync(path.join(udd, 'DevToolsActivePort'), { force: true });

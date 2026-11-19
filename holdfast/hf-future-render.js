@@ -72,7 +72,7 @@ function futOverlay(g, t) {
     g.strokeStyle = f.hostile ? (f.big ? '#ff6a3a' : '#ff5040') : f.turret ? '#ffc060' : f.train ? '#d8f0f0' : '#8ae8ff'; g.lineWidth = f.big ? 1.2 : 0.7; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
     g.fillStyle = '#ffffff'; g.fillRect(Math.round(x1 * K) / K - 0.5, Math.round(y1 * K) / K - 0.5, 1, 1); }
   // signals: a ring at the transmitting machine, a faint thread to what it reported
-  for (const s of HS.sig) { const age = HS.t - s.t, p = ISO(s.x, s.y, s.z || 10); if (s.emp) { g.strokeStyle = 'rgba(208,74,255,' + (0.45 * (1 - age / 2.4)).toFixed(2) + ')'; g.lineWidth = 0.6; g.beginPath(); g.ellipse(p[0], p[1], age * 30, age * 15, 0, 0, TAU); g.stroke(); continue; }
+  for (const s of HS.sig) { const age = clamp(HS.t - s.t, 0, 2.4), p = ISO(s.x, s.y, s.z || 10); if (s.emp) { g.strokeStyle = 'rgba(208,74,255,' + (0.45 * (1 - age / 2.4)).toFixed(2) + ')'; g.lineWidth = 0.6; g.beginPath(); g.ellipse(p[0], p[1], age * 30, age * 15, 0, 0, TAU); g.stroke(); continue; }
     for (let k = 0; k < 2; k++) { const r = ((age * 1.4 + k * 0.5) % 1) * 18; g.strokeStyle = 'rgba(255,90,60,' + (0.7 * (1 - r / 18) * (1 - age / 2.4)).toFixed(2) + ')'; g.lineWidth = 0.5; g.beginPath(); g.ellipse(p[0], p[1], r, r * 0.55, 0, 0, TAU); g.stroke(); }
     if (s.tx !== undefined && age < 1.2) { const q = ISO(s.tx, s.ty, 6); g.strokeStyle = 'rgba(255,90,60,' + (0.35 * (1 - age / 1.2)).toFixed(2) + ')'; g.setLineDash([1.5, 1.5]); g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); g.stroke(); g.setLineDash([]); } }
   // searchlight beams (a soft wedge from the platform to its spot) at night
@@ -88,12 +88,13 @@ function futLightMask(lg) {
 }
 function futLight(lg, t) {
   // sensor cones glow faintly red at night; machine eyes are already emissive in their sprites
-  for (const z of HS.zombies) { if (z.st === 'dead') continue; const Sc = BSTAT[z.L.t].scan; if (!Sc) continue; const R0 = Math.min(Sc[0], 110) * 0.8; fCone(lg, z.x, z.y, R0, z.ang || 0, Math.min(Sc[1], 0.8), 'rgba(255,70,50,0.10)'); }
+  const vx = HR.vw / K / 2 + 120, vy = HR.vh / K / 2 + 120, onV = (x, y) => { const p = ISO(x, y); return Math.abs(p[0] - HR.cx) < vx && Math.abs(p[1] - HR.cy) < vy; };   // only what can be seen
+  for (const z of HS.zombies) { if (z.st === 'dead' || !onV(z.x, z.y)) continue; const Sc = BSTAT[z.L.t].scan; if (!Sc) continue; const R0 = Math.min(Sc[0], 110) * 0.8; fCone(lg, z.x, z.y, R0, z.ang || 0, Math.min(Sc[1], 0.8), 'rgba(255,70,50,0.10)'); }
   for (const f of HS.fx) if (f.k === 'bolt') { const q = clamp(1 - f.t / f.T, 0, 1), p = ISO(f.x0 + (f.x1 - f.x0) * q, f.y0 + (f.y1 - f.y0) * q, f.z0 + (f.z1 - f.z0) * q); hrGlow(lg, p[0], p[1], f.big ? 16 : 9, f.hostile ? 'rgba(255,90,60,' : f.turret ? 'rgba(255,190,90,' : 'rgba(120,220,255,', 0.8); }
   for (const tw of HF.towers) if (tw.fired && HS.t - tw.fired < 0.12) { const p = ISO(tw.x + 13, tw.y + 4, 54); hrGlow(lg, p[0], p[1], 20, 'rgba(255,200,110,', 0.9); }
   // night patrols carry hand lamps along the wall walk
-  for (const p of HS.people) { if (!p.alive || p.role !== 'guard' || !p.post || p.post.k !== 'patrol' || p.onTower) continue; const d = DIRV[p.dir] || [1, 0], q = ISO(p.x + d[0] * 9, p.y + d[1] * 9); hrGlow(lg, q[0], q[1], 12, 'rgba(255,240,200,', 0.55); }
-  for (const s of HS.sig) { const p = ISO(s.x, s.y, s.z || 10); hrGlow(lg, p[0], p[1], 10, s.emp ? 'rgba(208,74,255,' : 'rgba(255,90,60,', 0.6 * (1 - (HS.t - s.t) / 2.4)); }
+  for (const p of HS.people) { if (!p.alive || p.role !== 'guard' || !p.post || p.post.k !== 'patrol' || p.onTower || !onV(p.x, p.y)) continue; const d = DIRV[p.dir] || [1, 0], q = ISO(p.x + d[0] * 9, p.y + d[1] * 9); hrGlow(lg, q[0], q[1], 12, 'rgba(255,240,200,', 0.55); }
+  for (const s of HS.sig) { const p = ISO(s.x, s.y, s.z || 10); hrGlow(lg, p[0], p[1], 10, s.emp ? 'rgba(208,74,255,' : 'rgba(255,90,60,', clamp(0.6 * (1 - (HS.t - s.t) / 2.4), 0, 0.6)); }
 }
 
 // ---------------------------------------------------------------- ground: composite paving with lane studs, paver streets, hexagon plazas, hydroponic trays in the fields

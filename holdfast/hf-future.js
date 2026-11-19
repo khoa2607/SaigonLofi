@@ -262,7 +262,7 @@ function futPower(dt) {
   const P = HS.Fp, h = HS.hour, wx = HS.weather === 'rain' ? 0.35 : HS.weather === 'wind' ? 0.85 : 1;
   let gen = 0; for (const a of HF.fsolar) { const dirt = P.dirt[a.id]; P.dirt[a.id] = Math.min(1, dirt + dt * (HS.weather === 'wind' ? 0.0011 : 0.0005)); gen += futSun(h) * wx * (1 - dirt * 0.8) * 0.1; }
   gen += HS.weather === 'wind' ? 0.12 : 0.05;                                                                // the turbines
-  const night = h < 6.5 || h > 18.5, on = P.sec.filter(s => s.on).length, load = 0.18 + on * (night ? 0.08 : 0.035) + (HS.alarm > 0 ? 0.08 : 0);
+  const night = h < 6.5 || h > 18.5, on = P.sec.filter(s => s.on).length, load = 0.1 + on * (night ? 0.055 : 0.03) + (HS.alarm > 0 ? 0.06 : 0);
   P.gen = gen; P.load = load; P.bat = clamp(P.bat + (gen - load) * dt * 0.004, 0, 1);
   if (P.bat < 0.06 && !P.shed) { const s = P.sec.find(q => q.on && !q.fault && q.i !== P.civ); if (s) { s.on = 0; s.shed = 1; P.shed = 1; HS.Fs.shed++; hsLog('fshed', { s: s.i + 1 }); } }
   if (P.shed && P.bat > 0.22) { for (const s of P.sec) if (s.shed) { s.on = 1; s.shed = 0; } P.shed = 0; HS.Fs.unshed++; }
