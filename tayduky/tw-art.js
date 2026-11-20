@@ -107,6 +107,7 @@ const TWA = (function () {
       default: {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
+          const sm = TWM.seam[k]; if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : tone(P.gorge, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
           if (((X + Y * 2) % 24) < 2) c = shade(c, 0.9); if (hp < 0.01) c = r[3];
           return c;
         }
@@ -258,7 +259,7 @@ const TWA = (function () {
         // riser: front face of the step, between heights z - rz and z
         let inR = false, rr = 0;
         for (let zz = z - rz; zz < z && !inR; zz++) { const dyR = dy0 + zz, fiR = (dyR / 16 + dx / 32) / 2, fjR = (dyR / 16 - dx / 32) / 2, al = st.dir === 'j' ? 1 - fjR : 1 - fiR, ac = st.dir === 'j' ? fiR : fjR; if (Math.abs(al - f0) < 0.035 && ac > 0.12 && ac < 0.88 && fiR >= -0.05 && fjR >= -0.05 && fiR <= 1.05 && fjR <= 1.05) { inR = true; rr = z - zz; } }
-        if (inT) put(sx - 32 + lx, sy + r, along - f0 < 0.06 ? mix(pal[4], [255, 255, 240], 0.3) : tone(pal, 2.4 + hash2(lx >> 2, s, 60)), null, 0);
+        if (inT) put(sx - 32 + lx, sy + r, along - f0 < 0.06 ? mix(pal[pal.length - 1], [255, 255, 240], 0.3) : tone(pal, 2.4 + hash2(lx >> 2, s, 60)), null, 0);
         else if (inR) put(sx - 32 + lx, sy + r, rr === 1 ? INK : tone(pal, st.dir === 'j' ? 1.3 : 0.6), null, 0);
       }
       // side walls of the flight
@@ -494,16 +495,26 @@ const TWA = (function () {
     spire: p => spire(p.v, p.size || 2), loom: () => loom(0.6), circle: () => circleDecal(), vlantern: () => lantern(true), screen: () => screenRock(), eggs: p => eggs(p.v),
     cocoon: p => cocoon(p.v), crystal: p => crystal(p.v), mushroom: p => mushroom(p.v), moss: p => moss(p.v), shard: p => shard(p.v),
   };
+  // ---------------------------------------------------------------- PixelLab object sprites (tayduky/sprites/, packed by docs/tayduky/v2/tools/pack_sprites.py)
+  const IMG = {};
+  function loadSprites() {
+    return Promise.all(Object.entries(window.TW_SPRITES || {}).map(([n, m]) => new Promise(res => { const im = new Image(); im.onload = () => { IMG[n] = { im, w: m.w, h: m.h, py: m.py }; res(); }; im.onerror = res; im.src = 'sprites/' + n + '.png'; })));
+  }
+  const IMGKINDS = { hut: ['hut_a', 'hut_b', 'hut_c'], shrine: ['shrine_a', 'shrine_b', 'shrine_c'], stall: ['stall_a', 'stall_b'], hbridge: ['bridge_a'], tent: ['tent_a', 'tent_b'],
+    altar: ['altar_a', 'altar_b'], pcrystals: ['crystals_a', 'crystals_b', 'crystals_c'], silkbr: ['silkbridge_a'], hall: ['hall_a', 'hall_b'], statue: ['statue_a', 'statue_b'], playground: ['playground_a'],
+    bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'] };
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
+    if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: null, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);
     if (cache.has(key)) return cache.get(key);
+    if (IMGKINDS[p.kind]) { const names = IMGKINDS[p.kind].filter(n => IMG[n]); if (!names.length) return null; const m = IMG[names[(p.v || 0) % names.length]]; return { w: m.w, h: m.h, py: m.py, frames: [m.im], em: null, flat: false, img: true }; }
     const paint = PAINT[p.kind]; if (!paint) return null;
     const frames = paint(Object.assign({}, p, { v: vv * 7919 + 13 })), f0 = frames[0];
     const out = { w: f0.w, h: f0.h, frames: frames.map(S => S.canvas()), em: f0.e ? f0.canvas(true) : null, flat: !!p.flat };
     cache.set(key, out); return out;
   }
-  return { OX, OY, LV, CH, WORLD_W, WORLD_H, SX, SY, bakeChunk, sprite, P, INK, Spr, blob, line, tone, ramp, mix, LEAF, GOLD, RED, STONE, VROCK };
+  return { loadSprites, IMG, OX, OY, LV, CH, WORLD_W, WORLD_H, SX, SY, bakeChunk, sprite, P, INK, Spr, blob, line, tone, ramp, mix, LEAF, GOLD, RED, STONE, VROCK };
 })();

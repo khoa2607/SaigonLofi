@@ -19,7 +19,8 @@ await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
   console.log(JSON.stringify({ ...res, signatures: [...sigs], drawMsMedian: ms[ms.length >> 1], drawMsP90: ms[Math.floor(ms.length * 0.9)], errors: errs }, null, 1));
   if (dir) {
     fs.mkdirSync(dir, { recursive: true });
-    for (const [name, at, tod] of [['hoa-qua-son-day', [131, 17], 'day'], ['hoa-qua-son-night', [138, 24], 'night'], ['ban-to-dong-day', [80, 141], 'day'], ['ban-to-dong-night', [84, 142], 'night']]) {
+    for (const [name, at, tod, z] of [['hoa-qua-son-day', [131, 17], 'day', 2], ['hoa-qua-son-night', [138, 24], 'night', 2], ['ban-to-dong-day', [80, 141], 'day', 2], ['ban-to-dong-night', [84, 142], 'night', 2], ['hoa-qua-son-wide-day', [135, 18], 'day', 1], ['ban-to-dong-wide-day', [80, 141], 'day', 1], ['hoa-qua-son-wide-night', [135, 18], 'night', 1], ['ban-to-dong-wide-night', [80, 141], 'night', 1]]) {
+      await ev(`TWR.zoom=${z}; TWR.resize()`);
       await ev(`(()=>{TWR.tod='${tod}'; TWR.clock={day:11,dusk:18.2,night:22}['${tod}']; TWR.lookAt(${at[0]}*8,${at[1]}*8,16);})()`); await wait(2500);
       const s = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(`${dir}/${name}.png`, Buffer.from(s.data, 'base64'));
     }

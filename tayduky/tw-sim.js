@@ -56,7 +56,7 @@ const TWS = (function () {
           if (!TWM.walkable(si, sj) && !(st.swim && TWM.isWater(TWM.MAT[TWM.id(si, sj)]))) { const nw = nearestWalk(a.x, a.y, a.biome, 3); if (nw) { si = Math.floor(nw[0] / T); sj = Math.floor(nw[1] / T); } }
           const p = TWM.path(si, sj, ti, tj, { swim: st.swim, biome: a.biome });
           if (!p) { st.fail = true; return true; }
-          st.path = p.slice(1).map(([i, j], k, arr) => k === arr.length - 1 ? [st.x, st.y] : [(i + 0.5) * T + rnd(-1.2, 1.2), (j + 0.5) * T + rnd(-1.2, 1.2)]);
+          st.path = p.slice(1).map(([i, j], k, arr) => { if (k === arr.length - 1) return [st.x, st.y]; let open = true; for (let dj = -1; dj <= 1 && open; dj++) for (let di = -1; di <= 1; di++) if (!TWM.walkable(i + di, j + dj) && !TWM.isWater(TWM.MAT[TWM.id(i + di, j + dj)])) { open = false; break; } const e = open ? 1.2 : 0; return [(i + 0.5) * T + rnd(-e, e), (j + 0.5) * T + rnd(-e, e)]; });
           if (!st.path.length) st.path = [[st.x, st.y]];
           a.path = st.path;
         }
@@ -94,6 +94,13 @@ const TWS = (function () {
         st.el += dt; const k = Math.min(1, st.el / st.t); a.x = st.x0 + (st.x - st.x0) * k; a.y = st.y0 + (st.y - st.y0) * k;
         const gzEnd = TWM.groundZ(st.x, st.y); a.lift = (st.z0 - TWM.groundZ(a.x, a.y)) * (1 - k) + Math.sin(k * Math.PI) * st.h; a.dir = dirTo(a, st.x, st.y); a.pose = 'jump';
         if (k >= 1) { a.lift = 0; a.pose = 'idle'; if (st.splash) fx('splash', st.x, st.y, 1.6, a.biome); return true; }
+        return false;
+      }
+      case 'crawl': {   // move along a cliff face at a fixed lift (pose climb), facing the wall
+        if (st.i === undefined) { st.i = 0; count('crawl'); }
+        const t = st.pts[st.i]; if (!t) { a.pose = 'idle'; return true; }
+        const dx = t[0] - a.x, dy = t[1] - a.y, d = Math.hypot(dx, dy), sp = a.v * 0.55 * dt; a.dir = 'up'; a.pose = 'climb'; a.moving = false;
+        if (d <= sp) { a.x = t[0]; a.y = t[1]; st.i++; } else { a.x += dx / d * sp; a.y += dy / d * sp; a.dist += sp * 2.2; }
         return false;
       }
       case 'fly': {
@@ -178,6 +185,22 @@ const TWS = (function () {
       L.sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y)); const l = L[0]; l.claimed = true;
       return [go(l.x, l.y), { k: 'act', t: 1.5 }, { k: 'call', fn: () => { S.litter.splice(S.litter.indexOf(l), 1); count('clean'); } }, { k: 'idle', t: 1 }];
     },
+    pray(a) { const p = poiFree(a.biome, 'pray'); if (!p) return ACT.wander(a); claim(a, p); count('pray');
+      return [go(p.x, p.y), { k: 'face', dir: p.face || 'up' }, { k: 'act', t: 2.4 }, { k: 'sit', t: rnd(5, 9) }, { k: 'bubble', kind: pick(['note', 'heart', 'star']) }, { k: 'sit', t: rnd(3, 6) }, { k: 'release', poi: p }]; },
+    hut(a) { const p = poiFree(a.biome, 'hut'); if (!p) return ACT.wander(a); claim(a, p); count('hut'); const night = S.hour < 6 || S.hour > 20.5;
+      return [go(p.x, p.y), { k: 'face', dir: p.face || 'up' }, { k: 'idle', t: 0.6 }, { k: 'fade', t: 0.7 }, { k: 'wait', t: night ? rnd(25, 45) : rnd(10, 24) }, { k: 'fade', t: 0.7, in: true }, { k: 'bubble', kind: 'note' }, { k: 'release', poi: p }]; },
+    stall(a) { const p = poiFree(a.biome, 'stall'); if (!p) return ACT.wander(a); claim(a, p); count('stall'); const q = near(a, 8);
+      return [go(p.x, p.y), { k: 'face', dir: 'up' }, { k: 'act', t: 2.4 }, { k: 'bubble', kind: 'excl' }, { k: 'idle', t: 1.2 }, { k: 'carry', what: 'peach' }, { k: 'bubble', kind: 'heart' }, { k: 'release', poi: p }, q && go(q[0], q[1]), { k: 'sit', t: rnd(4, 7) }, { k: 'act', t: 2.4 }, { k: 'carry', what: null }]; },
+    play(a) { const p = poiFree(a.biome, 'play'); if (!p) return ACT.wander(a); claim(a, p); count('play');
+      return [go(p.x, p.y, { run: 1.3 }), { k: 'face', dir: p.face || 'right' }, { k: 'nudge', x: p.x + 4, y: p.y }, { k: 'climb', to: 22, t: 2 }, { k: 'face', dir: 'down' }, { k: 'perch', t: rnd(2, 4) }, { k: 'bubble', kind: 'excl' }, { k: 'climb', to: 6, t: 1.2 }, { k: 'perch', t: 1.5 }, { k: 'climb', to: 0, t: 0.9 }, { k: 'hop', t: 2 }, { k: 'nudge', x: p.x, y: p.y }, { k: 'release', poi: p }]; },
+    fish(a) { const p = poiFree(a.biome, 'fish'); if (!p) return ACT.wander(a); claim(a, p); count('fish');
+      return [go(p.x, p.y), { k: 'face', dir: 'right' }, { k: 'act', t: rnd(8, 14) }, { k: 'call', fn: () => fx('splash', p.x + 10, p.y, 1.8, a.biome) }, { k: 'bubble', kind: 'excl' }, { k: 'carry', what: 'fish' }, { k: 'act', t: 2.5 }, { k: 'bubble', kind: 'heart' }, { k: 'sit', t: 3 }, { k: 'carry', what: null }, { k: 'release', poi: p }]; },
+    wall(a) { const p = poiFree(a.biome, 'wall'); if (!p) return ACT.wander(a); claim(a, p); const L = Math.min(Math.max(10, p.drop * 4 - 3), a.role === 'spiderling' ? 30 : 22), run = p.run;
+      const out = S.R() < 0.5 ? run : run.slice().reverse();
+      return [go(out[0][0], out[0][1], { run: 1.3 }), { k: 'face', dir: 'up' }, { k: 'climb', to: L, t: 2 }, { k: 'crawl', pts: out.slice(1) }, { k: 'perch', t: rnd(2, 4) }, { k: 'bubble', kind: pick(['note', 'excl']) }, { k: 'crawl', pts: out.slice(0, -1).reverse() }, { k: 'climb', to: 0, t: 1.8 }, { k: 'release', poi: p }]; },
+    altar(a) { const p = poiFree(a.biome, 'altar'); if (!p) return ACT.stroll(a); claim(a, p); count('altar'); return [go(p.x, p.y), { k: 'face', dir: 'up' }, { k: 'act', t: 3 }, { k: 'sit', t: rnd(8, 14) }, { k: 'bubble', kind: 'heart' }, { k: 'sit', t: 4 }, { k: 'release', poi: p }]; },
+    crystal(a) { const p = poiFree(a.biome, 'crystal'), al = pick(pois(a.biome, 'altar')); if (!p || !al) return ACT.stroll(a); claim(a, p); count('crystal');
+      return [go(p.x, p.y), { k: 'face', dir: 'up' }, { k: 'act', t: 5 }, { k: 'carry', what: 'crystal' }, { k: 'bubble', kind: 'star' }, { k: 'release', poi: p }, go(al.x, al.y), { k: 'face', dir: 'up' }, { k: 'act', t: 3 }, { k: 'carry', what: null }, { k: 'bubble', kind: 'heart' }]; },
     // Bàn Tơ Động
     weave(a) { const p = poiFree(a.biome, 'loom'); if (!p) return ACT.stroll(a); claim(a, p); const tx = (p.target[0] + 0.5) * T, ty = (p.target[1] + 0.5) * T; const prop = TWM.props.find(q => q.kind === 'loom' && q.i === p.target[0] && q.j === p.target[1]);
       return [go(p.x, p.y), { k: 'face', x: tx, y: ty }, { k: 'act', t: rnd(10, 18), prop, weave: true }, { k: 'bubble', kind: 'note' }, { k: 'idle', t: 2 }, { k: 'act', t: rnd(5, 8), prop }, { k: 'release', poi: p }, { k: 'call', fn: () => count('weave') }]; },

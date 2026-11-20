@@ -1,0 +1,62 @@
+{
+ "peachtree_a": [
+  "peachtree_0",
+  0.1
+ ],
+ "peachtree_b": [
+  "peachtree_1",
+  0.1
+ ],
+ "peachtree_c": [
+  "peachtree_2",
+  0.1
+ ],
+ "peachtree_d": [
+  "peachtree_3",
+  0.1
+ ],
+ "statue_a": [
+  "statue_0",
+  0.15
+ ],
+ "statue_b": [
+  "statue_3",
+  0.15
+ ],
+ "playground_a": [
+  "playground_0",
+  0.16
+ ],
+ "spire_a": [
+  "spire_0",
+  0.13
+ ],
+ "spire_b": [
+  "spire_1",
+  0.13
+ ],
+ "mush_a": [
+  "mush_0",
+  0.17
+ ],
+ "mush_b": [
+  "mush_1",
+  0.17
+ ],
+ "bath_a": [
+  "bath_1",
+  0.2
+ ],
+ "loom_a": [
+  "loom_0",
+  0.17
+ ],
+ "hall_a": [
+  "hall_1",
+  0.14
+ ],
+ "hall_b": [
+  "hall_3",
+  0.14
+ ]
+}

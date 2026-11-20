@@ -87,7 +87,7 @@ const TWR = (function () {
     else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
     g.globalAlpha = 1;
     if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; for (let k = 0; k < 7; k++) g.fillRect(X + 8, Y + 16 + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + 9 + k * 5, Y + 14, 1, 30); }
-    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (a.frame === 'act0' || a.frame === 'act1' ? 22 : 30); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
+    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (a.frame === 'act0' || a.frame === 'act1' ? 22 : 30); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
     if (a.bubble) bubble(g, X + C.pivot[0], Y + (C.top || 6) - 4, a.bubble);
   }
   const ICON = { note: ['00110', '00101', '00100', '11100', '11100'], dots: ['00000', '00000', '10101', '00000', '00000'], heart: ['01010', '11111', '11111', '01110', '00100'],

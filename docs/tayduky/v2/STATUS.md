@@ -5,6 +5,63 @@ Branch `feature/tayduky-redesign-v2`. Not merged to `main`. Last update: 2026-11
 Hoa Quả Sơn and Bàn Tơ Động are built to the vertical-slice standard in the real runtime. The other nine biomes are reserved,
 clearly marked development placeholders. The work **stops here** until the owner approves the two biomes visually.
 
+## Refinement pass 2 (2026-11-20): tighter, denser, more alive
+
+Owner review: layout, camera angle and zoom approved; the waterfall stays; quality about 60 %. The asks were:
+- **A smaller footprint.** The camera, zoom, characters, landmarks and the waterfall are *not* shrunk.
+- **No dead filler.**
+- **Richer art.**
+
+**Footprints (the map stays 160 × 160).** Each built biome now has a warped ellipse mask, `MASK` in `tw-map.js`.
+- Tiles outside the mask go to the nearest neighbouring cell, so the freed space is reallocated to the neighbours and is available for future biomes.
+- Hoa Quả Sơn: about 36 × 36 tiles of land (it was about 50 × 45).
+- Bàn Tơ Động: about 39 × 38 tiles (it was about 44 × 40), with nothing hidden in its corners.
+- The two masks are independent per-biome sizes (a showcase biome can be large, a compact one small), and the nine other cells are **provisional**: flat ground with no authored geography.
+- The seam band (`TWM.seam`) blends neighbour ground toward the built biome's colours, so borders carry both palettes. No other biome has been added or locked.
+
+**Art (PixelLab objects plus code art).** 15 PixelLab jobs (175 generations, see `PIXELLAB.md`) supplied the landmark sprites. Terrain, cliffs, water and characters stay our own.
+- *Hoa Quả Sơn:*
+  - The Monkey King's hall on a cliff platform beside the waterfall.
+  - A second pavilion.
+  - A statue lookout.
+  - A village of four stilt huts.
+  - Two peach market stalls.
+  - A wooden playground.
+  - A big stone Wukong statue by the stream.
+  - An orchard of giant blossoming peach trees, and blossoming trees on the cliff tops.
+- *Bàn Tơ Động:*
+  - Weaving workshops.
+  - Silk tents.
+  - An egg altar.
+  - Crystal groves, both on the floor and on the cliff tiers.
+  - Giant mushrooms.
+  - Silk-wrapped spires.
+  - A walkable **hanging gallery** (a ledge with lanterns and crystals) along the back wall, reached by four stairs.
+
+**Activity in the former empty zones.** Everything below is simulated, not decoration.
+
+| Place | New life |
+|---|---|
+| Cliff platforms, shrines, statue (HQS) | Monkeys climb the stairs and pray, sit and meditate at the shrine and statue |
+| Monkey village (HQS) | Residents walk to a hut door, fade inside and come back out (longer stays at night) |
+| Market stalls and meadow (HQS) | Monkeys haggle, carry peaches away and sit to eat them |
+| Playground (HQS) | Kids climb the frame, hang there and drop down hopping |
+| Beach (HQS) | Monkeys fish: they cast, splash, catch a fish and carry it |
+| Cliff faces (HQS and BTD) | Monkeys and spiderlings **crawl up and along the rock faces** at the foot of the cliffs |
+| Orchard (HQS) | Eating, climbing and fruit-raid events moved into the new orchard |
+| Gallery, tents, altar, crystals (BTD) | Sisters tend the egg altar, gather crystals from the groves and carry them to the altar, and retire to the tents |
+
+The activity set grew from 14 to 22 kinds. The simulation test passes on 4 seeds.
+
+Preview: `http://localhost:8765/tayduky/` (Hoa Quả Sơn), `…/tayduky/?at=btd` (Bàn Tơ Động), `…/tayduky/?at=btd&tod=night`.
+Screenshots: `docs/tayduky/v2/screenshots/` (`*-day`, `*-night` at zoom 2, and `*-wide-*` at zoom 1, which show the neighbouring cells).
+
+Known limits of this pass:
+- Neighbour cells are still flat hatched placeholders, though softened by the seam band.
+- The AI object sprites are denser than the characters.
+- Cliff crystals on the BTD tiers are a little repetitive.
+- The AI stone and silk bridge sprites and the bath sprite are packed but not yet placed.
+
 ## How to run
 
 Run `serve.bat` (or `python -m http.server 8765`) from the repo root, then open:

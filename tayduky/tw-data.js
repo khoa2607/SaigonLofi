@@ -18,11 +18,11 @@ window.TW_DATA = {
     hqs: {
       residents: [['wukong', 1, 'king'], ['khi_linh', 3, 'guard'], ['khi_lao', 2, 'elder'], ['khi_con', 6, 'kid'], ['khi_dan', 5, 'citizen'], ['khi_dan_b', 5, 'citizen']],
       roles: {
-        king: [['train', 3], ['throne', 3], ['visit', 2], ['hop_rocks', 2], ['wander', 1]],
-        guard: [['patrol', 5], ['drill', 3], ['watch', 2], ['rest', 1]],
-        elder: [['rest', 5], ['talk', 2], ['wander', 1], ['eat', 1]],
-        kid: [['chase', 3], ['hop', 2], ['climb', 3], ['eat', 2], ['swim', 2], ['wander', 1]],
-        citizen: [['wander', 2], ['rest', 2], ['eat', 3], ['groom', 2], ['climb', 2], ['swim', 1], ['cave', 1], ['talk', 2]],
+        king: [['train', 3], ['throne', 3], ['visit', 2], ['hop_rocks', 2], ['pray', 1], ['play', 1], ['wander', 1]],
+        guard: [['patrol', 5], ['drill', 3], ['watch', 2], ['pray', 1], ['hut', 1], ['rest', 1]],
+        elder: [['rest', 4], ['talk', 2], ['pray', 2], ['stall', 1], ['hut', 2], ['wander', 1], ['eat', 1]],
+        kid: [['chase', 3], ['hop', 2], ['climb', 3], ['play', 4], ['wall', 3], ['eat', 2], ['swim', 2], ['stall', 1], ['wander', 1]],
+        citizen: [['wander', 2], ['rest', 2], ['eat', 2], ['groom', 2], ['climb', 2], ['swim', 1], ['cave', 1], ['talk', 2], ['hut', 2], ['stall', 3], ['fish', 3], ['pray', 1], ['wall', 1], ['play', 1]],
       },
       minis: ['fruit_raid', 'storytime', 'dive_party', 'guard_drill', 'supper'],
       stories: [
@@ -41,8 +41,8 @@ window.TW_DATA = {
     btd: {
       residents: [['nhen_tinh', 1, 'sister'], ['nhen_tinh_em', 2, 'sister'], ['nhen_tinh_hong', 2, 'sister'], ['nhen_tinh_vang', 2, 'sister'], ['nhen_con', 10, 'spiderling']],
       roles: {
-        sister: [['weave', 4], ['bath', 2], ['talk', 3], ['stroll', 2], ['eggs', 2], ['cave', 1]],
-        spiderling: [['scuttle', 4], ['thread', 4], ['follow', 2]],
+        sister: [['weave', 4], ['bath', 2], ['talk', 3], ['stroll', 2], ['eggs', 2], ['cave', 1], ['hut', 2], ['altar', 2], ['crystal', 3], ['wall', 1]],
+        spiderling: [['scuttle', 3], ['thread', 3], ['wall', 4], ['follow', 2]],
       },
       minis: ['weaving_circle', 'hot_spring', 'spider_rain', 'lantern_gather', 'egg_watch'],
       stories: [

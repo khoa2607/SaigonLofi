@@ -50,5 +50,5 @@
   addEventListener('resize', () => TWR.resize());
   addEventListener('keydown', e => { const s = 160 / TWR.zoom; if (e.key === 'ArrowLeft') TWR.cx -= s; if (e.key === 'ArrowRight') TWR.cx += s; if (e.key === 'ArrowUp') TWR.cy -= s; if (e.key === 'ArrowDown') TWR.cy += s;
     if (e.key === '+' || e.key === '=') zoomBy(1); if (e.key === '-') zoomBy(-1); if (e.key === 'g') TWR.debug = !TWR.debug; TWR.clamp(); });
-  setTimeout(boot, 30);
+  TWA.loadSprites().then(() => setTimeout(boot, 30));
 })();
