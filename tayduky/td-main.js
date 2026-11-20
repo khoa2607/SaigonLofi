@@ -62,6 +62,16 @@ function frameFor(a) {
   return [C, C.frames[Math.min(f, C.frames.length - 1)], flip];
 }
 function drawAgent(a) {
+  if (a.buried) {   // Wukong under Ngũ Hành Sơn: the traced front frame cut at the shoulders, behind a stone lip with moss
+    const C = CH[a.char], im = C && img(C.src); if (!im || !im.complete) return;
+    const [fx, fy, fw, fh] = C.frames[0], sh = Math.round(fh * 0.42), x = Math.round(a.x - fw / 2), y = Math.round(a.y - sh + 1);
+    g.drawImage(im, fx, fy, fw, sh, x, y, fw, sh);
+    const lx = x - 3, lw = fw + 6, ly = Math.round(a.y) - 2;
+    g.fillStyle = '#3a3440'; g.fillRect(lx, ly - 1, lw, 5); g.fillStyle = '#8a96a2'; g.fillRect(lx + 1, ly, lw - 2, 3);
+    g.fillStyle = '#6e7a88'; g.fillRect(lx + 1, ly + 2, lw - 2, 1); g.fillStyle = '#7ea06a'; for (let i = 2; i < lw - 2; i += 5) g.fillRect(lx + i, ly, 2, 1);
+    if (a.bubble) bubble(a.x, y - 3, a.bubble);
+    return;
+  }
   const r = frameFor(a); if (!r) return; const [C, fr, flip] = r, im = img(C.src); if (!im.complete) return;
   const [fx, fy, fw, fh] = fr, bob = a.moving && Math.floor(a.step * 8) % 2 ? 1 : 0, bow = a.bow ? 1 : 0;
   const x = Math.round(a.x - fw / 2), y = Math.round(a.y - fh + 2 - bob + bow - (a.z || 0));
@@ -108,6 +118,37 @@ function fxDraw(f, t) {
     for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; g.beginPath(); g.moveTo(x, y - 30); g.lineTo(x + Math.cos(a) * r, y - 30 + Math.sin(a) * r * 0.5); g.stroke(); }
     for (let rr = 18; rr < r; rr += 18) { g.beginPath(); for (let i = 0; i <= 12; i++) { const a = i / 12 * 6.283; g[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y - 30 + Math.sin(a) * rr * 0.5); } g.stroke(); }
     return; }
+  if (f.kind === 'talisman') {   // the six-syllable seal: a flickering paper charm above the mountain's captive
+    const on = Math.sin(t * 9) > -0.3 ? 1 : 0.4, px = Math.round(x) - 3, py = Math.round(y - 44 + Math.sin(t * 2) * 2);
+    g.fillStyle = `rgba(255,220,90,${0.28 * on})`; g.fillRect(px - 5, py - 5, 16, 20);
+    g.fillStyle = '#3a2a1a'; g.fillRect(px - 1, py - 1, 8, 12); g.fillStyle = '#ffd84a'; g.fillRect(px, py, 6, 10);
+    g.fillStyle = '#c0302a'; g.fillRect(px + 2, py + 2, 2, 1); g.fillRect(px + 1, py + 4, 4, 1); g.fillRect(px + 2, py + 6, 2, 2); return;
+  }
+  if (f.kind === 'pebbles') {   // burst on a short arc; as an aftermath footprint, a settled scatter that fades at the end
+    for (let i = 0; i < 18; i++) {
+      const a = i * 2.39, d = f.r * (0.35 + (i % 5) / 6) * (f.soft ? 1 : Math.min(1, k * 1.4)), h = f.soft ? 0 : 36 * 4 * k * (1 - k) * (0.5 + (i % 3) / 3);
+      if (f.soft && k > 0.8 && i % 5 < (k - 0.8) * 25) continue;
+      g.fillStyle = i % 3 ? '#7c8592' : '#a8b0ba'; g.fillRect(Math.round(x + Math.cos(a) * d), Math.round(y + Math.sin(a) * d * 0.5 - h), 2, 2);
+    }
+    return;
+  }
+  if (f.kind === 'steam') { for (let i = 0; i < 5; i++) { const s = ((t * 12 + i * 6) % 24); g.fillStyle = `rgba(255,255,255,${0.6 * (1 - s / 24) * (1 - k)})`; g.fillRect(Math.round(x + 6 + Math.sin(t * 3 + i) * 2), Math.round(y - 4 - s), 3, 2); } return; }
+  if (f.kind === 'birds') {
+    for (let i = 0; i < 4; i++) { const a = t * 1.4 + i * 1.57, px = Math.round(x + Math.cos(a) * f.r * 0.7), py = Math.round(y - 40 + Math.sin(a) * 7 - (k > 0.85 ? (k - 0.85) * 400 : 0)), up = Math.floor(t * 6 + i) % 2;
+      g.fillStyle = '#3a2a30'; g.fillRect(px - 2, py - up, 2, 1); g.fillRect(px + 1, py - up, 2, 1); g.fillRect(px, py, 1, 1); }
+    return;
+  }
+  if (f.kind === 'ink') {   // "Tề Thiên Đại Thánh đến đây chơi": a gold glyph column on the finger pillar, fading slowly
+    g.fillStyle = `rgba(255,214,90,${0.9 * (1 - k)})`; const px = Math.round(x) + 12, py = Math.round(y) - 40;
+    for (let c = 0; c < 2; c++) for (let r = 0; r < 6; r++) { g.fillRect(px + c * 5, py + r * 5, 3, 1); if ((r + c) % 2) g.fillRect(px + c * 5 + 1, py + r * 5 + 1, 1, 2); }
+    return;
+  }
+  if (f.kind === 'embers') { for (let i = 0; i < 24; i++) { const s = i * 7.77, px = x + Math.sin(s) * f.r, py = y - 60 + ((t * 8 + i * 17) % 80); g.fillStyle = i % 4 ? 'rgba(90,80,80,0.7)' : '#ff9a3a'; g.fillRect(Math.round(px), Math.round(py), 1, 1); } return; }
+  if (f.kind === 'footprints') {
+    g.fillStyle = `rgba(60,40,30,${0.4 * Math.min(1, (1 - k) * 3)})`;
+    for (let i = 0; i < 12; i++) { const px = x - f.r + i * f.r / 6, py = y + Math.sin(i * 0.9) * 10 + (i % 2) * 4; g.fillRect(Math.round(px), Math.round(py), 3, 2); g.fillRect(Math.round(px) + 1, Math.round(py) - 1, 1, 1); }
+    return;
+  }
   if (f.kind === 'splash') { for (let s = 0; s < 3; s++) { const r = ((k * 3 + s * 0.33) % 1) * 70; g.strokeStyle = `rgba(220,245,255,${0.8 * (1 - r / 70)})`; g.beginPath(); g.ellipse(x, y, r, r * 0.45, 0, 0, 6.29); g.stroke(); } }
 }
 let _mist = null;
@@ -167,7 +208,7 @@ function frame(now) {
   const [col, amt] = tint(V.clock);
   g.setTransform(1, 0, 0, 1, 0, 0);
   if (amt > 0.01) { g.globalCompositeOperation = 'multiply'; g.globalAlpha = amt; g.fillStyle = col; g.fillRect(0, 0, W2, H2); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
-  if (amt > 0.3) { g.setTransform(1, 0, 0, 1, -x0, -y0); g.globalCompositeOperation = 'lighter'; for (const f of TS.fx) if (f.kind === 'lanterns' || f.kind === 'fire' || f.kind === 'gold') { g.globalAlpha = 0.2; g.fillStyle = '#ffb860'; g.beginPath(); g.ellipse(f.x, f.y - 20, 60, 34, 0, 0, 6.29); g.fill(); } g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); }
+  if (amt > 0.3) { g.setTransform(1, 0, 0, 1, -x0, -y0); g.globalCompositeOperation = 'lighter'; for (const f of TS.fx) if (f.kind === 'lanterns' || f.kind === 'fire' || f.kind === 'gold' || f.kind === 'talisman' || f.kind === 'embers') { g.globalAlpha = 0.2; g.fillStyle = '#ffb860'; g.beginPath(); g.ellipse(f.x, f.y - 20, 60, 34, 0, 0, 6.29); g.fill(); } g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); }
   placeCard(dt);
 }
 

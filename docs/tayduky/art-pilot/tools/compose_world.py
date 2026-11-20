@@ -12,7 +12,7 @@ Steps
   6. write chunks (512 px, lossless WebP), occluder chunks and world.js for tayduky/.
 Run: python compose_world.py   (takes a minute)
 """
-import os, json, math
+import os, json, math, zlib
 import numpy as np
 from PIL import Image
 from scipy import ndimage
@@ -34,12 +34,16 @@ BIOMES = [
     ('clt', ['Cao Lão Trang', "Old Gao's Village"], 'cao lão tarng 1672x941.png', 1.25, (2300, 1140), 'farm'),
     ('tth', ['Thông Thiên Hà', 'The River That Reaches Heaven'], None, None, (2280, 1720), 'river'),
     ('tc', ['Thiên Cung', 'The Heavenly Palace'], 'Nam Thiên Môn.png', 1.6, (3100, 560), 'heaven'),
-    ('btp', ['Lòng bàn tay Phật Tổ · Ngũ Hành Sơn', "The Buddha's Palm · Five Elements Mountain"], '01_Phat_To_Ngu_Hanh_Son_map_reference.png', 1.6, (3100, 1230), 'heaven'),
+    ('btp', ['Lòng Bàn Tay Phật Tổ', "The Buddha's Palm"], '01_Phat_To_Ngu_Hanh_Son_map_reference.png', 1.6, (3100, 1130), 'heaven'),
+    ('nhs', ['Ngũ Hành Sơn', 'Five Elements Mountain'], '01_Phat_To_Ngu_Hanh_Son_map_reference.png', 1.6, (3100, 1720), 'stone'),
     ('hqs', ['Hoa Quả Sơn', 'Flower-Fruit Mountain'], 'Hoa Quả Sơn - không nhân vật.png', 1.7, (3920, 1130), 'jungle'),
 ]
+# one reference holds both the palm (left) and the five-element mountain (right): each biome takes its half (source px x0, x1)
+CROP = {'btp': (0, 1100), 'nhs': (720, None)}
+CUT = {'btp': [(740, 0, 1536, 470), (1000, 0, 1536, 1104)]}   # source-px boxes removed from a plate (the mountain belongs to nhs)
 ADJ = {'lat': ['hds', 'nnq', 'btd'], 'hds': ['lat', 'nnq', 'bcl'], 'nnq': ['lat', 'hds', 'btd', 'clt'], 'btd': ['lat', 'nnq', 'tth'],
-       'bcl': ['hds', 'clt', 'tc'], 'clt': ['nnq', 'bcl', 'tth', 'btp'], 'tth': ['btd', 'clt', 'btp'], 'tc': ['bcl', 'btp', 'hqs'],
-       'btp': ['clt', 'tc', 'tth', 'hqs'], 'hqs': ['tc', 'btp']}
+       'bcl': ['hds', 'clt', 'tc'], 'clt': ['nnq', 'bcl', 'tth', 'btp'], 'tth': ['btd', 'clt', 'nhs'], 'tc': ['bcl', 'btp', 'hqs'],
+       'btp': ['clt', 'tc', 'nhs', 'hqs'], 'nhs': ['tth', 'btp', 'hqs'], 'hqs': ['tc', 'btp', 'nhs']}   # design §2.3
 WW, WH = 4560, 2280
 
 BASE = {   # palette of 4 ground tones + 1 accent per base terrain
@@ -50,6 +54,7 @@ BASE = {   # palette of 4 ground tones + 1 accent per base terrain
     'bone': ['#8e8898', '#948ea0', '#888292', '#9a94a6', '#ece6dc'],
     'farm': ['#88ba5c', '#8ec062', '#82b456', '#94c668', '#e8c860'],
     'river': ['#86b85a', '#8ec062', '#7cae52', '#98c86c', '#f0d870'],
+    'stone': ['#8a96a2', '#909ca8', '#84909c', '#7ea06a', '#6a8a5a'],
     'jungle': ['#72b24c', '#78b852', '#6cac46', '#7ebe58', '#f4b0b8'],
 }
 hx = lambda h: np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)], np.uint8)
@@ -90,9 +95,11 @@ def remove_banner(a):
     return cv2.inpaint(a, mask, 9, cv2.INPAINT_TELEA)
 
 
-def trace_plate(file, p):
+def trace_plate(file, p, crop=None, cut=None):
     a = np.asarray(Image.open(os.path.join(REFD, file)).convert('RGB'))
     bm = banner_mask(a) if file.startswith('0') else np.zeros(a.shape[:2], bool)
+    for (cx0, cy0, cx1, cy1) in (cut or []): bm[cy0:cy1, cx0:cx1] = True
+    if crop: a, bm = a[:, crop[0]:crop[1]], bm[:, crop[0]:crop[1]]
     H, W = a.shape[:2]
     best = None
     for ph in np.linspace(0, p, 5, endpoint=False):
@@ -186,13 +193,14 @@ if __name__ == '__main__':
     order = sorted([b for b in BIOMES if b[2]], key=lambda b: b[4][1])
     for b in order:
         bid, title, file, p, (pcx, pcy), terr = b
-        pl, bmd = trace_plate(file, p); ph, pw = pl.shape[:2]
+        pl, bmd = trace_plate(file, p, CROP.get(bid), CUT.get(bid)); ph, pw = pl.shape[:2]
         x0, y0 = int(pcx - pw / 2), int(pcy - ph / 2)
         keep = ~sky_mask(pl) & ~bmd
         # ragged dithered border (edge band shared with the neighbour beneath)
         dist = np.minimum.reduce([np.arange(pw)[None, :].repeat(ph, 0), (pw - 1 - np.arange(pw))[None, :].repeat(ph, 0),
                                   np.arange(ph)[:, None].repeat(pw, 1), (ph - 1 - np.arange(ph))[:, None].repeat(pw, 1)]).astype(np.float32)
-        nz = cv2.resize(vnoise((ph // 4 + 1, pw // 4 + 1), 4, hash(bid) % 1000), (pw, ph), interpolation=cv2.INTER_NEAREST)
+        if bmd.any(): dist = np.minimum(dist, ndimage.distance_transform_edt(~bmd).astype(np.float32))   # cut and banner edges get the same ragged band
+        nz = cv2.resize(vnoise((ph // 4 + 1, pw // 4 + 1), 4, zlib.crc32(bid.encode()) % 1000), (pw, ph), interpolation=cv2.INTER_NEAREST)
         keep &= dist > nz * 70
         Y0, X0 = max(0, y0), max(0, x0); Y1, X1 = min(WH, y0 + ph), min(WW, x0 + pw)
         sub = keep[Y0 - y0:Y1 - y0, X0 - x0:X1 - x0]

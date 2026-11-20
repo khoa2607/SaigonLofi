@@ -38,10 +38,11 @@ The owner chose the **hybrid** construction: each biome keeps a traced centre pl
 clouds, foreground and background), and the land between biomes is shared base terrain with dithered edge bands. Characters are about 50 px,
 traced from the owner's sheets. The alpha is running in `tayduky/`. See `docs/tayduky/STATUS.md` for what exists, the measurements and the
 limits. The tile figures in §2.1 predate this decision: the map is now 4560 × 2280 px (plates at about 1.25–1.7 source px per cell).
+All **11** biomes of §2.2 are on the map (2026-11-20): the shared palm/mountain reference is split, so Lòng Bàn Tay Phật Tổ and Ngũ Hành Sơn are separate biomes, with the §2.3 adjacency.
 
 ## 1. Fantasy and pillars
 
-*A living picture-book of Journey to the West: ten legendary places, each replaying its story forever. Everyone lives their daily life there, the legends
+*A living picture-book of Journey to the West: eleven legendary places, each replaying its story forever. Everyone lives their daily life there, the legends
 come and go, and the world remembers a little of each one.*
 
 1. **Every place is a legend.** Each biome is recognisable at a glance from its landmark and its colours.
