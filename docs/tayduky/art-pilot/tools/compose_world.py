@@ -220,7 +220,7 @@ if __name__ == '__main__':
     g = ground_mask(world) & ~water_mask(world) & (occ_layer[:, :, 3] == 0)
     g &= ~out.repeat(4, 0).repeat(4, 1)[:WH, :WW]
     cells = g[:WH // 4 * 4, :WW // 4 * 4].reshape(WH // 4, 4, WW // 4, 4).mean((1, 3)) > 0.7
-    cells = ndimage.binary_opening(cells, iterations=1)
+    cells = ndimage.binary_opening(cells, iterations=2)          # drops thin strips such as wall tops (under 5 cells)
     lab, n = ndimage.label(cells); sizes = ndimage.sum(cells, lab, range(1, n + 1))
     cells &= np.isin(lab, [i + 1 for i, s in enumerate(sizes) if s >= 40])
     Image.fromarray((cells * 255).astype(np.uint8)).save(os.path.join(OUT, 'walk.png'))
