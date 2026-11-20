@@ -39,7 +39,7 @@ window.TW_DATA = {
           recover: [['clean', { roles: ['citizen', 'kid'], dur: 90 }]] },
       ] },
     btd: {
-      residents: [['nhen_tinh', 1, 'sister'], ['nhen_tinh_em', 2, 'sister'], ['nhen_tinh_hong', 2, 'sister'], ['nhen_tinh_vang', 2, 'sister'], ['nhen_con', 10, 'spiderling']],
+      residents: [['sister1_violet', 1, 'sister'], ['sister2_teal', 1, 'sister'], ['sister3_rose', 1, 'sister'], ['sister4_amber', 1, 'sister'], ['sister5_crimson', 1, 'sister'], ['sister6_silver', 1, 'sister'], ['sister7_indigo', 1, 'sister'], ['nhen_con', 5, 'spiderling'], ['nhen_con_b', 5, 'spiderling']],
       roles: {
         sister: [['weave', 4], ['bath', 2], ['talk', 3], ['stroll', 2], ['eggs', 2], ['cave', 1], ['hut', 2], ['altar', 2], ['crystal', 3], ['wall', 1]],
         spiderling: [['scuttle', 3], ['thread', 3], ['wall', 4], ['follow', 2]],

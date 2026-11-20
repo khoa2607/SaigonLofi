@@ -1,0 +1,1156 @@
+{
+ "sprites": {
+  "hut_a": {
+   "file": "sprites/hut_a.png",
+   "size": [
+    105,
+    108
+   ],
+   "anchor_y": 90,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "hut_b": {
+   "file": "sprites/hut_b.png",
+   "size": [
+    107,
+    122
+   ],
+   "anchor_y": 101,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "hut_c": {
+   "file": "sprites/hut_c.png",
+   "size": [
+    103,
+    120
+   ],
+   "anchor_y": 100,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "shrine_a": {
+   "file": "sprites/shrine_a.png",
+   "size": [
+    84,
+    107
+   ],
+   "anchor_y": 91,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "shrine_b": {
+   "file": "sprites/shrine_b.png",
+   "size": [
+    96,
+    115
+   ],
+   "anchor_y": 98,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "shrine_c": {
+   "file": "sprites/shrine_c.png",
+   "size": [
+    94,
+    118
+   ],
+   "anchor_y": 100,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "stall_a": {
+   "file": "sprites/stall_a.png",
+   "size": [
+    111,
+    114
+   ],
+   "anchor_y": 95,
+   "category": "stalls",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents trade, carry peaches away",
+   "runtime_kind": "stall",
+   "source": "pixellab create_1_direction_object job 7d079980"
+  },
+  "stall_b": {
+   "file": "sprites/stall_b.png",
+   "size": [
+    114,
+    116
+   ],
+   "anchor_y": 96,
+   "category": "stalls",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents trade, carry peaches away",
+   "runtime_kind": "stall",
+   "source": "pixellab create_1_direction_object job 7d079980"
+  },
+  "bridge_a": {
+   "file": "sprites/bridge_a.png",
+   "size": [
+    123,
+    105
+   ],
+   "anchor_y": 84,
+   "category": "bridges",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "spans a 2-tile stream (mirror to cross along i)",
+   "life": "residents cross it; water underneath animates",
+   "runtime_kind": "hbridge",
+   "source": "pixellab create_1_direction_object job f47ea782"
+  },
+  "crystals_a": {
+   "file": "sprites/crystals_a.png",
+   "size": [
+    116,
+    104
+   ],
+   "anchor_y": 83,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "crystals_b": {
+   "file": "sprites/crystals_b.png",
+   "size": [
+    94,
+    114
+   ],
+   "anchor_y": 91,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "crystals_c": {
+   "file": "sprites/crystals_c.png",
+   "size": [
+    115,
+    113
+   ],
+   "anchor_y": 90,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "tent_a": {
+   "file": "sprites/tent_a.png",
+   "size": [
+    105,
+    123
+   ],
+   "anchor_y": 103,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave; silk shimmer, green lantern glow",
+   "runtime_kind": "tent",
+   "source": "pixellab create_1_direction_object job 7277f9bd"
+  },
+  "tent_b": {
+   "file": "sprites/tent_b.png",
+   "size": [
+    108,
+    116
+   ],
+   "anchor_y": 97,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave; silk shimmer, green lantern glow",
+   "runtime_kind": "tent",
+   "source": "pixellab create_1_direction_object job 7277f9bd"
+  },
+  "altar_a": {
+   "file": "sprites/altar_a.png",
+   "size": [
+    117,
+    116
+   ],
+   "anchor_y": 96,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters tend it; egg glow pulses, silk shimmers, violet spores",
+   "runtime_kind": "altar",
+   "source": "pixellab create_1_direction_object job 97819ce3"
+  },
+  "altar_b": {
+   "file": "sprites/altar_b.png",
+   "size": [
+    120,
+    112
+   ],
+   "anchor_y": 93,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters tend it; egg glow pulses, silk shimmers, violet spores",
+   "runtime_kind": "altar",
+   "source": "pixellab create_1_direction_object job 97819ce3"
+  },
+  "silkbridge_a": {
+   "file": "sprites/silkbridge_a.png",
+   "size": [
+    121,
+    116
+   ],
+   "anchor_y": 93,
+   "category": "bridges",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "spans a 3-tile chasm along j",
+   "life": "silk shimmer; the abyss underneath",
+   "runtime_kind": "silkbr",
+   "source": "pixellab create_1_direction_object job 0caab83e"
+  },
+  "peachtree_a": {
+   "file": "sprites/peachtree_a.png",
+   "size": [
+    143,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_b": {
+   "file": "sprites/peachtree_b.png",
+   "size": [
+    143,
+    142
+   ],
+   "anchor_y": 128,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_c": {
+   "file": "sprites/peachtree_c.png",
+   "size": [
+    146,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_d": {
+   "file": "sprites/peachtree_d.png",
+   "size": [
+    146,
+    137
+   ],
+   "anchor_y": 123,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "statue_a": {
+   "file": "sprites/statue_a.png",
+   "size": [
+    72,
+    116
+   ],
+   "anchor_y": 99,
+   "category": "statues",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "1x1",
+   "life": "landmark",
+   "runtime_kind": "statue",
+   "source": "pixellab create_1_direction_object job 9de37e22"
+  },
+  "statue_b": {
+   "file": "sprites/statue_b.png",
+   "size": [
+    98,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "statues",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "1x1",
+   "life": "landmark",
+   "runtime_kind": "statue",
+   "source": "pixellab create_1_direction_object job 9de37e22"
+  },
+  "playground_a": {
+   "file": "sprites/playground_a.png",
+   "size": [
+    116,
+    115
+   ],
+   "anchor_y": 97,
+   "category": "village-props",
+   "biomes": [
+    "hqs"
+   ],
+   "footprint": "2x2",
+   "life": "kids climb the frame and drop down",
+   "runtime_kind": "playground",
+   "source": "pixellab create_1_direction_object job 77428071"
+  },
+  "spire_a": {
+   "file": "sprites/spire_a.png",
+   "size": [
+    105,
+    141
+   ],
+   "anchor_y": 123,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1 or 2x2",
+   "life": "silk shimmer",
+   "runtime_kind": "bspire",
+   "source": "pixellab create_1_direction_object job 3e2ddeec"
+  },
+  "spire_b": {
+   "file": "sprites/spire_b.png",
+   "size": [
+    102,
+    142
+   ],
+   "anchor_y": 124,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1 or 2x2",
+   "life": "silk shimmer",
+   "runtime_kind": "bspire",
+   "source": "pixellab create_1_direction_object job 3e2ddeec"
+  },
+  "mush_a": {
+   "file": "sprites/mush_a.png",
+   "size": [
+    81,
+    118
+   ],
+   "anchor_y": 98,
+   "category": "mushrooms",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse + flicker, rising spores",
+   "runtime_kind": "bigmush",
+   "source": "pixellab create_1_direction_object job 4e93cb98"
+  },
+  "mush_b": {
+   "file": "sprites/mush_b.png",
+   "size": [
+    114,
+    111
+   ],
+   "anchor_y": 92,
+   "category": "mushrooms",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse + flicker, rising spores",
+   "runtime_kind": "bigmush",
+   "source": "pixellab create_1_direction_object job 4e93cb98"
+  },
+  "bath_a": {
+   "file": "sprites/bath_a.png",
+   "size": [
+    118,
+    114
+   ],
+   "anchor_y": 91,
+   "category": "village-props",
+   "biomes": [
+    "btd"
+   ],
+   "footprint": "2x2",
+   "life": "not placed yet (hot-spring bath terrace)",
+   "runtime_kind": "bath",
+   "source": "pixellab create_1_direction_object job 274abac0"
+  },
+  "loom_a": {
+   "file": "sprites/loom_a.png",
+   "size": [
+    118,
+    117
+   ],
+   "anchor_y": 97,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters weave here; silk threads run from their sleeves",
+   "runtime_kind": "bloom",
+   "source": "pixellab create_1_direction_object job cd7a9fd8"
+  },
+  "hall_a": {
+   "file": "sprites/hall_a.png",
+   "size": [
+    155,
+    150
+   ],
+   "anchor_y": 129,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "3x3",
+   "life": "landmark; prayers at the stairs",
+   "runtime_kind": "hall",
+   "source": "pixellab create_1_direction_object job 4e334cf4"
+  },
+  "hall_b": {
+   "file": "sprites/hall_b.png",
+   "size": [
+    161,
+    156
+   ],
+   "anchor_y": 134,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "3x3",
+   "life": "landmark; prayers at the stairs",
+   "runtime_kind": "hall",
+   "source": "pixellab create_1_direction_object job 4e334cf4"
+  },
+  "cave_a": {
+   "file": "sprites/cave_a.png",
+   "size": [
+    142,
+    130
+   ],
+   "anchor_y": 108,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "cave_b": {
+   "file": "sprites/cave_b.png",
+   "size": [
+    137,
+    128
+   ],
+   "anchor_y": 106,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "gate_a": {
+   "file": "sprites/gate_a.png",
+   "size": [
+    118,
+    116
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "gate_b": {
+   "file": "sprites/gate_b.png",
+   "size": [
+    99,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_a": {
+   "file": "sprites/bamboo_a.png",
+   "size": [
+    94,
+    116
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_b": {
+   "file": "sprites/bamboo_b.png",
+   "size": [
+    106,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_c": {
+   "file": "sprites/bamboo_c.png",
+   "size": [
+    115,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "scholar_a": {
+   "file": "sprites/scholar_a.png",
+   "size": [
+    92,
+    111
+   ],
+   "anchor_y": 94,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "scholar_b": {
+   "file": "sprites/scholar_b.png",
+   "size": [
+    78,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lantern_a": {
+   "file": "sprites/lantern_a.png",
+   "size": [
+    82,
+    81
+   ],
+   "anchor_y": 65,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lantern_b": {
+   "file": "sprites/lantern_b.png",
+   "size": [
+    78,
+    88
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "silkrack_a": {
+   "file": "sprites/silkrack_a.png",
+   "size": [
+    114,
+    117
+   ],
+   "anchor_y": 96,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "arch_a": {
+   "file": "sprites/arch_a.png",
+   "size": [
+    118,
+    115
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "arch_b": {
+   "file": "sprites/arch_b.png",
+   "size": [
+    117,
+    109
+   ],
+   "anchor_y": 93,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lotus_a": {
+   "file": "sprites/lotus_a.png",
+   "size": [
+    87,
+    82
+   ],
+   "anchor_y": 66,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lotus_b": {
+   "file": "sprites/lotus_b.png",
+   "size": [
+    89,
+    88
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  }
+ },
+ "characters": {
+  "wukong": {
+   "file": "chars/wukong.png",
+   "title": [
+    "Tôn Ngộ Không",
+    "Sun Wukong, Great Sage Equal to Heaven"
+   ],
+   "biome": "hqs",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "king"
+  },
+  "khi_linh": {
+   "file": "chars/khi_linh.png",
+   "title": [
+    "Khỉ Lính",
+    "Monkey Guard"
+   ],
+   "biome": "hqs",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "guard"
+  },
+  "khi_lao": {
+   "file": "chars/khi_lao.png",
+   "title": [
+    "Khỉ Lão",
+    "Old Monkey"
+   ],
+   "biome": "hqs",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "elder"
+  },
+  "khi_con": {
+   "file": "chars/khi_con.png",
+   "title": [
+    "Khỉ Con",
+    "Monkey Kid"
+   ],
+   "biome": "hqs",
+   "size": [
+    36,
+    36
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "kid"
+  },
+  "khi_dan": {
+   "file": "chars/khi_dan.png",
+   "title": [
+    "Khỉ Dân",
+    "Monkey Villager"
+   ],
+   "biome": "hqs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "citizen"
+  },
+  "khi_dan_b": {
+   "file": "chars/khi_dan_b.png",
+   "title": [
+    "Khỉ Dân",
+    "Monkey Villager"
+   ],
+   "biome": "hqs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "citizen"
+  },
+  "tam_tang": {
+   "file": "chars/tam_tang.png",
+   "title": [
+    "Đường Tam Tạng",
+    "Tang Sanzang"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "visitor"
+  },
+  "sister1_violet": {
+   "file": "chars/sister1_violet.png",
+   "title": [
+    "Nhện Tinh cả",
+    "Eldest Spider Sister (violet)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister2_teal": {
+   "file": "chars/sister2_teal.png",
+   "title": [
+    "Nhện Tinh hai",
+    "Second Sister, the scholar (teal)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister3_rose": {
+   "file": "chars/sister3_rose.png",
+   "title": [
+    "Nhện Tinh ba",
+    "Third Sister, the dancer (rose)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister4_amber": {
+   "file": "chars/sister4_amber.png",
+   "title": [
+    "Nhện Tinh tư",
+    "Fourth Sister, the warrior (amber)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister5_crimson": {
+   "file": "chars/sister5_crimson.png",
+   "title": [
+    "Nhện Tinh năm",
+    "Fifth Sister, the huntress (crimson)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister6_silver": {
+   "file": "chars/sister6_silver.png",
+   "title": [
+    "Nhện Tinh sáu",
+    "Sixth Sister, the ghostly weaver (silver)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister7_indigo": {
+   "file": "chars/sister7_indigo.png",
+   "title": [
+    "Nhện Tinh bảy",
+    "Seventh Sister, the trickster (indigo)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "nhen_con": {
+   "file": "chars/nhen_con.png",
+   "title": [
+    "Nhện Con",
+    "Spiderling (charcoal)"
+   ],
+   "biome": "btd",
+   "size": [
+    48,
+    48
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "spiderling"
+  },
+  "nhen_con_b": {
+   "file": "chars/nhen_con_b.png",
+   "title": [
+    "Nhện Con",
+    "Spiderling (silver)"
+   ],
+   "biome": "btd",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "source": "pixellab",
+   "role": "spiderling"
+  }
+ }
+}

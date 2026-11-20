@@ -1,0 +1,192 @@
+[
+ {
+  "name": "wukong",
+  "id": "a84c7a10-ea6b-4ccf-8eca-a565051e508c",
+  "title": [
+   "Tôn Ngộ Không",
+   "Sun Wukong, Great Sage Equal to Heaven"
+  ],
+  "biome": "hqs",
+  "speed": 26,
+  "role": "king"
+ },
+ {
+  "name": "khi_linh",
+  "id": "112db858-6971-40fe-8fa8-466ddedb5cbb",
+  "title": [
+   "Khỉ Lính",
+   "Monkey Guard"
+  ],
+  "biome": "hqs",
+  "speed": 18,
+  "role": "guard"
+ },
+ {
+  "name": "khi_lao",
+  "id": "4d07cf98-6ad0-4c14-b0d1-888236e15624",
+  "title": [
+   "Khỉ Lão",
+   "Old Monkey"
+  ],
+  "biome": "hqs",
+  "speed": 11,
+  "role": "elder"
+ },
+ {
+  "name": "khi_con",
+  "id": "3b0d9997-513b-4026-8ba3-37b34ec16a5b",
+  "title": [
+   "Khỉ Con",
+   "Monkey Kid"
+  ],
+  "biome": "hqs",
+  "speed": 24,
+  "gait": "hop",
+  "role": "kid",
+  "shadow": 12,
+  "refresh": true
+ },
+ {
+  "name": "khi_dan",
+  "id": "d4fa443f-3208-4578-96b7-c09495b94953",
+  "title": [
+   "Khỉ Dân",
+   "Monkey Villager"
+  ],
+  "biome": "hqs",
+  "speed": 20,
+  "role": "citizen"
+ },
+ {
+  "name": "khi_dan_b",
+  "id": "ffbf0d57-8e11-44ca-80f4-a32e3bbd12c7",
+  "title": [
+   "Khỉ Dân",
+   "Monkey Villager"
+  ],
+  "biome": "hqs",
+  "speed": 20,
+  "role": "citizen"
+ },
+ {
+  "name": "tam_tang",
+  "id": "7c4934b7-4ca5-4a55-901a-4da791624c78",
+  "title": [
+   "Đường Tam Tạng",
+   "Tang Sanzang"
+  ],
+  "biome": "btd",
+  "speed": 13,
+  "role": "visitor"
+ },
+ {
+  "name": "sister1_violet",
+  "id": "17866a2e-f09b-4435-ab1a-d0058c60f512",
+  "title": [
+   "Nhện Tinh cả",
+   "Eldest Spider Sister (violet)"
+  ],
+  "biome": "btd",
+  "speed": 14,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister2_teal",
+  "id": "25e86909-e869-4106-a9e3-209d5f7f260a",
+  "title": [
+   "Nhện Tinh hai",
+   "Second Sister, the scholar (teal)"
+  ],
+  "biome": "btd",
+  "speed": 14,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister3_rose",
+  "id": "c0af13b2-45f0-4771-b551-23fe3eefc63e",
+  "title": [
+   "Nhện Tinh ba",
+   "Third Sister, the dancer (rose)"
+  ],
+  "biome": "btd",
+  "speed": 14,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister4_amber",
+  "id": "18c8c819-9f97-47b5-ae6d-23019956f3c6",
+  "title": [
+   "Nhện Tinh tư",
+   "Fourth Sister, the warrior (amber)"
+  ],
+  "biome": "btd",
+  "speed": 15,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister5_crimson",
+  "id": "53102b10-a97c-4038-9117-6939ffdabd77",
+  "title": [
+   "Nhện Tinh năm",
+   "Fifth Sister, the huntress (crimson)"
+  ],
+  "biome": "btd",
+  "speed": 15,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister6_silver",
+  "id": "71c76bbe-2887-4319-80e0-8caa42cb4259",
+  "title": [
+   "Nhện Tinh sáu",
+   "Sixth Sister, the ghostly weaver (silver)"
+  ],
+  "biome": "btd",
+  "speed": 13,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "sister7_indigo",
+  "id": "68c29fa2-785a-4bcf-9d67-fcb4c15fed78",
+  "title": [
+   "Nhện Tinh bảy",
+   "Seventh Sister, the trickster (indigo)"
+  ],
+  "biome": "btd",
+  "speed": 16,
+  "role": "sister",
+  "shadow": 22
+ },
+ {
+  "name": "nhen_con",
+  "id": "ef561a52-ef52-4217-922d-08e219f0a099",
+  "title": [
+   "Nhện Con",
+   "Spiderling (charcoal)"
+  ],
+  "biome": "btd",
+  "speed": 30,
+  "gait": "scuttle",
+  "role": "spiderling",
+  "shadow": 18
+ },
+ {
+  "name": "nhen_con_b",
+  "id": "f22add2b-d537-4c62-acd7-33a58a8abab8",
+  "title": [
+   "Nhện Con",
+   "Spiderling (silver)"
+  ],
+  "biome": "btd",
+  "speed": 30,
+  "gait": "scuttle",
+  "role": "spiderling",
+  "shadow": 16
+ }
+]

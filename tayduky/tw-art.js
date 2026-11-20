@@ -89,7 +89,7 @@ const TWA = (function () {
         SH.water = m === M.SEA ? 1 : m === M.STREAM ? 2 : m === M.SPRING ? 3 : 4;
         return tone(r, 1.2 + n0 * 1.4 + n1 * 0.6 + (d ? 0.25 : 0));
       }
-      case M.BRIDGE: { const fv = (J * 4) % 1; if (fv < 0.14) return P.wood[0]; return tone(P.wood, 1.5 + hash2(Math.floor(J * 4), 0, 20) * 2); }
+      case M.BRIDGE: { SH.water = 2; return tone(P.stream, 1.2 + n0 * 1.4 + n1 * 0.6 + (d ? 0.25 : 0)); }      // water under the stone bridge sprite
       case M.GORGE: case M.GLOW: case M.WEBF: case M.CAVEF: {
         const r = m === M.CAVEF ? P.cavef : P.gorge; let t = 1 + n0 * 2 + n1 * 0.9 + (d ? 0.25 : 0);
         if (hp < 0.05) t += 1.4;                                                              // gravel
@@ -103,7 +103,7 @@ const TWA = (function () {
       }
       case M.WEBPATH: { const c = tone(P.webpath, 1 + n0 * 1.6 + n1 * 0.8 + (d ? 0.25 : 0)); return ((I * 3 + J * 5) % 1 < 0.06 || (I * 5 - J * 3 + 100) % 1 < 0.05) ? mix(c, P.silk[2], 0.5) : c; }
       case M.CHASM: { const t = 0.6 + n0 * 1.4 + n1 * 0.6; return hash2(X >> 1, Y, 23) < 0.03 ? P.chasm[3] : tone(P.chasm, t); }
-      case M.SILKB: { const fu = (I * 4) % 1, fv = (J * 4) % 1; return (fu < 0.18 || fv < 0.18) ? P.silk[0] : tone(P.silk, 1.5 + hash2(Math.floor(I * 4), Math.floor(J * 4), 24) * 1.6); }
+      case M.SILKB: { const t = 0.6 + n0 * 1.4 + n1 * 0.6; return tone(P.chasm, t); }                              // the abyss under the silk bridge sprite
       default: {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
@@ -208,7 +208,7 @@ const TWA = (function () {
         }
       }
     }
-    if (m === M.SILKB) { for (let s = 0; s < 6; s++) { const gx = sx - 28 + s * 11, len = 18 + Math.floor(hash2(i * 7 + s, j, 41) * 26); for (let y = 0; y < len; y++) if ((y + s) % 3) put(gx, sy + 28 + y - (s > 2 ? (s - 3) * 5 : 0), P.silk[1], null, 0); } }
+    if (false && m === M.SILKB) { for (let s = 0; s < 6; s++) { const gx = sx - 28 + s * 11, len = 18 + Math.floor(hash2(i * 7 + s, j, 41) * 26); for (let y = 0; y < len; y++) if ((y + s) % 3) put(gx, sy + 28 + y - (s > 2 ? (s - 3) * 5 : 0), P.silk[1], null, 0); } }
     // stairs and decals on this tile
     const st = TWM.stairAt.get(k); if (st) stairs(i, j, h, st, sx, sy, put, b);
     for (const dc of TWM.decals) if (dc.j === j && i >= dc.i && i < dc.i + dc.w) caveDecal(dc, i, j, h, sx, sy, put, hl);
@@ -497,21 +497,39 @@ const TWA = (function () {
   };
   // ---------------------------------------------------------------- PixelLab object sprites (tayduky/sprites/, packed by docs/tayduky/v2/tools/pack_sprites.py)
   const IMG = {};
-  function loadSprites() {
-    return Promise.all(Object.entries(window.TW_SPRITES || {}).map(([n, m]) => new Promise(res => { const im = new Image(); im.onload = () => { IMG[n] = { im, w: m.w, h: m.h, py: m.py }; res(); }; im.onerror = res; im.src = 'sprites/' + n + '.png'; })));
+  // life masks built from the sprite itself: GLOW = saturated bright violet/green/teal pixels (crystals, mushrooms, eggs) that pulse and come back at night;
+  // SILK = bright desaturated pixels (webs, silk wraps) that shimmer. Which sprites get which is a name-prefix table.
+  const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
+  function lifeMask(im, kind) {
+    const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const g = cv.getContext('2d'); g.drawImage(im, 0, 0);
+    const id = g.getImageData(0, 0, cv.width, cv.height), d = id.data; let n = 0;
+    for (let q = 0; q < d.length; q += 4) {
+      if (d[q + 3] < 8) { d[q + 3] = 0; continue; }
+      const r = d[q], gg = d[q + 1], b = d[q + 2], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), v = mx / 255, s = mx ? (mx - mn) / mx : 0;
+      let h = 0; if (mx !== mn) { const dd = mx - mn; h = mx === r ? ((gg - b) / dd + 6) % 6 : mx === gg ? (b - r) / dd + 2 : (r - gg) / dd + 4; h *= 60; }
+      const warm = s > 0.45 && v > 0.82 && h > 18 && h < 62;      // lantern flames
+      const on = kind === 'glow' ? (warm || (s > 0.4 && v > 0.62 && ((h > 80 && h < 195) || (h > 255 && h < 325)))) : (s < 0.3 && v > 0.74);
+      if (on) n++; else d[q + 3] = 0;
+    }
+    if (n < 6) return null; g.putImageData(id, 0, 0); return cv;
   }
+  function loadSprites() {
+    return Promise.all(Object.entries(window.TW_SPRITES || {}).map(([n, m]) => new Promise(res => { const im = new Image(); im.onload = () => {
+      IMG[n] = { im, w: m.w, h: m.h, py: m.py, name: n, glow: GLOWS.some(p => n.startsWith(p)) ? lifeMask(im, 'glow') : null, silk: SILKS.some(p => n.startsWith(p)) ? lifeMask(im, 'silk') : null }; res(); }; im.onerror = res; im.src = 'sprites/' + n + '.png'; })));
+  }
+  const SWAY = { bigpeach: 1.7, bigbamboo: 1.3, hut: 0.5, stall: 0.5, silkrack: 1.2 };
   const IMGKINDS = { hut: ['hut_a', 'hut_b', 'hut_c'], shrine: ['shrine_a', 'shrine_b', 'shrine_c'], stall: ['stall_a', 'stall_b'], hbridge: ['bridge_a'], tent: ['tent_a', 'tent_b'],
     altar: ['altar_a', 'altar_b'], pcrystals: ['crystals_a', 'crystals_b', 'crystals_c'], silkbr: ['silkbridge_a'], hall: ['hall_a', 'hall_b'], statue: ['statue_a', 'statue_b'], playground: ['playground_a'],
-    bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'] };
+    bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], caveent: ['cave_a', 'cave_b'], gate: ['gate_a', 'gate_b'], bigbamboo: ['bamboo_a', 'bamboo_b', 'bamboo_c'], scholar: ['scholar_a', 'scholar_b'],
+    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'] };
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
-    if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: null, flat: false, img: true }; })() : null; }
+    if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: r.glow, glow: r.glow, silk: r.silk, sway: SWAY[p.kind] || 0, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);
     if (cache.has(key)) return cache.get(key);
-    if (IMGKINDS[p.kind]) { const names = IMGKINDS[p.kind].filter(n => IMG[n]); if (!names.length) return null; const m = IMG[names[(p.v || 0) % names.length]]; return { w: m.w, h: m.h, py: m.py, frames: [m.im], em: null, flat: false, img: true }; }
-    const paint = PAINT[p.kind]; if (!paint) return null;
+    const paint = PAINT[p.kind]; if (!paint && !IMGKINDS[p.kind]) return null; if (!paint) return null;
     const frames = paint(Object.assign({}, p, { v: vv * 7919 + 13 })), f0 = frames[0];
     const out = { w: f0.w, h: f0.h, frames: frames.map(S => S.canvas()), em: f0.e ? f0.canvas(true) : null, flat: !!p.flat };
     cache.set(key, out); return out;

@@ -179,7 +179,6 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // the cave mouth: a floor tile at the wall foot; the arch is a decal on the wall face, silk curtains are a prop
   const cw = wB(BT.cave[0]); for (let i = BT.cave[0] - 1; i <= BT.cave[0] + 1; i++) set(i, cw, 2, M.CAVEF);
   for (let i = BT.cave[0] - 1; i <= BT.cave[0] + 1; i++) for (let j = cw; j < cw + 3; j++) if (H[id(i, j)] === 4) set(i, j, 2, M.CAVEF);
-  TWM.decals.push({ kind: 'cave_btd', i: BT.cave[0], j: cw - 1, w: 2 });
   BT.cave = [BT.cave[0], cw];
   TWM.webs.push({ biome: 'btd', x: (BT.canopy[0] + 0.5) * 8, y: (BT.canopy[1] + 0.5) * 8, z: 30, rx: 13 * 8, ry: 9 * 8, spokes: 24, base: 0.55 });
 
@@ -223,8 +222,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   carvePath([[146, 20], [146, 16], [146, 12], [146, 9], [146, 7], [146, 4]], M.DIRT, 'hqs');   // up the village to the statue lookout
   carvePath([[132, 22], [128, 18], [127, MBF + 4]], M.DIRT, 'hqs');                    // round the pool
   carvePath([[126, 24], [124, 18], [123, 12], [123, 9], [123, 7], [123, 4]], M.DIRT, 'hqs');   // up to the shrine
-  carvePath([[126, 30], [130, 34], [136, 35], [144, 34]], M.DIRT, 'hqs');              // meadow loop over the stream
-  carvePath([[132, 22], [132, 28], [131, 30]], M.DIRT, 'hqs');
+  carvePath([[126, 30], [130, 33], [132, 34]], M.DIRT, 'hqs');                         // orchard loop (stays on the west bank)
   // BTD routes
   const cv0 = BT.cave;
   carvePath([[cv0[0], cv0[1]], [cv0[0], 139], [80, 141], [90, 144], [92, 144]], M.WEBPATH, 'btd');
@@ -251,7 +249,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // --- HQS landmarks
   prop('throne', HQ.throne[0], HQ.throne[1], { fp: [2, 1] }); reserve(HQ.throne[0], HQ.throne[1], 1);
   poi('throne', 'hqs', HQ.throne[0] + 0.5, HQ.throne[1] + 1, { face: 'down', seat: true });
-  prop('banner', 137, 16); prop('banner', 144, 16); prop('drum', 136, 18, { fp: [1, 1] });
+  prop('banner', 137, 16); prop('banner', 144, 16);
+  prop('gate', 146, 15, { fp: [1, 1], block: false, v: 0, flip: true }); prop('lantern2', 134, 23, { fp: [1, 1], v: 0 }); prop('lantern2', 144, 27, { fp: [1, 1], v: 1 }); TWM.lights.push({ biome: 'hqs', i: 134, j: 23, r: 52, col: '255,190,110', kind: 'lantern' }); TWM.lights.push({ biome: 'hqs', i: 144, j: 27, r: 52, col: '255,190,110', kind: 'lantern' });
+  prop('scholar', 133, 19, { fp: [1, 1], v: 0 }); prop('scholar', 120, 11, { fp: [1, 1], v: 1 }); prop('lotus', 121, 20, { fp: [2, 2], v: 0 }); prop('lotus', 143, 25, { fp: [2, 2], v: 1 }); prop('drum', 136, 18, { fp: [1, 1] });
   prop('lantern', 137, 19); prop('lantern', 144, 19);
   for (const [i, j] of [[143, 21], [145, 23], [144, 25]]) { prop('dummy', i, j); poi('dummy', 'hqs', i - 1, j, { face: 'right', target: [i, j] }); }
   prop('rack', 147, 20); poi('court', 'hqs', HQ.court[0], HQ.court[1], { cap: 30 });
@@ -279,7 +279,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) { const i = 127 + c * 3 + (r % 2), j = 27 + r * 3; if (inMap(i, j) && isB(i, j, 'hqs') && isB(i, j + 1, 'hqs') && !RES[id(i, j)] && !PATHC[id(i, j)] && MAT[id(i, j)] !== M.STREAM && !TWM.isWater(MAT[id(i, j)]) && MAT[id(i, j)] !== M.PAVE) { prop('bigpeach', i, j, { v: r * 4 + c }); poi('tree', 'hqs', i, j + 1, { face: 'up', tree: [i, j], cap: 1 }); reserve(i, j, 1); } }
   poi('cave', 'hqs', FALL_I - 1, MBF, { cap: 4 }); poi('cave', 'hqs', FALL_I + 3, MBF, { cap: 4 });
   // --- BTD landmarks
-  prop('curtain', BT.cave[0], BT.cave[1], { block: false, fp: [1, 1] }); poi('cave', 'btd', BT.cave[0], BT.cave[1], { cap: 9 });
+  prop('caveent', BT.cave[0] - 1, BT.cave[1], { fp: [2, 1], v: 0 }); poi('cave', 'btd', BT.cave[0] + 1, BT.cave[1], { cap: 9 });
   prop('bspire', 66, 135, { fp: [2, 2], v: 0 }); prop('bspire', 91, 134, { fp: [2, 2], v: 1 }); prop('bspire', 83, 145, { fp: [2, 2], v: 0 });
   for (const [i, j] of [[65, 142], [65, 146]]) { prop('bloom', i, j, { fp: [2, 2] }); poi('loom', 'btd', i + 2, j + 1, { face: 'left', target: [i, j] }); }
   prop('circle', 74, 144, { block: false, flat: true }); poi('circle', 'btd', 74, 144, { cap: 12 });
@@ -297,6 +297,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   for (const i of [66, 73, 84, 92, 95]) { const j = wB(i) + 1; prop('vlantern', i, j); TWM.lights.push({ biome: 'btd', i, j, r: 42, col: '190,120,255', kind: 'lantern' }); }
   prop('bloom', 96, 146, { fp: [2, 2] }); poi('loom', 'btd', 95, 147, { face: 'right', target: [96, 146] });
   prop('tent', 90, 146, { fp: [2, 2], v: 0 }); poi('hut', 'btd', 89, 147, { cap: 3, face: 'right' });
+  prop('silkrack', 68, 145, { fp: [2, 2] }); prop('rockarch', 62, 140, { fp: [1, 1], block: false, v: 0, flip: true }); prop('rockarch', 97, 142, { fp: [1, 1], block: false, v: 1 });
   prop('bigmush', 88, 157, { fp: [1, 1], v: 0 }); prop('bigmush', 70, 158, { fp: [1, 1], v: 1 });
 
   // --- scatter vegetation and rocks (deterministic), never on paths, stairs, water or reserved tiles
@@ -314,7 +315,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       const grove = i >= 118 && i <= 134 && j >= 19 && j <= 36 && isB(i, j + 1, 'hqs');
       if (grove && r < 0.15 && nz > 0.3) { prop('peach', i, j); reserve(i, j, 1); poi('tree', 'hqs', i, j + 1, { face: 'up', tree: [i, j], cap: 1 }); continue; }
       if (!grove && r < 0.035 && H[k] >= 2 && isB(i, j + 1, 'hqs')) { prop('peach', i, j); reserve(i, j, 1); poi('tree', 'hqs', i, j + 1, { face: 'up', tree: [i, j], cap: 1 }); continue; }
-      if (j < uB(i) + 1 && r < 0.11 && nz > 0.45) { prop('bamboo', i, j); continue; }
+      if (j < uB(i) + 1 && r < 0.11 && nz > 0.45) { prop(r < 0.045 ? 'bigbamboo' : 'bamboo', i, j); continue; }
       if (r < 0.05) { prop('rock', i, j, { size: r < 0.015 ? 2 : 1 }); continue; }
       if (r < 0.11) { prop('bush', i, j, { block: false }); continue; }
       if (r < 0.2) { prop(m === M.FLOWER ? 'flowers' : 'tuft', i, j, { block: false }); continue; }
@@ -337,6 +338,14 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   }
   for (const b of TWM.biomes) if (!b.built) { const [ci, cj] = b.centre.map(Math.round); prop('stele', ci, cj, { block: true, placeholder: true }); }
 
+  // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
+  { const seenB = new Uint8Array(NN);
+    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const k = id(i, j); if (MAT[k] !== mat || seenB[k]) continue;
+      let n = 0; while (inMap(i, j + n) && MAT[id(i, j + n)] === mat) n++; let m2 = 0; while (inMap(i + m2, j) && MAT[id(i + m2, j)] === mat) m2++;
+      if (n >= m2) { for (let a = 0; a < n; a++) seenB[id(i, j + a)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [1, n], block: false, v: 0, bridge: true }); }
+      else { for (let a = 0; a < m2; a++) seenB[id(i + a, j)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [m2, 1], block: false, v: 0, bridge: true, flip: true }); }
+    } }
   // ---------------------------------------------------------------- seam band: placeholder ground near a built biome blends toward that biome's colours
   // TWM.seam[k] = distance (1..6) << 2 | built biome (1 hqs, 2 btd); 0 = none. (Design: borders carry both palettes.)
   TWM.seam = new Uint8Array(NN);

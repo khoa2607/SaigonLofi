@@ -64,6 +64,8 @@ The style is Chinese mythic fantasy pixel art: warm, charming and storybook-like
 
 ## 5. Pilot cast (2 biomes)
 
+The table below records the original hand-authored pilot. The current runtime cast was redesigned in pass 3; its authoritative roster and source IDs are in `tools/pl_cast.json`, with provenance in `PIXELLAB.md`.
+
 The **pilot biomes are Hoa Quả Sơn and Bàn Tơ Động**, the default choice. They contrast the most: warm jade, sunny and furry against charcoal violet, glowing and silken.
 
 | Character | Biome | Silhouette key | Built from |

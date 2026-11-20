@@ -123,6 +123,8 @@ def board(chars, bg, scale, name, col='idle0'):
     im.save(os.path.join(OUT, name))
 
 
+PLNAMES = set(e['name'] for e in json.load(open(os.path.join(HERE, 'pl_cast.json'), encoding='utf-8'))) if os.path.exists(os.path.join(HERE, 'pl_cast.json')) else set()
+
 if __name__ == '__main__':
     only = os.environ.get('ONLY')
     chars = []
@@ -130,12 +132,14 @@ if __name__ == '__main__':
     for p in sorted(glob.glob(os.path.join(SRC, '*.json'))):
         if only and only not in p: continue
         C0 = json.load(open(p, encoding='utf-8'))
+        if C0['name'] in PLNAMES: continue   # replaced by the PixelLab cast (pack_pl_chars.py)
         for C in [C0] + [dict(C0, name=v['name'], title=v.get('title', C0.get('title')), palette=dict(C0['palette'], **v['palette']), variant_of=C0['name']) for v in C0.get('variants', [])]:
             C, sheet, frames = build(p, C)
             chars.append((C, sheet, frames))
             fr = sheet.crop((0, 0, C['canvas'][0], C['canvas'][1])); top = next((y for y in range(fr.height) if any(fr.getpixel((x, y))[3] for x in range(fr.width))), 0)
             meta['chars'][C['name']] = {'src': 'out/' + C['name'] + '.png', 'size': C['canvas'], 'pivot': C['pivot'], 'title': C.get('title'), 'top': top,
-                                        'biome': C.get('biome'), 'speed': C.get('speed', 22), 'gait': C.get('gait', 'walk'), 'variant_of': C.get('variant_of')}
+                                        'biome': C.get('biome'), 'speed': C.get('speed', 22), 'gait': C.get('gait', 'walk'), 'variant_of': C.get('variant_of'),
+                                        'anim': {'idle': [0, 2], 'walk': [2, 4], 'sit': [6, 1], 'act': [7, 2]}, 'stride': 1.1, 'idleDur': 0.7, 'actDur': 0.32}
             print(C['name'], 'ok')
     if not only:
         with open(os.path.join(OUT, 'chars.js'), 'w', encoding='utf-8') as f:

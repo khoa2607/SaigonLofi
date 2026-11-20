@@ -207,3 +207,11 @@ The simulation is DOM-free and seeded (`TWS.R`), and it starts warm: the world i
 ## Next step
 
 The owner's visual review of the two biomes. After approval, the remaining nine are built one at a time on the same modules (map section, art set, residents, minis, story).
+
+## Pass 3 — cast and living environment (2026-11-20)
+
+The two showcase biomes now use the redesigned PixelLab cast: four directions and eight walk frames, seven distinct sisters, two spiderlings and Wukong's feathered silhouette. Idle frames derive from the walk drawings to avoid the scale jump in the original rotations. Staff practice and sisters' activities use alternating existing walk poses; these are not dedicated action clips. The night redraw respects the seated crop.
+
+The 48 packed object sprites and their provenance are catalogued in `ASSET-LIBRARY.md` and `PIXELLAB.md`. Bridges cross actual bridge tiles; trees, silk, lights, petals, spores and water add environmental motion. Existing activities, story loops and recovery remain in place. The other nine biomes remain placeholders.
+
+Verification: 900-second deterministic simulation runs for seeds 7 and 31 cover both story cycles and report no adjacency violations, blocked agents or teleports. The 30-second Chrome world test passed with both signatures, no console errors, and activity-frame and seated-night-crop checks; canvas script time was 0.6 ms median and 0.7 ms p90 in this run. Day and night captures of both biomes were reviewed at normal zoom. These checks do not establish GPU performance or replace further animation review. Dedicated staff and weaving clips and more natural back-view monkey silhouettes remain future art improvements.

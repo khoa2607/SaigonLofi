@@ -113,7 +113,7 @@ const TWS = (function () {
       case 'wait': if (st.left === undefined) st.left = st.t; st.left -= dt; a.moving = false; return st.left <= 0;
       case 'bubble': bubble(a, st.kind, st.t); return true;
       case 'carry': a.carry = st.what; return true;
-      case 'look': a.look = st.look; return true;
+      case 'look': { if (window.TD2_CHARS && window.TD2_CHARS.chars[st.look]) a.look = st.look; else a.look = a.char; a.robe = /_bath$/.test(st.look); return true; }
       case 'call': st.fn(a); return true;
       case 'release': if (st.poi && (a.claims || []).includes(st.poi)) { st.poi.users = Math.max(0, st.poi.users - 1); a.claims.splice(a.claims.indexOf(st.poi), 1); } return true;
     }

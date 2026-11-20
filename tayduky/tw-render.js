@@ -73,21 +73,52 @@ const TWR = (function () {
   // ---------------------------------------------------------------- characters
   const SHEETS = {};
   function sheet(name) { if (!SHEETS[name]) { const C = window.TD2_CHARS.chars[name]; if (!C) return null; const im = new Image(); im.src = 'chars/' + name + '.png'; SHEETS[name] = { im, C }; } return SHEETS[name]; }
-  function drawAgent(g, a) {
+  // frame selection from the character's animation table (C.anim = {idle:[col0,n], walk:[col0,n], act:[col0,n], sit:[col0,n]?}).
+  // Walk advances with distance travelled (feet never slide), idle and act with time.
+  function frameCol(C, a) {
+    const A = C.anim, T = R.t, ph = a.phase || 0;
+    const pick = (r, k) => r[0] + ((k % r[1]) + r[1]) % r[1];
+    if (a.moving || a.pose === 'climb') return A.walk ? pick(A.walk, Math.floor(a.dist / (C.stride || 1.1))) : 0;
+    if (a.pose === 'sit') return A.sit ? A.sit[0] : pick(A.idle, 0);
+    if (a.pose === 'act') {
+      if (A.act) return pick(A.act, Math.floor((T + ph) / (C.actDur || 0.2)));
+      // Reuse the matched-scale walk drawings for practice and weaving: a slow
+      // alternating stance moves the staff and the sisters' back legs in place.
+      if ((a.role === 'king' || a.role === 'sister') && A.walk) {
+        const poses = [0, 1, 2, 1, 0, 5, 6, 5];
+        return pick(A.walk, poses[Math.floor((T + ph) / 0.24) % poses.length]);
+      }
+      return pick(A.idle, Math.floor((T + ph) / (C.idleDur || 0.7)));
+    }
+    if (a.pose === 'jump' || a.pose === 'fly') return A.walk ? A.walk[0] : 0;
+    return pick(A.idle, Math.floor((T + ph) / (C.idleDur || 0.7)));
+  }
+  function drawAgent(g, a, glowOnly) {
     const S = sheet(a.look || a.char); if (!S || !S.im.complete) return;
-    const C = S.C, [w, h] = C.size, cols = window.TD2_CHARS.cols, dirs = window.TD2_CHARS.dirs;
-    const col = cols.indexOf(a.frame) >= 0 ? cols.indexOf(a.frame) : 0, row = dirs.indexOf(a.dir) >= 0 ? dirs.indexOf(a.dir) : 0;
-    const X = Math.round(wx(a.x, a.y) - C.pivot[0]), gz = a.gz, Y = Math.round(wy(a.x, a.y, gz + (a.lift || 0)) - C.pivot[1]);
+    const C = S.C, [w, h] = C.size, dirs = window.TD2_CHARS.dirs, px0 = C.pivot[0], py0 = C.pivot[1];
+    const col = frameCol(C, a), row = dirs.indexOf(a.dir) >= 0 ? dirs.indexOf(a.dir) : 0;
+    // working (act) poses bounce a little so a still idle frame still reads as effort
+    const bob = a.pose === 'act' && !(C.anim && C.anim.act) ? Math.round(Math.abs(Math.sin((R.t + (a.phase || 0)) * 7)) * 1.4) : 0;
+    const X = Math.round(wx(a.x, a.y) - px0), gz = a.gz, Y = Math.round(wy(a.x, a.y, gz + (a.lift || 0)) - py0) - bob;
+    const sitDrop = a.pose === 'sit' && C.anim && !C.anim.sit ? (C.sitDrop || 5) : 0;
+    if (glowOnly) { // Match the seated crop in the normal pass; never restore hidden legs at night.
+      if (sitDrop) { const cut = py0 - sitDrop; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + sitDrop, w, cut); }
+      else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
+      return;
+    }
+    const sw = Math.max(10, Math.round((C.shadow || 14)));
     // contact shadow on the ground (stays on the ground while jumping or climbing)
-    if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + 9, sY - 2, 14, 3); g.fillRect(X + 11, sY - 3, 10, 5); }
-    if (a.thread) { g.fillStyle = 'rgba(232,228,250,0.85)'; const ty = Math.round(wy(a.x, a.y, a.thread)); g.fillRect(X + C.pivot[0], ty, 1, Y + 30 - ty); }
+    if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + px0 - (sw >> 1), sY - 2, sw, 3); g.fillRect(X + px0 - (sw >> 1) + 2, sY - 3, sw - 4, 5); }
+    if (a.thread) { g.fillStyle = 'rgba(232,228,250,0.85)'; const ty = Math.round(wy(a.x, a.y, a.thread)); g.fillRect(X + px0, ty, 1, Y + (C.top || 6) + 16 - ty); }
     if (a.alpha !== undefined && a.alpha < 1) g.globalAlpha = Math.max(0, a.alpha);
-    if (a.inWater) { const cut = h - 14; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
-      const wl = Y + 6 + cut; g.fillStyle = 'rgba(220,250,250,0.85)'; g.fillRect(X + 7, wl - 1, 18, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(X + 5 + (Math.floor(R.t * 3) % 3), wl, 22, 1); }
+    if (a.inWater) { const cut = py0 - 12; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
+      const wl = Y + 6 + cut; g.fillStyle = 'rgba(220,250,250,0.85)'; g.fillRect(X + px0 - 9, wl - 1, 18, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(X + px0 - 11 + (Math.floor(R.t * 3) % 3), wl, 22, 1); }
+    else if (sitDrop) { const cut = py0 - sitDrop - 2; g.drawImage(S.im, col * w, row * h, w, cut + 2, X, Y + sitDrop, w, cut + 2); }
     else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
     g.globalAlpha = 1;
-    if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; for (let k = 0; k < 7; k++) g.fillRect(X + 8, Y + 16 + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + 9 + k * 5, Y + 14, 1, 30); }
-    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (a.frame === 'act0' || a.frame === 'act1' ? 22 : 30); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
+    if (a.robe) { const ry = Y + (C.top || 6) + Math.round((py0 - (C.top || 6)) * 0.34); g.fillStyle = '#2a1726'; g.fillRect(X + px0 - 9, ry - 1, 18, 9); g.fillStyle = '#f4f0fa'; g.fillRect(X + px0 - 8, ry, 16, 7); g.fillStyle = '#c8c0dc'; g.fillRect(X + px0 - 8, ry + 5, 16, 2); g.fillStyle = '#f4b0c8'; g.fillRect(X + px0 - 1, ry, 2, 5); }   // tasteful bathing robe
+    if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; const top = Y + (C.top || 6) + 14; for (let k = 0; k < 7; k++) g.fillRect(X + px0 - 8, top + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + px0 - 7 + k * 5, top - 2, 1, 28); }
+    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
     if (a.bubble) bubble(g, X + C.pivot[0], Y + (C.top || 6) - 4, a.bubble);
   }
   const ICON = { note: ['00110', '00101', '00100', '11100', '11100'], dots: ['00000', '00000', '10101', '00000', '00000'], heart: ['01010', '11111', '11111', '01110', '00100'],
@@ -99,6 +130,20 @@ const TWR = (function () {
     g.fillStyle = ICOL[kind]; for (let r = 0; r < 5; r++) for (let k = 0; k < 5; k++) if (m[r][k] === '1') g.fillRect(x + 2 + k, y + 1 + r, 1, 1);
   }
 
+  // ---------------------------------------------------------------- subtle life on sprites (render-only)
+  // sway: the sprite is drawn in 6 px strips; each strip shifts by a whole pixel following a slow wave, strongest at the top (a breeze, not a shake)
+  function sway(g, im, s, amp) {
+    const w = im.width, h = im.height, t = R.t * 0.9 + s.ph, st = 6;
+    for (let y = 0; y < h; y += st) { const k = Math.pow(Math.max(0, (s.sp.py * 0.85 - y) / (s.sp.py * 0.85)), 1.4), o = Math.round(Math.sin(t + y * 0.018) * amp * k);
+      g.drawImage(im, 0, y, w, Math.min(st, h - y), s.X + o, s.Y + y, w, Math.min(st, h - y)); }
+  }
+  // pulse (crystals, mushrooms, eggs): the glow pixels brighten and fade; shimmer (silk): bright threads twinkle on their own phase
+  function lifeOverlay(g, s) {
+    const t = R.t, night = 1 + R.dark * 1.2; g.globalCompositeOperation = 'lighter';
+    if (s.sp.glow) { g.globalAlpha = Math.min(0.9, (0.1 + 0.13 * (0.5 + 0.5 * Math.sin(t * 2.1 + s.ph * 1.9))) * night); g.drawImage(s.sp.glow, s.X, s.Y); }
+    if (s.sp.silk) { g.globalAlpha = Math.min(0.8, (0.05 + 0.14 * Math.max(0, Math.sin(t * 1.3 + s.ph * 2.3))) * (1 + R.dark * 0.6)); g.drawImage(s.sp.silk, s.X + (Math.sin(t * 0.7 + s.ph) > 0.8 ? 1 : 0), s.Y); }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  }
   // ---------------------------------------------------------------- dynamic world objects
   function drawFall(g, f) {
     // the curtain covers the massif face over f.w tiles; streaks move down; foam and mist at the foot
@@ -211,7 +256,10 @@ const TWR = (function () {
     D.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     for (const it of D) {
       if (it[1] === 0) { const s = it[2], fr = s.sp.frames, f = fr.length === 1 ? fr[0] : fr.length === 2 ? fr[Math.floor(R.t * 0.8 + s.ph) % 2] : fr[Math.floor(R.t * 4 + s.ph) % fr.length];
-        if (s.p.kind === 'dummy' && s.p.hit > 0) g.drawImage(f, s.X + (Math.floor(R.t * 30) % 2 ? 1 : -1), s.Y); else g.drawImage(f, s.X, s.Y);
+        if (s.p.kind === 'dummy' && s.p.hit > 0) g.drawImage(f, s.X + (Math.floor(R.t * 30) % 2 ? 1 : -1), s.Y);
+        else if (s.sp.sway) sway(g, f, s, s.sp.sway);
+        else if (s.p.flip) { g.save(); g.translate(s.X + f.width, s.Y); g.scale(-1, 1); g.drawImage(f, 0, 0); g.restore(); } else g.drawImage(f, s.X, s.Y);
+        if (s.sp.glow || s.sp.silk) lifeOverlay(g, s);
         if (s.p.kind === 'fire') drawFire(g, s); if (s.p.kind === 'curtain') drawCurtain(g, s); }
       else if (it[1] === 1) drawAgent(g, it[2]);
       else if (it[1] === 2) drawFall(g, it[2]);
@@ -232,10 +280,10 @@ const TWR = (function () {
     // emissive pixels come back on top of the grade; glows around lights
     const ea = Math.min(1, 0.45 + amt * 1.2);
     g.globalAlpha = ea; for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = R.chunks.get(ci + ',' + cj); if (c && c.ready && c.ecv) g.drawImage(c.ecv, ci * CH, cj * CH); }
-    for (const it of D) if (it[1] === 0 && it[2].sp.em) g.drawImage(it[2].sp.em, it[2].X, it[2].Y);
+    for (const it of D) if (it[1] === 0 && it[2].sp.em) { const s = it[2], fl = s.p.kind === 'lantern' || s.p.kind === 'vlantern' ? 0.78 + 0.22 * TWM.hash2(Math.floor(R.t * 9) + s.ph, s.ph, 5) : 0.82 + 0.18 * Math.sin(R.t * 2.1 + s.ph * 1.9); g.globalAlpha = Math.min(1, ea * fl); g.drawImage(s.sp.em, s.X, s.Y); }
     g.globalAlpha = 1;
     g.globalCompositeOperation = 'lighter';
-    for (const L of TWM.lights) { const btd = L.biome === 'btd', a = (btd ? 0.16 : 0) + amt * (L.kind === 'fire' ? 0.5 : 0.32); if (a < 0.02) continue; const x = wx((L.i + 0.5) * 8, (L.j + 0.5) * 8), y = wy((L.i + 0.5) * 8, (L.j + 0.5) * 8, TWM.H[TWM.id(L.i, L.j)] * 4) - 10;
+    for (const L of TWM.lights) { const btd = L.biome === 'btd', fl = L.kind === 'fire' ? 0.8 + 0.2 * TWM.hash2(Math.floor(R.t * 12), L.i * 7 + L.j, 6) : L.kind === 'lantern' ? 0.86 + 0.14 * Math.sin(R.t * 5 + L.i) * TWM.hash2(Math.floor(R.t * 6), L.j, 7) + 0.06 : L.kind === 'crystal' ? 0.8 + 0.2 * Math.sin(R.t * 1.8 + L.i * 0.7 + L.j) : 1, a = ((btd ? 0.16 : 0) + amt * (L.kind === 'fire' ? 0.5 : 0.32)) * fl; if (a < 0.02) continue; const x = wx((L.i + 0.5) * 8, (L.j + 0.5) * 8), y = wy((L.i + 0.5) * 8, (L.j + 0.5) * 8, TWM.H[TWM.id(L.i, L.j)] * 4) - 10;
       if (x < x0 - 90 || x > x0 + W + 90 || y < y0 - 90 || y > y0 + Hh + 90) continue; const rg = g.createRadialGradient(x, y, 2, x, y, L.r); rg.addColorStop(0, `rgba(${L.col},${a})`); rg.addColorStop(1, `rgba(${L.col},0)`); g.fillStyle = rg; g.fillRect(x - L.r, y - L.r, L.r * 2, L.r * 2); }
     if (sim && window.TWFX) TWFX.light(g, sim, R, amt);
     g.globalCompositeOperation = 'source-over';

@@ -23,6 +23,20 @@ const TWFX = (function () {
       for (let k = 0; k < 26; k++) { const a = TWM.hash2(k, 7, 99), ph = (t * (0.18 + a * 0.12) + a) % 1, x = sx + (a - 0.5) * 70 + Math.sin(t * 0.8 + k) * 4, y = sy + (TWM.hash2(k, 8, 99) - 0.5) * 30 - ph * 46; g.fillStyle = `rgba(255,255,255,${0.42 * Math.sin(ph * Math.PI)})`; g.fillRect(Math.round(x), Math.round(y), 5 + (k % 3) * 2, 3); }
     for (const a of S.agents) if (a.cur && a.cur.weave && a.pose === 'act' && a.cur.prop) { const p = a.cur.prop, lx = R.wx((p.i + 0.5) * T, (p.j + 0.5) * T), ly = R.wy((p.i + 0.5) * T, (p.j + 0.5) * T, TWM.groundZ((p.i + 0.5) * T, (p.j + 0.5) * T)) - 34, ax = R.wx(a.x, a.y), ay = R.wy(a.x, a.y, a.gz) - 24;
       g.fillStyle = 'rgba(240,236,255,0.85)'; for (let k = 0; k < 3; k++) { const n = 14; for (let s = 0; s <= n; s++) { const f = s / n; g.fillRect(Math.round(ax + (lx - ax) * f), Math.round(ay + (ly + k * 8 - ay) * f + Math.sin(f * Math.PI + t * 4 + k) * 1.5), 1, 1); } } }
+    // ambient life on static sprites: petals drift off the big peach trees, glowing spores rise from mushrooms and crystals, the web canopy twinkles
+    for (const st of R.statics) {
+      const kind = st.p.kind; if (kind !== 'bigpeach' && kind !== 'bigmush' && kind !== 'pcrystals' && kind !== 'altar') continue;
+      if (st.X > x0 + W + 40 || st.X + st.sp.w < x0 - 40 || st.Y > y0 + Hh + 40 || st.Y + st.sp.h < y0 - 40) continue;
+      if (kind === 'bigpeach') { for (let q = 0; q < 5; q++) { const a = TWM.hash2(st.ph, q, 71), ph = (t * 0.16 + a * 3) % 1, X = st.X + st.sp.w * (0.15 + a * 0.7) + Math.sin(t * 0.9 + q * 2) * 6 + ph * 10, Y = st.Y + st.sp.h * 0.32 + ph * st.sp.h * 0.62;
+        g.fillStyle = q % 2 ? '#ffc0d4' : '#fff0f6'; g.fillRect(Math.round(X), Math.round(Y), 2, 1); if (q % 3 === 0) g.fillRect(Math.round(X) + 1, Math.round(Y) - 1, 1, 1); } }
+      else { const cols = kind === 'bigmush' ? ['#7ef0d0', '#c8fff0'] : kind === 'altar' ? ['#c890ff', '#f0d8ff'] : ['#c8a0ff', '#9cff8a'];
+        for (let q = 0; q < 4; q++) { const a = TWM.hash2(st.ph, q, 72), ph = (t * 0.22 + a * 5) % 1, X = st.X + st.sp.w * (0.25 + a * 0.5) + Math.sin(t * 1.3 + q * 3) * 4, Y = st.Y + st.sp.h * 0.55 - ph * st.sp.h * 0.5;
+          g.fillStyle = cols[q % 2]; g.globalAlpha = Math.sin(ph * Math.PI) * 0.9; g.fillRect(Math.round(X), Math.round(Y), 1, 1); g.globalAlpha = 1; } } }
+    { const Wb = TWM.webs[0]; if (Wb) { const ext = S.web ? S.web.ext : Wb.base, cx = R.wx(Wb.x, Wb.y), cy = R.wy(Wb.x, Wb.y, Wb.z);
+      if (cx > x0 - 300 && cx < x0 + W + 300 && cy > y0 - 200 && cy < y0 + Hh + 200)
+        for (let q = 0; q < 46; q++) { const ang = TWM.hash2(q, 1, 73) * 6.283, rad = (0.15 + TWM.hash2(q, 2, 73) * 0.85) * Math.min(1, ext + 0.1), tw = Math.pow(Math.max(0, Math.sin(t * 1.5 + q * 2.3)), 4);
+          if (tw < 0.2) continue; const X = Math.round(cx + Math.cos(ang) * Wb.rx * 4 * 1.15 * rad), Y = Math.round(cy + Math.sin(ang) * Wb.ry * 2 * 1.25 * rad);
+          g.fillStyle = `rgba(255,255,255,${tw})`; g.fillRect(X, Y, 1, 1); if (tw > 0.7) { g.fillRect(X - 1, Y, 3, 1); g.fillRect(X, Y - 1, 1, 3); } } } }
     for (const f of S.fx) {
       const k = f.t / f.dur, X = R.wx(f.x, f.y), Y = R.wy(f.x, f.y, f.z || TWM.groundZ(f.x, f.y));
       if (X < x0 - 220 || X > x0 + W + 220 || Y < y0 - 300 || Y > y0 + Hh + 120) continue;
@@ -46,6 +60,11 @@ const TWFX = (function () {
       for (let s = 0; s < 18; s++) { const a = TWM.hash2(s, 5, 97), ph = (t * 0.3 + a) % 1; g.fillStyle = `rgba(255,255,255,${0.32 * (1 - ph)})`; g.fillRect(Math.round(X + (a - 0.5) * 70 + ph * 10), Math.round(Y - ph * 26 + 6), 6, 3); } }
   }
   function light(g, S, R, amt) {
+    // characters keep their own colour at night: the sprite is re-drawn additively over itself (after the night grade), so people stay readable without lighting the ground
+    if (amt > 0.1) { const x0 = R.cx - R.cv.width / 2 - 70, x1 = R.cx + R.cv.width / 2 + 70, y0 = R.cy - R.cv.height / 2 - 80, y1 = R.cy + R.cv.height / 2 + 100;
+      g.globalAlpha = Math.min(0.62, 0.12 + amt * 0.7);
+      for (const a of S.agents) { if (a.gone || a.hidden || (a.alpha !== undefined && a.alpha < 0.5)) continue; const X = R.wx(a.x, a.y), Y = R.wy(a.x, a.y, a.gz); if (X < x0 || X > x1 || Y < y0 || Y > y1 || a.inWater) continue; R.drawAgent(g, a, true); }
+      g.globalAlpha = 1; }
     // characters carry a soft light at night so they stay readable (violet spirit glow in the gorge, warm lantern light elsewhere)
     if (amt > 0.12 || true) for (const a of S.agents) { if (a.gone || a.hidden) continue; const btd = a.biome === 'btd', k = btd ? 0.2 + amt * 0.35 : amt * 0.4; if (k < 0.03) continue;
       const X = R.wx(a.x, a.y), Y = R.wy(a.x, a.y, a.gz + a.lift) - 18, gr = g.createRadialGradient(X, Y, 2, X, Y, 26); gr.addColorStop(0, btd ? `rgba(200,170,255,${k})` : `rgba(255,214,150,${k})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(X - 26, Y - 26, 52, 52); }

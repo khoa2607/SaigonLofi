@@ -25,3 +25,20 @@ All prompts began "isometric 2:1 view ... pixel art, dark plum outline, transpar
 | mush_a/b | 4e93cb98 | giant teal glowing mushrooms | 0, 1 |
 | bath_a | 274abac0 | hot spring bath terrace (not used yet) | 1 |
 | loom_a | cd7a9fd8 | spider-sister weaving workshop | 0 |
+
+## Pass 3 (2026-11-20): redesigned cast, animations and environment batch 2
+
+Balance before this pass 1,736.65, after 1,553.65 (**183 generations**). Tier 1 allows 8 concurrent jobs, and each animated direction counts as a job.
+
+**Characters** (`create_character`, mode v3, 64/60/56/48/44/36 px canvas, "low top-down", 2 generations each) plus `animate_character` template `walking-8-frames` for south, west, east and north (1 generation per direction). Idle is code-driven from a standing walk frame with a 1 px breath (`tools/pack_pl_chars.py`). IDs are in `tools/pl_cast.json`.
+
+| Runtime name | Design |
+|---|---|
+| wukong | Great Sage look: purple-gold phoenix-wing cap with two very tall curved feathers, golden chain armour, red cape, tiger skirt, tail, ruyi staff |
+| khi_linh, khi_lao, khi_con (36 px), khi_dan, khi_dan_b | jade-armoured guard with red plume and spear; grey elder with white beard and cane; baby monkey; two villagers |
+| tam_tang | gold five-panel crown, red-and-gold kasaya, ringed staff |
+| sister1_violet ... sister7_indigo | seven spider sisters, humanoid with four spider legs from the back: violet eldest (twin buns), teal scholar, rose dancer, amber warrior, crimson huntress, silver ghostly weaver, indigo trickster |
+| nhen_con, nhen_con_b | two spiderling demons (charcoal, silver) |
+
+**Objects, batch 2** (`create_1_direction_object`): btd_cave `b1d8713a` (160 px), hqs_gate `e533cf17`, hqs_bamboo `0b3b4d04`, hqs_scholarrock `388d2184`, hqs_lantern `60ec1c13` (96 px), btd_silkrack `0550e900`, btd_rockarch `f40e6a12`, hqs_lotus `9f3eb76a` (96 px).
+Two objects from batch 1 were first used here: the stone bridge (HQS stream) and the silk bridge (BTD chasm).

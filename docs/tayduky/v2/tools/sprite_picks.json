@@ -58,5 +58,69 @@
  "hall_b": [
   "hall_3",
   0.14
+ ],
+ "cave_a": [
+  "cave_1",
+  0.17
+ ],
+ "cave_b": [
+  "cave_0",
+  0.17
+ ],
+ "gate_a": [
+  "gate_1",
+  0.15
+ ],
+ "gate_b": [
+  "gate_0",
+  0.15
+ ],
+ "bamboo_a": [
+  "bamboo_0",
+  0.14
+ ],
+ "bamboo_b": [
+  "bamboo_1",
+  0.14
+ ],
+ "bamboo_c": [
+  "bamboo_3",
+  0.14
+ ],
+ "scholar_a": [
+  "scholarrock_1",
+  0.15
+ ],
+ "scholar_b": [
+  "scholarrock_2",
+  0.15
+ ],
+ "lantern_a": [
+  "lantern_0",
+  0.2
+ ],
+ "lantern_b": [
+  "lantern_2",
+  0.2
+ ],
+ "silkrack_a": [
+  "silkrack_1",
+  0.18
+ ],
+ "arch_a": [
+  "rockarch_0",
+  0.15
+ ],
+ "arch_b": [
+  "rockarch_1",
+  0.15
+ ],
+ "lotus_a": [
+  "lotus_1",
+  0.2
+ ],
+ "lotus_b": [
+  "lotus_3",
+  0.2
  ]
 }
