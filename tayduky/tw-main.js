@@ -4,7 +4,7 @@
   const Q = new URLSearchParams(location.search), cv = document.getElementById('c');
   const sim = window.TWS || null;
   const LM = (p) => TWM.layout ? TWM.layout.map(p[0], p[1]) : p;   // START points are authored in the 160-tile authoring space
-  const START = { hqs: LM([138, 24]), btd: LM([80, 140]), tc: LM([81, 18]), btp: TWM.palm ? [TWM.palm.centre[0] - 1, TWM.palm.centre[1] + 3] : [111, 47], buddha: TWM.palm ? [TWM.palm.buddha[0], TWM.palm.buddha[1] + 4] : [111, 47], fall: LM([131, 16]), spring: LM([92, 143]) };
+  const START = { hqs: LM([138, 24]), btd: LM([80, 140]), tc: LM([81, 18]), btp: TWM.palm ? [TWM.palm.centre[0] - 1, TWM.palm.centre[1] + 3] : [111, 47], buddha: TWM.palm ? [TWM.palm.buddha[0], TWM.palm.buddha[1] + 4] : [111, 47], hdsgate: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 12, TWM.layout.hds.y0 + 6] : [10, 100], hdsvolc: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 7, TWM.layout.hds.y0 + 17] : [10, 100], hdsfire: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 26, TWM.layout.hds.y0 + 22] : [10, 100], hdsc: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 5, TWM.layout.hds.y0 + TWM.layout.hds.h - 7] : [10, 110], hdsb: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 18, TWM.layout.hds.y0 + 1] : [20, 90], fall: LM([131, 16]), spring: LM([92, 143]) };
   function boot() {
     TWR.init(cv);
     if (sim && sim.init) sim.init(+(Q.get('seed') || (Date.now() % 100000)));

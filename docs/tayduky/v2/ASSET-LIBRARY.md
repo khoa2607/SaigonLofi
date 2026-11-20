@@ -124,6 +124,31 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `pmist_a` | 62x112 |  |  |  | pixellab create_1_direction_object job  |
 | `pmist_b` | 101x97 |  |  |  | pixellab create_1_direction_object job  |
 | `pride_a` | 46x55 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_volcano_a` | 236x234 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_bridge_a` | 146x119 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_bridge_b` | 146x119 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_oven_a` | 119x105 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_oven_b` | 120x109 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_stall_a` | 106x112 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_stall_b` | 100x116 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_hut_a` | 115x105 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_hut_b` | 113x110 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_hut_c` | 118x103 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_vent_a` | 114x88 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_vent_b` | 119x110 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_vent_c` | 120x104 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_shrine_a` | 112x115 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_crates_a` | 83x79 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_crates_b` | 85x73 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_lantern_a` | 45x88 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_tree_a` | 85x115 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_tree_b` | 106x113 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_rock_a` | 84x59 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_rock_b` | 86x66 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_ruin_a` | 97x114 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_ruin_b` | 111x111 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_gate_a` | 215x237 |  |  |  | pixellab create_1_direction_object job  |
+| `hds_volcano_b` | 249x241 |  |  |  | pixellab create_1_direction_object job  |
 
 ## mushrooms
 
@@ -213,3 +238,8 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `tc_laojun` | tc | 60x60 | idle x4, walk x8, tend-furnace | pixellab |
 | `tc_wukong` | tc | 64x64 | idle x4, walk x8 | pixellab |
 | `palm_attendant` | btp | 52x52 | idle x4, walk x8 | pixellab |
+| `bajie` | hds | 60x60 | idle x4, walk x8 | pixellab |
+| `hds_baker` | hds | 52x52 | idle x4, walk x8 | pixellab |
+| `hds_seller` | hds | 52x52 | idle x4, walk x8 | pixellab |
+| `tiefan` | hds | 60x60 | idle x4, walk x8, act x6 | pixellab |
+| `hds_mule` | hds | 68x68 | idle x4, walk x8 | pixellab |

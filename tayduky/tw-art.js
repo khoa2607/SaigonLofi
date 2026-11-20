@@ -84,6 +84,8 @@ const TWA = (function () {
   function top(m, I, J, X, Y, k, dith) {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
+    if (TWM.bleed && TWM.bleed[k] && TWA.fire && m < M.PH) { const c0 = top0(m, I, J, X, Y, k, dith), v = TWM.bleed[k] / 5, r = hash2(X, Y, 130), nn = vnoise(I * 0.8, J * 0.8, 131); if (r < v * (0.35 + nn * 0.6)) { const a = TWA.fire.seamTone(I, J, n0, n1); if (r < 0.012 * v) { SH.em = [255, 150, 60]; return [255, 150, 60]; } return mix(c0, a, 0.78); } return c0; }   // Hỏa Diệm Sơn ash staining on built neighbours (dithered, colour only)
+    if (m < M.PH && TWA.fire && TWM.seam[k] && TWM.seamK[k] === TWM.bi.hds && m !== M.SKYC) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 7), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
     if (m !== M.SKYC && m !== M.SKYD && m < M.PH && TWA.ext && TWM.seam[k] && TWM.seamK[k] === TWM.bi.btp) {      // provisional paths inside the palm's cloud fade ring dissolve into cloud too
       const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 3) / 15), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12));
     }
@@ -93,6 +95,7 @@ const TWA = (function () {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     switch (m) {
+      case M.ASH: case M.BASALT: case M.LAVA: case M.WARM: case M.CINDER: case M.SCORCH: case M.LBRIDGE: case M.CRUST: return TWA.fire.top(m, I, J, X, Y, k, dith, SH);   // Hỏa Diệm Sơn (tw-fire-art.js)
       case M.SKYC: case M.SKYD: return TWA.ext.top(m, I, J, X, Y, k, dith, SH);        // Buddha's Palm cloud terraces (tw-palm-art.js)
       case M.HEAVEN: return tone(P.heaven, 1.6 + n0 + n1 * 0.8);
       case M.PEACHLAWN: {
@@ -176,7 +179,8 @@ const TWA = (function () {
       default: {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
-          const sm = TWM.seam[k]; if (sm && TWM.seamK[k] === TWM.bi.btp && TWA.ext) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 3) / 15); return mix(c, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12)); }
+          const sm = TWM.seam[k]; if (sm && TWM.seamK[k] === TWM.bi.hds && TWA.fire) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 7); return mix(c, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
+          if (sm && TWM.seamK[k] === TWM.bi.btp && TWA.ext) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 3) / 15); return mix(c, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12)); }
           if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : (sm & 3) === 2 ? tone(P.gorge, 1 + n0 * 2 + n1) : tone(P.heaven, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
           if(TWM.edgeOther[k]!==255){const other=PHR[TWM.biomes[TWM.edgeOther[k]].id]||PHR.tc, w=Math.max(0,(5-TWM.edgeDist[k])/10);c=mix(c,tone(other,1+n0*1.5),w);}
           if (((X + Y * 2) % 24) < 2) c = shade(c, 0.9); if (hp < 0.01) c = r[3];
@@ -208,6 +212,7 @@ const TWA = (function () {
   // ---------------------------------------------------------------- cliff faces
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
+    if (b === 'hds' && TWA.fire) return TWA.fire.face(side, lx, ry, drop, elev, gx, k, SH);
     // b: biome id; side 0 = front-left (lit), 1 = front-right (shade); lx = global column; ry = px below the lip; elev = absolute px height
     const sea = TWM.MAT[k] === M.SEA;
     const R = sea ? P.faceS : b === 'btd' ? P.faceB : b === 'hqs' ? P.faceH : null;
@@ -347,14 +352,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : (b === 'hds' && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -648,6 +653,7 @@ const TWA = (function () {
   const cache = new Map();
   function sprite(p) {
     if (TWA.ext && TWA.ext.sprite) { const r = TWA.ext.sprite(p); if (r) return r; }
+    if (TWA.fire && TWA.fire.sprite) { const r = TWA.fire.sprite(p); if (r) return r; }
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
     if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: r.glow, glow: r.glow, silk: r.silk, sway: SWAY[p.kind] || 0, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);

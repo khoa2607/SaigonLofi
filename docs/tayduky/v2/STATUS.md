@@ -278,3 +278,17 @@ Remaining: see `tayduky/AI_HANDOFF.md` §4.
 ## Footprint normalisation (2026-11-20)
 
 World **160 x 160 -> 104 x 104** (24,964 -> 10,404 tiles). Thiên Cung 2,231 -> 847 tiles, Buddha's Palm 2,099 -> 953, the eleven placeholders re-planned to 482-616 tiles each; Hoa Quả Sơn (1,406) and Bàn Tơ Động (1,101) are only translated (tile and prop hashes unchanged). Every trimmed built biome opens through a ramped gate (`TWM.gates`); adjacency is still derived from the mask (31 -> 32 edges; Thiên Cung no longer touches Hoa Quả Sơn / the Palm). Full rules, measurements, per-biome changes and consequences: `docs/tayduky/v2/FOOTPRINT.md`. Mask overview: `screenshots/footprint/overview-before-after.png`. Tests: map15, sim 900 (seeds 7, 21, 33), heaven-assets, heaven, world 30 all PASS after the pass.
+
+## Hoa Diem Son - Flaming Mountains (2026-11-21)
+
+**Built biomes: hqs, btd, tc, btp, hds (5).** The other ten are placeholders. World 124 x 124; HDS = 1,362 tiles (see FOOTPRINT.md).
+
+**Terrain.** Levels 1-14: two great volcanoes with a second tier of cones behind them, a carved palace terrace with the grand gate (hero landmark, PixelLab 256), a warm-clay village plateau (level 3), two lava channels, a lake and an east canal with lava FALLS where they drop, stone bridges over the lava (`LBRIDGE`), switchback stairs, lookouts, vents, ruins. New materials ASH 100, BASALT 101, LAVA 102, WARM 103, CINDER 104, SCORCH 105, LBRIDGE 106, CRUST 107 (ids above any placeholder).
+
+**Life.** Lava flow sparks and pulse, glowing cracks that breathe, smoke columns, drifting embers, heat-shimmer streaks, flickering code-drawn flames and bubbling pools over every vent, flames on the gate braziers, eruptions with ballistic sparks and a breathing heat aura at the great volcanoes, flame bursts that startle the mule and bakers, ash whirlwinds, oven puffs. Residents: Thiet Phien, Wukong, Bajie, 3 bakers, 3 sellers, 2 mules (bake, sell, haul, warm up on hearths, inspect, overlook, lava edge). Minis: cake seller, startled mule, Bajie and the heat, ash whirlwind, oven flare.
+
+**Signature - The Palm-Leaf Fan** (`tw-fire-data.js`): foreshadow (heat, bursts, villagers gather, Thiet Phien descends) -> she fans Wukong away in a long spinning arc -> he returns with the fan: 7 strokes of 7 (49, shown as seven rune lights) -> rain; lava crusts over and turns to rain pools; the ground greens from the village outward (stage 0-9 per tile, dithered, ground chunks re-baked; landmark sprites blend to cooled copies) -> celebration -> gradual recovery (greening fades from the far edge inward, cracks reignite). `node tests/tayduky-v2-fire.mjs` runs and captures every phase.
+
+**Verified.** map15 (15 regions, reachability, Director), sim 900 s seeds 7/21/33 (fire minis, bake/sell/warm, signature, no teleports), fire signature test, heaven-assets, heaven, world. Screenshots: `screenshots/hds/`.
+
+**Limits.** Wukong's flip clip is still unpacked (the blow-away uses a code-driven spin); mule, baker and seller have walk only (idle = walk-derived); terrain is blocky at the strata level by design; frame time grows with world size on software GL; the east canal and some lava falls look stepped; ten regions remain placeholders.

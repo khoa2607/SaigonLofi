@@ -34,7 +34,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // ---------------------------------------------------------------- materials
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
-    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, SKYC: 30, SKYD: 31, PH: 32 };
+    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, SKYC: 30, SKYD: 31, PH: 32,
+    ASH: 100, BASALT: 101, LAVA: 102, WARM: 103, CINDER: 104, SCORCH: 105, LBRIDGE: 106, CRUST: 107 };   // Hỏa Diệm Sơn (tw-fire.js); ids above any placeholder (PH + 15)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -262,8 +263,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     const visit = (i, j) => {
       if (inMap(i, j) && isB(i, j, biome)) {
         const k2 = id(i, j);
-        if (MAT[k2] === M.STREAM || MAT[k2] === M.CHASM) { MAT[k2] = MAT[k2] === M.STREAM ? M.BRIDGE : M.SILKB; if (H[k2] === 0) H[k2] = 2; }
-        else if (MAT[k2] !== M.PAVE && MAT[k2] !== M.LEDGE && MAT[k2] !== M.CAVEF && MAT[k2] !== M.POOL && MAT[k2] !== M.SPRING) MAT[k2] = mat;
+        if (MAT[k2] === M.LAVA) { MAT[k2] = M.LBRIDGE; }
+        else if (MAT[k2] === M.STREAM || MAT[k2] === M.CHASM) { MAT[k2] = MAT[k2] === M.STREAM ? M.BRIDGE : M.SILKB; if (H[k2] === 0) H[k2] = 2; }
+        else if (MAT[k2] !== M.PAVE && MAT[k2] !== M.LBRIDGE && MAT[k2] !== M.LEDGE && MAT[k2] !== M.CAVEF && MAT[k2] !== M.POOL && MAT[k2] !== M.SPRING) MAT[k2] = mat;
         PATHC[k2] = 1;
       }
       if (pi !== null) {
@@ -491,6 +493,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) if (i < 1 || j < 1 || i > N - 2 || j > N - 2) { MAT[id(i, j)] = M.VOID; H[id(i, j)] = -4; }
   }
 
+  // Hỏa Diệm Sơn (tw-fire.js): authored directly in world space inside the footprint reserved by tw-layout.js
+  if (window.TW_FIRE_BUILD) TW_FIRE_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
   for (const b of TWM.biomes.filter(b=>!b.built)) {
@@ -505,7 +510,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // Gates (footprint normalisation): a trimmed built biome must still open onto the world. Its main walkable body gets one ramped gate out into a
   // neighbouring placeholder: the placeholder tiles outward from the border step the height down (or up) to the placeholder level with stairs.
   if (window.TW_LAYOUT) {
-    const walk0 = k => { const m = MAT[k]; return m === M.BRIDGE || m === M.SILKB || (m !== M.VOID && m !== M.ROCK && m !== M.CHASM && m !== M.SKYD && !TWM.isWater(m)); };
+    const walk0 = k => { const m = MAT[k]; return m === M.BRIDGE || m === M.SILKB || (m !== M.VOID && m !== M.ROCK && m !== M.CHASM && m !== M.SKYD && m !== M.LAVA && m !== M.CRUST && !TWM.isWater(m)); };
     const step0 = (a, b) => walk0(a) && walk0(b) && (H[a] === H[b] || TWM.stairs.has(a + ',' + b));
     TWM.gates = [];
     for (const b of TWM.biomes.filter(b => b.built)) {
@@ -538,7 +543,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
   { const seenB = new Uint8Array(NN);
-    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr'], [M.HEAVENBRIDGE, 'tcbridge']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr'], [M.HEAVENBRIDGE, 'tcbridge'], [M.LBRIDGE, 'lbridge']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const k = id(i, j); if (MAT[k] !== mat || seenB[k]) continue;
       let n = 0; while (inMap(i, j + n) && MAT[id(i, j + n)] === mat) n++; let m2 = 0; while (inMap(i + m2, j) && MAT[id(i + m2, j)] === mat) m2++;
       if (n >= m2) { for (let a = 0; a < n; a++) seenB[id(i, j + a)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [1, n], block: false, v: 0, bridge: true }); }
@@ -578,6 +583,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     WALK[k] = w ? 1 : 0;
   }
   if (window.TW_PALM_POST) TW_PALM_POST({ TWM, MAT, WALK, M });
+  if (window.TW_FIRE_POST) TW_FIRE_POST({ TWM, MAT, WALK, M });
   for (const p of TWM.props) if (p.block) {
     if (p.piers) {
       for (const [di,dj] of p.piers) WALK[id(p.i+di,p.j+dj)] = 0;

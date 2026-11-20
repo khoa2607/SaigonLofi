@@ -32,7 +32,7 @@ const TWR = (function () {
   // ---------------------------------------------------------------- chunks
   function chunk(ci, cj) { const k = ci + ',' + cj; let c = R.chunks.get(k); if (!c) { c = { ci, cj, ready: false, queued: false }; R.chunks.set(k, c); } return c; }
   function bake(c) {
-    const t0 = performance.now(); const b = A.bakeChunk(c.ci, c.cj); Object.assign(c, b, { ready: true });
+    const t0 = performance.now(); const b = A.bakeChunk(c.ci, c.cj); Object.assign(c, b, { ready: true, fireStale: false }); if (window.TWFX && TWFX.fire) TWFX.fire.mark(c);
     // water shimmer: 4 frames of sparse glints over pixels that stayed water
     if (b.glints.length) {
       c.wf = []; const src = b.cv.getContext('2d').getImageData(0, 0, CH, CH).data;
@@ -122,15 +122,17 @@ const TWR = (function () {
     if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + px0 - (sw >> 1), sY - 2, sw, 3); g.fillRect(X + px0 - (sw >> 1) + 2, sY - 3, sw - 4, 5); }
     if (a.thread) { g.fillStyle = 'rgba(232,228,250,0.85)'; const ty = Math.round(wy(a.x, a.y, a.thread)); g.fillRect(X + px0, ty, 1, Y + (C.top || 6) + 16 - ty); }
     if (a.alpha !== undefined && a.alpha < 1) g.globalAlpha = Math.max(0, a.alpha);
+    const spun = a.spin ? (g.save(), g.translate(X + px0, Y + Math.round(py0 * 0.55)), g.rotate(a.spin), g.translate(-(X + px0), -(Y + Math.round(py0 * 0.55))), true) : false;   // tumbling through the air (the fan blows Wukong away)
     if (actionReady) drawAction();
     else if (a.inWater) { const cut = py0 - 12; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
       const wl = Y + 6 + cut; g.fillStyle = 'rgba(220,250,250,0.85)'; g.fillRect(X + px0 - 9, wl - 1, 18, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(X + px0 - 11 + (Math.floor(R.t * 3) % 3), wl, 22, 1); }
     else if (sitDrop) { const cut = py0 - sitDrop - 2; g.drawImage(S.im, col * w, row * h, w, cut + 2, X, Y + sitDrop, w, cut + 2); }
     else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
-    g.globalAlpha = 1;
+    g.globalAlpha = 1; if (spun) g.restore();
+    if (a.hasFan && window.TWFX && TWFX.fire) TWFX.fire.drawFan(g, a, X, Y, px0, py0);
     if (a.robe) { const ry = Y + (C.top || 6) + Math.round((py0 - (C.top || 6)) * 0.34); g.fillStyle = '#2a1726'; g.fillRect(X + px0 - 9, ry - 1, 18, 9); g.fillStyle = '#f4f0fa'; g.fillRect(X + px0 - 8, ry, 16, 7); g.fillStyle = '#c8c0dc'; g.fillRect(X + px0 - 8, ry + 5, 16, 2); g.fillStyle = '#f4b0c8'; g.fillRect(X + px0 - 1, ry, 2, 5); }   // tasteful bathing robe
     if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; const top = Y + (C.top || 6) + 14; for (let k = 0; k < 7; k++) g.fillRect(X + px0 - 8, top + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + px0 - 7 + k * 5, top - 2, 1, 28); }
-    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
+    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'cake' ? '#f0b64a' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
     if (a.bubble) bubble(g, X + C.pivot[0], Y + (C.top || 6) - 4, a.bubble);
   }
   const ICON = { note: ['00110', '00101', '00100', '11100', '11100'], dots: ['00000', '00000', '10101', '00000', '00000'], heart: ['01010', '11111', '11111', '01110', '00100'],
@@ -258,7 +260,7 @@ const TWR = (function () {
     // ground chunks: bake what is visible (nearest first), bounded per frame once the first view is ready
     const ci0 = Math.floor(x0 / CH), ci1 = Math.floor((x0 + W) / CH), cj0 = Math.floor(y0 / CH), cj1 = Math.floor((y0 + Hh) / CH);
     const need = [];
-    for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) need.push(c); }
+    for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) need.push(c); else if (window.TWFX && TWFX.fire && TWFX.fire.stale(c) && !need.some(q => q.fireStale)) { c.fireStale = true; need.push(c); } }   // Hỏa Diệm Sơn: one stale (greening) chunk re-baked per frame
     const budget = R.first ? 9 : 1e9; let used = 0;
     need.sort((a, b) => Math.hypot(a.ci * CH + 256 - R.cx, a.cj * CH + 256 - R.cy) - Math.hypot(b.ci * CH + 256 - R.cx, b.cj * CH + 256 - R.cy));
     for (const c of need) { if (used > budget) break; const s = performance.now(); bake(c); used += performance.now() - s; }
@@ -313,7 +315,8 @@ const TWR = (function () {
     if (R.tod === 'auto') R.clock = (R.clock + dt * 24 / 480) % 24;
     const [col, amt] = tint(R.clock); R.dark = amt;
     g.globalCompositeOperation = 'multiply';
-    const gc = gloomCanvas(); g.imageSmoothingEnabled = true; g.globalAlpha = 0.55 + amt * 0.3; g.drawImage(gc, 0, A.OY - 32 + 16, A.WORLD_W, TWM.N * 32); g.imageSmoothingEnabled = false; g.globalAlpha = 1;
+    const gc = gloomCanvas(); g.imageSmoothingEnabled = true; g.globalAlpha = 0.55 + amt * 0.3; { const k = 32, Nn = TWM.N, top = A.OY - 32 + 16, u0 = Math.max(0, Math.floor(x0 / k) - 1), u1 = Math.min(Nn * 2, Math.ceil((x0 + W) / k) + 1), v0 = Math.max(0, Math.floor((y0 - top) / k) - 1), v1 = Math.min(Nn, Math.ceil((y0 + Hh - top) / k) + 1);   // only the visible part of the (huge) gloom map is stretched
+      if (u1 > u0 && v1 > v0) g.drawImage(gc, u0, v0, u1 - u0, v1 - v0, u0 * k, top + v0 * k, (u1 - u0) * k, (v1 - v0) * k); } g.imageSmoothingEnabled = false; g.globalAlpha = 1;
     if (amt > 0.01) { g.globalAlpha = amt; g.fillStyle = col; g.fillRect(x0, y0, W, Hh); g.globalAlpha = 1; }
     g.globalCompositeOperation = 'source-over';
     // emissive pixels come back on top of the grade; glows around lights

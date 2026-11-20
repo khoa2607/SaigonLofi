@@ -54,3 +54,18 @@ Other consequences: START camera points, 'mouthE' story points and test look-at 
 
 ## 5. Limits / next
 Placeholder terrain (hatched, level 1) now touches Thiên Cung and the Palm directly, so their sea edges show a visible cliff against it until the neighbours are built; the 11 placeholders are mask-only; Hoa Quả Sơn / Bàn Tơ Động are still above the size standard; the Palm's rim walkway to Hoa Quả Sơn is a dead-end strip (its link to the lanes lies outside the trimmed ring).
+
+## Update 2026-11-21 - Hoa Diem Son (build first, size second)
+
+The owner lifted the universal size ceiling: each new biome is built at the size its landmarks, activities and story need. **World 104 x 104 -> 124 x 124** (+20 rows and columns of free land; no existing biome moved or edited, `OFF_CLUSTER` / `OFF_BTD` unchanged). Hoa Diem Son is authored directly in world space (`tw-fire.js`) inside a footprint reserved by `tw-layout.js`.
+
+| Biome | Tiles | Notes |
+|---|---|---|
+| Hoa Diem Son | **1,362** (about 900 walkable) | squircle core + two map-edge strips: it hugs the world's south-west corner so no dead wedge is left against the rim; the strips are composed (ruined shrine, lookout ledge, ash-basin vents, dead trees, broken ridge), not padding |
+| the other 10 placeholders | re-planned on the remaining free land | still mask-only |
+
+**Adjacency** (derived): HDS touches `hvd, btd, lhd, sdl`. The Director rules are unchanged (900 s runs, seeds 7, 21, 33: no adjacent simultaneous signatures). The village's east road ramps down to level 1 at the east edge so HDS stays connected (`map15`: all 15 regions reachable).
+
+**Border blending (new rule).** A biome edge is a layered band, never a straight cut: (1) the volcano pushes OUT - placeholder tiles within 6 tiles become ash / scorched ground with dead trees and vents (`TWM.fire.out`); (2) the neighbour pushes IN - Ban To Dong's cave floor, glow patches and crystals creep into HDS's edge tiles, HDS slopes down to Ban To Dong's level in a talus band instead of ending at a cliff, and Ban To Dong's own ground gets dithered ash/ember staining within 3 tiles (`TWM.bleed`, colour only, geometry untouched); (3) the ridge along the rest of the edge is broken (shelves, notches). Screenshots: `screenshots/hds/hds-neighbours-wide-btd.png`, `hds-seam-close.png`, `hds-corner-wide.png`.
+
+Frame-time note: headless frame time grows with world size (about 1.5 ms at 104, 6-12 ms at 124 on software GL); the gloom overlay is now clipped to the viewport. Re-check on a real GPU before adding more biomes.

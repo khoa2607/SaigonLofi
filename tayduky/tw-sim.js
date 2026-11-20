@@ -438,7 +438,7 @@ const TWS = (function () {
       const data = D().biomes[b.id]; const B = S.biomes[b.id] = { id: b.id, data: data || null, phase: 'peace', timer: rnd(25, 90), miniT: rnd(5, 25), run: null, story: null };
       if (!data) continue;
       for (const [ch, n, role] of data.residents) for (let k = 0; k < n; k++) {
-        const home = b.id === 'tc' && TWM.tc[{fairy:'orchard',heavenguard:'gate',laojun:'furnace',trickster:'court'}[role]];
+        const hm = TWM.homes && TWM.homes[b.id], home = b.id === 'tc' ? TWM.tc[{fairy:'orchard',heavenguard:'gate',laojun:'furnace',trickster:'court'}[role]] : hm ? (hm[role] || hm._) : null;
         const p = home ? TWM.randomWalkable(b.id,S.R,home,3) : TWM.randomWalkable(b.id,S.R);
         if (p) agent(ch, b.id, role, p[0], p[1]);
       }

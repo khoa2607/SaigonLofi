@@ -18,14 +18,15 @@ for (let k = 0; k < secs * 10; k++) {
     const i = Math.floor(a.x / 8), j = Math.floor(a.y / 8), t = M.id(i, j), m = M.MAT[t];
     const ok = M.WALK[t] || m === M.M.POOL || m === M.M.SPRING || a.lift > 1 || (a.cur && ['nudge', 'jump', 'climb', 'perch'].includes(a.cur.k));   // up a tree is allowed
     a._bad = ok ? 0 : (a._bad || 0) + 1; if (a._bad > 15 && bad.length < 8) bad.push([a.char, a.task, a.cur && a.cur.k, i, j, m]);   // on a blocked tile for more than 1.5 s
-    const p = prev.get(a); if (p && Math.hypot(a.x - p[0], a.y - p[1]) > 3.5 && tele.length < 8) tele.push([a.char, a.task, a.cur && a.cur.k, +(Math.hypot(a.x - p[0], a.y - p[1])).toFixed(1)]);
+    const p = prev.get(a); if (p && Math.hypot(a.x - p[0], a.y - p[1]) > 3.5 && tele.length < 8 && !a.flying && !(a.cur && a.cur.k === 'arc') && !a.ride) tele.push([a.char, a.task, a.cur && a.cur.k, +(Math.hypot(a.x - p[0], a.y - p[1])).toFixed(1)]);
     prev.set(a, [a.x, a.y]);
   }
 }
 const res = { seconds: secs, agents: S.agents.length, phases: Object.fromEntries(Object.entries(phases).map(([k, v]) => [k, [...v]])), stories: S.counts.stories, minis: S.counts.minis, acts: S.counts.acts,
   log: S.log.map(l => l.slice(1).join(':')), maxActive: maxAct, adjacencyViolations: adjV, badTiles: bad, teleports: tele, web: +S.web.ext.toFixed(2), litter: S.litter.length,tcRecovery };
 console.log(JSON.stringify(res, null, 1));
-const allPh = ['hqs', 'btd', 'tc'].every(b => ['peace', 'fore', 'sig', 'after'].every(p => res.phases[b] && res.phases[b].includes(p)));
+const allPh = ['hqs', 'btd', 'tc', 'btp', 'hds'].every(b => ['peace', 'fore', 'sig', 'after'].every(p => res.phases[b] && res.phases[b].includes(p)));
 const tcCoverage = ['havoc_heaven','peach_banquet'].every(k => res.log.includes('tc:after:'+k) && tcRecovery[k] && tcRecovery[k].max>tcRecovery[k].min) && ['heaven_shift','heaven_furnace_flare','heaven_peach_baskets'].every(k => res.minis[k] > 0) && ['heaven_tend','heaven_harvest','heaven_furnace','heaven_patrol','heaven_watch','heaven_banquet'].every(k => res.acts[k] > 0);
-const ok = allPh && tcCoverage && Object.keys(res.minis).length >= 6 && Object.keys(res.acts).length >= 10 && maxAct <= 5 && adjV === 0 && !bad.length && !tele.length;
+const fireCoverage = ['fire_cakeseller', 'fire_mule', 'fire_bajie_heat', 'fire_whirlwind'].filter(k => res.minis[k] > 0).length >= 3 && res.log.includes('hds:after:palm_leaf_fan') && ['bake', 'sell', 'warm'].every(k => res.acts[k] > 0);
+const ok = allPh && fireCoverage && tcCoverage && Object.keys(res.minis).length >= 6 && Object.keys(res.acts).length >= 10 && maxAct <= 5 && adjV === 0 && !bad.length && !tele.length;
 console.log(ok ? 'PASS' : 'FAIL'); process.exitCode = ok ? 0 : 1;

@@ -243,5 +243,61 @@
   "biome": "btp",
   "speed": 13,
   "role": "attendant"
+ },
+ {
+  "name": "tiefan",
+  "id": "2cbdc588-ec39-4a7d-89c0-672d7e63aa29",
+  "title": [
+   "Thiết Phiến Công Chúa",
+   "Princess Iron Fan"
+  ],
+  "biome": "hds",
+  "speed": 15,
+  "role": "princess"
+ },
+ {
+  "name": "bajie",
+  "id": "7af61907-f5a5-4847-8462-e593c8e89bb7",
+  "title": [
+   "Trư Bát Giới",
+   "Zhu Bajie"
+  ],
+  "biome": "hds",
+  "speed": 13,
+  "role": "fire_bajie"
+ },
+ {
+  "name": "hds_baker",
+  "id": "4ca20190-038d-4849-bcd5-31d544bf05dd",
+  "title": [
+   "Thợ nướng bánh",
+   "Cake Baker"
+  ],
+  "biome": "hds",
+  "speed": 17,
+  "role": "baker"
+ },
+ {
+  "name": "hds_seller",
+  "id": "b26fa722-afcb-44dc-b93c-f6a30837deef",
+  "title": [
+   "Người bán bánh",
+   "Cake Seller"
+  ],
+  "biome": "hds",
+  "speed": 17,
+  "role": "seller"
+ },
+ {
+  "name": "hds_mule",
+  "id": "a32d7d87-7a44-4e10-9bcc-ad432fd3c87f",
+  "title": [
+   "Con la",
+   "Mule"
+  ],
+  "biome": "hds",
+  "speed": 24,
+  "role": "mule",
+  "shadow": 18
  }
 ]

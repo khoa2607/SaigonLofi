@@ -18,7 +18,7 @@ RAW = os.path.join(ROOT, 'tayduky', 'chars-pl', 'raw'); OUT = os.path.join(ROOT,
 DIRS = [('down', 'south'), ('left', 'west'), ('right', 'east'), ('up', 'north')]
 WALK = ['walking-8-frames', 'walking-6-frames', 'walking-4-frames', 'walking', 'walk']
 IDLE = ['breathing-idle', 'fight-stance-idle-8-frames']
-ACT = ['fireball', 'cross-punch', 'throw-object', 'picking-up', 'drinking', 'two-footed-jump']
+ACT = ['fireball', 'casting', 'cross-punch', 'throw-object', 'picking-up', 'drinking', 'two-footed-jump']
 
 
 def fetch(name, cid, refresh=False):
