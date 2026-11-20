@@ -20,6 +20,7 @@ A cozy, observation-only **living isometric diorama** (Journey to the West), van
 | `tw-map.js` | the map (`TWM`): height levels, biome cells + masks, terrain, paths, stairs, props, POIs, lights, water shapes, wall-crawl spots, seam band, A* | no |
 | `tw-data.js` | residents, role activity weights, mini events, stories as beats | no |
 | `tw-sim.js` | simulation (`TWS`): step-queue activities, mini events, Director, Living Story Loop, recovery. Randomness only via `TWS.R` | no |
+| `tw-layout.js` | footprint normalisation: trims built biomes to their footprint, relocates them into the 104 x 104 world (`TW_LAYOUT`, `TWM.layout`), re-plans the placeholders; see `docs/tayduky/v2/FOOTPRINT.md` | yes (via tw-map) |
 | `tw-palm.js`, `tw-palm-art.js`, `tw-palm-fx.js`, `tw-palm-data.js` | Buddha's Palm (`btp`): map build hook (loaded before tw-map), terrain/finger art (`TWA.ext`), fx (`TWFX.palm`), sim state and events (`TWS.stepExt/opExt/ACT/MINI`) | partly (build + data) |
 | `tw-art.js` | code-painted terrain/cliffs/stairs, prop painters, PixelLab sprite loader with life masks (`GLOWS`, `SILKS`, `SWAY`, `IMGKINDS`) | canvas |
 | `tw-fx.js` | story/ambient effects, night character pass | render |

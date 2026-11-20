@@ -274,3 +274,7 @@ Merge decisions: conflicts in tw-map.js (material table, blocking-prop pass), tw
 Verified after the merge: `map15` PASS (15 regions, adjacency, all regions mutually reachable, Director with 15 regions), `sim 900` seeds 7 and 21 PASS, `heaven-assets` PASS, `heaven` PASS (both Heaven signatures, 60 fps median), story run OK, browser captures of the four biomes day and night with no console errors (`screenshots/integration/`, plus `map-15-regions.png`). `tayduky-v2-pilot.mjs` fails, as it did before the merge (legacy sandbox, removed `nhen_tinh`).
 
 Remaining: see `tayduky/AI_HANDOFF.md` §4.
+
+## Footprint normalisation (2026-11-20)
+
+World **160 x 160 -> 104 x 104** (24,964 -> 10,404 tiles). Thiên Cung 2,231 -> 847 tiles, Buddha's Palm 2,099 -> 953, the eleven placeholders re-planned to 482-616 tiles each; Hoa Quả Sơn (1,406) and Bàn Tơ Động (1,101) are only translated (tile and prop hashes unchanged). Every trimmed built biome opens through a ramped gate (`TWM.gates`); adjacency is still derived from the mask (31 -> 32 edges; Thiên Cung no longer touches Hoa Quả Sơn / the Palm). Full rules, measurements, per-biome changes and consequences: `docs/tayduky/v2/FOOTPRINT.md`. Mask overview: `screenshots/footprint/overview-before-after.png`. Tests: map15, sim 900 (seeds 7, 21, 33), heaven-assets, heaven, world 30 all PASS after the pass.

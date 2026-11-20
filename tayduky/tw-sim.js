@@ -300,7 +300,7 @@ const TWS = (function () {
     if (S.pointExt[spec]) return S.pointExt[spec](B, R);
     if (Array.isArray(spec)) return C(spec[0], spec[1]);
     if (spec === 'canopy') return C(TWM.btd.canopy[0], TWM.btd.canopy[1]);
-    if (spec === 'mouthE') return C(R && R.kind === 'sig' && R.i < 8 ? 97 : 104, 143);
+    if (spec === 'mouthE') { const m = TWM.layout ? TWM.layout.map : (i, j) => [i, j]; return C(...m(R && R.kind === 'sig' && R.i < 8 ? 97 : 104, 143)); }   // authoring coordinates -> world (footprint normalisation)
     const p = pick(pois(B.id, spec)); if (p) return [p.x, p.y];
     const a = who(B, spec, R); if (a && !Array.isArray(a)) return [a.x, a.y];
     return C(...TWM.biomes[TWM.bi[B.id]].centre.map(Math.round));

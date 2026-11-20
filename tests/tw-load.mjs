@@ -7,6 +7,7 @@ export function loadTW(files) {
   files = (files || ['tw-map.js', 'tw-data.js', 'tw-sim.js']).slice();
   if (files.includes('tw-map.js') && !files.includes('tw-palm.js') && fs.existsSync(path.join(dir, 'tw-palm.js'))) files.unshift('tw-palm.js');   // the Buddha's Palm map section is part of the map
   if (files.includes('tw-sim.js') && !files.includes('tw-palm-data.js') && fs.existsSync(path.join(dir, 'tw-palm-data.js'))) files.splice(files.indexOf('tw-sim.js') + 1, 0, 'tw-palm-data.js');
+  if (!process.env.TW_NOLAYOUT && files.includes('tw-map.js') && !files.includes('tw-layout.js') && fs.existsSync(path.join(dir, 'tw-layout.js'))) files.unshift('tw-layout.js');   // footprint normalisation relocates the authored map
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

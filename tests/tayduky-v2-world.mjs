@@ -9,7 +9,7 @@ await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
   await send('Page.navigate', { url: base + 'tayduky/index.html?at=hqs&zoom=2&seed=7&speed=6&force=hqs,btd,tc' }); await wait(3000);
   const ms = [], sigs = new Set(); let k = 0;
   for (let s = 0; s < secs; s++) {
-    if (s % 6 === 3) await ev(`(()=>{const c=${JSON.stringify([[80,141],[86,21],[140.5,22.5]])}[${k++ % 3}]; TWR.lookAt(c[0]*8,c[1]*8,4);})()`);
+    if (s % 6 === 3) await ev(`(()=>{const c=${JSON.stringify([[80,141],[86,21],[140.5,22.5]])}[${k++ % 3}]; const m=TWM.layout.map(c[0],c[1]);TWR.lookAt(m[0]*8,m[1]*8,4);})()`);
     const st = JSON.parse(await ev(`JSON.stringify({ms: TWR.frameMs, h: TWS.biomes.hqs.phase, b: TWS.biomes.btd.phase, tc:TWS.biomes.tc.phase})`)); ms.push(st.ms);
     if (st.h === 'sig' || st.h === 'after') sigs.add('hqs'); if (st.b === 'sig' || st.b === 'after') sigs.add('btd'); if (st.tc === 'sig' || st.tc === 'after') sigs.add('tc');
     await wait(1000);
@@ -34,7 +34,7 @@ await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
     fs.mkdirSync(dir, { recursive: true });
     for (const [name, at, tod, z] of [['thien-cung-day',[85,21],'day',2],['thien-cung-night',[85,21],'night',2],['thien-cung-wide-day',[85,21],'day',1],['thien-cung-wide-night',[85,21],'night',1],['hoa-qua-son-day', [131, 17], 'day', 2], ['hoa-qua-son-night', [138, 24], 'night', 2], ['ban-to-dong-day', [80, 141], 'day', 2], ['ban-to-dong-night', [84, 142], 'night', 2]]) {
       await ev(`TWR.zoom=${z}; TWR.resize()`);
-      await ev(`(()=>{TWR.tod='${tod}'; TWR.clock={day:11,dusk:18.2,night:22}['${tod}']; TWR.lookAt(${at[0]}*8,${at[1]}*8,16);})()`); await wait(2500);
+      await ev(`(()=>{TWR.tod='${tod}'; TWR.clock={day:11,dusk:18.2,night:22}['${tod}']; const m=TWM.layout.map(${at[0]},${at[1]});TWR.lookAt(m[0]*8,m[1]*8,16);})()`); await wait(2500);
       const s = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(`${dir}/${name}.png`, Buffer.from(s.data, 'base64'));
     }
   }

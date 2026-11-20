@@ -9,10 +9,10 @@ await withChrome(1920,1080,async ({base,send,ev,on})=>{
     await ev(`(()=>{for(const b of Object.values(TWS.biomes))if(b.id!=='tc')b.timer=1e8;const b=TWS.biomes.tc;b.last='${story==='havoc_heaven'?'peach_banquet':'havoc_heaven'}';b.timer=.1;})()`);
     let found=false;for(let i=0;i<120;i++){const v=await ev(`(()=>{const b=TWS.biomes.tc;return !!(b.phase==='sig'&&b.story&&b.story.id==='${story}'&&b.run&&b.run.i>=3)})()`);if(v){found=true;break;}await wait(500);}
     if(!found)throw Error('signature not reached: '+story);
-    await ev(`TWR.lookAt(86*8,20*8,4)`);await wait(1200);
+    await ev(`(()=>{const c=TWM.layout.map(86,20);TWR.lookAt(c[0]*8,c[1]*8,4)})()`);await wait(1200);
     const shot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(`${out}/${story}.png`,Buffer.from(shot.data,'base64'));console.log('signature captured',story);
   }
-  const perf={};for(const z of [1,2]){await ev(`TWR.zoom=${z};TWR.resize();TWR.lookAt(85*8,21*8,4)`);await wait(2500);
+  const perf={};for(const z of [1,2]){await ev(`TWR.zoom=${z};TWR.resize();(()=>{const c=TWM.layout.map(85,21);TWR.lookAt(c[0]*8,c[1]*8,4)})()`);await wait(2500);
     perf[z]=JSON.parse(await ev(`new Promise(resolve=>{const dt=[],draw=[];let last=performance.now();function tick(now){dt.push(now-last);draw.push(TWR.frameMs);last=now;if(dt.length<120)requestAnimationFrame(tick);else{dt.sort((a,b)=>a-b);draw.sort((a,b)=>a-b);resolve(JSON.stringify({frameMedian:dt[60],frameP90:dt[108],drawMedian:draw[60],drawP90:draw[108]}))}}requestAnimationFrame(tick)})`,true));}
   console.log('heaven performance',JSON.stringify(perf));
   // Capture a labelled diagnostic of the real BIO grid; it is not a zoomed-out game view.

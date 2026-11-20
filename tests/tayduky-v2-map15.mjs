@@ -3,19 +3,19 @@ import { loadTW } from './tw-load.mjs';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 const M = loadTW().TWM, N = M.N;
-assert.equal(N, 160); assert.equal(M.biomes.length, 15);
-const expected = {hqs:'92c7a701ef7854d1537d976f37b66a43b0e36e5e78706a1fc68ba40d95cd8a0d', btd:'d9bb59e288b6d71977dc3eebe0db5975c17aeb70cfb3caaebd8a3c2f78d31432'};
+assert.equal(N, 104);   // footprint normalisation: 160 -> 104 (docs/tayduky/v2/FOOTPRINT.md) assert.equal(M.biomes.length, 15);
+const expected = {hqs:'f31de9435a202b878a9b02a0d0c11261870b3e28347cf9dc3c4918d75608db4c', btd:'99fb3f52f87a8eb80b22922cda9e1ef788c30283b68940d023d122d6583ea4b7'   /* interior tiles in authoring coordinates; identical to the pre-normalisation world (verified against commit 404b90f) */};
 const expectedProps={hqs:'2a8b96947d4e8aa7a744770f433411c35f51dd50db19d6485616d9640987a8e6',btd:'1cef16d696ccefb6322591810e7ccfd911781b18ea412fe3360765f71fdf8de4'};
 const area = {}, walk = {}, components = {}, reachable = {}, edges = new Set();
 for (const b of M.biomes) {
-  const tiles = [], todo = new Set(); let passable = 0;
+  const tiles = [], oldTiles = [], todo = new Set(); let passable = 0;
   for (let j=0;j<N;j++) for (let i=0;i<N;i++) {const k=M.id(i,j); if (M.BIO[k]!==b.k) continue;
-    tiles.push([i,j,M.H[k],M.MAT[k],M.WALK[k]]);
+    tiles.push([i,j,M.H[k],M.MAT[k],M.WALK[k]]); {const [a,b]=M.layout.unmap(i,j); if(a>=1&&b>=1&&a<=158&&b<=158) oldTiles.push([a,b,M.H[k],M.MAT[k],M.WALK[k]]);}   // authoring coordinates: proves the pilot biomes were only translated
     if (i>0 && j>0 && i<N-1 && j<N-1) {todo.add(k); if(M.WALK[k]) passable++;}
   }
   area[b.id]=todo.size; walk[b.id]=passable;
-  if (expected[b.id]) assert.equal(createHash('sha256').update(JSON.stringify(tiles)).digest('hex'), expected[b.id], `${b.id} changed`);
-  if (expectedProps[b.id]) assert.equal(createHash('sha256').update(JSON.stringify(M.props.filter(p=>M.biomeAt(p.i,p.j)===b.id))).digest('hex'),expectedProps[b.id],`${b.id} props changed`);
+  if (expected[b.id]) assert.equal(createHash('sha256').update(JSON.stringify(oldTiles)).digest('hex'), expected[b.id], `${b.id} changed`);
+  if (expectedProps[b.id]) assert.equal(createHash('sha256').update(JSON.stringify(M.props.filter(p=>M.biomeAt(p.i,p.j)===b.id).map(p=>Object.assign({},p,{i:M.layout.unmap(p.i,p.j)[0],j:M.layout.unmap(p.i,p.j)[1]})))).digest('hex'),expectedProps[b.id],`${b.id} props changed`);
   let n=0; while(todo.size) {n++;const first=todo.values().next().value;todo.delete(first);const q=[first];
     for(let x=0;x<q.length;x++){const i=q[x]%N,j=Math.floor(q[x]/N);for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]) {const ii=i+di,jj=j+dj;if(ii<1||jj<1||ii>=N-1||jj>=N-1)continue;const k=M.id(ii,jj);if(todo.delete(k))q.push(k);}}}
   components[b.id]=n; assert.equal(n,1,`${b.id} has disconnected mask`); assert(passable>0,`${b.id} has no accessible tiles`);
@@ -25,7 +25,7 @@ for (const b of M.biomes) {
 }
 for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++)for(const [di,dj] of [[1,0],[0,1]]) {if(i+di>=N-1||j+dj>=N-1)continue;const a=M.biomeAt(i,j),b=M.biomeAt(i+di,j+dj);if(a!==b)edges.add([a,b].sort().join(':'));}
 for(const b of M.biomes)for(const other of M.adj[b.id]) {assert(M.adj[other].includes(b.id));assert(edges.has([b.id,other].sort().join(':')));}
-assert.equal(Object.values(area).reduce((a,b)=>a+b,0),158*158);
+assert.equal(Object.values(area).reduce((a,b)=>a+b,0),(N-2)*(N-2));
 assert.equal([...edges].length,Object.values(M.adj).reduce((a,x)=>a+x.length,0)/2);
 const court=M.pois.find(p=>p.biome==='tc'&&p.kind==='court');assert(court);
 for(const p of M.pois.filter(p=>p.biome==='tc')) {const i=Math.floor(p.i),j=Math.floor(p.j);assert(M.walkable(i,j),`blocked tc ${p.kind}`);assert(M.path(Math.floor(court.i),Math.floor(court.j),i,j,{biome:'tc'}),`unreachable tc ${p.kind}`);}

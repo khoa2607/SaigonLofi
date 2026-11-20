@@ -39,8 +39,8 @@
     if (p >= 1) { a.pose = st.keepFly ? 'fly' : 'idle'; a.lift = st.l0; return true; } return false;
   };
   X.land = (a, st, dt) => {   // come down on the nearest cloud tile and step off the cloud
-    if (st.el === undefined) { st.el = 0; st.l0 = a.lift || 0; const nw = H.nearestWalk(a.x, a.y, a.biome, 6); st.tx = nw ? nw[0] : a.x; st.ty = nw ? nw[1] : a.y; st.x0 = a.x; st.y0 = a.y; }
-    st.el += dt; const p = Math.min(1, st.el / (st.t || 0.8)); a.x = st.x0 + (st.tx - st.x0) * p; a.y = st.y0 + (st.ty - st.y0) * p; a.lift = st.l0 * (1 - p); a.pose = 'fly'; a.moving = false;
+    if (st.el === undefined) { st.el = 0; st.l0 = a.lift || 0; const nw = H.nearestWalk(a.x, a.y, a.biome, 6); st.tx = nw ? nw[0] : a.x; st.ty = nw ? nw[1] : a.y; st.x0 = a.x; st.y0 = a.y; st.dur = Math.max(st.t || 0.8, Math.hypot(st.tx - a.x, st.ty - a.y) / 26); }   // never glide faster than ~26 units/s
+    st.el += dt; const p = Math.min(1, st.el / st.dur); a.x = st.x0 + (st.tx - st.x0) * p; a.y = st.y0 + (st.ty - st.y0) * p; a.lift = st.l0 * (1 - p); a.pose = 'fly'; a.moving = false;
     if (p >= 1) { a.lift = 0; a.ride = false; a.pose = 'idle'; return true; } return false;
   };
   X.ripple = (a, st) => { S.palm.ripples.push({ x: st.x, y: st.y, t: 0 }); return true; };

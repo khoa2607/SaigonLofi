@@ -9,8 +9,11 @@ Updated 2026-11-20 after the integration of Buddha's Palm. Scope: Tây Du Ký on
 - The source branch `feature/tayduky-buddha-palm` (`b8f2006`) is kept for now; its worktree was `E:/game/web-lofi/testFableLofi-palm`.
 - Untracked and deliberately preserved: `tmp-tayduky-animation/`, `tmp-tayduky-review/` (owner decides about deleting).
 
+## 1b. Footprint standard (read before designing any biome)
+The world is **104 x 104** (`docs/tayduky/v2/FOOTPRINT.md`). A biome = active core + small support ring + short exits, **<= ~900 tiles** (placeholders are ~540 each). The four built biomes are authored in the old 160-tile *authoring space* and relocated by `tayduky/tw-layout.js` (rigid per-biome translations; Hoa Quả Sơn / Thiên Cung / Palm by (-57,0), Bàn Tơ Động by (-58,-76)). New biomes: either author in world space after the `TW_LAYOUT` block in `tw-map.js`, or add them to `tw-layout.js` (keep rule + offset). Use `TWM.layout.map(i, j)` for old-space coordinates; never hard-code tile coordinates in sim/render/tests.
+
 ## 2. Architecture notes that matter when editing
-- Plain `<script>` order (see `tayduky/index.html`): `tw-palm.js` (map build hook, before tw-map) → tw-map → chars → sprites → tw-data → tw-sim → `tw-palm-data.js` → tw-art → `tw-palm-art.js` → tw-fx → `tw-palm-fx.js` → tw-render → tw-main. `tests/tw-load.mjs` mirrors this order for Node.
+- Plain `<script>` order (see `tayduky/index.html`): `tw-layout.js` (footprint relocation, before tw-map) → `tw-palm.js` (map build hook, before tw-map) → tw-map → chars → sprites → tw-data → tw-sim → `tw-palm-data.js` → tw-art → `tw-palm-art.js` → tw-fx → `tw-palm-fx.js` → tw-render → tw-main. `tests/tw-load.mjs` mirrors this order for Node.
 - The palm is hook-based: `TW_PALM_BUILD/TW_PALM_POST` (tw-map), `TWA.ext` (art), `TWFX.palm` (fx), `TWS.stepExt/opExt/pointExt/ACT/MINI` (sim). Shared files hold only the hooks.
 - **Material ids** (tw-map `M`): PEACHLAWN 28 and BRONZE 29 belong to Thiên Cung; the palm's `SKYC`=30, `SKYD`=31, placeholders `PH`=32+ (renumbered in the merge — never reuse ids).
 - Heights are levels of 4 world units; terrain is 2:1 isometric; map 160 × 160 with 15 BIO regions; `canStep` limits height steps.

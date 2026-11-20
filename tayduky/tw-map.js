@@ -8,7 +8,7 @@
 
 const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 (function () {
-  const N = TWM.N;
+  let N = TWM.N;
   // ---------------------------------------------------------------- deterministic noise
   function hash2(x, y, s) { let h = (x * 374761393 + y * 668265263 + (s || 0) * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
   function vnoise(x, y, s) {
@@ -38,7 +38,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
-  const NN = N * N, H = new Int8Array(NN), MAT = new Uint8Array(NN), BIO = new Uint8Array(NN), WALK = new Uint8Array(NN), PATHC = new Uint8Array(NN), RES = new Uint8Array(NN);
+  let NN = N * N, H = new Int8Array(NN), MAT = new Uint8Array(NN), BIO = new Uint8Array(NN), WALK = new Uint8Array(NN), PATHC = new Uint8Array(NN), RES = new Uint8Array(NN);
   Object.assign(TWM, { H, MAT, BIO, WALK, PATHC, RES, props: [], pois: [], stairs: new Map(), stairAt: new Map(), water: [], falls: [], decals: [], webs: [], lights: [] });
   const id = (i, j) => j * N + i, inMap = (i, j) => i >= 0 && j >= 0 && i < N && j < N;
   TWM.id = id; TWM.inMap = inMap;
@@ -474,6 +474,23 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // Lòng Bàn Tay Phật Tổ (tw-palm.js): a celestial sea of clouds, five finger pillars and the seated Buddha
   if (window.TW_PALM_BUILD) TW_PALM_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32 });
 
+  // Footprint normalisation (tw-layout.js): relocate the authored content into the compact world, trim built biomes to their footprints and
+  // re-plan the placeholder regions. Everything below (routes, bridges, seam, walkability, nav) is built in the final world space.
+  if (window.TW_LAYOUT) {
+    const L = TW_LAYOUT.apply({ TWM, N, H, MAT, BIO, PATHC, RES, M, vnoise });
+    ({ N, NN, H, MAT, BIO, WALK, PATHC, RES } = L); TWM.N = N;
+    Object.assign(TWM, { H, MAT, BIO, WALK, PATHC, RES });
+    TWM.adj = Object.fromEntries(TWM.biomes.map(b => [b.id, []]));
+    for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) for (const [di,dj] of [[1,0],[0,1]]) {
+      if (i + di >= N - 1 || j + dj >= N - 1) continue;
+      const a = TWM.biomes[BIO[id(i,j)]].id, b2 = TWM.biomes[BIO[id(i+di,j+dj)]].id;
+      if (a !== b2 && !TWM.adj[a].includes(b2)) { TWM.adj[a].push(b2); TWM.adj[b2].push(a); }
+    }
+    // placeholder ground and the map rim in the new world
+    for (let k = 0; k < NN; k++) if (!TWM.biomes[BIO[k]].built && MAT[k] === 0 && H[k] === 0) { H[k] = 1; MAT[k] = M.PH + BIO[k]; }
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) if (i < 1 || j < 1 || i > N - 2 || j > N - 2) { MAT[id(i, j)] = M.VOID; H[id(i, j)] = -4; }
+  }
+
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
   for (const b of TWM.biomes.filter(b=>!b.built)) {
@@ -485,9 +502,39 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       if(other!==b.id){if(ends[other]===undefined)ends[other]=k;continue;}if(prev[z]<0&&!RES[z]){prev[z]=k;q.push(z);}}}
     for(const end of Object.values(ends))for(let k=end;;k=prev[k]){if(MAT[k]>=M.PH){MAT[k]=M.TRAIL;PATHC[k]=1;}if(k===start||prev[k]<0)break;}
   }
+  // Gates (footprint normalisation): a trimmed built biome must still open onto the world. Its main walkable body gets one ramped gate out into a
+  // neighbouring placeholder: the placeholder tiles outward from the border step the height down (or up) to the placeholder level with stairs.
+  if (window.TW_LAYOUT) {
+    const walk0 = k => { const m = MAT[k]; return m === M.BRIDGE || m === M.SILKB || (m !== M.VOID && m !== M.ROCK && m !== M.CHASM && m !== M.SKYD && !TWM.isWater(m)); };
+    const step0 = (a, b) => walk0(a) && walk0(b) && (H[a] === H[b] || TWM.stairs.has(a + ',' + b));
+    TWM.gates = [];
+    for (const b of TWM.biomes.filter(b => b.built)) {
+      // walkable components of the biome
+      const comp = new Int32Array(NN).fill(-1), sizes = []; let c = 0;
+      for (let k = 0; k < NN; k++) { if (BIO[k] !== b.k || comp[k] >= 0 || !walk0(k)) continue; const q = [k]; comp[k] = c;
+        for (let n = 0; n < q.length; n++) { const x = q[n] % N, y = Math.floor(q[n] / N); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inMap(x + dx, y + dy)) continue; const z = id(x + dx, y + dy); if (BIO[z] === b.k && comp[z] < 0 && step0(q[n], z)) { comp[z] = c; q.push(z); } } }
+        sizes.push(q.length); c++; }
+      if (!c) continue; const main = sizes.indexOf(Math.max(...sizes));
+      let best = null;
+      for (let j = 2; j < N - 2; j++) for (let i = 2; i < N - 2; i++) { const k = id(i, j); if (comp[k] !== main) continue;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const p = id(i + dx, j + dy); if (BIO[p] === b.k || TWM.biomes[BIO[p]].built) continue;
+          // the ramp runs straight out through placeholder tiles from the border until it reaches level 1
+          const need = Math.abs(H[k] - 1); let ok = true; for (let t = 0; t < need; t++) { const x = i + dx * (t + 1), y = j + dy * (t + 1); if (x < 2 || y < 2 || x >= N - 2 || y >= N - 2 || TWM.biomes[BIO[id(x, y)]].built || BIO[id(x, y)] === b.k) { ok = false; break; } }
+          if (!ok) continue; const score = need * 4 + (H[k] > 1 ? 1 : 0) + Math.hypot(i - b.centre[0], j - b.centre[1]) * 0.02; if (!best || score < best.score) best = { i, j, dx, dy, need, score }; } }
+      if (!best) continue;
+      let prev = id(best.i, best.j), h = H[prev]; const dir = h > 1 ? -1 : 1;
+      for (let t = 0; t < Math.max(1, best.need); t++) {
+        const x = best.i + best.dx * (t + 1), y = best.j + best.dy * (t + 1), k = id(x, y);
+        if (h !== 1) { h += dir; H[k] = h; } else H[k] = 1;
+        MAT[k] = M.TRAIL; PATHC[k] = 1;
+        if (H[prev] !== H[k]) { if (H[k] > H[prev]) addStair(prev, k); else addStair(k, prev); }
+        prev = k; }
+      TWM.gates.push({ biome: b.id, at: [best.i, best.j], dir: [best.dx, best.dy], len: best.need });
+    }
+  }
   // Reserved river corridor in the unfinished TTH region; route crossings are
   // kept walkable. Its detailed banks and story terrain remain unbuilt.
-  for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j);if(isB(i,j,'tth') && !PATHC[k] && !RES[k] && (i%16<7 || i%16>9) && Math.abs(j-(124+Math.sin(i*.07)*3))<1.5)MAT[k]=M.PLACEWATER;}
+  for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j);if(isB(i,j,'tth') && !PATHC[k] && !RES[k] && (i%16<7 || i%16>9) && Math.abs(j-(Math.round(TWM.biomes[TWM.bi.tth].centre[1])+1+Math.sin(i*.07)*3))<1.5)MAT[k]=M.PLACEWATER;}
 
   // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
   { const seenB = new Uint8Array(NN);
