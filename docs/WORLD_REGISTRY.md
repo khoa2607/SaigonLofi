@@ -1,5 +1,7 @@
 # Lofi Worlds — World Registry
 
+To add a world, follow `docs/WORLD-BUILDER-GUIDE.md`.
+
 | World | Status | Where | Notes |
 |---|---|---|---|
 | Saigon Through Time | production | `main` (`index.html`, `js/`) | four eras, events, riverfront |

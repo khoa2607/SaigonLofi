@@ -69,3 +69,6 @@ The default zoom starts about 17% wider than before (still a whole number of scr
 
 ## UI language (VI / EN)
 The VI / EN toggle (top right) switches all interface text instantly, defaults to Vietnamese and is saved in `localStorage` (`saigonlofi-lang`). `js/i18n.js` holds the dictionaries: `UI` (keyed `[vi, en]` strings used by `data-i18n` / `data-i18n-attr` in `index.html` and by `t(key)`), and `MSG` (ticker and YouTube-status sentences, looked up by their Vietnamese source text via `tm()`). In-world text (shop signs, banners, landmarks) is never translated.
+
+## Adding a new world
+See `docs/WORLD-BUILDER-GUIDE.md` (platform contract, shared APIs, Holdfast template, tests, checklist) and `docs/WORLD_REGISTRY.md`.

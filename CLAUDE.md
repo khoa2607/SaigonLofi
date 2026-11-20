@@ -9,6 +9,9 @@ This repository is the **live Lofi Worlds web app**: a world gallery plus two pa
 > The general rules it shares with this project are repeated below. Nothing in this repo uses React, Phaser, Vite or PixelLab.
 > If PixelLab is ever used from here, the parent file's budget policy still applies (approval per paid batch, balance checks).
 
+> **Building a new world?** Start with `docs/WORLD-BUILDER-GUIDE.md`: platform contract, shared API signatures, the Holdfast
+> template, test harness and a step-by-step checklist. It is written so you do not need to read the codebase first.
+
 ## Architecture (as it exists)
 
 | Part | Files | Notes |
