@@ -32,7 +32,17 @@ v0.3 changes: **the whole map is Saigon-sized and each biome is small** (D13, §
 | D17 | **No biome is calm.** Every biome is busy with ambient life, mini events and signatures; biomes differ only in loop length (5–10 min) and mood. |
 | D18 | Gallery title: **"Journey to the West — A Living Legend"** / **"Tây Du Ký — Huyền Thoại Sống"**. |
 
-## 0b. Build status and the hybrid decision (2026-11-20)
+## 0c. Redesign v2 (2026-11-20): supersedes §0b and the traced art direction of §7.1b
+
+The owner rejected the traced hybrid alpha. The world is being rebuilt from scratch as a true 2:1 isometric living world, using the
+Saigon/Holdfast architecture with an original Chinese mythic pixel-art style. It has:
+- modular tiles, with separate objects and characters
+- one depth sort, a nav grid, and hand-drawn sprites made for animation
+
+References are inspiration only (no tracing). The story design (biomes, the Director, the Living Story Loop, stories) in this document still applies.
+Rules, scale and the character pilot: `docs/tayduky/v2/REDESIGN.md`. The sections below about traced plates are legacy.
+
+## 0b. Build status and the hybrid decision (2026-11-20) — legacy
 
 The owner chose the **hybrid** construction: each biome keeps a traced centre plate (the 3D look of the references: mountains, flowing water,
 clouds, foreground and background), and the land between biomes is shared base terrain with dithered edge bands. Characters are about 50 px,

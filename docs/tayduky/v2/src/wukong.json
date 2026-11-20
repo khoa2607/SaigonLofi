@@ -1,0 +1,415 @@
+{
+ "version": 1,
+ "name": "wukong",
+ "title": [
+  "Tôn Ngộ Không",
+  "Sun Wukong"
+ ],
+ "biome": "hqs",
+ "canvas": [
+  32,
+  48
+ ],
+ "pivot": [
+  16,
+  46
+ ],
+ "speed": 26,
+ "notes": "Hand-authored v2. Silhouette keys: two pheasant feathers, round head with ears, golden circlet, flared tiger skirt, curled tail. The staff is shrunk behind his ear while he walks (canon), so arms swing free and the left view mirrors the right.",
+ "palette": {
+  "o": "#2a1726",
+  "q": "#c8384a",
+  "F": "#c27a3c",
+  "f": "#8e4e30",
+  "h": "#e8a85a",
+  "S": "#f6c49a",
+  "s": "#d4907a",
+  "P": "#f08a8a",
+  "w": "#ffffff",
+  "m": "#7a2a34",
+  "G": "#f2c03c",
+  "g": "#c0802a",
+  "Y": "#fff0a0",
+  "R": "#e04a3a",
+  "r": "#a02a38",
+  "d": "#6a1c30",
+  "T": "#f39a34",
+  "t": "#6e3020",
+  "W": "#f4e8cc",
+  "V": "#c8b49a",
+  "K": "#3a2c44",
+  "k": "#5e4c6a",
+  "J": "#241a30"
+ },
+ "views": {
+  "down": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     ".....q..........",
+     ".....q..........",
+     "......q.........",
+     "......q.........",
+     ".......q........",
+     ".......q........",
+     "........q.......",
+     ".........q......",
+     "..........qooooo",
+     ".........ooFFhhh",
+     "........oFFFFhhh",
+     ".......oFFFFFFFh",
+     ".......oGGGGGGYY",
+     ".......oggggggGR",
+     ".....ooofSSSSfFF",
+     "....oSSofSSSSSSf",
+     "....oSsofSSooSSS",
+     "....ossofSSwoSSS",
+     ".....ooofSSooSSS",
+     ".......ofSPSSSSm",
+     ".......ofSSSSmSS",
+     "........ofSSSSmm",
+     ".........ofSSSSS",
+     "..........oooooo",
+     ".........ooRRRRR",
+     "........oRRRRRRR",
+     ".......oFfrRRRRr",
+     ".......oFfGGGGRR",
+     ".......oFfgggggR",
+     ".......oFfGGGGrR",
+     ".......oSSgggggr",
+     ".......osSdddddd",
+     ".......ooTTTtTTt",
+     "........oTtTTTtT",
+     "........otTTtTtT",
+     "........oooooooo"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................",
+      "..........orrro.",
+      "..........orrro.",
+      "..........oWWWo.",
+      "..........oWVWo.",
+      "..........oWWWo.",
+      ".........oKKKKo.",
+      ".........oKkKKo.",
+      ".........oKKKKo.",
+      ".........oooooo."
+     ]
+    },
+    "a": {
+     "from": "stand",
+     "lift": [
+      0,
+      15
+     ]
+    },
+    "b": {
+     "from": "stand",
+     "lift": [
+      16,
+      31
+     ]
+    }
+   },
+   "item": {
+    "layer": "back",
+    "part": {
+     "at": [
+      17,
+      27
+     ],
+     "rows": [
+      "oo.........",
+      "oFo........",
+      "oFFo.......",
+      ".oFFo......",
+      "..oFFo.....",
+      "...oFFo..oo",
+      "....oFFooFo",
+      ".....oFFFFo",
+      "......oooo."
+     ]
+    }
+   }
+  },
+  "up": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     ".....q..........",
+     ".....q..........",
+     "......q.........",
+     "......q.........",
+     ".......q........",
+     ".......q........",
+     "........q.......",
+     ".........q......",
+     "..........qooooo",
+     ".........ooFFhhh",
+     "........oFFFFhhh",
+     ".......oFFFFFFFh",
+     ".......oGGGGGGGG",
+     ".......ogggggggg",
+     ".....oooFFFFFFFF",
+     "....oSSoFFFFFFFF",
+     "....oSsoFFFFFFFF",
+     "....ossofFFFFFFF",
+     ".....ooofFFFFFFF",
+     ".......ofFFFFFFF",
+     ".......offFFFFFF",
+     "........offFFFFF",
+     ".........offFFFF",
+     "..........oooooo",
+     ".........ooRRRRR",
+     "........oRRRRRRR",
+     ".......oFfRRRRRR",
+     ".......oFfrRRRRR",
+     ".......oFfGrrrrr",
+     ".......oFfGGGGGG",
+     ".......oSSgGGGGG",
+     ".......osSdddddd",
+     ".......ooTTTtTTt",
+     "........oTtTTTtT",
+     "........otTTtTtT",
+     "........oooooooo"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................",
+      "..........orrro.",
+      "..........orrro.",
+      "..........oWWWo.",
+      "..........oWVWo.",
+      "..........oWWWo.",
+      ".........oKKKKo.",
+      ".........oKKKKo.",
+      ".........oKkKKo.",
+      ".........oooooo."
+     ]
+    },
+    "a": {
+     "from": "stand",
+     "lift": [
+      0,
+      15
+     ]
+    },
+    "b": {
+     "from": "stand",
+     "lift": [
+      16,
+      31
+     ]
+    }
+   },
+   "item": {
+    "layer": "front",
+    "part": {
+     "at": [
+      15,
+      31
+     ],
+     "rows": [
+      "oo.........",
+      "oFo........",
+      "oFFo.......",
+      ".oFFo......",
+      "..oFFo.....",
+      "...oFFo..oo",
+      "....oFFooFo",
+      ".....oFFFFo",
+      "......oooo."
+     ]
+    }
+   }
+  },
+  "right": {
+   "upper": {
+    "rows": [
+     "................................",
+     "........q.......................",
+     ".......q........................",
+     ".......q........................",
+     "........q.......................",
+     "........q.......................",
+     ".........q......................",
+     "..........q.....................",
+     "...........q....................",
+     "............qoooooo.............",
+     "...........ooFFFFhhoo...........",
+     "..........oFFFFFFFhhho..........",
+     ".........oFFFFFFFFFFFFo.........",
+     ".........oGGGGGGGGGGGYYo........",
+     ".........ogggggggggggggRo.......",
+     "........oFFFoooFFFSSSSSo........",
+     "........oFFoSSoFFSSSSSSSo.......",
+     "........oFFoSsoFSSSSSooSo.......",
+     "........oFFossoFSSSSSwoSSo......",
+     "........ofFFooFFSSSSSooSSSo.....",
+     "........ofFFFFFSPSSSSSSSSmo.....",
+     "........offFFFFSSSSSSSSmSSo.....",
+     ".........offFFFSSSSSSSSmmo......",
+     "..........offFFSSSSSSSSSo.......",
+     "...........oooooooooooooo.......",
+     "............ooRRRRRRRo..........",
+     "...........oRRRRRRRRRRo.........",
+     "...........oRrGGGGGGGGo.........",
+     "............oGGGGGGGGGo.........",
+     "............ogggggggggo.........",
+     "............oGGGGGGGGgo.........",
+     "............ogggggggggo.........",
+     "............odddddddddo.........",
+     "...........oTTtTTTtTTTo.........",
+     "...........oTtTTTtTTtTTo........",
+     "...........otTTtTtTTtTTo........",
+     "...........oooooooooooo........."
+    ]
+   },
+   "arm": {
+    "n": {
+     "at": [
+      15,
+      26
+     ],
+     "rows": [
+      ".oo.",
+      "oFFo",
+      "oFFo",
+      "oFfo",
+      "oFfo",
+      "oSSo",
+      "oSso",
+      ".oo."
+     ]
+    },
+    "f": {
+     "at": [
+      15,
+      26
+     ],
+     "rows": [
+      ".oo...",
+      "oFFo..",
+      "oFFFo.",
+      ".oFFFo",
+      "..oFfo",
+      "..oSSo",
+      "..osso",
+      "...oo."
+     ]
+    },
+    "b": {
+     "at": [
+      12,
+      26
+     ],
+     "rows": [
+      "...oo.",
+      "..oFFo",
+      ".oFFFo",
+      "oFFFo.",
+      "oFfo..",
+      "oSSo..",
+      "osso..",
+      ".oo..."
+     ]
+    }
+   },
+   "item": {
+    "layer": "back",
+    "part": {
+     "at": [
+      3,
+      22
+     ],
+     "rows": [
+      ".ooo......",
+      "oFFFo.....",
+      "oFooFo....",
+      ".o.oFo....",
+      "...oFo....",
+      "...oFFo...",
+      "....oFo...",
+      "....oFFo..",
+      ".....oFFoo",
+      "......oFFF",
+      ".......ooo"
+     ]
+    }
+   },
+   "lower": {
+    "stand": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............orrro.............",
+      "..............orrro.............",
+      "..............oWWWo.............",
+      "..............oWVWo.............",
+      "..............oWWWo.............",
+      "..............oKKKKo............",
+      "..............oKkKKKo...........",
+      "..............oKKKKKo...........",
+      "..............ooooooo..........."
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............oddrro............",
+      ".............oddorrro...........",
+      "............oVVo..oWWo..........",
+      "............oVVo..oWVWo.........",
+      "...........oVVo....oWWo.........",
+      "..........oJJJo....oKKKKo.......",
+      "..........oJJJJo...oKkKKKo......",
+      "..........ooooo....oKKKKKo......",
+      "...................ooooooo......"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............orrddo............",
+      ".............orrrodddo..........",
+      "............oWWo..oVVo..........",
+      "............oWVo..oVVVo.........",
+      "...........oWWo....oVVo.........",
+      "..........oKKKo....oJJJJo.......",
+      "..........oKkKKo...oJJJJJo......",
+      "..........ooooo....oJJJJJo......",
+      "...................ooooooo......"
+     ]
+    }
+   }
+  }
+ }
+}

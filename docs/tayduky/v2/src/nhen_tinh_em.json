@@ -1,0 +1,367 @@
+{
+ "version": 1,
+ "name": "nhen_tinh_em",
+ "title": [
+  "Nhện Tinh (em)",
+  "Spider Spirit, younger sister"
+ ],
+ "biome": "btd",
+ "canvas": [
+  32,
+  48
+ ],
+ "pivot": [
+  16,
+  46
+ ],
+ "speed": 14,
+ "gait": "glide",
+ "notes": "Same lady body as the eldest sister; a single high bun, teal robe, rose sash, darker hair.",
+ "palette": {
+  "o": "#2a1726",
+  "H": "#2e2a44",
+  "h": "#6a5a8a",
+  "X": "#24182e",
+  "I": "#ffffff",
+  "i": "#a49ad0",
+  "S": "#fbe0cc",
+  "P": "#f4a0a8",
+  "l": "#d2405a",
+  "e": "#5a2a7a",
+  "w": "#ffffff",
+  "K": "#2e2440",
+  "V": "#3cb8a8",
+  "v": "#24807c",
+  "N": "#f48ab0",
+  "n": "#c25a84"
+ },
+ "views": {
+  "down": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     "................",
+     "................",
+     "..............oo",
+     ".............oHh",
+     "............oHHh",
+     "...........oXHHH",
+     "..........oooXXX",
+     "........ooHHHHhh",
+     ".......oHHHHHHhh",
+     ".......oHHHHHHHH",
+     ".......oHHHHXXXX",
+     ".......oHHXSSSSX",
+     ".......oHXSSSSSS",
+     ".......oHXSSSSSS",
+     ".......oHXoooSSS",
+     ".......oHXSewSSS",
+     ".......oHXSSSSSS",
+     ".......oHXPSSSSS",
+     ".......oHHSSSSSl",
+     ".......oHHoSSSSS",
+     ".......oHHHooooo",
+     "......oHHHHoIoSS",
+     "......oHHoVVVVIS",
+     ".....oVVVVVVVVVI",
+     "....oVVVVvVVVVVV",
+     "....oVVVvVVVVVVV",
+     "...oVVVvVVVVVVVV",
+     "...oVVVvVNNNNNNN",
+     "...oVVVvVnnnnnnN",
+     "..oVVVVvVVVVVVnV",
+     "..oIIIIvVVVVVVnV",
+     "..oooooovVVVVVVV",
+     ".......ovVVVVVVV",
+     ".......oVvVVVVVV",
+     "......oVVVVIVVVV",
+     "......oVVVIVIVVV",
+     "......oVVVVIVVVV",
+     ".....ovVVVVVVVVV",
+     ".....oVVVVVVVVVV"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVV",
+      "....ovVVVVVVVVVV",
+      "....oooooooooooo",
+      "..........oKKo..",
+      "..........oooo..",
+      "................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      ".....ovVVVVVVVVVVVVVVVVVVVvo....",
+      ".....ooooooooooooooooooooooo....",
+      "..........oKKo..................",
+      "..........oooo..................",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      "....ovVVVVVVVVVVVVVVVVVVVvo.....",
+      "....ooooooooooooooooooooooo.....",
+      "..................oKKo..........",
+      "..................oooo..........",
+      "................................"
+     ]
+    }
+   }
+  },
+  "up": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     "................",
+     "................",
+     "..............oo",
+     ".............oHh",
+     "............oHHh",
+     "...........oXHHH",
+     "..........oooXXX",
+     "........ooHHHHhh",
+     ".......oHHHHHHhh",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHh",
+     ".......oHHHHHHhH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oXHHHHHHH",
+     "......oVXHHHHHHH",
+     "......oVVXHHHHHH",
+     ".....oVVVVXHHHHH",
+     "....oVVVVvVXHHHH",
+     "....oVVVvVVVXHHH",
+     "...oVVVvVVVVVXHH",
+     "...oVVVvVNNNNNNN",
+     "...oVVVvVnnnNNNn",
+     "..oVVVVvVVVoNNNo",
+     "..oIIIIvVVVVonnV",
+     "..oooooovVVVVoVV",
+     ".......ovVVVVVVV",
+     ".......oVvVVVVVV",
+     "......oVVVVIVVVV",
+     "......oVVVIVIVVV",
+     "......oVVVVIVVVV",
+     ".....ovVVVVVVVVV",
+     ".....oVVVVVVVVVV"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVV",
+      "....ovVVVVVVVVVV",
+      "....oooooooooooo",
+      "..........oKKo..",
+      "..........oooo..",
+      "................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      ".....ovVVVVVVVVVVVVVVVVVVVvo....",
+      ".....ooooooooooooooooooooooo....",
+      "..........oKKo..................",
+      "..........oooo..................",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      "....ovVVVVVVVVVVVVVVVVVVVvo.....",
+      "....ooooooooooooooooooooooo.....",
+      "..................oKKo..........",
+      "..................oooo..........",
+      "................................"
+     ]
+    }
+   }
+  },
+  "right": {
+   "upper": {
+    "rows": [
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "...........oo...................",
+     "..........oHho..................",
+     ".........oHHHo..................",
+     "..........oXXoooooo.............",
+     ".........oHHHHHhhhhoo...........",
+     "........oHHHHHHHHhhhho..........",
+     "........oHHHHHHHHHHHHHo.........",
+     "........oHHHHHHHHHXXXXo.........",
+     "........oHHHHHHHXSSSSSXo........",
+     "........oHHHHHHXSSSSSSSo........",
+     "........oHHHHHHXSSSSSSSSo.......",
+     "........oHHHHHHXSSSooSSSo.......",
+     "........oHHHHHHXSSSewSSSo.......",
+     "........oHHHHHHXSSSSSSSo........",
+     "........oHHHHHHXSPSSSSSo........",
+     "........oHHHHHHHSSSSSlSo........",
+     "........oHHHHHHHoSSSSSo.........",
+     "........oHHHHHHHHooooo..........",
+     ".........oHHHHHHoIoS............",
+     ".........oHHHHHVVVIVo...........",
+     "........oHHHHVVVVVVVVo..........",
+     "........oHHHVVVVVVVVVo..........",
+     "........oHHVVVVVVVVVVo..........",
+     "........oHVVVVVVVVVVVo..........",
+     "........oHNNNNNNNNNNNo..........",
+     "........onnnnnnnnnnnNo..........",
+     "........oVVVVVVVVVVVVo..........",
+     "........ovVVVVVVVVVVVo..........",
+     ".......ovVVVVVVIVVVVVo..........",
+     ".......oVVVVVVIVIVVVVo..........",
+     ".......oVVVVVVVIVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVo.........",
+     "......oVVVVVVVVVVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVo.........",
+     "......oVVVVVVVVVVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVVo........"
+    ]
+   },
+   "arm": {
+    "n": {
+     "at": [
+      13,
+      23
+     ],
+     "rows": [
+      ".oooo.",
+      "oVVVVo",
+      "oVVVVo",
+      "oVVvVo",
+      "oVVvVo",
+      "oVVvVo",
+      "oVVvVVo",
+      "oIIIIIo",
+      ".ooooo."
+     ]
+    },
+    "f": {
+     "at": [
+      14,
+      23
+     ],
+     "rows": [
+      ".oooo..",
+      "oVVVVo.",
+      "oVVVVVo",
+      ".oVVvVo",
+      ".oVVvVVo",
+      "..oVvVVo",
+      "..oVvVVVo",
+      "..oIIIIIo",
+      "...ooooo."
+     ]
+    },
+    "b": {
+     "at": [
+      11,
+      23
+     ],
+     "rows": [
+      "...oooo",
+      "..oVVVVo",
+      ".oVVVVVo",
+      "oVVvVVo.",
+      "oVvVVo..",
+      "oVvVVo..",
+      "oVvVVo..",
+      "oIIIIo..",
+      ".oooo..."
+     ]
+    }
+   },
+   "lower": {
+    "stand": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVo.........",
+      "......ovVVVVVVVVVVVVVVVo........",
+      "......oooooooooooooooooo........",
+      "...............oKKKo............",
+      "...............ooooo............",
+      "................................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVVo........",
+      "......ovVVVVVVVVVVVVVVVVo.......",
+      "......ooooooooooooooooooo.......",
+      "..........ooo.......oKKKo.......",
+      "...................ooooo........",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVo.........",
+      ".....ovVVVVVVVVVVVVVVVo.........",
+      ".....oooooooooooooooooo.........",
+      "........oKKKo.....ooo...........",
+      "........ooooo...................",
+      "................................"
+     ]
+    }
+   }
+  }
+ }
+}

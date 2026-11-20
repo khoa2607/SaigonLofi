@@ -1,5 +1,15 @@
 # Tây Du Ký — Huyền Thoại Sống: status
 
+> **Redesign v2 (2026-11-20, branch `feature/tayduky-redesign-v2`).** The owner rejected the traced, plate-based alpha below, which looks like stitched images.
+> It is now **legacy**: kept intact as reference and history, and no longer polished.
+> The v2 path rebuilds the world from scratch as a true 2:1 isometric living world:
+> - modular tiles, with separate objects and characters
+> - depth sorting, a nav grid, and hand-drawn sprites made for animation
+>
+> Current v2 milestone: the **character pilot** for Hoa Quả Sơn and Bàn Tơ Động. It is waiting for the owner's review, and no biome rebuild has started.
+> See `docs/tayduky/v2/REDESIGN.md` and preview at `http://localhost:8765/docs/tayduky/v2/`.
+
+
 Branch `feature/tayduky-world`. Not merged to `main` and not linked from the gallery yet. Last update: 2026-11-20 (resume session: the 11th biome, mini events, recovery).
 
 ## How to run
