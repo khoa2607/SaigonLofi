@@ -6,8 +6,8 @@
 > - modular tiles, with separate objects and characters
 > - depth sorting, a nav grid, and hand-drawn sprites made for animation
 >
-> Current v2 milestone: the **character pilot** for Hoa Quả Sơn and Bàn Tơ Động. It is waiting for the owner's review, and no biome rebuild has started.
-> See `docs/tayduky/v2/REDESIGN.md` and preview at `http://localhost:8765/docs/tayduky/v2/`.
+> Current v2 milestone (2026-11-20): the **living world vertical slice**. Hoa Quả Sơn and Bàn Tơ Động are built in the real runtime at `tayduky/`, and nine placeholders are reserved.
+> It is waiting for the owner's visual approval. Status: `docs/tayduky/v2/STATUS.md`. The traced alpha below now lives at `tayduky/alpha/`.
 
 
 Branch `feature/tayduky-world`. Not merged to `main` and not linked from the gallery yet. Last update: 2026-11-20 (resume session: the 11th biome, mini events, recovery).

@@ -268,7 +268,7 @@ const TWA = (function () {
     // an arch cut into the front-left face of this tile row (the face exists because the tile in front is lower)
     const drop = (h - hl) * LV; if (drop < 24) return;
     const W = dc.w * 32, btd = dc.kind === 'cave_btd';
-    const archH = Math.min(drop - 6, btd ? 56 : 50), archW = btd ? 30 : 40;
+    const archH = Math.min(drop - 6, btd ? 56 : 54), archW = btd ? 30 : 52;
     for (let c = 0; c < 32; c++) {
       const lx = c, rtop = Math.floor((lx + 32) / 2) + 1, gx = sx - 32 + lx;
       const ax = gx - (SX(dc.i, dc.j) - 32 + dc.w * 16);

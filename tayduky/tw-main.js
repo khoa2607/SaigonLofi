@@ -3,11 +3,12 @@
 (function () {
   const Q = new URLSearchParams(location.search), cv = document.getElementById('c');
   const sim = window.TWS || null;
-  const START = { hqs: [138, 24], btd: [80, 140] };
+  const START = { hqs: [138, 24], btd: [80, 140], fall: [131, 16], spring: [92, 143] };
   function boot() {
     TWR.init(cv);
     if (sim && sim.init) sim.init(+(Q.get('seed') || (Date.now() % 100000)));
     if (sim) sim.speed = +(Q.get('speed') || 1);
+    if (sim && Q.get('force')) for (const b of Q.get('force').split(',')) if (sim.biomes[b]) sim.biomes[b].timer = 0.5;   // dev/test only: start a biome's story loop now
     TWR.zoom = +(Q.get('zoom') || Math.max(1, Math.min(4, Math.round(Math.sqrt(innerWidth * innerHeight * (window.devicePixelRatio || 1) ** 2 / (960 * 540)))))); TWR.resize();
     const at = START[Q.get('at')] || (Q.get('at') && TWM.biomes[TWM.bi[Q.get('at')]] ? TWM.biomes[TWM.bi[Q.get('at')]].centre : START.hqs);
     TWR.lookAt((at[0] + 0.5) * 8, (at[1] + 0.5) * 8, TWM.H[TWM.id(Math.round(at[0]), Math.round(at[1]))] * 4);

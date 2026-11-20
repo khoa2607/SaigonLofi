@@ -87,7 +87,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   }
   // the river on the massif and the waterfall notch
   const MBF = mB(FALL_I);
-  for (let j = 1; j < MBF; j++) for (let i = FALL_I - 3; i <= FALL_I + 4; i++) set(i, j, 10, i >= FALL_I && i <= FALL_I + 1 ? M.STREAM : M.ROCK);
+  for (let j = 1; j < MBF; j++) for (let i = FALL_I - 3; i <= FALL_I + 4; i++) set(i, j, 10, i >= FALL_I && i <= FALL_I + 2 ? M.STREAM : M.ROCK);
   for (let j = 1; j < MBF; j++) for (const i of [FALL_I - 5, FALL_I - 4, FALL_I + 5, FALL_I + 6]) if (H[id(i, j)] < 9) set(i, j, 9, M.ROCK);
   // the pool basin, cut into the upper terrace down to the middle level, with a ledge behind the falling water (Thủy Liêm Động)
   const PC = [FALL_I + 0.5, MBF + 3.6];
@@ -100,9 +100,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   HQ.pool = PC; HQ.fallI = FALL_I; HQ.mB = MBF;
   TWM.water.push({ type: 'ell', c: [PC[0] + 0.5, PC[1] + 0.5], rx: 5.6, ry: 3.4, mat: M.POOL });
   TWM.water.push({ type: 'sea', f: j => sB(j) + 3, mat: M.SEA });
-  TWM.falls.push({ biome: 'hqs', i: FALL_I, j: MBF - 1, w: 2, top: 10, bottom: 2, cave: true });
-  TWM.decals.push({ kind: 'cave_hqs', i: FALL_I - 1, j: MBF - 1, w: 4 });       // Thủy Liêm Động: arch in the massif face, the water falls through its middle
-  set(FALL_I, MBF, 2, M.STREAM); set(FALL_I + 1, MBF, 2, M.STREAM);
+  TWM.falls.push({ biome: 'hqs', i: FALL_I, j: MBF - 1, w: 3, top: 10, bottom: 2, cave: true });
+  TWM.decals.push({ kind: 'cave_hqs', i: FALL_I - 1, j: MBF - 1, w: 5 });       // Thủy Liêm Động: arch in the massif face, the water falls through its middle
+  set(FALL_I, MBF, 2, M.STREAM); set(FALL_I + 1, MBF, 2, M.STREAM); set(FALL_I + 2, MBF, 2, M.STREAM);
   // stream: pool outflow down the terraces to the sea
   function carveStream(pts, w) {
     TWM.water.push({ type: 'line', pts: pts.map(([a, b]) => [a + 0.5 + (w > 1 ? 0.5 : 0), b + 0.5]), w: w * 0.62, mat: M.STREAM });
@@ -172,30 +172,34 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   }
   function carvePath(pts, mat, biome) {
     let pi = null, pj = null;
+    const visit = (i, j) => {
+      if (inMap(i, j) && isB(i, j, biome)) {
+        const k2 = id(i, j);
+        if (MAT[k2] === M.STREAM || MAT[k2] === M.CHASM) { MAT[k2] = MAT[k2] === M.STREAM ? M.BRIDGE : M.SILKB; if (H[k2] === 0) H[k2] = 2; }
+        else if (MAT[k2] !== M.PAVE && MAT[k2] !== M.LEDGE && MAT[k2] !== M.CAVEF && MAT[k2] !== M.POOL && MAT[k2] !== M.SPRING) MAT[k2] = mat;
+        PATHC[k2] = 1;
+      }
+      if (pi !== null) {
+        const a = id(pi, pj), b = id(i, j), dh = H[b] - H[a];
+        if (dh !== 0 && Math.abs(dh) <= 2 && !TWM.isWater(MAT[a]) && !TWM.isWater(MAT[b]) && MAT[a] !== M.CHASM && MAT[b] !== M.CHASM) { if (dh > 0) addStair(a, b); else addStair(b, a); }
+      }
+      pi = i; pj = j;
+    };
     for (let k = 0; k < pts.length - 1; k++) {
       let [i, j] = pts[k]; const [i1, j1] = pts[k + 1];
       while (i !== i1 || j !== j1) {
-        if (inMap(i, j) && isB(i, j, biome)) {
-          const k2 = id(i, j);
-          if (MAT[k2] === M.STREAM || MAT[k2] === M.CHASM) { MAT[k2] = MAT[k2] === M.STREAM ? M.BRIDGE : M.SILKB; if (H[k2] === 0) H[k2] = 2; }
-          else if (MAT[k2] !== M.PAVE && MAT[k2] !== M.LEDGE && MAT[k2] !== M.CAVEF && MAT[k2] !== M.POOL && MAT[k2] !== M.SPRING) MAT[k2] = mat;
-          PATHC[k2] = 1;
-        }
-        if (pi !== null) {
-          const a = id(pi, pj), b = id(i, j), dh = H[b] - H[a];
-          if (dh !== 0 && Math.abs(dh) <= 2 && !TWM.isWater(MAT[a]) && !TWM.isWater(MAT[b]) && MAT[a] !== M.CHASM && MAT[b] !== M.CHASM) { if (dh > 0) addStair(a, b); else addStair(b, a); }
-        }
-        pi = i; pj = j;
+        visit(i, j);
         // walk the longer axis first, then the other (orthogonal steps, so stairs are always straight)
         if (Math.abs(i1 - i) >= Math.abs(j1 - j) && i !== i1) i += Math.sign(i1 - i); else j += Math.sign(j1 - j);
       }
     }
+    const last = pts[pts.length - 1]; visit(last[0], last[1]);
   }
   // HQS routes
   const hq = [[140, 22], [132, 22], [124, 24], [120, 30], [116, 36], [110, 40]];
   carvePath(hq, M.DIRT, 'hqs');
   carvePath([[140, 22], [146, 27], [149, 31], [150, 36]], M.DIRT, 'hqs');
-  carvePath([[140, 20], [140, 19]], M.PAVE, 'hqs');                                    // dais steps
+  carvePath([[140, 21], [140, 17]], M.PAVE, 'hqs'); carvePath([[143, 21], [143, 18]], M.PAVE, 'hqs');   // dais steps
   carvePath([[146, 20], [147, 16], [147, 13], [146, 11]], M.DIRT, 'hqs');             // up to the lookout on the upper terrace
   carvePath([[132, 22], [128, 18], [127, MBF + 4]], M.DIRT, 'hqs');                    // round the pool
   carvePath([[124, 24], [124, 15], [122, 12]], M.DIRT, 'hqs');                         // the upper terrace west
@@ -235,7 +239,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   prop('rock', 146, 10, { size: 3, fp: [2, 1] }); poi('lookout', 'hqs', 146, 12, { cap: 6, face: 'up' });
   // story-telling stone and grooming spots
   prop('rock', 113, 33, { size: 2, block: true }); poi('elder_seat', 'hqs', 114, 33, { face: 'left', seat: true });
-  poi('cave', 'hqs', FALL_I - 1, MBF, { cap: 4 }); poi('cave', 'hqs', FALL_I + 2, MBF, { cap: 4 });
+  poi('cave', 'hqs', FALL_I - 1, MBF, { cap: 4 }); poi('cave', 'hqs', FALL_I + 3, MBF, { cap: 4 });
   // --- BTD landmarks
   prop('curtain', BT.cave[0], BT.cave[1], { block: false, fp: [1, 1] }); poi('cave', 'btd', BT.cave[0], BT.cave[1], { cap: 9 });
   prop('spire', 67, 137, { size: 3 }); prop('spire', 91, 136, { size: 2 }); prop('spire', 83, 146, { size: 2 });

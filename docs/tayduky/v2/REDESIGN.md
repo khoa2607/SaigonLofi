@@ -1,7 +1,7 @@
 # Tây Du Ký — redesign v2: a living isometric world, rebuilt from scratch
 
-Branch `feature/tayduky-redesign-v2` (from `feature/tayduky-world` at `19015cd`). Status: **character pilot for review**. The biomes, the map and the
-runtime have not been rebuilt yet. They wait for the owner's approval of the characters.
+Branch `feature/tayduky-redesign-v2` (from `feature/tayduky-world` at `19015cd`). Status: the character pilot is **approved** (2026-11-20).
+The living-world vertical slice with Hoa Quả Sơn and Bàn Tơ Động is built in `tayduky/`; see `docs/tayduky/v2/STATUS.md`.
 
 The traced alpha (`tayduky/`, `docs/tayduky/art-pilot/`, `docs/tayduky/pilot/`) is now **legacy**. It stays untouched on both branches as reference and history.
 

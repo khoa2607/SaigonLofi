@@ -50,9 +50,9 @@ window.TW_DATA = {
           fore: [['web', { glow: true }], ['gather', { at: 'circle', r: 2.6, roles: ['sister'] }], ['reweave', { dur: 30 }]],
           beats: [
             ['act', { who: 'crowd', t: 3 }], ['web', { target: 1, rate: 0.04 }], ['fx', { kind: 'silkrise', at: 'circle', dur: 14 }], ['act', { who: 'crowd', t: 12 }],
-            ['spawn', { id: 'monk', char: 'tam_tang', from: 'edge', edge: 'east' }], ['go', { who: 'monk', to: 'canopy', run: 0.8 }],
+            ['spawn', { id: 'monk', char: 'tam_tang', from: 'edge', edge: 'east' }], ['go', { who: 'monk', to: 'canopy', run: 1.4 }],
             ['wrap', { who: 'monk', on: true }], ['fx', { kind: 'silk', at: 'monk', dur: 6 }], ['bubble', { who: 'monk', kind: 'excl' }], ['bubble', { who: 'crowd', kind: 'heart' }], ['wait', { t: 5 }],
-            ['spawn', { id: 'wk', char: 'wukong', from: 'sky', at: 'canopy', off: [3, 1] }], ['wait', { t: 1 }], ['bubble', { who: 'wk', kind: 'excl' }],
+            ['spawn', { id: 'wk', char: 'wukong', from: 'sky', at: 'monk', off: [2, 1] }], ['wait', { t: 1 }], ['bubble', { who: 'wk', kind: 'excl' }],
             ['strike', { who: 'wk', at: 'monk' }], ['strike', { who: 'wk', at: 'monk' }], ['web', { target: 0.12, rate: 0.9, glow: false }], ['fx', { kind: 'shreds', at: 'canopy', dur: 16, r: 90 }],
             ['wrap', { who: 'monk', on: false }], ['bubble', { who: 'crowd', kind: 'excl' }], ['retreat', { roles: ['sister'], to: 'cave' }], ['scatter', { roles: ['spiderling'] }],
             ['wait', { t: 3 }], ['bubble', { who: 'monk', kind: 'heart' }], ['leave', { who: 'monk', by: 'walk', to: 'mouthE' }], ['leave', { who: 'wk', by: 'walk', to: 'mouthE' }]],
