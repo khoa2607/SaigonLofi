@@ -1,5 +1,7 @@
 # Holdfast — Parallel Development (Claude Opus ∥ Codex)
 
+> **Merged 2026-11-19.** All Holdfast work (Current, Past, Future and the three-era dock fix) is integrated on `main`, which is now the only branch. The parallel-development split below is **historical**; new work starts from `main` on a short-lived feature branch.
+
 Status: **setup only**. Gameplay and visuals were not changed by this setup. The Future timeline is **not started**.
 
 ## 1. Git branch structure

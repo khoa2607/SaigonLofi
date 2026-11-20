@@ -6,6 +6,8 @@ that is silent, ask the owner (the human user) instead of guessing.
 
 ## 0. Your assignment (read first)
 
+> **Merged 2026-11-19.** All Holdfast work (Current, Past, Future and the three-era dock fix) is integrated on `main`, which is now the only branch. The parallel-development split below is **historical**; new work starts from `main` on a short-lived feature branch.
+
 | | |
 |---|---|
 | **Your branch** | `feature/holdfast-current-past` |

@@ -15,8 +15,8 @@ Everything is drawn by code in one style taken from the reference sprite: chibi 
 ## Lofi Worlds menu
 The site now opens on the **Lofi Worlds** gallery (`js/menu.js`, styles at the end of `index.html`). Saigon only boots when you enter it, the lofi radio keeps playing between the menu and the world, and **Esc** or the *Lofi Worlds* button in the world returns to the gallery. Any URL with a query string (for example `?era=2&time=night`, as used by the tests) or `#saigon` skips the menu and opens Saigon directly.
 
-## Holdfast — Edge of Survival (second world, branch `design/holdfast-world`)
-A walled settlement in a river bend living through the zombie years: ~120 autonomous settlers, roaming and attacking infected, snipers, breaches and repairs, scavenger expeditions, rescues, arrivals, day/night, weather and seasons. Only the **Current** era is built; Past and Future show as "soon".
+## Holdfast — Edge of Survival (second world)
+A walled settlement in a river bend living through the zombie years: ~120 autonomous settlers, roaming and attacking infected, snipers, breaches and repairs, scavenger expeditions, rescues, arrivals, day/night, weather and seasons. Three timelines share the same valley, switched in the page: **Current** (infected), **Past** (dinosaurs) and **Future** (machines).
 - Gallery: the **Holdfast** card opens it in a frame over the gallery (the radio keeps playing). Direct: `holdfast/index.html` (e.g. `http://localhost:8765/holdfast/?cam=gate`).
 - Community (milestone 6): training ground, stable with horses and mounted scouts, workshop with forge and carpentry, house repairs with scaffolding, a two-storey hospital, a school campus, a farmyard (pigs, chickens, goats), a churchyard with gentle night spirits, and a living market with queues.
 - Code: `holdfast/` (`hf-map.js` valley, layout + nav, `hf-art.js` models/looks, `hf-sim.js` settlers/infected/director, `hf-work.js` crops, stores and hauling, `hf-life.js` community zones, `hf-render.js`, `hf-audio.js`, `hf-main.js`). It reuses `js/core.js`, `js/art.js`, `js/audio.js`, `js/yt.js`, `js/i18n.js`, `js/dock.js` and `css/lofi-ui.css` read-only.

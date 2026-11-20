@@ -1,6 +1,6 @@
 # Holdfast — Implementation Status (Current era MVP + PAST timeline, seamless switching)
 
-Branch `design/holdfast-world`. **Not merged to `main`.** CURRENT and PAST are playable timelines (the PAST tab rebuilds the same valley in the age of dinosaurs, see *Milestone 8* at the end); FUTURE is still a "soon" tab.
+On `main` (merged 2026-11-19). CURRENT, PAST and FUTURE are playable timelines (the PAST tab rebuilds the same valley in the age of dinosaurs, see *Milestone 8* at the end; FUTURE is documented in `FUTURE-STATUS.md`).
 
 ## How to run
 

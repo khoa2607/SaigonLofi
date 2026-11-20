@@ -1,6 +1,6 @@
 # Holdfast — Future timeline status (milestone 9)
 
-Branch `feature/holdfast-future` (Claude). Design: `FUTURE-DESIGN.md`. Shared-code changes and their conflict risks: `shared-changes/future.md`. Current/Past status stays in `STATUS.md` (Codex).
+On `main` (merged 2026-11-19; developed on `feature/holdfast-future`). Design: `FUTURE-DESIGN.md`. Shared-code changes and their conflict risks: `shared-changes/future.md`. Current/Past status stays in `STATUS.md` (Codex).
 
 ## What exists
 

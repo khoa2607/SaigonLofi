@@ -17,7 +17,7 @@ This repository is the **live Lofi Worlds web app**: a world gallery plus two pa
 | Shared UI | `css/lofi-ui.css`, `js/dock.js`, `js/i18n.js`, `js/audio.js`, `js/yt.js` | Saigon's UI extracted verbatim; Holdfast uses the same markup/ids with its own palette (`holdfast/hf-theme.css`). |
 | Shared art system | `js/core.js` (`bake` box models, `grade`, ink, `gridCanvas`, K = 2 art px per world unit), `js/art.js` (`drawPerson`, trees, bubbles) | All art is drawn by code at load time. Holdfast uses these read-only. |
 | SaigonLofi world | `js/main.js`, `js/city.js`, `js/build.js`, `js/eras.js`, `js/sim.js`, `js/river.js`, `js/landmarks.js`, `js/fx.js`, `js/tet.js`, `js/events.js`, `js/costumes.js`, `js/dance.js` | Isometric Saigon street corner across four eras. See `README.md`. |
-| Holdfast world (on `main`; see Parallel development below) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI), `hf-world.js` (world contexts, background preparation) | Opened from the gallery in a frame. Two timelines on the same map: Current (infected) and Past (`hf-past-art.js` art, `hf-past.js` simulation; `HF.era`, `?era=past`), switched **in the page** by a crossfade between two lazily created world contexts (no reload; `hf-world.js`, `hfSwitchEra` in `hf-main.js`); Future is a "soon" tab. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
+| Holdfast world (on `main`) | `holdfast/index.html` + `hf-map.js` (valley, layout, nav grid, flow fields), `hf-art.js` (models, looks), `hf-sim.js` (settlers, infected, director, expeditions), `hf-work.js` (crops, stores, hauling, cooking, guard responses), `hf-life.js` (community zones: training, stable + riders, workshop, repairs, hospital, school, farmyard, graveyard, market), `hf-render.js`, `hf-audio.js`, `hf-main.js` (page, camera, UI), `hf-world.js` (world contexts, background preparation) | Opened from the gallery in a frame. Two timelines on the same map: Current (infected) and Past (`hf-past-art.js` art, `hf-past.js` simulation; `HF.era`, `?era=past`), plus Future (`hf-future-art.js`, `hf-future.js`, `hf-future-render.js`; `?era=future`), switched **in the page** by a crossfade between lazily created world contexts (no reload; `hf-world.js`, `hfSwitchEra` in `hf-main.js`). Future status: `docs/holdfast/FUTURE-STATUS.md`. Status and measurements: `docs/holdfast/STATUS.md`; design: `docs/holdfast/HOLDFAST-DESIGN.md`. |
 | Tests | `tests/*.mjs` | Node only (no packages) + an installed Chrome/Edge for browser checks. See below. |
 
 Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, then `http://localhost:8765/` (YouTube needs http).
@@ -34,8 +34,8 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
   cocoa ink outline, warm grade); new things must match it.
 - Do not change SaigonLofi gameplay or the shared UI behaviour when working on Holdfast. Saigon files are used read-only
   (shared CSS/JS changes need an explicit reason and a parity check: `tests/ui-snapshot.mjs`).
-- Do not implement Holdfast's Future era without an approved scope. The Past (approved, milestone 8) lives behind `HF.era === 'past'`;
-  every Past branch must leave the Current timeline's behaviour and random sequence unchanged (`tests/holdfast-past.mjs` checks the map).
+- All three Holdfast eras (Current, Past, Future) are approved and on `main`. Era-specific code lives behind `HF.era === 'past'` / `'future'`;
+  every era branch must leave the other timelines' behaviour and random sequence unchanged (`tests/holdfast-past.mjs`, `tests/holdfast-future.mjs`).
 
 ## Code rules
 
@@ -62,7 +62,7 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 
 ## Workflow
 
-- Work on your own feature branch (see Parallel development below). Never merge into `main` without the owner's approval.
+- `main` is the only long-lived branch. Start each piece of work (e.g. a new world) on a short-lived feature branch from `main`; never merge into `main` without the owner's approval, then delete the branch.
 - Commit in small, verified milestones; push the branch after each milestone.
 - Do not commit secrets, temporary screenshots, test reports, browser profiles, `node_modules` or other generated output.
   Curated screenshots live in `docs/holdfast/screenshots/` and are only replaced deliberately.
@@ -70,7 +70,9 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 - Update `docs/holdfast/STATUS.md` (and the design doc when the scope changes) with every Holdfast milestone: what exists,
   measured results, tests run, and an honest list of limitations.
 
-## Parallel development (Claude Opus ∥ Codex)
+## Parallel development (Claude Opus ∥ Codex) — historical
+
+> **Merged 2026-11-19.** All Holdfast work (Current, Past, Future and the three-era dock fix) is integrated on `main`, which is now the only branch. The parallel-development split below is **historical**; new work starts from `main` on a short-lived feature branch.
 
 Two agents work on Holdfast at the same time from the **same baseline commit** (`main` after the coordination docs; gameplay baseline `2b37501`). Full contract: `docs/holdfast/PARALLEL-DEVELOPMENT.md`; Codex's instructions: `AGENTS.md`. The three documents agree; the contract wins if they differ.
 
