@@ -20,7 +20,7 @@
   function loop(now) {
     requestAnimationFrame(loop);
     const dt = Math.min(0.1, (now - last) / 1000 || 0); last = now;
-    if (sim && sim.tick) { acc += dt * (sim.speed || 1); let n = 0; while (acc >= 0.1 && n++ < 12) { sim.tick(0.1); acc -= 0.1; } if (n >= 12) acc = 0; }
+    if (sim && sim.tick) { sim.hour = TWR.clock; acc += dt * (sim.speed || 1); let n = 0; while (acc >= 0.1 && n++ < 12) { sim.tick(0.1); acc -= 0.1; } if (n >= 12) acc = 0; }
     TWR.frame(dt, sim && sim.agents ? sim : null);
     placeCard(dt);
   }

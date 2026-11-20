@@ -65,7 +65,7 @@ const TWA = (function () {
         let t = 1.4 + n0 * 2.0 + n1 * 0.9 + (d ? 0.25 : 0);
         if (hp < 0.07) t += 1.2; else if (hash2(X, Y - 1, 9) < 0.07) t -= 1.0;        // blades: a light tip with a shaded foot
         let c = tone(r, t);
-        if (m === M.FLOWER && hash2(X >> 1, Y >> 1, 12) < 0.06 && n1 > 0.35) c = P.flowers[Math.floor(hash2(X >> 2, Y >> 2, 13) * 5)];
+        if (m === M.FLOWER && hash2(X >> 2, Y >> 1, 12) < 0.035 && n1 > 0.45) c = P.flowers[Math.floor(hash2(X >> 3, Y >> 2, 13) * 5)];
         else if (hash2(X >> 2, Y >> 2, 14) < 0.004 && vnoise(I * 0.9, J * 0.9, 16) > 0.6) c = P.flowers[Math.floor(hash2(X >> 3, Y >> 3, 15) * 4)];
         return c;
       }
@@ -96,7 +96,7 @@ const TWA = (function () {
         let c = tone(r, t);
         if (m === M.GLOW || (m === M.GORGE && n1 > 0.85)) {
           const g = vnoise(I * 3.4, J * 3.4, 21);
-          if (g > 0.62) { const gi = g > 0.8 ? 2 : g > 0.7 ? 1 : 0; c = P.glow[gi]; if (gi >= 1 && hash2(X, Y, 22) < 0.5) SH.em = P.glow[gi + 1]; }
+          if (g > 0.62) { const gi = g > 0.8 ? 2 : g > 0.7 ? 1 : 0; c = P.glow[gi]; if (gi >= 2 && hash2(X, Y, 22) < 0.3) SH.em = P.glow[gi + 1]; }
         }
         if (m === M.WEBF) c = web(I, J, c);
         return c;

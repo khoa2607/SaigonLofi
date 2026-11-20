@@ -194,13 +194,14 @@ const TWR = (function () {
     for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) continue; g.drawImage(c.cv, ci * CH, cj * CH); if (c.wf) g.drawImage(c.wf[wfI], ci * CH, cj * CH); }
     // flat decals
     for (const s of R.flats) if (s.X < x0 + W && s.X + s.sp.w > x0 && s.Y < y0 + Hh && s.Y + s.sp.h > y0) g.drawImage(s.sp.frames[0], s.X, s.Y);
+    if (sim && window.TWFX) TWFX.ground(g, sim, R, x0, y0, W, Hh);
     // sorted drawables
     const D = [], cols = new Map();
     const addCols = (list, lvl) => { for (const k of list) { const c = cols.get(k); if (c === undefined || lvl < c) cols.set(k, lvl); } };
     for (let cj = Math.floor((y0 - 260) / CH); cj <= cj1 + 1; cj++) for (let ci = ci0 - 1; ci <= ci1 + 1; ci++) { const L = R.grid.get(ci + ',' + cj); if (!L) continue;
       for (const s of L) { if (s.X > x0 + W || s.X + s.sp.w < x0 || s.Y > y0 + Hh || s.Y + s.sp.h < y0) continue; D.push([s.key, 0, s]); if (s.occ.length) addCols(s.occ, Math.floor(s.z / 4)); } }
     if (sim) for (const a of sim.agents) {
-      if (a.gone) continue; const X = wx(a.x, a.y), Y = wy(a.x, a.y, a.gz);
+      if (a.gone || a.hidden) continue; const X = wx(a.x, a.y), Y = wy(a.x, a.y, a.gz);
       if (X < x0 - 40 || X > x0 + W + 40 || Y < y0 - 20 || Y > y0 + Hh + 80) continue;
       D.push([a.key !== undefined ? a.key : a.x + a.y, 1, a]);
       addCols(columnsInFront(a.x, a.y, a.gz, X - 16, Y - 48 - (a.lift || 0) * 4, 32, 48), Math.floor(a.gz / 4 + 0.01));
@@ -220,7 +221,7 @@ const TWR = (function () {
     for (const Wb of TWM.webs) { const ext = sim && sim.web ? sim.web.ext : Wb.base, cvw = webCanvas(Wb, ext), X = wx(Wb.x, Wb.y), Y = wy(Wb.x, Wb.y, Wb.z), sw = Math.round(Math.sin(R.t * 0.5) * 1.2);
       if (X + cvw.width / 2 > x0 && X - cvw.width / 2 < x0 + W && Y + cvw.height / 2 > y0 && Y - cvw.height / 2 < y0 + Hh) { g.globalAlpha = sim && sim.web && sim.web.glow ? 1 : 0.85; g.drawImage(cvw, Math.round(X - cvw.width / 2) + sw, Math.round(Y - cvw.height / 2)); g.globalAlpha = 1; } }
     drawButterflies(g); drawFlies(g); drawBirds(g);
-    if (sim && window.TWFX) TWFX.draw(g, sim, R);
+    if (sim && window.TWFX) TWFX.draw(g, sim, R, x0, y0, W, Hh);
     // time of day + gorge gloom
     if (R.tod === 'auto') R.clock = (R.clock + dt * 24 / 480) % 24;
     const [col, amt] = tint(R.clock); R.dark = amt;
@@ -246,7 +247,7 @@ const TWR = (function () {
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const sx = A.SX(i, j), sy = A.SY(i, j, TWM.H[TWM.id(i, j)]); if (sx < x0 - 40 || sx > x0 + W + 40 || sy < y0 - 40 || sy > y0 + Hh + 40) continue;
       const k = TWM.id(i, j); g.strokeStyle = TWM.WALK[k] ? 'rgba(80,255,120,0.35)' : 'rgba(255,60,90,0.45)'; g.beginPath(); g.moveTo(sx, sy + 1); g.lineTo(sx + 31, sy + 16); g.lineTo(sx, sy + 31); g.lineTo(sx - 31, sy + 16); g.closePath(); g.stroke();
       if (TWM.stairAt.has(k)) { g.fillStyle = '#ffd200'; g.fillRect(sx - 2, sy + 14, 4, 4); } }
-    if (sim) for (const a of sim.agents) { if (a.gone) continue; const X = wx(a.x, a.y), Y = wy(a.x, a.y, a.gz); g.fillStyle = '#fff200'; g.fillRect(Math.round(X) - 1, Math.round(Y) - 1, 3, 3);
+    if (sim) for (const a of sim.agents) { if (a.gone || a.hidden) continue; const X = wx(a.x, a.y), Y = wy(a.x, a.y, a.gz); g.fillStyle = '#fff200'; g.fillRect(Math.round(X) - 1, Math.round(Y) - 1, 3, 3);
       if (a.path && a.path.length) { g.strokeStyle = 'rgba(255,240,0,0.6)'; g.beginPath(); g.moveTo(X, Y); for (const [px, py] of a.path) g.lineTo(wx(px, py), wy(px, py, TWM.groundZ(px, py))); g.stroke(); } }
   }
   function resize() {

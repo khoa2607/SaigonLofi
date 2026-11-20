@@ -20,8 +20,8 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, '..', 'src'); OUT = os.path.join(HERE, '..', 'out'); os.makedirs(OUT, exist_ok=True)
 DIRS = ['down', 'left', 'right', 'up']
-COLS = ['idle0', 'idle1', 'walk0', 'walk1', 'walk2', 'walk3']
-TIMING = {'idle0': 600, 'idle1': 600, 'walk0': 140, 'walk1': 140, 'walk2': 140, 'walk3': 140}
+COLS = ['idle0', 'idle1', 'walk0', 'walk1', 'walk2', 'walk3', 'sit', 'act0', 'act1']
+TIMING = {'idle0': 600, 'idle1': 600, 'walk0': 140, 'walk1': 140, 'walk2': 140, 'walk3': 140, 'sit': 600, 'act0': 220, 'act1': 220}
 
 
 def hexrgba(h):
@@ -61,7 +61,9 @@ def compose(C, view, col):
     W, H = C['canvas']; pal = {k: hexrgba(v) for k, v in C['palette'].items()}
     V = C['views'][view]
     img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    lower = V['lower']; legs = {'idle0': 'stand', 'idle1': 'stand', 'walk0': 'a', 'walk1': 'stand', 'walk2': 'b', 'walk3': 'stand'}[col]
+    lower = V['lower']; legs = {'idle0': 'stand', 'idle1': 'stand', 'walk0': 'a', 'walk1': 'stand', 'walk2': 'b', 'walk3': 'stand', 'sit': 'sit', 'act0': 'stand', 'act1': 'stand'}[col]
+    if legs not in lower: legs = 'stand'
+    act = (V.get('acts') or {}).get(col) if col in ('act0', 'act1') else None
     lp = lower[legs]
     if isinstance(lp, dict) and 'from' in lp:          # a lifted copy: columns x0..x1 of another pose move up 1 px (a raised foot)
         src = lower[lp['from']]; rows = part_rows(src); x0, x1 = lp['lift']
@@ -69,8 +71,9 @@ def compose(C, view, col):
         lp = {'rows': rows, 'at': src.get('at', [0, 0])}
     if isinstance(lp, str) and lp.startswith('mirror:'):
         src = lower[lp.split(':')[1]]; lp = mirror_part(src); lp['at'] = [W - src.get('at', [0, 0])[0] - max(len(r) for r in part_rows(src)), src.get('at', [0, 0])[1]]
-    bob = {'idle0': 0, 'idle1': 1, 'walk0': 0, 'walk1': -1, 'walk2': 0, 'walk3': -1}[col]
+    bob = {'idle0': 0, 'idle1': 1, 'walk0': 0, 'walk1': -1, 'walk2': 0, 'walk3': -1, 'sit': C.get('sitDrop', 4), 'act0': 0, 'act1': 0}[col]
     items = list(V.get('items', [])) + ([V['item']] if V.get('item') else [])
+    if act and 'items' in act: items = act['items']
     for it in items:
         if it.get('layer') == 'back': stamp(img, pal, it['part'], 0, bob)
     stamp(img, pal, lp)
@@ -78,16 +81,18 @@ def compose(C, view, col):
     if bob < 0:   # passing pose lifts the upper body 1 px: refill the row it uncovered with the upper body's own bottom row
         ur = part_rows(V['upper']); last = max((i for i, r in enumerate(ur) if r.strip('.')), default=-1)
         if last >= 0: stamp(img, pal, {'rows': [ur[last]], 'at': [V['upper'].get('at', [0, 0])[0], V['upper'].get('at', [0, 0])[1] + last]}, 0, 0)
-    if 'arm' in V:
+    if act and 'arm' in act: stamp(img, pal, act['arm'], 0, bob)
+    elif 'arm' in V:
         a = V['arm'][{'walk0': 'f', 'walk2': 'b'}.get(col, 'n')]
         stamp(img, pal, a, 0, bob)
+    for ov in ((act or {}).get('over') or []): stamp(img, pal, ov, 0, bob)
     for it in items:
         if it.get('layer', 'front') == 'front': stamp(img, pal, it['part'], 0, bob)
     return img
 
 
-def build(path):
-    C = json.load(open(path, encoding='utf-8'))
+def build(path, C=None):
+    C = C or json.load(open(path, encoding='utf-8'))
     W, H = C['canvas']
     sheet = Image.new('RGBA', (W * len(COLS), H * len(DIRS)), (0, 0, 0, 0))
     frames = {}
@@ -124,11 +129,14 @@ if __name__ == '__main__':
     meta = {'format': 'tayduky-v2-chars-1', 'dirs': DIRS, 'cols': COLS, 'timing': TIMING, 'chars': {}}
     for p in sorted(glob.glob(os.path.join(SRC, '*.json'))):
         if only and only not in p: continue
-        C, sheet, frames = build(p)
-        chars.append((C, sheet, frames))
-        meta['chars'][C['name']] = {'src': 'out/' + C['name'] + '.png', 'size': C['canvas'], 'pivot': C['pivot'], 'title': C.get('title'),
-                                    'biome': C.get('biome'), 'speed': C.get('speed', 22), 'gait': C.get('gait', 'walk')}
-        print(C['name'], 'ok')
+        C0 = json.load(open(p, encoding='utf-8'))
+        for C in [C0] + [dict(C0, name=v['name'], title=v.get('title', C0.get('title')), palette=dict(C0['palette'], **v['palette']), variant_of=C0['name']) for v in C0.get('variants', [])]:
+            C, sheet, frames = build(p, C)
+            chars.append((C, sheet, frames))
+            fr = sheet.crop((0, 0, C['canvas'][0], C['canvas'][1])); top = next((y for y in range(fr.height) if any(fr.getpixel((x, y))[3] for x in range(fr.width))), 0)
+            meta['chars'][C['name']] = {'src': 'out/' + C['name'] + '.png', 'size': C['canvas'], 'pivot': C['pivot'], 'title': C.get('title'), 'top': top,
+                                        'biome': C.get('biome'), 'speed': C.get('speed', 22), 'gait': C.get('gait', 'walk'), 'variant_of': C.get('variant_of')}
+            print(C['name'], 'ok')
     if not only:
         with open(os.path.join(OUT, 'chars.js'), 'w', encoding='utf-8') as f:
             f.write('// generated by docs/tayduky/v2/tools/build_chars.py\nwindow.TD2_CHARS = ' + json.dumps(meta, ensure_ascii=False) + ';\n')
@@ -138,8 +146,9 @@ if __name__ == '__main__':
         for C, _, _ in chars: shutil.copy(os.path.join(OUT, C['name'] + '.png'), os.path.join(RT, C['name'] + '.png'))
         with open(os.path.join(RT, 'chars.js'), 'w', encoding='utf-8') as f:
             f.write('// generated by docs/tayduky/v2/tools/build_chars.py\nwindow.TD2_CHARS = ' + json.dumps(meta, ensure_ascii=False) + ';\n')
-    board(chars, '#f4ead8', 1, 'board-light-1x.png'); board(chars, '#1e1a2a', 1, 'board-dark-1x.png')
-    board(chars, '#f4ead8', 4, 'board-light-4x.png'); board(chars, '#1e1a2a', 4, 'board-dark-4x.png')
+    base = [c for c in chars if not c[0].get('variant_of')]
+    board(base, '#f4ead8', 1, 'board-light-1x.png'); board(base, '#1e1a2a', 1, 'board-dark-1x.png')
+    board(base, '#f4ead8', 4, 'board-light-4x.png'); board(base, '#1e1a2a', 4, 'board-dark-4x.png')
     # all frames of every character, 4x, for review
     for C, sheet, fr in chars:
         bgim = Image.new('RGBA', sheet.size, hexrgba('#e8dcc8')); bgim.alpha_composite(sheet)

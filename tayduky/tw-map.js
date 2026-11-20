@@ -268,7 +268,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     } else if (b === 'btd') {
       if (m === M.ROCK) { if (r < 0.08) prop('shard', i, j, { block: true }); continue; }
       if (m === M.CHASM || m === M.SPRING || m === M.SILKB) continue;
-      if (r < 0.05) { prop('crystal', i, j, { block: true }); TWM.lights.push({ biome: 'btd', i, j, r: 30, col: '120,255,140', kind: 'crystal' }); continue; }
+      if (r < 0.03) { prop('crystal', i, j, { block: true }); TWM.lights.push({ biome: 'btd', i, j, r: 22, col: '120,255,140', kind: 'crystal' }); continue; }
       if (r < 0.1) { prop('mushroom', i, j, { block: false }); continue; }
       const nearWall = H[id(i, Math.max(0, j - 1))] > H[k] || H[id(i, Math.max(0, j - 2))] > H[k];
       if (r < 0.2 && nearWall && hash2(i, j, 79) < 0.35) { prop('cocoon', i, j, { block: true }); continue; }
@@ -304,7 +304,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   function hpush(k) { heap.push(k); let c = heap.length - 1; while (c > 0) { const p = (c - 1) >> 1; if (F[heap[p]] <= F[heap[c]]) break; [heap[p], heap[c]] = [heap[c], heap[p]]; c = p; } }
   function hpop() { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let c = 0; for (;;) { const l = c * 2 + 1, r = l + 1; let m = c; if (l < heap.length && F[heap[l]] < F[heap[m]]) m = l; if (r < heap.length && F[heap[r]] < F[heap[m]]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } } return top; }
   TWM.path = function (si, sj, ti, tj, opt) {
-    opt = opt || {}; const swim = !!opt.swim, lim = opt.limit || 6000;
+    opt = opt || {}; const swim = !!opt.swim, lim = opt.limit || 9000, bio = opt.biome !== undefined ? TWM.bi[opt.biome] : -1;
     if (!inMap(si, sj) || !inMap(ti, tj)) return null;
     const s = id(si, sj), t = id(ti, tj); if (s === t) return [[si, sj]];
     stamp++; heap.length = 0; G[s] = 0; F[s] = Math.hypot(ti - si, tj - sj); STAMP[s] = stamp; FROM[s] = -1; hpush(s);
@@ -315,7 +315,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       const ci = c % N, cj = Math.floor(c / N);
       for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
         if (!di && !dj) continue; const ni = ci + di, nj = cj + dj; if (!inMap(ni, nj)) continue; const k = id(ni, nj);
-        if (CLOSED[k] === stamp || !TWM.canStep(c, k, swim)) continue;
+        if (CLOSED[k] === stamp || !TWM.canStep(c, k, swim) || (bio >= 0 && BIO[k] !== bio)) continue;
         if (di && dj) { const a = id(ci + di, cj), b = id(ci, cj + dj); if (!TWM.canStep(c, a, swim) || !TWM.canStep(c, b, swim) || H[a] !== H[c] || H[b] !== H[c] || H[k] !== H[c]) continue; }
         const g = G[c] + (di && dj ? 1.414 : 1) * TWM.cost(k);
         if (STAMP[k] === stamp && g >= G[k]) continue;
