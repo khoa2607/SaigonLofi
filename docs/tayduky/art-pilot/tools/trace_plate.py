@@ -17,6 +17,8 @@ PLATES = {
     # name: (file, crop box or None, cell size)
     'hoa-qua-son': ('hoa quả sơn.png', None, 1.7),
     'cao-lao-trang': ('tổng hợp - nam thiên môn - động bàn tơ - cao lão trang.png', (732, 566, 1536, 1024), 1.0),
+    'hqs-clean': ('Hoa Quả Sơn - không nhân vật.png', None, 1.7),
+    'clt-full': ('cao lão tarng 1672x941.png', None, 1.25),
 }
 
 

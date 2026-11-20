@@ -65,3 +65,18 @@ Regenerate from `tools/`: `python trace_ref.py && python step2_heaven.py && pyth
     (like `hoa quả sơn.png`) without characters.
 - Plan for living scenes from plates: a hand-authored depth mask per plate, so characters walk behind cliffs, trees and roofs; palette
   cycling on the water and waterfall colours for flowing liquid; drifting cloud sprites; walkable-area masks for the simulation.
+
+### Two test biomes in the browser (`docs/tayduky/pilot/`)
+
+Run `serve.bat`, then open `http://localhost:8765/docs/tayduky/pilot/`. The page shows Hoa Quả Sơn (character-free plate) and
+Cao Lão Trang (full plate, traced at cell 1.25 so the buildings fit about 50 px people).
+
+- **Cast:** 10 and 16 characters wander inside authored walk zones, intersected with ground colours, and pause and look around. They face 4
+  directions; left and right are mirrored.
+- **Depth:** occluder zones with a base line keep the right depth order, so people walk behind trees, walls and roofs. Solid objects
+  (the rune rock, the well) are opaque and blocked to walkers.
+- **Water:** waterfall pixels get light bands moving down; river pixels get slow diagonal glints.
+- **Clouds** drift along the top of Hoa Quả Sơn.
+- **Built by** `tools/build_pilot.py`, which writes `pilot/data.js` and debug overlays in `out/plates/*-debug.png`.
+- **Pilot limits:** there are no walk frames (only a 1 px bob), the zones are hand-placed rectangles and polygons, and there is no day/night or
+  weather yet.

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tây Du Ký Pilot</title>
+<style>
+  :root { --bg: #17141c; --fg: #f1e7d4; --muted: #b7a98f; --plate: #2a2431; --gold: #e8b03a; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; overflow: hidden; }
+  #view { position: absolute; inset: 0; overflow: hidden; cursor: grab; }
+  #view.drag { cursor: grabbing; }
+  canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
+  #hud { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 2; }
+  #hud button { background: var(--plate); color: var(--fg); border: 2px solid #4a3f52; border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  #hud button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+  #card { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); background: rgba(23, 20, 28, .82); border: 2px solid var(--gold);
+          border-radius: 8px; padding: 6px 18px; text-align: center; transition: opacity .8s; z-index: 2; pointer-events: none; }
+  #card b { display: block; font-size: 18px; color: var(--gold); } #card span { color: var(--muted); font-size: 12px; }
+  #info { position: absolute; left: 16px; bottom: 14px; color: var(--muted); font-size: 12px; z-index: 2; }
+</style>
+</head>
+<body>
+<div id="view"><canvas id="c"></canvas></div>
+<div id="hud">
+  <button data-biome="hoa-qua-son" aria-pressed="true">Hoa Quả Sơn</button>
+  <button data-biome="cao-lao-trang" aria-pressed="false">Cao Lão Trang</button>
+  <button id="zin" title="Phóng to">＋</button><button id="zout" title="Thu nhỏ">－</button>
+</div>
+<div id="card"><b></b><span></span></div>
+<div id="info">Kéo để di chuyển · ＋/－ để phóng · bản thử nghiệm (pilot), không phải bản chính</div>
+<script src="data.js"></script>
+<script src="pilot.js"></script>
+</body>
+</html>
