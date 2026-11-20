@@ -67,7 +67,8 @@ def pack(entry):
     idle, walk, act = {}, {}, {}
     ia = wa = aa = None
     for _, d in DIRS:
-        ia, idle[d] = frames_of(z, meta, IDLE, d); wa, walk[d] = frames_of(z, meta, WALK, d); aa, act[d] = frames_of(z, meta, ACT, d)
+        ia, idle[d] = frames_of(z, meta, IDLE, d) if entry.get('use_generated_idle') else (None, None)
+        wa, walk[d] = frames_of(z, meta, WALK, d); aa, act[d] = frames_of(z, meta, ACT, d)
         if not idle[d]:
             base = standing(walk[d]) if walk[d] and len(walk[d]) > 1 else rot[d]       # the walk clips are drawn a little smaller than the base rotation: take idle from a walk frame so the scale never pops
             b = breathe(base); idle[d] = [base, b, b, base]
@@ -101,7 +102,11 @@ if __name__ == '__main__':
     cj = os.path.join(OUT, 'chars.js'); txt = open(cj, encoding='utf-8').read(); head, js = txt.split('window.TD2_CHARS = ', 1); meta = json.loads(js.strip().rstrip(';'))
     for e in cast:
         if only and e['name'] not in only: continue
-        try: meta['chars'][e['name']] = pack(e); print('packed', e['name'], meta['chars'][e['name']]['anim'], meta['chars'][e['name']]['size'], 'top', meta['chars'][e['name']]['top'], 'feet', meta['chars'][e['name']]['pivot'][1])
+        try:
+            action = meta['chars'].get(e['name'], {}).get('action')
+            meta['chars'][e['name']] = pack(e)
+            if action: meta['chars'][e['name']]['action'] = action
+            print('packed', e['name'], meta['chars'][e['name']]['anim'], meta['chars'][e['name']]['size'], 'top', meta['chars'][e['name']]['top'], 'feet', meta['chars'][e['name']]['pivot'][1])
         except Exception as ex: print('FAILED', e['name'], repr(ex)[:160])
     # the runtime carries only the PixelLab cast; the hand-authored v2 pilot sheets stay in docs/tayduky/v2 (pilot page and src/)
     for n in [n for n, c in meta['chars'].items() if c.get('source') != 'pixellab']:

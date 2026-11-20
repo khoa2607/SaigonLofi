@@ -42,3 +42,7 @@ Balance before this pass 1,736.65, after 1,553.65 (**183 generations**). Tier 1 
 
 **Objects, batch 2** (`create_1_direction_object`): btd_cave `b1d8713a` (160 px), hqs_gate `e533cf17`, hqs_bamboo `0b3b4d04`, hqs_scholarrock `388d2184`, hqs_lantern `60ec1c13` (96 px), btd_silkrack `0550e900`, btd_rockarch `f40e6a12`, hqs_lotus `9f3eb76a` (96 px).
 Two objects from batch 1 were first used here: the stone bridge (HQS stream) and the silk bridge (BTD chasm).
+
+## Animation follow-up (2026-11-20)
+
+Balance before 1,553.65; after 1,514.65 (**39 generations**). Generated four-direction eight-frame v3 `staff-practice` for Wukong and `silk-weaving` for each of the seven sisters, plus a four-direction Wukong `breathing-idle` trial. The trial is retained in the source ZIP, but the runtime keeps the existing walk-derived idle to avoid a size jump. Source ZIPs and `tools/pack_actions.py` reproduce the dedicated action sheets. The v3 action canvases are larger than the original walk drawings; the packer matches their per-direction scale with nearest-neighbour resizing and uses a fixed pivot, checking every frame for clipping. This can discard pixel detail and is a candidate for a native-scale hand polish pass. The generated movement is interpretive, especially subtle in some weaving views; it is not a literal loom interaction in every frame.

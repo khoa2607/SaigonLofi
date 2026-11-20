@@ -73,6 +73,7 @@ const TWR = (function () {
   // ---------------------------------------------------------------- characters
   const SHEETS = {};
   function sheet(name) { if (!SHEETS[name]) { const C = window.TD2_CHARS.chars[name]; if (!C) return null; const im = new Image(); im.src = 'chars/' + name + '.png'; SHEETS[name] = { im, C }; } return SHEETS[name]; }
+  function actionSheet(name, C) { const key = name + ':action'; if (!SHEETS[key]) { const im = new Image(); im.src = C.action.src; SHEETS[key] = im; } return SHEETS[key]; }
   // frame selection from the character's animation table (C.anim = {idle:[col0,n], walk:[col0,n], act:[col0,n], sit:[col0,n]?}).
   // Walk advances with distance travelled (feet never slide), idle and act with time.
   function frameCol(C, a) {
@@ -94,15 +95,20 @@ const TWR = (function () {
     return pick(A.idle, Math.floor((T + ph) / (C.idleDur || 0.7)));
   }
   function drawAgent(g, a, glowOnly) {
-    const S = sheet(a.look || a.char); if (!S || !S.im.complete) return;
+    const name = a.look || a.char, S = sheet(name); if (!S || !S.im.complete) return;
     const C = S.C, [w, h] = C.size, dirs = window.TD2_CHARS.dirs, px0 = C.pivot[0], py0 = C.pivot[1];
     const col = frameCol(C, a), row = dirs.indexOf(a.dir) >= 0 ? dirs.indexOf(a.dir) : 0;
+    const action = a.pose === 'act' && !a.moving && !a.inWater && C.action && (C.role === 'king' || C.role === 'sister') ? actionSheet(name, C) : null;
+    const actionReady = action && action.complete && action.naturalWidth;
     // working (act) poses bounce a little so a still idle frame still reads as effort
-    const bob = a.pose === 'act' && !(C.anim && C.anim.act) ? Math.round(Math.abs(Math.sin((R.t + (a.phase || 0)) * 7)) * 1.4) : 0;
+    const bob = !actionReady && a.pose === 'act' && !(C.anim && C.anim.act) ? Math.round(Math.abs(Math.sin((R.t + (a.phase || 0)) * 7)) * 1.4) : 0;
     const X = Math.round(wx(a.x, a.y) - px0), gz = a.gz, Y = Math.round(wy(a.x, a.y, gz + (a.lift || 0)) - py0) - bob;
+    const drawAction = () => { const A = C.action, [aw, ah] = A.size, ac = Math.floor((R.t + (a.phase || 0)) / A.duration) % A.count;
+      g.drawImage(action, ac * aw, row * ah, aw, ah, X + px0 - A.pivot[0], Y + py0 - A.pivot[1], aw, ah); };
     const sitDrop = a.pose === 'sit' && C.anim && !C.anim.sit ? (C.sitDrop || 5) : 0;
     if (glowOnly) { // Match the seated crop in the normal pass; never restore hidden legs at night.
-      if (sitDrop) { const cut = py0 - sitDrop; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + sitDrop, w, cut); }
+      if (actionReady) drawAction();
+      else if (sitDrop) { const cut = py0 - sitDrop; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + sitDrop, w, cut); }
       else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
       return;
     }
@@ -111,7 +117,8 @@ const TWR = (function () {
     if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + px0 - (sw >> 1), sY - 2, sw, 3); g.fillRect(X + px0 - (sw >> 1) + 2, sY - 3, sw - 4, 5); }
     if (a.thread) { g.fillStyle = 'rgba(232,228,250,0.85)'; const ty = Math.round(wy(a.x, a.y, a.thread)); g.fillRect(X + px0, ty, 1, Y + (C.top || 6) + 16 - ty); }
     if (a.alpha !== undefined && a.alpha < 1) g.globalAlpha = Math.max(0, a.alpha);
-    if (a.inWater) { const cut = py0 - 12; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
+    if (actionReady) drawAction();
+    else if (a.inWater) { const cut = py0 - 12; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
       const wl = Y + 6 + cut; g.fillStyle = 'rgba(220,250,250,0.85)'; g.fillRect(X + px0 - 9, wl - 1, 18, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(X + px0 - 11 + (Math.floor(R.t * 3) % 3), wl, 22, 1); }
     else if (sitDrop) { const cut = py0 - sitDrop - 2; g.drawImage(S.im, col * w, row * h, w, cut + 2, X, Y + sitDrop, w, cut + 2); }
     else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);

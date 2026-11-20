@@ -16,15 +16,17 @@ await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
   }
   const res = JSON.parse(await ev(`JSON.stringify({ biomes: TWM.biomes.length, built: TWM.biomes.filter(b=>b.built).map(b=>b.id), residents: {hqs: TWS.agents.filter(a=>a.biome==='hqs'&&a.role!=='actor').length, btd: TWS.agents.filter(a=>a.biome==='btd'&&a.role!=='actor').length}, chunks: TWR.chunks.size })`));
   // Load off-screen sheets too before exercising the real renderer.
-  await ev(`Promise.all(['king','sister'].map(role=>{const a=TWS.agents.find(a=>a.role===role), im=TWR.sheet(a.look||a.char).im; return im.decode()}))`, true);
+  await ev(`Promise.all(['king','sister'].map(async role=>{const a=TWS.agents.find(a=>a.role===role), S=TWR.sheet(a.look||a.char); await S.im.decode(); const im=new Image(); im.src=S.C.action.src; await im.decode(); TWR.drawAgent(TWR.cv.getContext('2d'),{...a,pose:'act',moving:false,inWater:false},true)}))`, true);
+  await wait(250);
   // Exercise the real renderer with a recording context, including the night redraw.
   const poses = JSON.parse(await ev(`JSON.stringify((()=>{
     const calls=[], g={drawImage(...x){calls.push(x)},fillRect(){},save(){},restore(){}};
     const check=role=>{const a=TWS.agents.find(a=>a.role===role), C=TD2_CHARS.chars[a.look||a.char], old=TWR.t;
-      const sample=t=>{calls.length=0; TWR.t=t; TWR.drawAgent(g,{...a,pose:'act',moving:false,phase:0,inWater:false,thread:0,robe:false,wrap:false,carry:null,bubble:null},true); return calls[0]&&calls[0][1]/C.size[0]};
-      const frames=[sample(0),sample(.25),sample(.5)];
+      const sample=t=>{calls.length=0; TWR.t=t; TWR.drawAgent(g,{...a,pose:'act',moving:false,phase:0,inWater:false,thread:0,robe:false,wrap:false,carry:null,bubble:null},true); return calls[0]&&calls[0][1]/C.action.size[0]};
+      const frames=[sample(0),sample(.25),sample(.5)], actionWidth=calls[0]&&calls[0][3];
+      calls.length=0; TWR.drawAgent(g,{...a,role:'actor',pose:'act',moving:false,inWater:false},true); const actorWidth=calls[0]&&calls[0][3];
       calls.length=0; TWR.drawAgent(g,{...a,pose:'sit',moving:false,inWater:false,thread:0},true); const height=calls[0]&&calls[0][4]; TWR.t=old;
-      return {frames,seatCrop:height<C.size[1]};};
+      return {frames,actionWidth,actorWidth,seatCrop:height<C.size[1]};};
     return {king:check('king'),sister:check('sister')};})())`));
   ms.sort((a, b) => a - b);
   console.log(JSON.stringify({ ...res, poses, signatures: [...sigs], drawMsMedian: ms[ms.length >> 1], drawMsP90: ms[Math.floor(ms.length * 0.9)], errors: errs }, null, 1));
@@ -36,6 +38,6 @@ await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
       const s = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(`${dir}/${name}.png`, Buffer.from(s.data, 'base64'));
     }
   }
-  const ok = !errs.length && res.biomes === 11 && res.residents.hqs > 10 && res.residents.btd > 10 && sigs.size === 2 && Object.values(poses).every(p => p.seatCrop && new Set(p.frames).size >= 2);
+  const ok = !errs.length && res.biomes === 11 && res.residents.hqs > 10 && res.residents.btd > 10 && sigs.size === 2 && Object.values(poses).every(p => p.seatCrop && p.actionWidth === 80 && p.actorWidth === 80 && new Set(p.frames).size >= 2);
   console.log(ok ? 'PASS' : 'FAIL'); process.exitCode = ok ? 0 : 1;
 });
