@@ -32,6 +32,13 @@ v0.3 changes: **the whole map is Saigon-sized and each biome is small** (D13, §
 | D17 | **No biome is calm.** Every biome is busy with ambient life, mini events and signatures; biomes differ only in loop length (5–10 min) and mood. |
 | D18 | Gallery title: **"Journey to the West — A Living Legend"** / **"Tây Du Ký — Huyền Thoại Sống"**. |
 
+## 0b. Build status and the hybrid decision (2026-11-20)
+
+The owner chose the **hybrid** construction: each biome keeps a traced centre plate (the 3D look of the references: mountains, flowing water,
+clouds, foreground and background), and the land between biomes is shared base terrain with dithered edge bands. Characters are about 50 px,
+traced from the owner's sheets. The alpha is running in `tayduky/`. See `docs/tayduky/STATUS.md` for what exists, the measurements and the
+limits. The tile figures in §2.1 predate this decision: the map is now 4560 × 2280 px (plates at about 1.25–1.7 source px per cell).
+
 ## 1. Fantasy and pillars
 
 *A living picture-book of Journey to the West: ten legendary places, each replaying its story forever. Everyone lives their daily life there, the legends
