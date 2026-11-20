@@ -46,3 +46,22 @@ Regenerate from `tools/`: `python trace_ref.py && python step2_heaven.py && pyth
 - A few traced details still carry blur from the reference and should be hand-fixed in `src/*.json`. Sa Tăng's crescent on the headband is the clearest case.
 - The props, roofs, ground and clouds are drawn by script on this kit; they are not hand-placed pixel by pixel. The ground uses a per-pixel painter.
 - The scenes are static compositions rendered offline in Python, not the runtime renderer.
+
+
+## v3: density B (characters about 50 px), Hoa Quả Sơn + Cao Lão Trang (2026-11-20)
+
+- `tools/trace_sheet.py` traces the owner's multi-direction sheets (cell 3.0 px for people, 4.2 px for the monkeys so they stand a little smaller).
+  It finds the background, fills holes enclosed by the outline (dark robes on dark sheets, white beards on light ones), segments each row into
+  the known number of sprites, uses one palette per character, removes cut-off shadows, and inks the silhouette.
+  - Output: `src/chars/<name>.json` (pixel-art-studio grids, frames d1..d4), plus `out/chars/<name>/` (the skill's `render`: atlas.png,
+    atlas.json, preview.png). `out/lineup-*.png` shows them on light and dark backgrounds.
+  - Cao Lão Trang: Bát Giới, Cao Thúy Lan, Cao Thái Công, Tam Tạng, Ngộ Không, Sa Tăng, a manor guard, a farmer, a village man, a village woman.
+  - Hoa Quả Sơn: monkey warrior, elder, strongman, baby with a peach, spear monkey.
+- `tools/trace_plate.py` traces a scene reference into a plate at the same density. `out/plates/hoa-qua-son.png` matches the traced
+  characters (see `hoa-qua-son-demo.png`), and its mountains, waterfalls, water, clouds and fore/background give the 3D depth the owner asked for.
+- Limits found:
+  - The Hoa Quả Sơn reference has about 17 monkeys and Wukong painted into it. A living scene needs a version without characters.
+  - The Cao Lão Trang panel in the combined image is too small: its doors are about 40 px for 52 px characters. It needs a full-size scene
+    (like `hoa quả sơn.png`) without characters.
+- Plan for living scenes from plates: a hand-authored depth mask per plate, so characters walk behind cliffs, trees and roofs; palette
+  cycling on the water and waterfall colours for flowing liquid; drifting cloud sprites; walkable-area masks for the simulation.
