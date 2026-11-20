@@ -154,7 +154,7 @@ function menuEnter(card) {
   art.style.transform = `translate(${vw / 2 - (r.left + r.width / 2)}px, ${vh / 2 - (r.top + r.height / 2)}px) scale(${sc})`; card.classList.add('zoom');
   if (!AU.playing && !(typeof YTS !== 'undefined' && YTS.on)) { try { audioPlay(); } catch (e) { } }              // entering is a user gesture: start the radio if it was silent
   setTimeout(() => {
-    if (card.dataset.world === 'holdfast') { $m('menu').classList.add('leaving'); hfOpen(); setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520); return; }
+    if (FRAMED[card.dataset.world]) { $m('menu').classList.add('leaving'); wfOpen(card.dataset.world); setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520); return; }
     $m('menu').classList.add('leaving'); document.body.classList.remove('menu'); G.menu = false; document.title = t('title');
     for (const [id, k] of [['vMusic', 'music'], ['vAmb', 'amb'], ['vVinyl', 'vinyl'], ['vStreet', 'street']]) { const e = $m(id); if (e) e.value = AU.vol[k] * 100; }
     if (!MENU.entered) { MENU.entered = true; boot().then(() => { if (typeof updateUI === 'function') updateUI(); }); } else if (typeof updateUI === 'function') updateUI();
@@ -183,17 +183,23 @@ function menuStart() {
 // Only one world simulates at a time: Saigon sleeps (G.menu stays true) while Holdfast is open; closing the frame disposes Holdfast.
 window.LW = { AU, YTS, TRACKS, audioInit, audioPlay, audioPause, nextTrack, setVol, ytLoad, ytOff, ytToggle, ytNext, ytVolume, setLang };
 function hfBedsOff() { try { for (const b of [AU.rainBed, AU.windBed, AU.humBed, AU.murBed, AU.cicBed]) if (b) b.g.gain.setTargetAtTime(0, AU.ctx.currentTime, 0.3); } catch (e) { } }   // Saigon's city beds would otherwise keep droning under Holdfast
-function hfOpen() {
-  let f = $m('hfFrame'); hfBedsOff();
-  if (!f) { f = document.createElement('iframe'); f.id = 'hfFrame'; f.title = 'Holdfast'; f.allow = 'autoplay; fullscreen'; f.src = 'holdfast/index.html?embed=1'; document.body.appendChild(f); }
-  else { f.style.display = ''; try { f.contentWindow.postMessage({ hf: 'wake', lang: LANG.cur }, '*'); } catch (e) { } }      // the world was kept alive in memory: it resumes where it was
-  G.menu = true; document.body.classList.remove('menu'); document.body.classList.add('hfopen'); document.title = t('w.holdfast'); setTimeout(() => { try { f.focus(); } catch (e) { } }, 600);
+// Framed worlds: one iframe per world, kept alive (hidden) between visits. To add a world: an entry here, a WORLDS card, and in the world's page
+// post {lw:'exit', world:id, lang} to leave and handle {lw:'sleep'|'wake', world:id, lang} (Holdfast still uses the older {hf:...} keys, sent too).
+const FRAMED = { holdfast: { src: 'holdfast/index.html?embed=1', frame: 'hfFrame', cls: 'hfopen', title: 'w.holdfast' } };
+let WF_CUR = null;
+function wfMsg(f, id, k) { try { f.contentWindow.postMessage({ hf: k, lw: k, world: id, lang: LANG.cur }, '*'); } catch (e) { } }
+function wfOpen(id) {
+  const W = FRAMED[id]; let f = $m(W.frame); hfBedsOff(); WF_CUR = id;
+  if (!f) { f = document.createElement('iframe'); f.id = W.frame; f.className = 'wframe'; f.title = W.frame === 'hfFrame' ? 'Holdfast' : id; f.allow = 'autoplay; fullscreen'; f.src = W.src; document.body.appendChild(f); }
+  else { f.style.display = ''; wfMsg(f, id, 'wake'); }      // the world was kept alive in memory: it resumes where it was
+  G.menu = true; document.body.classList.remove('menu'); document.body.classList.add('wfopen', W.cls); document.title = t(W.title); setTimeout(() => { try { f.focus(); } catch (e) { } }, 600);
 }
-function hfClose(lang) {
-  const f = $m('hfFrame'); if (f) { try { f.contentWindow.postMessage({ hf: 'sleep' }, '*'); } catch (e) { } f.style.display = 'none'; }   // hidden, not destroyed: no restart on re-entry; a hidden frame does not tick
-  document.body.classList.remove('hfopen');
+function wfClose(id, lang) {
+  const W = FRAMED[id || WF_CUR]; if (!W) return; const f = $m(W.frame);
+  if (f) { wfMsg(f, id || WF_CUR, 'sleep'); f.style.display = 'none'; }   // hidden, not destroyed: no restart on re-entry; a hidden frame does not tick
+  document.body.classList.remove('wfopen', W.cls); WF_CUR = null;
   if (lang && lang !== LANG.cur) setLang(lang);
   menuShow(true);
 }
-window.addEventListener('message', e => { if (e.data && e.data.hf === 'exit') hfClose(e.data.lang); });
-window.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('hfopen')) hfClose(); });
+window.addEventListener('message', e => { const d = e.data; if (d && (d.lw === 'exit' || d.hf === 'exit')) wfClose(d.world || 'holdfast', d.lang); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && WF_CUR) wfClose(); });

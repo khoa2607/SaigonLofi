@@ -101,9 +101,9 @@ body.menu #hud, body.menu #dock, body.menu #lang, body.menu #ytbox { visibility:
   .mtip { left: 8px; right: 8px; bottom: 8px; font-size: 12px; padding: 6px 8px; }
 }
 /* Holdfast opens in its own frame above everything; the shared YouTube player must stay visible above it */
-#hfFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9000; background: #1d1a20; }
-body.hfopen #ytbox { visibility: visible; position: fixed; z-index: 9500; }   /* same bottom-right spot as in Saigon (the shared rules place it) */
-body.hfopen #hud, body.hfopen #dock, body.hfopen #lang { visibility: hidden; }
+.wframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9000; background: #1d1a20; }
+body.wfopen #ytbox { visibility: visible; position: fixed; z-index: 9500; }   /* same bottom-right spot as in Saigon (the shared rules place it) */
+body.wfopen #hud, body.wfopen #dock, body.wfopen #lang { visibility: hidden; }
 </style>
 </head>
 <body>
