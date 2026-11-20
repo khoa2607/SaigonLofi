@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tây Du Ký Art Pilot</title>
+<style>
+  :root { --bg: #1d1a22; --fg: #efe6d6; --muted: #b9ac98; --card: #2a2530; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1500px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; } h2 { font-size: 17px; margin: 32px 0 6px; }
+  p { color: var(--muted); margin: 0 0 12px; max-width: 900px; }
+  img { image-rendering: pixelated; image-rendering: crisp-edges; max-width: 100%; height: auto; display: block; background: var(--card); border-radius: 6px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tây Du Ký — Huyền Thoại Sống · art pilot</h1>
+  <p>Phong cách theo ảnh tham khảo của chủ dự án (references/tayduky/ref). Mọi ảnh là pixel art ở độ phân giải gốc, phóng to theo bội số nguyên (không làm mờ).</p>
+
+  <h2>Bước 1 · Dàn nhân vật</h2>
+  <p>Ngộ Không, Bát Giới, Sa Tăng, Tam Tạng cưỡi ngựa trắng, khỉ Hoa Quả Sơn, thiên binh, tiên nữ, nhện tinh. Nền sáng và nền tối. Nhân vật cao 48 px (ngựa 60 px).</p>
+  <img src="out/step1-characters.png" alt="Character lineup">
+
+  <h2>Bước 2 · Góc Thiên Cung</h2>
+  <p>Nam Thiên Môn mái cong hai tầng, bảng tên, sàn ngọc nổi trên biển mây, mây trôi trên mặt đất, cây đào tiên, lò Bát Quái.</p>
+  <img src="out/step2-thien-cung.png" alt="Thiên Cung corner">
+
+  <h2>Bước 3 · Hẻm Bàn Tơ Động · ngày / hoàng hôn / đêm</h2>
+  <p>Tông lạnh tím-lục, vòm mạng nhện giữa hai vách đá, nhện khắp nơi, trứng nhện và rêu phát sáng ban đêm, suối nước nóng.</p>
+  <img src="out/step3-ban-to-dong.png" alt="Bàn Tơ Động day dusk night">
+  <div class="row" style="margin-top:12px"><img src="out/step3-ban-to-dong-day.png" alt="day"><img src="out/step3-ban-to-dong-night.png" alt="night"></div>
+
+  <h2>Bước 4 · Ranh giới Hỏa Diệm Sơn ↔ Cao Lão Trang · ngày / hoàng hôn</h2>
+  <p>Viền mang màu của cả hai bên: tro phủ lên ruộng lúa vàng, ruộng cháy sém, nhà tranh bị sém mái, đống rơm dính tro.</p>
+  <div class="row"><img src="out/step4-bien-gioi.png" alt="border day"><img src="out/step4-bien-gioi-dusk.png" alt="border dusk"></div>
+</main>
+</body>
+</html>

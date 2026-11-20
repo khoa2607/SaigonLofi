@@ -339,6 +339,13 @@ Thiết Phiến, the Linh Cảm goldfish demon, the giant turtle, the Demon of H
 - Creatures (monkeys, spiders, the turtle, the goldfish, cranes) get custom grids, the way Holdfast Past made its 15 dinosaur species.
 - All designs are **original**, based on the novel's descriptions, and do not copy any film, game or comic adaptation.
 
+### 7.1b Art direction (changed 2026-11-19)
+
+The owner rejected the SaigonLofi / Holdfast box-model look for this world. The style follows the owner's references
+(`E:\game\web-lofieferences	aydukyef\`, outside the repo): detailed chibi pixel art with a warm dark outline, 5-tone ramps, rich gold
+and characters 48 px tall in a 3/4 top-down view. Sprites are pixel-grid sources (text, one character per pixel), so the world can still draw them
+at load time without binary art assets. See `docs/tayduky/art-pilot/README.md`.
+
 ### 7.2 Hard art problems (solve these in the pilot)
 
 1. **Curved roofs and eaves** (palace, temple, manor) built from box models: stepped boxes plus a painter that curves the eave line.
