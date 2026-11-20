@@ -1,12 +1,14 @@
-# Tây Du Ký Lofi: Creative Direction & Design Document (v0.1)
+# Tây Du Ký Lofi: Creative Direction & Design Document (v0.2)
 
-Lofi Worlds, World 3. Status: **design, not approved yet, no code.** Branch `feature/tayduky-world`.
+Lofi Worlds, World 3. Status: **design v0.2 (owner's round-2 feedback applied), art pilot not started, no code.** Branch `feature/tayduky-world`.
 This document follows step 1 of `docs/WORLD-BUILDER-GUIDE.md`. The platform rules (observation only, isometric, code-drawn art, crisp pixels,
 bilingual UI, no loading screen) are inherited and not repeated here.
 
 ---
 
-## 0. Decisions already made by the owner (v0.1 baseline)
+## 0. Decisions already made by the owner
+
+v0.2 changes from v0.1: biomes are Saigon-sized (D11, D13); up to 5 signatures at once (D9); readability markers (D14); loops last 5–10 minutes (D15); no journal and no world setting (D12); the bathing scene is kept (§4.8); Lôi Âm Tự is a huge temple (D16, §4.11).
 
 | # | Decision |
 |---|---|
@@ -18,10 +20,14 @@ bilingual UI, no loading screen) are inherited and not repeated here.
 | D6 | **No pilgrim party walks across the map.** Each biome has its own cast, which appears, plays its story, leaves and comes back. Duplicate Wukongs in different biomes are fine. |
 | D7 | Three activity layers: **ambient** (always on), **mini events** (now and then, with many variants) and **signature events** (rare, with a beginning, middle and end). |
 | D8 | **Living Story Loop** per biome (Peaceful, then Foreshadowing, Signature, Aftermath, Gradual reset). "Reset the story, never the world": no fade, no reload, no snapping back. |
-| D9 | **Global Story Director:** at most 2 signature events at once, and **never in two adjacent biomes**. |
+| D9 | **Global Story Director:** up to **5 signature events at once** (a lively world is fine), but **never in two biomes that share a border**. |
 | D10 | One shared time of day. **Each biome interprets weather its own way** (rain becomes a flower rain in Thiên Cung, an ash rain in Hỏa Diệm Sơn, fog in Bạch Cốt Lĩnh). **Seasons apply only to earthly biomes.** |
 | D11 | At max zoom-out the viewer sees **3–5 biomes**. |
-| D12 | Keep the shared dock with its basic functions. Details are open (§10). |
+| D12 | The viewer only does small things: music (play, choose a track or YouTube), time of day, weather (including each biome's special weather), seasons, volume, zoom. **No world-specific setting, no journal, no event list, nothing sequential.** Each biome runs by itself. |
+| D13 | **Biome size is Saigon-like** (rich in detail), not the small 36 × 36 vignette of v0.1. |
+| D14 | **Each biome is readable for people who don't know Journey to the West** (§4.0). |
+| D15 | **One story loop takes 5–10 minutes**, depending on the biome. |
+| D16 | Lôi Âm Tự stays and is a showpiece: a huge, towering temple. |
 
 ## 1. Fantasy and pillars
 
@@ -36,19 +42,31 @@ come and go, and the world remembers a little of each one.*
 
 ## 2. Map
 
-### 2.1 Scale (fits the platform's pixel rules)
+### 2.1 Scale: Saigon-sized biomes plus a far-zoom art level
 
-The renderer's widest zoom is 1 device px per art px (`aps = 1`). At 1080p that shows about **960 × 540 world units**. To see 3–5 biomes there
-while keeping integer scaling, each biome is a **dense diorama of about 36 × 36 tiles** (288 × 288 units, an iso footprint of about 576 × 288).
+SaigonLofi shows about **960 × 540 world units** at its default 1080p view (K = 2 art px per unit, 1 device px per art px), on a 160 × 160 tile map.
+That density of detail is the target (D13). Each biome is therefore about **80 × 80 tiles** (640 × 640 units, an iso footprint of about 1280 × 640).
+At the default view one biome is a bit more than one screen of Saigon, so it is as rich as Saigon and you pan a little to see all of it.
 
-| Zoom (1080p) | Visible | Use |
-|---|---|---|
-| `aps 1` (widest) | 3–5 biomes | the overview of the world |
-| `aps 2` (default) | about 1 biome | the default view: one legend fills the screen |
-| `aps 3–6` | one landmark or one scene | close-ups |
+**The conflict, and the fix.** At normal art density (K = 2) the widest integer zoom shows only about 960 × 540 units, which is less than one Saigon-sized biome.
+Seeing 3–5 biomes (D11) needs a **far-zoom art level**:
 
-The whole map is about **176 × 136 tiles**, close to Holdfast's area (144 × 144). Sprite counts and frame cost therefore stay in Holdfast's measured envelope.
-Larger screens see proportionally more at the same scale.
+- Every sprite and the ground are also baked at **K = 1** (half density). This is *real* pixel art, drawn by the same code at the lower density, not a
+  shrunk image. The people already exist at 1x (`drawPerson` draws 1x grids that `gridCanvas` doubles with Scale2x), and the box baker only needs its density as a parameter.
+- Zoom steps at 1080p:
+
+| Zoom step | Art density | Visible | Use |
+|---|---|---|---|
+| **Far** | K = 1, 1 device px per art px | about 1920 × 1080 units: **3–5 biomes** (partly) | overview |
+| **Default** | K = 2, 1 device px per art px | about 960 × 540 units: most of one biome | the Saigon view |
+| **Close 1–4** | K = 2, 2–5 device px per art px | one landmark or one scene | close-ups |
+
+- When switching between Far and Default, the view swaps art sets on the same camera centre. Because Far is pixel-exact, there is no blur. Far also skips the tiniest
+  ambient creatures (birds, spiderlings), which keeps it cheap.
+- Cost: the K = 1 set is a quarter of the pixels, so it adds about 25% bake time and memory. It is baked in idle time, nearest first, like everything else (§9).
+
+The whole map is about **4 × 3 biome slots**, 320 × 240 tiles plus margins (roughly 340 × 260 tiles, about 3.5 times Saigon's map). Only the area near the camera is
+baked and drawn, so frame cost depends on the view, not the map size.
 
 ### 2.2 Layout (screen view; east is right, the heavens are at the top)
 
@@ -77,17 +95,18 @@ W  |  HỎA DIỆM SƠN  |  NGŨ HÀNH SƠN   |  CAO LÃO TRANG  |  HOA QUẢ S�
 
 ### 2.3 Adjacency (for the Director)
 
-Two biomes are **adjacent** when they share a border, diagonals included:
+Two biomes are **adjacent** when they **share a border side**. Diagonal corners do not count, because organic borders barely touch there. Lists per biome:
 ```
-LAT: BTP, HDS, NHS          BTP: LAT, TC, HDS, NHS, CLT      TC: BTP, NHS, CLT, HQS
-HDS: LAT, BTP, NHS, BTD, NNQ    NHS: LAT, BTP, TC, HDS, CLT, BTD, NNQ, TTH
-CLT: BTP, TC, NHS, HQS, NNQ, TTH, BCL     HQS: TC, CLT, TTH, BCL
-BTD: HDS, NHS, NNQ          NNQ: HDS, NHS, CLT, BTD, TTH     TTH: NHS, CLT, HQS, NNQ, BCL     BCL: CLT, HQS, TTH
+LAT: BTP, HDS            BTP: LAT, TC, NHS          TC: BTP, CLT
+HDS: LAT, NHS, BTD       NHS: BTP, HDS, CLT, NNQ    CLT: TC, NHS, HQS, TTH     HQS: CLT, BCL
+BTD: HDS, NNQ            NNQ: NHS, BTD, TTH         TTH: CLT, NNQ, BCL         BCL: HQS, TTH
 ```
 (LAT Lôi Âm Tự · BTP Bàn tay Phật · TC Thiên Cung · HDS Hỏa Diệm Sơn · NHS Ngũ Hành Sơn · CLT Cao Lão Trang · HQS Hoa Quả Sơn ·
 BTD Bàn Tơ Động · NNQ Nữ Nhi Quốc · TTH Thông Thiên Hà · BCL Bạch Cốt Lĩnh)
 
-This is 11 biomes. If the owner wants exactly 10, Lôi Âm Tự or Bàn Tơ Động can move to the expansion list (§4.12).
+This is **11 biomes** (the owner keeps Lôi Âm Tự). Up to 6 biomes can be non-adjacent at once (a checkerboard), so the cap of 5 (D9) is always reachable.
+
+**Tall landmarks sit in the top row** (Lôi Âm Tự's temple, the finger pillars, the heavenly gate). In isometric view, things at the top of the screen are *behind*, so tall sprites there rise into the cloud sea without hiding other biomes. They also work as beacons that can be seen from across the map.
 
 ## 3. Colour system
 
@@ -113,7 +132,7 @@ The shared `grade()` (`js/core.js`) pulls every colour toward one warm brown-ora
 (Bàn Tơ violet, Thông Thiên blue, Bạch Cốt bone white). So:
 
 - **Each biome has its own 8-step ramp.** The ink outline (cocoa), the sunlit tops, the plum shade side and the crease lines stay shared, so the world is still one family with Saigon and Holdfast.
-- `bake()` gains an optional ramp parameter. This is a minimal, backward-compatible shared change, verified by `tests/ui-snapshot.mjs` plus the Holdfast browser and flow tests showing that Saigon and Holdfast are unchanged. The fallback is a world-local copy of the baker.
+- Implemented in a **world-local copy of the baker** (`td-bake.js`, §9) that takes the ramp and the art density as parameters, so the shared `js/core.js` is not touched.
 
 ### 3.3 Edge bands (D4)
 
@@ -124,10 +143,26 @@ The shared `grade()` (`js/core.js`) pulls every colour toward one warm brown-ora
 
 ## 4. Biomes
 
+### 4.0 Readable without knowing the novel (D14)
+
+Each biome gives four layers of signposting, from subtle to explicit:
+
+1. **Silhouette landmark.** One big shape that names the place by itself: the waterfall cave, the heavenly gate, five finger pillars, five peaks with a head beneath,
+   the flaming ridge, the web canopy, the golden temple. Each is visible at Far zoom.
+2. **Emblem motif** repeated in props and banners: peach, monkey, trigram, talisman, rake, bone, lotus, silk, palm-leaf fan, goldfish, sutra scroll.
+3. **Entrance gate (paifang) or stele** at the main path into each biome, with the place name painted in the pixel font. In-world text is not translated (platform rule),
+   and the 3 × 5 font is Latin capitals without diacritics, so these read as `HOA QUA SON` and similar.
+4. **Place-name card (UI, bilingual).** When the centre of the view settles inside a biome for about 2 seconds, a calligraphy-style title fades in near the top of the screen and fades out after about 4 seconds.
+   Example: *"Hoa Quả Sơn: nơi Tôn Ngộ Không ra đời"* / *"Flower-Fruit Mountain: birthplace of the Monkey King"*. The same biome does not show it again for a few minutes.
+   This names the **place**, not an event, so it is not a ticker or a journal (D12). It can be turned off in the `···` panel.
+
+Each sheet below names its emblem and its one-line card.
+
 Every biome sheet lists: identity and landmarks · ambient life (Layer 1) · mini events (Layer 2, with variants) · signature stories (Layer 3) ·
 footprints left after a signature · weather interpretation · seasons · intensity (calm / medium / lively, used by the Director).
 
 ### 4.1 Hoa Quả Sơn: Flower-Fruit Mountain · medium
+- **Emblem:** peach and monkey. **Card:** *"Hoa Quả Sơn: nơi Tôn Ngộ Không ra đời"* / *"Flower-Fruit Mountain: birthplace of the Monkey King"*
 - **Landmarks:** stacked jade cliffs; **Thủy Liêm Động** (the waterfall cave) at the centre; fruit orchards; the stone seat of the Monkey King; the shore of Đông Hải on the east.
 - **Ambient:** a big troop of monkeys (about 40) who eat, groom, swing, bathe under the falls and squabble over fruit; birds; mist from the falls.
 - **Mini events:** a monkey fruit feast · Wukong practises the 72 transformations (he becomes a tree, a bird, a rock, then pops back) · monkeys drill with wooden staffs · a baby monkey steals a banana and is chased · Wukong naps on the stone seat.
@@ -136,6 +171,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain is real rain (it can trigger (c)), wind sends blossoms flying. **Seasons:** yes.
 
 ### 4.2 Thiên Cung / Vườn Đào: the Heavenly Palace and Peach Garden · lively
+- **Emblem:** immortal peach and trigram. **Card:** *"Thiên Cung: vườn đào tiên của Ngọc Hoàng"* / *"The Heavenly Palace: the Jade Emperor's peach garden"*
 - **Landmarks:** Nam Thiên Môn (the South Heaven Gate) with cloud pillars; the peach orchard; Lão Quân's **Bát Quái furnace** (a glowing bronze trigram furnace); jade bridges over cloud streams.
 - **Ambient:** fairies tend and pick peaches, heavenly soldiers patrol in formation, cranes glide, smoke curls from the furnace, clouds drift *through* the ground.
 - **Mini events:** the guard changes at the gate · Lão Quân stokes the furnace (it flares) · a monkey (Wukong) pilfers one peach and naps in a tree · fairies carry baskets to a banquet table · a soldier dozes off on duty.
@@ -144,6 +180,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain becomes **a rain of peach blossom**, wind becomes streaming cloud ribbons. **Seasons:** no (eternal spring).
 
 ### 4.3 Lòng bàn tay Phật Tổ: the Buddha's Palm · calm
+- **Emblem:** open palm and lotus. **Card:** *"Lòng bàn tay Phật Tổ: nơi Ngộ Không không thể thoát ra"* / *"The Buddha's Palm: where the Monkey King could not escape"*
 - **Landmarks:** the ground *is* a vast golden palm (crease lines as paths), with **five finger pillars** rising at the far edge and lotus clouds around. The Buddha is shown only as the hand and a distant golden radiance, never as a comic figure.
 - **Ambient:** lotus petals drift, golden motes rise, small clouds circle.
 - **Mini events:** Wukong somersaults in long loops and lands, sure he has reached the end of the world · he writes "Tề Thiên Đại Thánh đến đây chơi" on a finger pillar · he relieves himself at the pillar's foot, back turned, with a little puff of steam (never shown explicitly) · he bounces off an invisible edge.
@@ -152,6 +189,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain becomes **a rain of golden light**, wind sends lotus petals drifting. **Seasons:** no.
 
 ### 4.4 Ngũ Hành Sơn: Five Elements Mountain · calm
+- **Emblem:** talisman. **Card:** *"Ngũ Hành Sơn: năm trăm năm dưới chân núi"* / *"Five Elements Mountain: five hundred years beneath the rock"*
 - **Landmarks:** five peaks with subtle element tints (metal, wood, water, fire, earth); **Wukong's head and one arm** stick out from under the base; the **six-syllable talisman** sits on the summit.
 - **Ambient:** grass grows around his head and birds land on it; a local earth spirit (thổ địa) visits with iron pellets and copper water (from the novel); the seasons change the mountain's coat.
 - **Mini events:** a bird nests in his hair · he chats with the earth spirit · he yawns, and the mountain shakes slightly · children from a nearby trail peek and run away.
@@ -160,6 +198,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** real rain, and the talisman glows in it. **Seasons:** yes (snow-capped peaks in winter).
 
 ### 4.5 Cao Lão Trang: Old Gao's Village · calm–medium
+- **Emblem:** rake and pig. **Card:** *"Cao Lão Trang: ngôi làng của Trư Bát Giới"* / *"Old Gao's Village: home of Pigsy"*
 - **Landmarks:** an old farming village with the Cao family's courtyard manor, terraced rice fields, a threshing floor, haystacks and a pig pen.
 - **Ambient:** farmers, children and buffalo; **Bát Giới** (as the Cao son-in-law) ploughs absurdly fast, eats enormous meals and sleeps on haystacks.
 - **Mini events:** Bát Giới raids the kitchen · he dozes off mid-field · a village market day · children fly kites · Old Cao argues with him in the courtyard.
@@ -168,6 +207,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** real rain (farmers wear straw cloaks), wind sends straw flying. **Seasons:** yes (rice cycles).
 
 ### 4.6 Bạch Cốt Lĩnh: White Bone Ridge · medium–lively (spooky-cozy)
+- **Emblem:** bone and crow. **Card:** *"Bạch Cốt Lĩnh: yêu tinh ba lần biến hóa"* / *"White Bone Ridge: the spirit of three disguises"*
 - **Landmarks:** dead white trees, ribbed rock arches like old bones, a misty tarn, a mirage pavilion.
 - **Ambient:** crows, ghost lights, rolling fog; the mirage pavilion shimmers in and out.
 - **Mini events:** a mirage of a feast appears and dissolves · wisps lure each other in circles · skeletal trees creak in the wind · a lost woodcutter hurries through.
@@ -176,6 +216,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain becomes **thick fog**, wind tears the mist into ribbons. **Seasons:** yes (muted).
 
 ### 4.7 Nữ Nhi Quốc: the Women's Kingdom · calm (festive)
+- **Emblem:** lotus and lantern. **Card:** *"Nữ Nhi Quốc: vương quốc chỉ có phụ nữ"* / *"The Women's Kingdom: a realm ruled by women"*
 - **Landmarks:** a vermilion palace, a turquoise lotus lake with small boats, a market street, a ceremonial bridge.
 - **Ambient:** court ladies, merchants, boatwomen, children and herons.
 - **Daily loop (the owner's design):** the morning market, then boating, a court ceremony, and the lantern festival in the evening.
@@ -185,14 +226,16 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain becomes a drizzle with rings on the lotus lake. **Seasons:** yes (lotus in summer, bare stems in winter).
 
 ### 4.8 Bàn Tơ Động: Silk Web Cave · medium
+- **Emblem:** silk web. **Card:** *"Bàn Tơ Động: hang của bảy nhện tinh"* / *"Silk Web Cave: lair of the seven spider sisters"*
 - **Landmarks:** an **open-air gorge under a giant web canopy** instead of a closed cave (this avoids isometric cutaways), a cave mouth, a steaming hot spring and silver silk bridges.
 - **Ambient:** spiders weave, baby spiders swing on threads, glowing moss pulses, steam rises.
-- **Mini events:** the spider sisters spin silk on looms · a moth is caught and released · a web snaps and is rewoven · dew glitters at dawn.
-- **Signature:** *The Seven Sisters' Net*. Foreshadowing: webs spread over the trail. Event: the net closes over the gorge, Wukong plucks hairs that become a swarm of little monkeys, they cut the silk, and the sisters retreat into the cave. (The bathing episode from the novel is deliberately left out.)
+- **Mini events:** the spider sisters spin silk on looms · **the sisters bathe in the steaming hot spring** (from the novel; tasteful and chibi, in bathing robes, wrapped in steam) · a moth is caught and released · a web snaps and is rewoven · dew glitters at dawn.
+- **Signature:** *The Seven Sisters' Net*. Foreshadowing: webs spread over the trail. Event: the net closes over the gorge, Wukong plucks hairs that become a swarm of little monkeys, they cut the silk, and the sisters retreat into the cave.
 - **Footprints:** drifting silk strands that the spiders slowly reweave.
 - **Weather:** rain becomes **dew-laden webs that sparkle**, wind makes the web canopy sway. **Seasons:** no (sheltered).
 
 ### 4.9 Hỏa Diệm Sơn: the Flaming Mountains · lively
+- **Emblem:** palm-leaf fan. **Card:** *"Hỏa Diệm Sơn: ngọn núi lửa chỉ quạt Ba Tiêu dập được"* / *"The Flaming Mountains: only the palm-leaf fan can quench them"*
 - **Landmarks:** red ridges with lava cracks, a fire-cake village on hot ground (the novel's cake seller), and Thiết Phiến's palm-leaf cave at the edge.
 - **Ambient:** heat haze, flame jets, villagers baking cakes on the ground, ember drift.
 - **Mini events:** a cake seller hawks his wares · a flame jet startles a mule · Bát Giới complains about the heat · ash devils whirl.
@@ -201,6 +244,7 @@ footprints left after a signature · weather interpretation · seasons · intens
 - **Weather:** rain becomes **a rain of ash** (except during the fan aftermath, when it is real rain), wind brings ember storms. **Seasons:** no.
 
 ### 4.10 Thông Thiên Hà: the River That Reaches Heaven · medium
+- **Emblem:** goldfish and turtle. **Card:** *"Thông Thiên Hà: dòng sông của Linh Cảm Đại Vương"* / *"The River That Reaches Heaven: the goldfish king's river"*
 - **Landmarks:** a wide river, the fishing village of Trần Gia Trang on stilts, the river temple of the Linh Cảm king, and festival lanterns.
 - **Ambient:** fishing boats and nets, children floating lotus lanterns, a goldfish shoal glinting.
 - **Mini events:** a big catch · a boat race · a goldfish leaps · offerings at the river temple.
@@ -210,7 +254,8 @@ footprints left after a signature · weather interpretation · seasons · intens
 - (The novel's child-offering demand is reframed as a demand for tribute, so no children are in danger.)
 
 ### 4.11 Lôi Âm Tự: Thunderclap Monastery (the Western Paradise) · calm
-- **Landmarks:** a golden temple on a soft rise, the sutra library, a bell tower, a lotus pond.
+- **Emblem:** sutra scroll and bell. **Card:** *"Lôi Âm Tự: nơi cuối con đường thỉnh kinh"* / *"Thunderclap Monastery: the end of the journey west"*
+- **Landmarks:** the **largest structure in the world: a towering golden temple complex** on stepped terraces. Grand stairs, a many-tiered main hall, a pagoda that rises far into the cloud sea and catches the light, giant guardian statues flanking the stairs, the sutra library, a bell tower and a lotus pond. It is visible from much of the map and glows softly at night (a beacon in the top-left corner). It is baked with `slice` so actors walk in front of and behind its parts correctly.
 - **Ambient:** monks walking, chanting, sweeping and reading; bells; doves; incense.
 - **Mini events:** a sutra procession · a bell is rung (heard from afar) · monks copy sutras · a novice chases a dove.
 - **Signature:** *The Scriptures Received*. A golden light descends, and the pilgrims receive the sutra scrolls in a quiet ceremony. This is the calmest signature, a breathing space.
@@ -237,14 +282,16 @@ Sư Đà Lĩnh (the lion, elephant and roc city), Long Cung (the Dragon Palace).
 
 | Phase | Duration (tunable) | What happens |
 |---|---|---|
-| 1. Peaceful life | 4–8 min | ambient and mini events only |
-| 2. Foreshadowing | 1–2 min | **long-range cues**: coloured sky columns, glows, drifting smoke, distant sounds, restless NPCs |
-| 3. Signature | 1–3 min | the scripted story, with a beginning, middle and end |
-| 4. Aftermath | 3–6 min | NPCs react, clean up and repair; footprints stay |
-| 5. Gradual reset | until done | damage heals step by step (no snapping) and footprints fade |
+| 1. Peaceful life | 2–5 min | ambient and mini events only |
+| 2. Foreshadowing | 30–60 s | **long-range cues**: coloured sky columns, glows, drifting smoke, distant sounds, restless NPCs |
+| 3. Signature | 1–2 min | the scripted story, with a beginning, middle and end |
+| 4. Aftermath | 1–2 min | NPCs react, clean up and repair; footprints stay |
+| 5. Gradual reset | overlaps the next peaceful phase | damage heals step by step (no snapping) and footprints fade |
 
-A biome's cycle is about 10–20 minutes. Over 11 biomes, with signatures about 2 minutes long, the expected number of concurrent signatures is about 1.3.
-The cap of 2 (D9) therefore holds without long queues. The Director (§6.3) checks this.
+**One loop takes 5–10 minutes** (D15). Calm biomes (Ngũ Hành Sơn, Lôi Âm Tự, Nữ Nhi Quốc) run nearer 10 minutes; lively ones (Thiên Cung, Hỏa Diệm Sơn, Bạch Cốt Lĩnh) run nearer 5.
+Because the reset overlaps the next peaceful phase, the world never waits on a reset.
+Over 11 biomes, a 1.5-minute signature per 7.5-minute loop averages about **2.2 signatures running at once**, sometimes 4–5. That is the lively, fun-to-watch world the owner asked for (D9).
+Since a biome has several signatures (§4), the same story comes back to the same biome only about every 15–30 minutes.
 
 ### 6.2 Stories as data
 
@@ -274,16 +321,16 @@ tdStory('hqs.kingReturns', {
 
 | Rule | Value (tunable) |
 |---|---|
-| Concurrent signature events (whole map) | at most **2** |
+| Concurrent signature events (whole map) | at most **5** |
 | Signature in a biome adjacent (§2.3) to one already running or foreshadowing | **not allowed** |
-| Minimum gap between two signatures in the same biome | aftermath + reset done, and at least 8 min |
+| Minimum gap between two signatures in the same biome | aftermath done, and at least 3 min (calm biomes 5 min) |
+| Same signature story twice in a row in one biome | avoided (pick another story or variant) |
 | Concurrent mini events per biome | 1–2 (calm biomes: 1) |
 | Story pressure | grows while a biome waits; the biome with the highest pressure that is allowed goes next |
-| Intensity balance | at most 1 *lively* signature at a time, so the second slot goes to a calm or medium one |
 | Camera | **no bias** (D1: the world plays on its own). One tunable is kept off by default and documented. |
 | Flash safety | magic flashes are capped in brightness and frequency (no full-screen strobes) |
 
-A "story pace" setting (§10) scales the peaceful-phase durations and the mini-event rate.
+There is no user-facing pace setting (D12). The durations are tuned per biome in data.
 
 ## 7. Cast and art
 
@@ -315,9 +362,10 @@ One static pilot page (`docs/tayduky/art-pilot/`) with three vignettes, compared
 
 ## 8. UI and audio
 
-- **Dock:** the shared markup and behaviour (music, time, weather, seasons, volumes, zoom, full screen). Seasons show a note that they affect earthly lands.
-  The one world-specific setting is **Nhịp câu chuyện** (story pace): *Thư thả / Vừa / Sôi động*.
-- **HUD plate:** the world title only. **No ticker, no journal, no fly-to buttons** (D1). Camera: drag, wheel and zoom buttons, and Esc returns to the gallery.
+- **Dock:** the shared markup and behaviour: music (play, track, YouTube), time of day, weather, seasons, volumes, zoom (Far / Default / Close) and full screen.
+  The weather buttons keep their shared names (auto / clear / rain / wind), and each biome shows its own special weather for them (§5). Seasons apply to earthly lands only.
+  **No world-specific setting** (D12). The only extra switch is "place names on/off" in the `···` panel (§4.0).
+- **HUD plate:** the world title only. **No ticker, no journal, no event list, no fly-to buttons** (D1, D12). Camera: drag, wheel and zoom buttons, and Esc returns to the gallery.
 - **Audio:** the gallery's shared lofi radio is not changed. The world adds a **regional ambience** mixed by biome weight at the view centre (waterfall and monkeys,
   wind chimes and cranes, fire crackle, river and oars, temple bells, the hum of the web). It also adds **soft instrument accents** (synthesised zither plucks, bamboo flute,
   wooden fish, bells) and **distance-attenuated story sounds**, so a distant signature can be *heard* and invites the viewer over.
@@ -329,41 +377,41 @@ One static pilot page (`docs/tayduky/art-pilot/`) with three vignettes, compared
 - **Biome plug-ins:** `tayduky/biomes/<id>.js` registers a biome's layout, palette, props, cast and stories. Adding a biome means adding one file.
 - **Streaming without a loading screen:** at entry only the view ring is baked (target: first frame within about 1 s of the gallery zoom), then rings outward in about 5 ms idle
   slices, nearest first, with far chunks trimmed. No task over 50 ms.
-- **Simulation:** the whole map simulates at once (estimated 400–600 agents, about 1–1.5 ms per 0.1 s tick, extrapolated from Holdfast and to be measured).
-- **Rendering LOD at `aps 1`:** tiny ambient creatures (birds, spiderlings, small monkeys) are skipped so the widest view stays within the frame budget.
-- **Shared changes needed:** (1) an optional ramp parameter in `bake()` (§3.2); (2) the gallery frame host generalised for a second framed world (guide §3.2). Each needs a parity check.
-- **Tests** (deterministic): story-engine runs; the Director over 6 game hours (never more than 2 signatures, never adjacent, every biome gets its turn, every reset completes);
-  the weight field (sums to 1, edge-band widths); streaming (no long tasks); benches at `aps 1` and `aps 2`.
+- **Simulation:** the whole map simulates at once. With Saigon-sized biomes, estimate about 80–120 agents per biome, so **900–1,300 agents** in total. Holdfast runs 120 agents in 0.2–0.4 ms per 0.1 s tick, so about 2–4 ms per tick is estimated (to be measured). If that is too much, biomes far from the view run a cheaper tick (fewer path recomputes, coarser routines) while the story engine and Director keep full fidelity everywhere.
+- **Two art densities** (§2.1): every sprite, sheet and ground chunk exists at K = 2 (Default and Close) and K = 1 (Far). Far skips the tiniest ambient creatures.
+- **Baker:** the world uses a **local copy of the box baker** (`td-bake.js`) that adds a per-biome ramp (§3.2) and the art density as parameters. Shared `js/core.js` stays untouched, so no Saigon or Holdfast parity risk. Painters and models are written once in world units and work at both densities.
+- **Shared change needed:** the gallery frame host, generalised for a second framed world (guide §3.2), with Holdfast's browser and flow tests as the parity check.
+- **Tests** (deterministic): story-engine runs; the Director over 6 game hours (never more than 5 signatures, never adjacent, every biome gets its turn, no story repeats back to back, every reset completes);
+  the weight field (sums to 1, edge-band widths); streaming (no long tasks); benches at Far, Default and Close zoom.
 
 ## 10. Open questions for the owner
 
-1. **11 or 10 biomes?** The layout in §2.2 holds 11. To trim, move Lôi Âm Tự or Bàn Tơ Động to the expansion list.
-2. **Dock details:** is "story pace" the right world setting? Should the seasons button note that it applies to earthly lands only?
-3. **Journal:** none (as proposed), or a hidden, opt-in list of recent stories?
-4. **Instrument accents:** wanted on top of the shared lofi radio, or ambience only?
-5. **Gallery card:** title "Tây Du Ký Lofi" / "Journey to the West"? Thumbnail motif: the peach orchard on clouds, or the waterfall cave?
+1. **Instrument accents:** wanted on top of the shared lofi radio (synthesised zither, bamboo flute, wooden fish, bells), or regional ambience only?
+2. **Gallery card:** title "Tây Du Ký Lofi" / "Journey to the West"? Thumbnail motif: Lôi Âm Tự's temple in the clouds, the peach orchard, or the waterfall cave?
+3. **Place-name cards (§4.0):** on by default (proposed), or off by default?
 
 ## 11. Milestones (proposed)
 
 | Milestone | Content |
 |---|---|
 | **M0** | this doc approved, plus the art pilot (§7.3) approved |
-| **M1 Platform** | the whole map skeleton: all biome regions' ground, palettes and edge bands, landmarks as simple blocks, regional light and weather, camera and zoom, streaming bake, gallery card. The world is walkable end to end from day one. |
+| **M1 Platform** | the whole map skeleton: all biome regions' ground, palettes and edge bands, landmarks as simple blocks, regional light and weather, camera with the Far / Default / Close zooms and both art densities, streaming bake, place-name cards, gallery card. The world can be explored end to end from day one. |
 | **M2 Stories** | story engine and Director, plus 2 contrasting biomes in full: **Hoa Quả Sơn** and **Hỏa Diệm Sơn** |
 | **M3** | Thiên Cung, Cao Lão Trang |
 | **M4** | Lòng bàn tay Phật, Ngũ Hành Sơn |
 | **M5** | Thông Thiên Hà, Nữ Nhi Quốc |
-| **M6** | Bạch Cốt Lĩnh, Bàn Tơ Động, Lôi Âm Tự |
+| **M6** | Bạch Cốt Lĩnh, Bàn Tơ Động, Lôi Âm Tự (the showpiece temple) |
 | **M7** | audio pass, performance pass, docs and screenshots |
 
 ## 12. Risks
 
 | Risk | Mitigation |
 |---|---|
-| Art volume (11 biomes, about 25 characters, effects) is the main schedule risk | the pilot first; biome plug-ins; reuse `drawPerson`, props and Holdfast's water and boats |
+| Art volume (11 Saigon-sized biomes, about 25 characters, effects, two art densities) is the main schedule risk | the pilot first; biome plug-ins; reuse `drawPerson`, props and Holdfast's water and boats |
 | Curved roofs, clouds and organic forms in a box-model style | pilot vignettes A and C; a painter-based eave curve |
 | The shared warm grade erases cool palettes | regional ramps (§3.2) with a parity check |
-| Frame budget at the widest zoom | dense biomes sized for `aps 1` (§2.1), creature LOD, Holdfast-style culling |
-| Signatures missed with no ticker | strong long-range foreshadowing (sky columns, light, sound) and long aftermaths |
-| Cultural and religious sensitivity | the Buddha only as the hand and radiance; Quan Âm dignified; humour stays with Wukong and Bát Giới; no gore; the child-offering and bathing episodes reframed or left out |
+| Frame budget at Far zoom, and the size of the Saigon-sized map | the K = 1 art level (a quarter of the pixels), creature LOD, culling, streaming and trimming of chunks; benches at every zoom |
+| Signatures missed with no ticker | strong long-range foreshadowing (sky columns, light, sound), 2–5 signatures running at once, short loops |
+| Viewers who don't know the novel | the four signposting layers of §4.0 |
+| Cultural and religious sensitivity | the Buddha only as the hand and radiance; Quan Âm dignified; humour stays with Wukong and Bát Giới; no gore; the child offering reframed as tribute; the bathing scene kept tasteful (robes, steam, chibi) |
 | Originality and IP | the source is a public-domain classic; all designs original; no adaptation is copied |
