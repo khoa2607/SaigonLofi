@@ -110,6 +110,17 @@ function fxDraw(f, t) {
     return; }
   if (f.kind === 'splash') { for (let s = 0; s < 3; s++) { const r = ((k * 3 + s * 0.33) % 1) * 70; g.strokeStyle = `rgba(220,245,255,${0.8 * (1 - r / 70)})`; g.beginPath(); g.ellipse(x, y, r, r * 0.45, 0, 0, 6.29); g.stroke(); } }
 }
+let _mist = null;
+function seamMist() {
+  if (_mist) return _mist; _mist = [];
+  const seen = {}; let n = 0;
+  for (const [a, list] of Object.entries(W.adj)) for (const b of list) {
+    if (seen[b + a]) continue; seen[a + b] = 1;
+    const A = TS.biomes[a], B = TS.biomes[b]; if (!A || !B) continue;
+    for (let k = 0; k < 3; k++) { const t = 0.38 + k * 0.12; _mist.push({ x: A.centre[0] + (B.centre[0] - A.centre[0]) * t + (k - 1) * 40, y: A.centre[1] + (B.centre[1] - A.centre[1]) * t - 30 + k * 26, k: (n++) % 3, ph: n }); }
+  }
+  return _mist;
+}
 function beacon(B, t) {
   const col = window.TD_DATA.beacon[B.id] || '#fff'; const [x, y] = B.focal, top = V.cy - V.vh / 2 - 10;
   const pulse = 0.18 + 0.1 * Math.sin(t * 3);
@@ -148,6 +159,9 @@ function frame(now) {
     }
   }
   for (const f of TS.fx) fxDraw(f, TS.t);
+  // seam mist: drifting cloud banks on the borders between biomes hide the plates' framing
+  for (const m of seamMist()) { const im = img('world/cloud' + m.k + '.png'); if (!im.complete) continue; const mx = Math.round(m.x + Math.sin(TS.t * 0.05 + m.ph) * 18 - im.width / 2), my = Math.round(m.y + Math.sin(TS.t * 0.08 + m.ph) * 4 - im.height / 2);
+    if (mx < x0 + W2 && mx + im.width > x0 && my < y0 + H2 && my + im.height > y0) g.drawImage(im, mx, my); }
   for (const B of Object.values(TS.biomes)) if (B.phase === 'fore') beacon(B, TS.t);
   // time of day
   const [col, amt] = tint(V.clock);

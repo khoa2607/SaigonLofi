@@ -109,7 +109,7 @@ Idle characters sometimes **chat**: two neighbours face each other and trade pix
 2. **Hỏa Diệm Sơn's plate has characters painted into it** (Ngưu Ma Vương, the pilgrims). It needs a character-free reference. Thông Thiên Hà has no map reference (it is procedural).
 3. **Occluders are automatic** (object blobs of moderate size). Some trees and roofs merge with cliffs and do not occlude; a few blobs occlude slightly early or late.
    **Walk zones** are derived from ground colours, so characters can stand on some colour-alike surfaces.
-4. **Seams:** the dithered edge bands work, but some biome borders still show the plates' rectangular framing. Mist/cloud sprites along the seams would hide them.
+4. **Seams:** the dithered edge bands work. Drifting cloud banks now sit on every border between biomes (`seamMist` in `td-main.js`), but some borders still show the plates' rectangular framing in places.
 5. **Stories are short beat scripts**, not full sequences. There are no voice or music cues yet. The shared lofi radio and dock are not wired in (the page is standalone).
 6. **Night:** the grade is simple. Plate lanterns do not glow (only FX glow). Weather per biome (flower rain, ash rain, fog) is not implemented as a mode, only inside stories.
 7. **Not in the gallery:** the gallery frame host must be generalised first (World-Builder Guide §3.2).
