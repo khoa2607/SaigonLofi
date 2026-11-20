@@ -342,8 +342,11 @@ Thiết Phiến, the Linh Cảm goldfish demon, the giant turtle, the Demon of H
 ### 7.1b Art direction (changed 2026-11-19)
 
 The owner rejected the SaigonLofi / Holdfast box-model look for this world. The style follows the owner's references
-(`E:\game\web-lofieferences	aydukyef\`, outside the repo): detailed chibi pixel art with a warm dark outline, 5-tone ramps, rich gold
-and characters 48 px tall in a 3/4 top-down view. Sprites are pixel-grid sources (text, one character per pixel), so the world can still draw them
+(`E:\game\web-lofi
+eferences	ayduky
+ef\`, outside the repo): detailed chibi pixel art with a warm dark outline, 5-tone ramps, rich gold
+and a 3/4 top-down view. **Pilot v2:** the four pilgrims are traced pixel by pixel from the owner's top-down sheet (about 70 px tall); the world uses K = 4
+(a tile is 64 × 32 px); clouds follow the owner's `cloud.jpg`. Sprites are pixel-grid sources (text, one character per pixel), so the world can still draw them
 at load time without binary art assets. See `docs/tayduky/art-pilot/README.md`.
 
 ### 7.2 Hard art problems (solve these in the pilot)
