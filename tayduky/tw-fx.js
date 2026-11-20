@@ -15,6 +15,7 @@ const TWFX = (function () {
       for (let s = 0; s < 3; s++) { g.fillStyle = `rgba(${col},${pulse * (1 - s * 0.28)})`; const w = 14 - s * 4; g.fillRect(Math.round(X - w / 2), top, w, Y - top); } }
   }
   function draw(g, S, R, x0, y0, W, Hh) {
+    if (window.TWFX && TWFX.palm) TWFX.palm.draw(g, S, R, x0, y0, W, Hh);   // Buddha's Palm atmosphere (tw-palm-fx.js)
     const t = R.t;
     beacon(g, S, R, x0, y0);
     // Furnace sparks/smoke and drifting cloud wisps are separate from the terrain.
@@ -68,6 +69,7 @@ const TWFX = (function () {
       for (let s = 0; s < 18; s++) { const a = TWM.hash2(s, 5, 97), ph = (t * 0.3 + a) % 1; g.fillStyle = `rgba(255,255,255,${0.32 * (1 - ph)})`; g.fillRect(Math.round(X + (a - 0.5) * 70 + ph * 10), Math.round(Y - ph * 26 + 6), 6, 3); } }
   }
   function light(g, S, R, amt) {
+    if (window.TWFX && TWFX.palm) TWFX.palm.light(g, S, R, amt);
     // characters keep their own colour at night: the sprite is re-drawn additively over itself (after the night grade), so people stay readable without lighting the ground
     if (amt > 0.1) { const x0 = R.cx - R.cv.width / 2 - 70, x1 = R.cx + R.cv.width / 2 + 70, y0 = R.cy - R.cv.height / 2 - 80, y1 = R.cy + R.cv.height / 2 + 100;
       g.globalAlpha = Math.min(0.62, 0.12 + amt * 0.7);

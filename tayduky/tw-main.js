@@ -3,7 +3,7 @@
 (function () {
   const Q = new URLSearchParams(location.search), cv = document.getElementById('c');
   const sim = window.TWS || null;
-  const START = { hqs: [138, 24], btd: [80, 140], tc: [85, 20], fall: [131, 16], spring: [92, 143] };
+  const START = { hqs: [138, 24], btd: [80, 140], tc: [85, 20], btp: TWM.palm ? [TWM.palm.centre[0] - 1, TWM.palm.centre[1] + 3] : [111, 47], buddha: TWM.palm ? [TWM.palm.buddha[0], TWM.palm.buddha[1] + 4] : [111, 47], fall: [131, 16], spring: [92, 143] };
   function boot() {
     TWR.init(cv);
     if (sim && sim.init) sim.init(+(Q.get('seed') || (Date.now() % 100000)));

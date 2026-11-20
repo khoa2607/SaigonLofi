@@ -119,20 +119,128 @@
   "lotus_1",
   0.2
  ],
- "tc_gate_a": ["tc_gate_0", 0.15],
- "tc_gate_b": ["tc_gate_3", 0.15],
- "tc_palace_a": ["tc_palace_0", 0.15],
- "tc_palace_b": ["tc_palace_2", 0.15],
- "tc_furnace_a": ["tc_furnace_0", 0.16],
- "tc_furnace_b": ["tc_furnace_2", 0.16],
- "tc_bridge_a": ["tc_bridge_0", 0.20],
- "tc_bridge_b": ["tc_bridge_1", 0.20],
- "tc_lantern_a": ["tc_lantern_1", 0.17],
- "tc_lantern_b": ["tc_lantern_2", 0.17],
- "tc_peach_a": ["tc_peach_1", 0.10],
- "tc_peach_b": ["tc_peach_2", 0.10],
+ "tc_gate_a": [
+  "tc_gate_0",
+  0.15
+ ],
+ "tc_gate_b": [
+  "tc_gate_3",
+  0.15
+ ],
+ "tc_palace_a": [
+  "tc_palace_0",
+  0.15
+ ],
+ "tc_palace_b": [
+  "tc_palace_2",
+  0.15
+ ],
+ "tc_furnace_a": [
+  "tc_furnace_0",
+  0.16
+ ],
+ "tc_furnace_b": [
+  "tc_furnace_2",
+  0.16
+ ],
+ "tc_bridge_a": [
+  "tc_bridge_0",
+  0.2
+ ],
+ "tc_bridge_b": [
+  "tc_bridge_1",
+  0.2
+ ],
+ "tc_lantern_a": [
+  "tc_lantern_1",
+  0.17
+ ],
+ "tc_lantern_b": [
+  "tc_lantern_2",
+  0.17
+ ],
+ "tc_peach_a": [
+  "tc_peach_1",
+  0.1
+ ],
+ "tc_peach_b": [
+  "tc_peach_2",
+  0.1
+ ],
  "lotus_b": [
   "lotus_3",
   0.2
+ ],
+ "buddha_a": [
+  "palmbuddha_256",
+  0.12
+ ],
+ "pcloud_a": [
+  "palmcloudpuffs_0",
+  0.25
+ ],
+ "pcloud_b": [
+  "palmcloudpuffs_1",
+  0.25
+ ],
+ "pcloud_c": [
+  "palmcloudpuffs_2",
+  0.25
+ ],
+ "pcloud_d": [
+  "palmcloudpuffs_3",
+  0.25
+ ],
+ "pcloudw_a": [
+  "palmcloudwide",
+  0.25
+ ],
+ "pcloudw_b": [
+  "palmcloudstrip",
+  0.3
+ ],
+ "pcloudw_c": [
+  "palmcloudmound",
+  0.2
+ ],
+ "pcloudt_a": [
+  "palmcloudtower",
+  0.12
+ ],
+ "pcloudt_b": [
+  "palmcloudarch",
+  0.2
+ ],
+ "plotus_a": [
+  "palmlotus_0",
+  0.2
+ ],
+ "plotus_b": [
+  "palmlotus_1",
+  0.2
+ ],
+ "pwheel_a": [
+  "palmwheel_0",
+  0.14
+ ],
+ "pbell_a": [
+  "palmbell_3",
+  0.2
+ ],
+ "plantern_a": [
+  "palmlanterns_0",
+  0.5
+ ],
+ "pmist_a": [
+  "palmmist_0",
+  0.3
+ ],
+ "pmist_b": [
+  "palmmist_1",
+  0.3
+ ],
+ "pride_a": [
+  "palmwukongcloud_3",
+  0.3
  ]
 }

@@ -34,7 +34,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // ---------------------------------------------------------------- materials
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
-    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PH: 30 };
+    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, SKYC: 28, SKYD: 29, PH: 30 };
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -405,6 +405,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     const h=hash2(i,j,181);if(h<.14)prop('tclantern',i,j,{block:true,v:(i+j)%2});else if(h<.24)prop('flowers',i,j,{block:false});else if(h<.31)prop('scholar',i,j,{block:true,v:(i+j)%2});
   }
 
+  // Lòng Bàn Tay Phật Tổ (tw-palm.js): a celestial sea of clouds, five finger pillars and the seated Buddha
+  if (window.TW_PALM_BUILD) TW_PALM_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32 });
+
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
   for (const b of TWM.biomes.filter(b=>!b.built)) {
@@ -430,11 +433,11 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     } }
   // ---------------------------------------------------------------- seam band: placeholder ground near a built biome blends toward that biome's colours
   // TWM.seam[k] = distance (1..6) << 2 | built biome (1 hqs, 2 btd); 0 = none. (Design: borders carry both palettes.)
-  TWM.seam = new Uint8Array(NN);
-  { const q = [], dist = new Int8Array(NN).fill(-1), own = new Uint8Array(NN);
-    for (let k = 0; k < NN; k++) { const b = TWM.biomes[BIO[k]]; if (b.built && MAT[k] !== M.VOID) { dist[k] = 0; own[k] = b.id === 'hqs' ? 1 : b.id === 'btd' ? 2 : 3; q.push(k); } }
-    for (let h = 0; h < q.length; h++) { const k = q[h], i = k % N, j = Math.floor(k / N); if (dist[k] >= 6) continue;
-      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = i + di, c = j + dj; if (!inMap(a, c)) continue; const n = id(a, c); if (dist[n] >= 0) continue; dist[n] = dist[k] + 1; own[n] = own[k]; if (!TWM.biomes[BIO[n]].built) TWM.seam[n] = (dist[n] << 2) | own[n]; q.push(n); } } }
+  TWM.seam = new Uint8Array(NN); TWM.seamK = new Uint8Array(NN);
+  { const q = [], dist = new Int8Array(NN).fill(-1), own = new Uint8Array(NN), ownK = new Uint8Array(NN);
+    for (let k = 0; k < NN; k++) { const b = TWM.biomes[BIO[k]]; if (b.built && MAT[k] !== M.VOID) { dist[k] = 0; own[k] = b.id === 'hqs' ? 1 : b.id === 'btd' ? 2 : 3; ownK[k] = b.k; q.push(k); } }
+    for (let h = 0; h < q.length; h++) { const k = q[h], i = k % N, j = Math.floor(k / N); if (dist[k] >= (ownK[k] === TWM.bi.btp ? 16 : 6)) continue;      // the cloud sea fades far into its neighbours
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = i + di, c = j + dj; if (!inMap(a, c)) continue; const n = id(a, c); if (dist[n] >= 0) continue; dist[n] = dist[k] + 1; own[n] = own[k]; ownK[n] = ownK[k]; if (!TWM.biomes[BIO[n]].built) { TWM.seam[n] = (dist[n] << 2) | own[n]; TWM.seamK[n] = ownK[n]; } q.push(n); } } }
   // Placeholder-to-placeholder transition bands; retain both palettes without
   // assigning either region's future authored geography.
   TWM.edgeOther=new Uint8Array(NN).fill(255);TWM.edgeDist=new Uint8Array(NN).fill(255);
@@ -457,6 +460,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     if (m === M.BRIDGE || m === M.SILKB) w = true;
     WALK[k] = w ? 1 : 0;
   }
+  if (window.TW_PALM_POST) TW_PALM_POST({ TWM, MAT, WALK, M });
   for (const p of TWM.props) if (p.block) { const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1; for (let b = 0; b < fh; b++) for (let a = 0; a < fw; a++) if (inMap(p.i + a, p.j + b)) WALK[id(p.i + a, p.j + b)] = 0; }
   // stair tiles stay walkable
   for (const s of TWM.props) if (s.kind === 'stairs') WALK[id(s.i, s.j)] = 1;

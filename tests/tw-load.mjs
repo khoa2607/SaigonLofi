@@ -4,6 +4,9 @@ const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'taydu
 export function loadTW(files) {
   const ctx = vm.createContext({ console, Math, Date, JSON, Map, Set, Float32Array, Int8Array, Uint8Array, Uint32Array, Int32Array, Int16Array, Object, Array });
   ctx.window = ctx; ctx.globalThis = ctx;
-  for (const f of files || ['tw-map.js', 'tw-data.js', 'tw-sim.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
+  files = (files || ['tw-map.js', 'tw-data.js', 'tw-sim.js']).slice();
+  if (files.includes('tw-map.js') && !files.includes('tw-palm.js') && fs.existsSync(path.join(dir, 'tw-palm.js'))) files.unshift('tw-palm.js');   // the Buddha's Palm map section is part of the map
+  if (files.includes('tw-sim.js') && !files.includes('tw-palm-data.js') && fs.existsSync(path.join(dir, 'tw-palm-data.js'))) files.splice(files.indexOf('tw-sim.js') + 1, 0, 'tw-palm-data.js');
+  for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

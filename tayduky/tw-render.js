@@ -17,8 +17,8 @@ const TWR = (function () {
       if (p.kind === 'stairs') continue;
       const sp = A.sprite(p); if (!sp) continue;
       if (sp.py === undefined) sp.py = pivotOf(sp.frames[0]);
-      const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1, x = (p.i + fw / 2) * 8, y = (p.j + fh / 2) * 8, z = TWM.H[TWM.id(p.i, p.j)] * 4;
-      const s = { p, sp, x, y, z, X: Math.round(wx(x, y) - sp.w / 2), Y: Math.round(wy(x, y, z) - sp.py + 2), key: x + y, ph: (p.i * 7 + p.j * 3) % 17 };
+      const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1, x = (p.i + fw / 2) * 8, y = (p.j + fh / 2) * 8, z = TWM.H[TWM.id(p.i, p.j)] * 4 + (p.lift || 0);
+      const s = { p, sp, x, y, z, X: Math.round(wx(x, y) - (sp.ox !== undefined ? sp.ox : sp.w / 2)), Y: Math.round(wy(x, y, z) - sp.py + 2), key: x + y + (p.keyOff || 0), ph: (p.i * 7 + p.j * 3) % 17 };
       if (sp.flat) R.flats.push(s); else R.statics.push(s);
       const ck = Math.floor(s.X / CH) + ',' + Math.floor(s.Y / CH); if (!R.grid.has(ck)) R.grid.set(ck, []); R.grid.get(ck).push(s);
       // static occlusion: terrain columns in front of this prop that rise above its base
@@ -91,6 +91,7 @@ const TWR = (function () {
       }
       return pick(A.idle, Math.floor((T + ph) / (C.idleDur || 0.7)));
     }
+    if (a.pose === 'flip' && A.flip) return A.flip[0] + Math.min(A.flip[1] - 1, Math.floor((a.flipP || 0) * A.flip[1]));
     if (a.pose === 'jump' || a.pose === 'fly') return A.walk ? A.walk[0] : 0;
     return pick(A.idle, Math.floor((T + ph) / (C.idleDur || 0.7)));
   }
@@ -112,6 +113,7 @@ const TWR = (function () {
       else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
       return;
     }
+    if (a.ride && window.TWFX && TWFX.palm && TWFX.palm.drawRide) TWFX.palm.drawRide(g, a, X, Y, px0, py0);   // Wukong's somersault cloud
     const sw = Math.max(10, Math.round((C.shadow || 14)));
     // contact shadow on the ground (stays on the ground while jumping or climbing)
     if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + px0 - (sw >> 1), sY - 2, sw, 3); g.fillRect(X + px0 - (sw >> 1) + 2, sY - 3, sw - 4, 5); }
@@ -257,7 +259,7 @@ const TWR = (function () {
     // sorted drawables
     const D = [], cols = new Map();
     const addCols = (list, lvl) => { for (const k of list) { const c = cols.get(k); if (c === undefined || lvl < c) cols.set(k, lvl); } };
-    for (let cj = Math.floor((y0 - 260) / CH); cj <= cj1 + 1; cj++) for (let ci = ci0 - 1; ci <= ci1 + 1; ci++) { const L = R.grid.get(ci + ',' + cj); if (!L) continue;
+    for (let cj = Math.floor((y0 - 460) / CH); cj <= cj1 + 1; cj++) for (let ci = ci0 - 1; ci <= ci1 + 1; ci++) { const L = R.grid.get(ci + ',' + cj); if (!L) continue;
       for (const s of L) { if (s.X > x0 + W || s.X + s.sp.w < x0 || s.Y > y0 + Hh || s.Y + s.sp.h < y0) continue; D.push([s.key, 0, s]); if (s.occ.length) addCols(s.occ, Math.floor(s.z / 4)); } }
     if (sim) for (const a of sim.agents) {
       if (a.gone || a.hidden) continue; const X = wx(a.x, a.y), Y = wy(a.x, a.y, a.gz);
@@ -265,17 +267,21 @@ const TWR = (function () {
       D.push([a.key !== undefined ? a.key : a.x + a.y, 1, a]);
       addCols(columnsInFront(a.x, a.y, a.gz, X - 16, Y - 48 - (a.lift || 0) * 4, 32, 48), Math.floor(a.gz / 4 + 0.01));
     }
+    if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
     for (const f of TWM.falls) D.push([(f.i + f.j + 1) * 8 + 2, 2, f]);
     for (const [k, lvl] of cols) { const i = k % TWM.N, j = Math.floor(k / TWM.N); D.push([(i + j + 1) * 8 - 0.01, 3, k, lvl]); }
     D.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     for (const it of D) {
-      if (it[1] === 0) { const s = it[2], fr = s.sp.frames, f = fr.length === 1 ? fr[0] : fr.length === 2 ? fr[Math.floor(R.t * 0.8 + s.ph) % 2] : fr[Math.floor(R.t * 4 + s.ph) % fr.length];
-        if (s.p.kind === 'dummy' && s.p.hit > 0) g.drawImage(f, s.X + (Math.floor(R.t * 30) % 2 ? 1 : -1), s.Y);
+      if (it[1] === 0) { const s = it[2], fr = s.sp.frames, f = s.sp.pick ? s.sp.pick(s) : fr.length === 1 ? fr[0] : fr.length === 2 ? fr[Math.floor(R.t * 0.8 + s.ph) % 2] : fr[Math.floor(R.t * 4 + s.ph) % fr.length];
+        if (s.sp.draw) s.sp.draw(g, s, f, R);
+        else if (s.p.kind === 'dummy' && s.p.hit > 0) g.drawImage(f, s.X + (Math.floor(R.t * 30) % 2 ? 1 : -1), s.Y);
         else if (s.sp.sway) sway(g, f, s, s.sp.sway);
         else if (s.p.flip) { g.save(); g.translate(s.X + f.width, s.Y); g.scale(-1, 1); g.drawImage(f, 0, 0); g.restore(); } else g.drawImage(f, s.X, s.Y);
         if (s.sp.glow || s.sp.silk) lifeOverlay(g, s);
+        if (s.sp.after) s.sp.after(g, s, f, R);
         if (s.p.kind === 'fire') drawFire(g, s); if (s.p.kind === 'curtain') drawCurtain(g, s); }
       else if (it[1] === 1) drawAgent(g, it[2]);
+      else if (it[1] === 5) it[2].draw(g, R);
       else if (it[1] === 2) drawFall(g, it[2]);
       else drawColumn(g, it[2], it[3]);
     }
@@ -321,5 +327,5 @@ const TWR = (function () {
   function clamp() { R.cx = Math.max(R.cv.width / 2, Math.min(A.WORLD_W - R.cv.width / 2, R.cx)); R.cy = Math.max(R.cv.height / 2 - 200, Math.min(A.WORLD_H - R.cv.height / 2, R.cy)); }
   function lookAt(x, y, z) { R.cx = wx(x, y); R.cy = wy(x, y, z || 0); clamp(); }
   function init(cv) { R.cv = cv; R.g = cv.getContext('2d'); initStatics(); initAmbient(); resize(); }
-  return Object.assign(R, { init, frame, resize, clamp, lookAt, drawAgent, bubble, sheet, columnsInFront });
+  return Object.assign(R, { addStatic(p, sp, x, y, z) { const s = { p, sp, x, y, z, X: Math.round(wx(x, y) - (sp.ox !== undefined ? sp.ox : sp.w / 2)), Y: Math.round(wy(x, y, z) - sp.py + 2), key: x + y + (p.keyOff || 0), ph: (p.v || 0) % 17, occ: [] }; R.statics.push(s); const ck = Math.floor(s.X / CH) + ',' + Math.floor(s.Y / CH); if (!R.grid.has(ck)) R.grid.set(ck, []); R.grid.get(ck).push(s); return s; }, init, frame, resize, clamp, lookAt, drawAgent, bubble, sheet, columnsInFront });
 })();

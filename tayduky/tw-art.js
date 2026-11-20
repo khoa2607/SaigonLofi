@@ -62,7 +62,16 @@ const TWA = (function () {
   function top(m, I, J, X, Y, k, dith) {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
+    if (m !== M.SKYC && m !== M.SKYD && m < M.PH && TWA.ext && TWM.seam[k] && TWM.seamK[k] === TWM.bi.btp) {      // provisional paths inside the palm's cloud fade ring dissolve into cloud too
+      const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 3) / 15), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12));
+    }
+    return top0(m, I, J, X, Y, k, dith);
+  }
+  function top0(m, I, J, X, Y, k, dith) {
+    SH.em = null; SH.water = 0;
+    const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     switch (m) {
+      case M.SKYC: case M.SKYD: return TWA.ext.top(m, I, J, X, Y, k, dith, SH);        // Buddha's Palm cloud terraces (tw-palm-art.js)
       case M.HEAVEN: { const r=P.heaven; let c=tone(r,1+n0*1.8+n1*0.6); if (((X+Y*2)%48)<2) c=mix(c,P.cloud[3],0.3); return c; }
       case M.HEAVENPAVE: { const u=I*1.5,v=J*1.5,fu=u-Math.floor(u),fv=v-Math.floor(v); const c=tone(P.heaven,2+hash2(Math.floor(u),Math.floor(v),182)); return fu<.055||fv<.055?mix(c,[181,160,157],.4):c; }
       case M.CLOUD: case M.HEAVENBRIDGE: { SH.water=2; return tone(P.cloud,1+n0*1.5+n1*0.6); }
@@ -115,7 +124,8 @@ const TWA = (function () {
       default: {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
-          const sm = TWM.seam[k]; if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : (sm & 3) === 2 ? tone(P.gorge, 1 + n0 * 2 + n1) : tone(P.heaven, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
+          const sm = TWM.seam[k]; if (sm && TWM.seamK[k] === TWM.bi.btp && TWA.ext) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 3) / 15); return mix(c, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12)); }
+          if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : (sm & 3) === 2 ? tone(P.gorge, 1 + n0 * 2 + n1) : tone(P.heaven, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
           if(TWM.edgeOther[k]!==255){const other=PHR[TWM.biomes[TWM.edgeOther[k]].id]||PHR.tc, w=Math.max(0,(5-TWM.edgeDist[k])/10);c=mix(c,tone(other,1+n0*1.5),w);}
           if (((X + Y * 2) % 24) < 2) c = shade(c, 0.9); if (hp < 0.01) c = r[3];
           return c;
@@ -145,6 +155,7 @@ const TWA = (function () {
 
   // ---------------------------------------------------------------- cliff faces
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
+    if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     // b: biome id; side 0 = front-left (lit), 1 = front-right (shade); lx = global column; ry = px below the lip; elev = absolute px height
     const sea = TWM.MAT[k] === M.SEA;
     const R = sea ? P.faceS : b === 'btd' ? P.faceB : b === 'hqs' ? P.faceH : null;
@@ -213,6 +224,7 @@ const TWA = (function () {
         for (let ry = 0; ry < drop; ry++) {
           SH.em = null;
           const col = faceCol(b, side, lx, ry, drop, h * LV - ry, gx, k);
+          if (col === null) continue;
           put(gx, sy + rtop + ry, col, SH.em, 0);
         }
       }
@@ -251,14 +263,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'btd' ? P.ledgeB : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -536,6 +548,7 @@ const TWA = (function () {
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {
+    if (TWA.ext && TWA.ext.sprite) { const r = TWA.ext.sprite(p); if (r) return r; }
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
     if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: r.glow, glow: r.glow, silk: r.silk, sway: SWAY[p.kind] || 0, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);
@@ -545,5 +558,5 @@ const TWA = (function () {
     const out = { w: f0.w, h: f0.h, frames: frames.map(S => S.canvas()), em: f0.e ? f0.canvas(true) : null, flat: !!p.flat };
     cache.set(key, out); return out;
   }
-  return { loadSprites, IMG, OX, OY, LV, CH, WORLD_W, WORLD_H, SX, SY, bakeChunk, sprite, P, INK, Spr, blob, line, tone, ramp, mix, LEAF, GOLD, RED, STONE, VROCK };
+  return { loadSprites, IMG, IMGKINDS, GLOWS, SILKS, SWAY, OX, OY, LV, CH, WORLD_W, WORLD_H, SX, SY, bakeChunk, sprite, P, INK, Spr, blob, line, tone, ramp, mix, LEAF, GOLD, RED, STONE, VROCK };
 })();
