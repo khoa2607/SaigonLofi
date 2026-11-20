@@ -11,7 +11,7 @@ A cozy, observation-only **living isometric diorama** (Journey to the West), van
 - No tracing or compositing of reference images; no flattened biome plates, no emoji art. The traced alpha in `tayduky/alpha/` is legacy; leave it.
 - Observation only: no player control, no objectives. Keep the Global Story Director, the Living Story Loop, at most 5 signatures at once and never in two adjacent biomes.
 - Characters and props must be separate objects with real world coordinates, depth sorting and collision. No sliding over illustrations.
-- Biome footprints are compact (variable per biome via `MASK` in `tw-map.js`); freed land belongs to neighbouring cells. Do not lock the nine placeholder regions' future geography.
+- Biome footprints are compact (variable per biome via `MASK` in `tw-map.js`); freed land belongs to neighbouring cells. Do not lock the eleven placeholder regions' future geography.
 - PixelLab spending: the owner has approved unrestricted use for the Tây Du Ký asset work, but still call `get_balance` before and after a batch and record it in `docs/tayduky/v2/PIXELLAB.md`. Tier 1 allows 8 concurrent jobs. Never store keys in the repo.
 
 ## Code map (plain `<script>` globals, load order in `index.html`)
@@ -20,6 +20,7 @@ A cozy, observation-only **living isometric diorama** (Journey to the West), van
 | `tw-map.js` | the map (`TWM`): height levels, biome cells + masks, terrain, paths, stairs, props, POIs, lights, water shapes, wall-crawl spots, seam band, A* | no |
 | `tw-data.js` | residents, role activity weights, mini events, stories as beats | no |
 | `tw-sim.js` | simulation (`TWS`): step-queue activities, mini events, Director, Living Story Loop, recovery. Randomness only via `TWS.R` | no |
+| `tw-palm.js`, `tw-palm-art.js`, `tw-palm-fx.js`, `tw-palm-data.js` | Buddha's Palm (`btp`): map build hook (loaded before tw-map), terrain/finger art (`TWA.ext`), fx (`TWFX.palm`), sim state and events (`TWS.stepExt/opExt/ACT/MINI`) | partly (build + data) |
 | `tw-art.js` | code-painted terrain/cliffs/stairs, prop painters, PixelLab sprite loader with life masks (`GLOWS`, `SILKS`, `SWAY`, `IMGKINDS`) | canvas |
 | `tw-fx.js` | story/ambient effects, night character pass | render |
 | `tw-render.js` | chunked ground, one x+y depth sort, occlusion columns, agents, grade, lights | yes |

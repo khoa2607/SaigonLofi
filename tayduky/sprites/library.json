@@ -1117,6 +1117,258 @@
    "life": "",
    "runtime_kind": "",
    "source": "pixellab create_1_direction_object job "
+  },
+  "buddha_a": {
+   "file": "sprites/buddha_a.png",
+   "size": [
+    171,
+    245
+   ],
+   "anchor_y": 216,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_a": {
+   "file": "sprites/pcloud_a.png",
+   "size": [
+    109,
+    95
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_b": {
+   "file": "sprites/pcloud_b.png",
+   "size": [
+    110,
+    96
+   ],
+   "anchor_y": 72,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_c": {
+   "file": "sprites/pcloud_c.png",
+   "size": [
+    112,
+    90
+   ],
+   "anchor_y": 68,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_d": {
+   "file": "sprites/pcloud_d.png",
+   "size": [
+    110,
+    99
+   ],
+   "anchor_y": 74,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_a": {
+   "file": "sprites/pcloudw_a.png",
+   "size": [
+    255,
+    223
+   ],
+   "anchor_y": 167,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_b": {
+   "file": "sprites/pcloudw_b.png",
+   "size": [
+    241,
+    148
+   ],
+   "anchor_y": 104,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_c": {
+   "file": "sprites/pcloudw_c.png",
+   "size": [
+    250,
+    224
+   ],
+   "anchor_y": 179,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudt_a": {
+   "file": "sprites/pcloudt_a.png",
+   "size": [
+    205,
+    240
+   ],
+   "anchor_y": 211,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudt_b": {
+   "file": "sprites/pcloudt_b.png",
+   "size": [
+    241,
+    213
+   ],
+   "anchor_y": 170,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plotus_a": {
+   "file": "sprites/plotus_a.png",
+   "size": [
+    94,
+    109
+   ],
+   "anchor_y": 87,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plotus_b": {
+   "file": "sprites/plotus_b.png",
+   "size": [
+    115,
+    106
+   ],
+   "anchor_y": 85,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pwheel_a": {
+   "file": "sprites/pwheel_a.png",
+   "size": [
+    83,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pbell_a": {
+   "file": "sprites/pbell_a.png",
+   "size": [
+    111,
+    116
+   ],
+   "anchor_y": 93,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plantern_a": {
+   "file": "sprites/plantern_a.png",
+   "size": [
+    97,
+    118
+   ],
+   "anchor_y": 59,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pmist_a": {
+   "file": "sprites/pmist_a.png",
+   "size": [
+    62,
+    112
+   ],
+   "anchor_y": 78,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pmist_b": {
+   "file": "sprites/pmist_b.png",
+   "size": [
+    101,
+    97
+   ],
+   "anchor_y": 68,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pride_a": {
+   "file": "sprites/pride_a.png",
+   "size": [
+    46,
+    55
+   ],
+   "anchor_y": 38,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
   }
  },
  "characters": {
@@ -1762,6 +2014,31 @@
    "action": null,
    "source": "pixellab",
    "role": "trickster"
+  },
+  "palm_attendant": {
+   "file": "chars/palm_attendant.png",
+   "title": [
+    "Tiên Đồng Phật Quang",
+    "Palm Attendant"
+   ],
+   "biome": "btp",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "attendant"
   }
  }
 }

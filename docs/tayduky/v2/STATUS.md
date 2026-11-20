@@ -264,3 +264,13 @@ The 900-second simulations passed again for seeds 7 and 31, with zero adjacency 
 **Tests run.** `node tests/tayduky-v2-sim.mjs 900 7` and `... 900 11`: PASS (Director ran btp fore/sig/after, no adjacency violations, no bad tiles, no teleports; `a.ride` is exempt). `node tests/tayduky-v2-map15.mjs`: PASS (all 15 regions mutually reachable, incl. hqs through the new rim walkway). Rendering: frameMs 0.3-1.0 on headless Chrome at 1920x1080. Screenshots: `docs/tayduky/v2/screenshots/palm/` (day wide, night, Buddha close-up, signature).
 
 **Honest limitations.** Fingers are smooth stylised pillars (cylinder-shaded, creases, whorl) and read as monumental fingers more than anatomical ones; the Wukong flip clip is not packed (see PIXELLAB.md); the signature's divine column is a soft rectangle that still looks a little boxy at the middle finger; the neighbouring placeholder regions south of the palm show through the fade as grey cloud; no automated test yet for each mini-event (they run in the sim test only as coverage); the palm biome is not yet balanced against Codex's Thiên Cung changes (separate branch).
+
+## Integration (2026-11-20): four built biomes in one world
+
+`feature/tayduky-redesign-v2` now holds Thiên Cung (checkpoint `6c04b19`) and Buddha's Palm (merged from `feature/tayduky-buddha-palm`, merge commit `aa39fd2`). **Built:** hqs, btd, tc, btp. **Placeholders:** the other eleven regions (mask, adjacency and Director rules are real; ground is development hatching).
+
+Merge decisions: conflicts in tw-map.js (material table, blocking-prop pass), tw-art.js (terrain cases, stair palette), tw-render.js (static sprite placement and draw), tw-main.js (camera starts), sprites.js and sprite_picks.json. Thiên Cung terrain/props/cloud drawing kept as is; the palm's hooks added around it. Palm materials renumbered to SKYC 30 / SKYD 31 / PH 32 because Thiên Cung owns 28 and 29. `sprites.js` regenerated from the merged picks (88 sprites).
+
+Verified after the merge: `map15` PASS (15 regions, adjacency, all regions mutually reachable, Director with 15 regions), `sim 900` seeds 7 and 21 PASS, `heaven-assets` PASS, `heaven` PASS (both Heaven signatures, 60 fps median), story run OK, browser captures of the four biomes day and night with no console errors (`screenshots/integration/`, plus `map-15-regions.png`). `tayduky-v2-pilot.mjs` fails, as it did before the merge (legacy sandbox, removed `nhen_tinh`).
+
+Remaining: see `tayduky/AI_HANDOFF.md` §4.

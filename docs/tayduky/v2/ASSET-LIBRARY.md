@@ -106,6 +106,24 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `arch_b` | 117x109 |  |  |  | pixellab create_1_direction_object job  |
 | `lotus_a` | 87x82 |  |  |  | pixellab create_1_direction_object job  |
 | `lotus_b` | 89x88 |  |  |  | pixellab create_1_direction_object job  |
+| `buddha_a` | 171x245 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloud_a` | 109x95 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloud_b` | 110x96 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloud_c` | 112x90 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloud_d` | 110x99 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloudw_a` | 255x223 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloudw_b` | 241x148 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloudw_c` | 250x224 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloudt_a` | 205x240 |  |  |  | pixellab create_1_direction_object job  |
+| `pcloudt_b` | 241x213 |  |  |  | pixellab create_1_direction_object job  |
+| `plotus_a` | 94x109 |  |  |  | pixellab create_1_direction_object job  |
+| `plotus_b` | 115x106 |  |  |  | pixellab create_1_direction_object job  |
+| `pwheel_a` | 83x115 |  |  |  | pixellab create_1_direction_object job  |
+| `pbell_a` | 111x116 |  |  |  | pixellab create_1_direction_object job  |
+| `plantern_a` | 97x118 |  |  |  | pixellab create_1_direction_object job  |
+| `pmist_a` | 62x112 |  |  |  | pixellab create_1_direction_object job  |
+| `pmist_b` | 101x97 |  |  |  | pixellab create_1_direction_object job  |
+| `pride_a` | 46x55 |  |  |  | pixellab create_1_direction_object job  |
 
 ## mushrooms
 
@@ -194,3 +212,4 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `tc_guard` | tc | 60x60 | idle x4, walk x8, guard-watch | pixellab |
 | `tc_laojun` | tc | 60x60 | idle x4, walk x8, tend-furnace | pixellab |
 | `tc_wukong` | tc | 64x64 | idle x4, walk x8 | pixellab |
+| `palm_attendant` | btp | 52x52 | idle x4, walk x8 | pixellab |
