@@ -14,6 +14,10 @@ SP = os.path.join(ROOT, 'tayduky', 'sprites'); CH = os.path.join(ROOT, 'tayduky'
 
 # prefix -> (category, biome tags, footprint hint in tiles, life behaviours the renderer gives it, runtime kind, PixelLab job)
 CLS = {
+    'tc_gate': ('heaven', ['tc'], '1x1', 'gate landmark', 'tcgate', '1348df9c'),
+    'tc_palace': ('heaven', ['tc'], '1x1', 'palace landmark', 'tcpalace', 'eac2e662'),
+    'tc_furnace': ('heaven', ['tc'], '1x1', 'flickering glow, rising smoke', 'tcfurnace', 'e52bfc0f'),
+    'tc_bridge': ('heaven', ['tc'], 'cloud-channel crossing', 'walkable bridge over animated cloud stream', 'tcbridge', '3c8beb65'),
     'peachtree': ('trees', ['hqs', 'earthly'], '1x1 (canopy 2.5 tiles)', 'sway (6 px strips), drifting petals', 'bigpeach', '1423100d'),
     'hut': ('buildings', ['hqs', 'earthly'], '2x2', 'residents enter and leave (door POI), lantern glow at night', 'hut', '64e8709c'),
     'shrine': ('buildings', ['hqs', 'heaven'], '2x2', 'residents pray / sit at the steps', 'shrine', '0e249abe'),
@@ -39,7 +43,7 @@ for name, m in man.items():
     catalog['sprites'][name] = {'file': 'sprites/%s.png' % name, 'size': [m['w'], m['h']], 'anchor_y': m['py'], 'category': c[0], 'biomes': c[1], 'footprint': c[2], 'life': c[3], 'runtime_kind': c[4], 'source': 'pixellab create_1_direction_object job ' + c[5]}
 chars = json.loads(open(os.path.join(CH, 'chars.js'), encoding='utf-8').read().split('window.TD2_CHARS = ', 1)[1].strip().rstrip(';'))['chars']
 for name, c in chars.items():
-    catalog['characters'][name] = {'file': c['src'], 'title': c.get('title'), 'biome': c.get('biome'), 'size': c['size'], 'anim': c['anim'], 'source': c.get('source', 'hand-authored (docs/tayduky/v2/src)'), 'role': c.get('role')}
+    catalog['characters'][name] = {'file': c['src'], 'title': c.get('title'), 'biome': c.get('biome'), 'size': c['size'], 'anim': c['anim'], 'action': c.get('action'), 'source': c.get('source', 'hand-authored (docs/tayduky/v2/src)'), 'role': c.get('role')}
 json.dump(catalog, open(os.path.join(SP, 'library.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # contact sheets per category
@@ -72,6 +76,6 @@ for cat, names in sorted(cats.items()):
         c = catalog['sprites'][n]; md.append('| `%s` | %dx%d | %s | %s | %s | %s |' % (n, c['size'][0], c['size'][1], ', '.join(c['biomes']), c['footprint'], c['life'], c['source']))
     md.append('')
 md += ['## characters', '', '![characters](library/characters.png)\n', '| Name | Biome | Canvas | Animations | Source |', '|---|---|---|---|---|']
-for n, c in catalog['characters'].items(): md.append('| `%s` | %s | %dx%d | %s | %s |' % (n, c['biome'], c['size'][0], c['size'][1], ', '.join('%s x%d' % (k, v[1]) for k, v in c['anim'].items()), c['source']))
+for n, c in catalog['characters'].items(): md.append('| `%s` | %s | %dx%d | %s | %s |' % (n, c['biome'], c['size'][0], c['size'][1], ', '.join('%s x%d' % (k, v[1]) for k, v in c['anim'].items()) + (', ' + c['action']['clip'] if c.get('action') else ''), c['source']))
 open(os.path.join(DOC, 'ASSET-LIBRARY.md'), 'w', encoding='utf-8').write('\n'.join(md) + '\n')
 print(len(catalog['sprites']), 'sprites,', len(catalog['characters']), 'characters,', len(cats), 'categories')

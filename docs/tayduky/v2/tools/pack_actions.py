@@ -18,7 +18,7 @@ CAST = os.path.join(ROOT, 'tayduky', 'chars')
 RAW = os.path.join(ROOT, 'tayduky', 'chars-pl', 'raw')
 OUT = os.path.join(CAST, 'actions')
 DIRS = ['south', 'west', 'east', 'north']
-NAMES = ['wukong'] + ['sister%d_%s' % x for x in enumerate(['violet', 'teal', 'rose', 'amber', 'crimson', 'silver', 'indigo'], 1)]
+NAMES = ['wukong'] + ['sister%d_%s' % x for x in enumerate(['violet', 'teal', 'rose', 'amber', 'crimson', 'silver', 'indigo'], 1)] + ['tc_laojun','tc_guard','tc_fairy']
 os.makedirs(OUT, exist_ok=True)
 
 def load(z, path):
@@ -34,7 +34,7 @@ def main():
     head, js = open(path, encoding='utf-8').read().split('window.TD2_CHARS = ', 1)
     meta = json.loads(js.strip().rstrip(';'))
     for name in NAMES:
-        clip = 'staff-practice' if name == 'wukong' else 'silk-weaving'
+        clip = {'wukong':'staff-practice', 'tc_laojun':'tend-furnace', 'tc_guard':'guard-watch', 'tc_fairy':'tend-peach'}.get(name, 'silk-weaving')
         with zipfile.ZipFile(os.path.join(RAW, name + '.zip')) as z:
             state = json.loads(z.read('metadata.json'))['states'][0]
             frames = state['frames']; anim = frames['animations'][clip]

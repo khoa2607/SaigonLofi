@@ -55,6 +55,21 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `crystals_b` | 94x114 | btd, cave | 1x1 | pulse (glow mask), silk shimmer, lights at night, spores | pixellab create_1_direction_object job cd4218c0 |
 | `crystals_c` | 115x113 | btd, cave | 1x1 | pulse (glow mask), silk shimmer, lights at night, spores | pixellab create_1_direction_object job cd4218c0 |
 
+## heaven
+
+![heaven](library/heaven.png)
+
+| Sprite | Size | Biomes | Footprint | Life | Source |
+|---|---|---|---|---|---|
+| `tc_gate_a` | 136x155 | tc | 1x1 | gate landmark | pixellab create_1_direction_object job 1348df9c |
+| `tc_gate_b` | 150x153 | tc | 1x1 | gate landmark | pixellab create_1_direction_object job 1348df9c |
+| `tc_palace_a` | 148x142 | tc | 1x1 | palace landmark | pixellab create_1_direction_object job eac2e662 |
+| `tc_palace_b` | 157x147 | tc | 1x1 | palace landmark | pixellab create_1_direction_object job eac2e662 |
+| `tc_furnace_a` | 78x110 | tc | 1x1 | flickering glow, rising smoke | pixellab create_1_direction_object job e52bfc0f |
+| `tc_furnace_b` | 85x117 | tc | 1x1 | flickering glow, rising smoke | pixellab create_1_direction_object job e52bfc0f |
+| `tc_bridge_a` | 120x92 | tc | cloud-channel crossing | walkable bridge over animated cloud stream | pixellab create_1_direction_object job 3c8beb65 |
+| `tc_bridge_b` | 123x94 | tc | cloud-channel crossing | walkable bridge over animated cloud stream | pixellab create_1_direction_object job 3c8beb65 |
+
 ## misc
 
 ![misc](library/misc.png)
@@ -145,19 +160,23 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 
 | Name | Biome | Canvas | Animations | Source |
 |---|---|---|---|---|
-| `wukong` | hqs | 64x64 | idle x4, walk x8 | pixellab |
+| `wukong` | hqs | 64x64 | idle x4, walk x8, staff-practice | pixellab |
 | `khi_linh` | hqs | 60x60 | idle x4, walk x8 | pixellab |
 | `khi_lao` | hqs | 60x60 | idle x4, walk x8 | pixellab |
 | `khi_con` | hqs | 36x36 | idle x4, walk x8 | pixellab |
 | `khi_dan` | hqs | 56x56 | idle x4, walk x8 | pixellab |
 | `khi_dan_b` | hqs | 56x56 | idle x4, walk x8 | pixellab |
 | `tam_tang` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister1_violet` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister2_teal` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister3_rose` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister4_amber` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister5_crimson` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister6_silver` | btd | 64x64 | idle x4, walk x8 | pixellab |
-| `sister7_indigo` | btd | 64x64 | idle x4, walk x8 | pixellab |
+| `sister1_violet` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister2_teal` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister3_rose` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister4_amber` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister5_crimson` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister6_silver` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
+| `sister7_indigo` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
 | `nhen_con` | btd | 48x48 | idle x4, walk x8 | pixellab |
 | `nhen_con_b` | btd | 44x44 | idle x4, walk x8 | pixellab |
+| `tc_fairy` | tc | 56x56 | idle x4, walk x8, tend-peach | pixellab |
+| `tc_guard` | tc | 60x60 | idle x4, walk x8, guard-watch | pixellab |
+| `tc_laojun` | tc | 60x60 | idle x4, walk x8, tend-furnace | pixellab |
+| `tc_wukong` | tc | 64x64 | idle x4, walk x8 | pixellab |

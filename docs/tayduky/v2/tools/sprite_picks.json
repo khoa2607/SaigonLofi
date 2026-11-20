@@ -119,6 +119,14 @@
   "lotus_1",
   0.2
  ],
+ "tc_gate_a": ["tc_gate_0", 0.15],
+ "tc_gate_b": ["tc_gate_3", 0.15],
+ "tc_palace_a": ["tc_palace_0", 0.15],
+ "tc_palace_b": ["tc_palace_2", 0.15],
+ "tc_furnace_a": ["tc_furnace_0", 0.16],
+ "tc_furnace_b": ["tc_furnace_2", 0.16],
+ "tc_bridge_a": ["tc_bridge_0", 0.20],
+ "tc_bridge_b": ["tc_bridge_1", 0.20],
  "lotus_b": [
   "lotus_3",
   0.2

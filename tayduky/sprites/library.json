@@ -752,6 +752,134 @@
    "runtime_kind": "",
    "source": "pixellab create_1_direction_object job "
   },
+  "tc_gate_a": {
+   "file": "sprites/tc_gate_a.png",
+   "size": [
+    136,
+    155
+   ],
+   "anchor_y": 132,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "gate landmark",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_gate_b": {
+   "file": "sprites/tc_gate_b.png",
+   "size": [
+    150,
+    153
+   ],
+   "anchor_y": 130,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "gate landmark",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_palace_a": {
+   "file": "sprites/tc_palace_a.png",
+   "size": [
+    148,
+    142
+   ],
+   "anchor_y": 121,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "palace landmark",
+   "runtime_kind": "tcpalace",
+   "source": "pixellab create_1_direction_object job eac2e662"
+  },
+  "tc_palace_b": {
+   "file": "sprites/tc_palace_b.png",
+   "size": [
+    157,
+    147
+   ],
+   "anchor_y": 125,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "palace landmark",
+   "runtime_kind": "tcpalace",
+   "source": "pixellab create_1_direction_object job eac2e662"
+  },
+  "tc_furnace_a": {
+   "file": "sprites/tc_furnace_a.png",
+   "size": [
+    78,
+    110
+   ],
+   "anchor_y": 92,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "flickering glow, rising smoke",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job e52bfc0f"
+  },
+  "tc_furnace_b": {
+   "file": "sprites/tc_furnace_b.png",
+   "size": [
+    85,
+    117
+   ],
+   "anchor_y": 98,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "flickering glow, rising smoke",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job e52bfc0f"
+  },
+  "tc_bridge_a": {
+   "file": "sprites/tc_bridge_a.png",
+   "size": [
+    120,
+    92
+   ],
+   "anchor_y": 74,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud-channel crossing",
+   "life": "walkable bridge over animated cloud stream",
+   "runtime_kind": "tcbridge",
+   "source": "pixellab create_1_direction_object job 3c8beb65"
+  },
+  "tc_bridge_b": {
+   "file": "sprites/tc_bridge_b.png",
+   "size": [
+    123,
+    94
+   ],
+   "anchor_y": 75,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud-channel crossing",
+   "life": "walkable bridge over animated cloud stream",
+   "runtime_kind": "tcbridge",
+   "source": "pixellab create_1_direction_object job 3c8beb65"
+  },
   "lotus_b": {
    "file": "sprites/lotus_b.png",
    "size": [
@@ -789,6 +917,20 @@
      8
     ]
    },
+   "action": {
+    "src": "chars/actions/wukong.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "staff-practice"
+   },
    "source": "pixellab",
    "role": "king"
   },
@@ -813,6 +955,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "guard"
   },
@@ -837,6 +980,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "elder"
   },
@@ -861,6 +1005,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "kid"
   },
@@ -885,6 +1030,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "citizen"
   },
@@ -909,6 +1055,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "citizen"
   },
@@ -933,6 +1080,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "visitor"
   },
@@ -956,6 +1104,20 @@
      4,
      8
     ]
+   },
+   "action": {
+    "src": "chars/actions/sister1_violet.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
    },
    "source": "pixellab",
    "role": "sister"
@@ -981,6 +1143,20 @@
      8
     ]
    },
+   "action": {
+    "src": "chars/actions/sister2_teal.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
    "source": "pixellab",
    "role": "sister"
   },
@@ -1004,6 +1180,20 @@
      4,
      8
     ]
+   },
+   "action": {
+    "src": "chars/actions/sister3_rose.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
    },
    "source": "pixellab",
    "role": "sister"
@@ -1029,6 +1219,20 @@
      8
     ]
    },
+   "action": {
+    "src": "chars/actions/sister4_amber.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
    "source": "pixellab",
    "role": "sister"
   },
@@ -1052,6 +1256,20 @@
      4,
      8
     ]
+   },
+   "action": {
+    "src": "chars/actions/sister5_crimson.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
    },
    "source": "pixellab",
    "role": "sister"
@@ -1077,6 +1295,20 @@
      8
     ]
    },
+   "action": {
+    "src": "chars/actions/sister6_silver.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
    "source": "pixellab",
    "role": "sister"
   },
@@ -1100,6 +1332,20 @@
      4,
      8
     ]
+   },
+   "action": {
+    "src": "chars/actions/sister7_indigo.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
    },
    "source": "pixellab",
    "role": "sister"
@@ -1125,6 +1371,7 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "spiderling"
   },
@@ -1149,8 +1396,148 @@
      8
     ]
    },
+   "action": null,
    "source": "pixellab",
    "role": "spiderling"
+  },
+  "tc_fairy": {
+   "file": "chars/tc_fairy.png",
+   "title": [
+    "Tiên nữ",
+    "Heavenly fairy"
+   ],
+   "biome": "tc",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_fairy.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "tend-peach"
+   },
+   "source": "pixellab",
+   "role": "fairy"
+  },
+  "tc_guard": {
+   "file": "chars/tc_guard.png",
+   "title": [
+    "Thiên binh",
+    "Heavenly guard"
+   ],
+   "biome": "tc",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_guard.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "guard-watch"
+   },
+   "source": "pixellab",
+   "role": "heavenguard"
+  },
+  "tc_laojun": {
+   "file": "chars/tc_laojun.png",
+   "title": [
+    "Thái Thượng Lão Quân",
+    "Lao Jun"
+   ],
+   "biome": "tc",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_laojun.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "tend-furnace"
+   },
+   "source": "pixellab",
+   "role": "laojun"
+  },
+  "tc_wukong": {
+   "file": "chars/tc_wukong.png",
+   "title": [
+    "Tôn Ngộ Không",
+    "Sun Wukong in heaven"
+   ],
+   "biome": "tc",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "trickster"
   }
  }
 }

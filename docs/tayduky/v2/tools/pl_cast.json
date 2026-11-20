@@ -188,5 +188,49 @@
   "gait": "scuttle",
   "role": "spiderling",
   "shadow": 16
+ },
+ {
+  "name": "tc_fairy",
+  "id": "92823905-342c-4c44-a8cf-a372cfe38c7c",
+  "title": [
+   "Tiên nữ",
+   "Heavenly fairy"
+  ],
+  "biome": "tc",
+  "speed": 17,
+  "role": "fairy"
+ },
+ {
+  "name": "tc_guard",
+  "id": "4e0ff6f3-e76a-4717-bcc2-f48bf6dfbbae",
+  "title": [
+   "Thiên binh",
+   "Heavenly guard"
+  ],
+  "biome": "tc",
+  "speed": 18,
+  "role": "heavenguard"
+ },
+ {
+  "name": "tc_laojun",
+  "id": "5f63cdc4-e55b-45b2-b7b1-7a1b4d6dc309",
+  "title": [
+   "Thái Thượng Lão Quân",
+   "Lao Jun"
+  ],
+  "biome": "tc",
+  "speed": 12,
+  "role": "laojun"
+ },
+ {
+  "name": "tc_wukong",
+  "id": "6810cd87-6f4d-45d0-890f-98ffdbdc134a",
+  "title": [
+   "Tôn Ngộ Không",
+   "Sun Wukong in heaven"
+  ],
+  "biome": "tc",
+  "speed": 24,
+  "role": "trickster"
  }
 ]
