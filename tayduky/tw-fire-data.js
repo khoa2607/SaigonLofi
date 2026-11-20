@@ -39,7 +39,7 @@
   };
   function burst(x, y) {
     S.fire.bursts.push({ x, y, t: 0 });
-    for (const a of S.agents) if (a.biome === B && !a.gone && !a.hidden && H.free(a) && Math.hypot(a.x - x, a.y - y) < 46 && (a.role === 'mule' || a.role === 'baker' || a.role === 'seller' || a.role === 'fire_bajie')) startle(a, x, y);
+    for (const a of S.agents) if (a.biome === B && !a.gone && !a.hidden && H.free(a) && Math.hypot(a.x - x, a.y - y) < 46 && (a.role === 'mule' || a.role === 'baker' || a.role === 'seller' || a.role === 'fire_bajie' || a.role === 'monk' || a.role === 'sha')) startle(a, x, y);
   }
   function startle(a, x, y) {
     if (a.role === 'mule') { const away = H.nearestWalk(a.x + (a.x - x) * 2.2, a.y + (a.y - y) * 2.2, B, 6); H.assign(a, [{ k: 'bubble', kind: 'excl' }, { k: 'hop', t: 0.7 }].concat(away ? [H.go(away[0], away[1], { run: 1.8 })] : []).concat([{ k: 'idle', t: 2 }]), 'mini'); }
@@ -91,6 +91,11 @@
     buyers.forEach((a, n) => H.assign(a, [{ k: 'idle', t: 2 + n }, H.go(sq.x + (n ? 9 : -9), sq.y + 8), { k: 'face', dir: 'up' }, { k: 'bubble', kind: 'heart' }, { k: 'idle', t: 3 }, { k: 'carry', what: 'cake' }, { k: 'sit', t: 6 }, { k: 'bubble', kind: 'note' }, { k: 'carry', what: null }, { k: 'idle', t: 1 }], 'mini'));
     H.count('cakeseller'); return true;
   };
+  M.fire_pilgrims = b => {   // Tam Tạng and Sa Tăng walk to the square together; the monk blesses the village, Sa Tăng keeps watch with his staff
+    const m = by(b, 'monk'), sh = by(b, 'sha'), sq = H.pois(b, 'square')[0]; if (!m || !sh || !sq) return false;
+    H.assign(m, [H.go(sq.x - 10, sq.y + 6), { k: 'face', dir: 'down' }, { k: 'bubble', kind: 'note' }, { k: 'act', t: 3 }, { k: 'bubble', kind: 'heart' }, { k: 'idle', t: 3 }, { k: 'sit', t: 4 }], 'mini');
+    H.assign(sh, [H.go(sq.x + 4, sq.y + 8), { k: 'face', dir: 'up' }, { k: 'idle', t: 4 }, { k: 'bubble', kind: 'dots' }, { k: 'idle', t: 4 }, { k: 'bubble', kind: 'excl' }, { k: 'idle', t: 2 }], 'mini'); H.count('pilgrims'); return true;
+  };
   M.fire_mule = b => {   // a flame bursts under a mule; it bolts across the village, a baker gives chase, the crowd hops aside
     const m = by(b, 'mule'), v = F.vents.length ? F.vents[Math.floor(S.R() * F.vents.length)] : null; if (!m) return false; const bx = m.x + (S.R() < 0.5 ? 14 : -14), by_ = m.y + 12;
     burst(bx, by_); const sq = H.pois(b, 'square')[0], baker = by(b, 'baker');
@@ -135,14 +140,14 @@
     for (let c = 0; c < per; c++) steps.push({ k: 'fan', t: 2.1 }, { k: 'firecall', fn: () => { f.fanPips = c + 1; f.gT = Math.min(1, (c + 1) / per); f.gRate = 0.05; f.rainT = Math.min(1, 0.25 + (c + 1) / per * 0.9); f.rainRate = 0.12; f.fanN += 7; for (let q = 0; q < 3; q++) { const v = F.vents[(c * 3 + q) % F.vents.length]; if (v) f.puffs.push({ x: v[0] * 8 + 4, y: v[1] * 8 + 4, t: 0 }); } } });
     steps.push({ k: 'idle', t: 1.4 }, { k: 'hop', t: 1.4 }); H.assign(W, steps, 'story'); pend(R, () => !W.q.length && !W.cur);
   };
-  O.firecelebrate = (R, o) => { const sq = H.pois(B, 'square')[0]; if (!sq) return; for (const a of S.agents) if (a.biome === B && !a.gone && !a.hidden && (a.role === 'baker' || a.role === 'seller' || a.role === 'fire_bajie' || a.role === 'fire_wukong') && H.free(a)) { a.gathered = R; H.assign(a, [H.go(sq.x + (S.R() - 0.5) * 36, sq.y + (S.R() - 0.5) * 24), { k: 'face', dir: 'up' }, { k: 'hop', t: 3 }, { k: 'bubble', kind: 'heart' }, { k: 'hop', t: 2 }, { k: 'bubble', kind: 'note' }, { k: 'idle', t: 4 }, { k: 'carry', what: a.role === 'seller' ? 'cake' : null }], 'story'); } };
+  O.firecelebrate = (R, o) => { const sq = H.pois(B, 'square')[0]; if (!sq) return; for (const a of S.agents) if (a.biome === B && !a.gone && !a.hidden && (a.role === 'baker' || a.role === 'seller' || a.role === 'fire_bajie' || a.role === 'fire_wukong' || a.role === 'monk' || a.role === 'sha') && H.free(a)) { a.gathered = R; H.assign(a, [H.go(sq.x + (S.R() - 0.5) * 36, sq.y + (S.R() - 0.5) * 24), { k: 'face', dir: 'up' }, { k: 'hop', t: 3 }, { k: 'bubble', kind: 'heart' }, { k: 'hop', t: 2 }, { k: 'bubble', kind: 'note' }, { k: 'idle', t: 4 }, { k: 'carry', what: a.role === 'seller' ? 'cake' : null }], 'story'); } };
   O.firerecover = (R, o) => { const f = S.fire; f.gT = 0; f.gRate = o.rate || 0.011; f.heatT = 0.15; f.rainT = 0; f.rainRate = 0.08; f.fanT = 0; f.fanPips = 0; for (const a of S.agents) if (a.biome === B && a.hasFan) a.hasFan = false; };
   O.wk_leave = (R, o, Bm, W) => { if (!W) return; W.hasFan = false; W.story = R; H.assign(W, [{ k: 'bubble', kind: 'note' }, { k: 'idle', t: 2 }, { k: 'fly', t: 2.4 }], 'story'); pend(R, () => W.hidden || W.away); };
 
   // ---------------------------------------------------------------- data
   D.beacon.hds = '255,140,70';
   D.biomes.hds = {
-    residents: [['tiefan', 1, 'princess'], ['wukong', 1, 'fire_wukong'], ['bajie', 1, 'fire_bajie'], ['hds_baker', 3, 'baker'], ['hds_seller', 3, 'seller'], ['hds_mule', 2, 'mule']],
+    residents: [['tiefan', 1, 'princess'], ['wukong', 1, 'fire_wukong'], ['bajie', 1, 'fire_bajie'], ['hds_baker', 3, 'baker'], ['hds_seller', 3, 'seller'], ['hds_mule', 2, 'mule'], ['tam_tang', 1, 'monk'], ['sa_tang', 1, 'sha']],
     roles: {
       princess: [['fire_palace', 4], ['fire_inspect', 3], ['fire_overlook', 2], ['fire_shrine', 1], ['stroll', 1]],
       fire_wukong: [['fire_overlook', 3], ['fire_cakes', 3], ['fire_lavaedge', 2], ['hop_rocks', 2], ['stroll', 2], ['fire_warm', 1]],
@@ -150,14 +155,16 @@
       baker: [['fire_bake', 5], ['fire_carry', 2], ['fire_warm', 1], ['talk', 1], ['stroll', 1], ['fire_sell', 1]],
       seller: [['fire_sell', 5], ['fire_carry', 2], ['fire_warm', 1], ['talk', 2], ['stroll', 1]],
       mule: [['fire_mule', 4], ['stroll', 3]],
+      monk: [['fire_shrine', 3], ['fire_cakes', 2], ['fire_overlook', 2], ['fire_warm', 2], ['talk', 1], ['stroll', 2]],
+      sha: [['fire_warm', 3], ['fire_shrine', 2], ['fire_lavaedge', 2], ['stroll', 3], ['fire_overlook', 1]],
     },
-    minis: ['fire_cakeseller', 'fire_mule', 'fire_bajie_heat', 'fire_whirlwind', 'fire_oven_flare'],
+    minis: ['fire_pilgrims', 'fire_cakeseller', 'fire_mule', 'fire_bajie_heat', 'fire_whirlwind', 'fire_oven_flare'],
     stories: [
       { id: 'palm_leaf_fan', title: ['Quạt Ba Tiêu', 'The Palm-Leaf Fan'],
-        fore: [['fire', { heat: 1, rate: 0.03 }], ['fireburst', { n: 4 }], ['gather', { at: 'square', r: 5, roles: ['baker', 'seller'], n: 6 }], ['face', { who: 'crowd', dir: 'up' }], ['bubble', { who: 'crowd', kind: 'excl' }], ['depart', { who: 'fire_wukong' }], ['princess_to', { who: 'princess', at: 'square' }]],
+        fore: [['fire', { heat: 1, rate: 0.03 }], ['fireburst', { n: 4 }], ['gather', { at: 'square', r: 5, roles: ['baker', 'seller', 'monk', 'sha'], n: 8 }], ['face', { who: 'crowd', dir: 'up' }], ['bubble', { who: 'crowd', kind: 'excl' }], ['depart', { who: 'fire_wukong' }], ['princess_to', { who: 'princess', at: 'square' }]],
         beats: [
           ['arrive_at', { who: 'fire_wukong', from: 'sky', dx: -22, dy: 12 }], ['bubble', { who: 'fire_wukong', kind: 'star' }], ['wait', { t: 1.5 }], ['bubble', { who: 'crowd', kind: 'excl' }],
-          ['blowaway', { who: 'fire_wukong' }], ['fireburst', { n: 3 }], ['wait', { t: 5 }], ['bubble', { who: 'crowd', kind: 'dots' }],
+          ['blowaway', { who: 'fire_wukong' }], ['fireburst', { n: 3 }], ['bubble', { who: 'monk', kind: 'q' }], ['bubble', { who: 'sha', kind: 'excl' }], ['wait', { t: 5 }], ['bubble', { who: 'crowd', kind: 'dots' }],
           ['arrive_at', { who: 'fire_wukong', from: 'sky', dx: 30, dy: -18 }], ['face', { who: 'princess', dir: 'right' }], ['bubble', { who: 'princess', kind: 'excl' }],
           ['fan49', { who: 'fire_wukong' }], ['fire', { heat: 0, rate: 0.06 }], ['firewait', { gAbove: 0.97 }],
           ['fire', { rain: 0.6, rainRate: 0.08 }], ['firecelebrate', {}], ['wait', { t: 10 }], ['fire', { rain: 0, rainRate: 0.1 }], ['bubble', { who: 'princess', kind: 'heart' }], ['wait', { t: 4 }], ['princess_to', { who: 'princess', at: 'palace' }], ['wk_leave', { who: 'fire_wukong' }], ['disperse', {}]],

@@ -243,3 +243,4 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `hds_seller` | hds | 52x52 | idle x4, walk x8 | pixellab |
 | `tiefan` | hds | 60x60 | idle x4, walk x8, act x6 | pixellab |
 | `hds_mule` | hds | 68x68 | idle x4, walk x8 | pixellab |
+| `sa_tang` | hds | 60x60 | idle x4, walk x8 | pixellab |

@@ -212,7 +212,7 @@ const TWA = (function () {
   // ---------------------------------------------------------------- cliff faces
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
-    if (b === 'hds' && TWA.fire) return TWA.fire.face(side, lx, ry, drop, elev, gx, k, SH);
+    if ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) return TWA.fire.face(side, lx, ry, drop, elev, gx, k, SH);
     // b: biome id; side 0 = front-left (lit), 1 = front-right (shade); lx = global column; ry = px below the lip; elev = absolute px height
     const sea = TWM.MAT[k] === M.SEA;
     const R = sea ? P.faceS : b === 'btd' ? P.faceB : b === 'hqs' ? P.faceH : null;
@@ -352,7 +352,7 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : (b === 'hds' && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }

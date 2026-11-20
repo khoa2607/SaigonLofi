@@ -72,3 +72,5 @@ Balance before **1,209.65**, after **991.65**: **218 generations**. Tier 1 = 8 c
 **Characters** (v3 `create_character`, 2 gens each, + `animate_character` template `walking-8-frames` south/west/east/north = 4 gens): tiefan 2cbdc588 (60 px; plus `fireball` 4 dirs, packed as `act`), bajie 7af61907 (60), hds_baker 4ca20190 (52), hds_seller b26fa722 (52); mule a32d7d87 (`standard`, quadruped horse template, 1 gen, + `walk-8-frames`). Wukong reuses the existing `wukong` sheet.
 
 Packed with `tools/sprite_picks.json` -> `pack_sprites.py` (raw frames in `tayduky/sprites/raw/hds_*`) and `tools/pl_cast.json` -> `pack_pl_chars.py` (the `casting_*` clip name was added to the `act` list).
+
+Follow-up (2026-11-21): `sa_tang` 1cab0b0a-2e39-437f-ac3d-4d1394b5d445 (Sha Wujing, v3 60 px, 2 gens + 4 for `walking-8-frames`); balance 991.65 -> 985.65. Tam Tạng reuses the existing `tam_tang` sheet.

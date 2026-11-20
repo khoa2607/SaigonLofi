@@ -299,5 +299,16 @@
   "speed": 24,
   "role": "mule",
   "shadow": 18
+ },
+ {
+  "name": "sa_tang",
+  "id": "1cab0b0a-2e39-437f-ac3d-4d1394b5d445",
+  "title": [
+   "Sa Tăng",
+   "Sha Wujing"
+  ],
+  "biome": "hds",
+  "speed": 14,
+  "role": "sha"
  }
 ]

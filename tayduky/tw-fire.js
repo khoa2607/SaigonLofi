@@ -100,6 +100,7 @@ window.TW_FIRE_BUILD = function (X) {
   for (const [a, b] of [[10, 30], [18, 30], [12, 33]]) { P('hdsoven', a, b, { fp: [2, 1], v: 0, block: true }); Q('oven', a, b + 1, { cap: 1, face: 'up' }); }
   for (const [a, b, v] of [[8, 25, 0], [8, 32, 1], [18, 34, 2], [20, 26, 0], [6, 29, 1]]) { P('hdshut', a, b, { fp: [2, 2], v, block: true }); Q('hearth', a + 1, b + 2, { cap: 2, face: 'up' }); }
   for (const [a, b] of [[11, 31], [16, 31], [13, 25]]) { P('hdscrates', a, b, { fp: [1, 1], v: a & 3, block: true }); Q('crate', a, b + 1, { cap: 1, face: 'up' }); }
+  P('hdscrates', 4, 25, { fp: [1, 1], v: 1, block: true }); P('hdsrock', 3, 24, { fp: [1, 1], v: 0, block: true });   // west edge of the village: stored goods and a basalt boulder where the lava basin used to be
   Q('hearth', 14, 29, { cap: 4, face: 'up' }); Q('hearth', 17, 29, { cap: 3, face: 'up' }); Q('square', 14, 30, { cap: 8, face: 'up' });
   Q('pen', 9, 35, { cap: 3, face: 'right' }); Q('pen', 11, 36, { cap: 3, face: 'right' });
   for (const [a, b] of [[9, 28], [19, 28], [14, 26], [14, 34], [7, 31], [20, 31]]) { P('hdslantern', a, b, { fp: [1, 1], v: 0, block: true }); TWM.lights.push({ biome: 'hds', i: x0 + a, j: y0 + b, r: 52, col: '255,160,70', kind: 'lantern' }); }
@@ -107,7 +108,7 @@ window.TW_FIRE_BUILD = function (X) {
   Q('overlook', 25, 13, { cap: 3, face: 'down' }); Q('overlook', 5, 22, { cap: 3, face: 'down' }); Q('lavaedge', 22, 31, { cap: 2, face: 'right' }); Q('lavaedge', 19, 25, { cap: 2, face: 'right' }); Q('lavaedge', 23, 34, { cap: 2, face: 'up' });
   Q('switch', 18, 20, { cap: 2, face: 'down' }); Q('switch', 13, 13, { cap: 2, face: 'down' }); Q('path', 16, 23, { cap: 2, face: 'down' }); Q('path', 16, 36, { cap: 2, face: 'up' });
   // vents: smoking fissures (non-blocking decoration that the fx layer animates), lava rocks and charred trees
-  const vents = [[7, 20], [24, 20], [3, 24], [22, 6], [28, 31], [10, 15]];
+  const vents = [[7, 20], [24, 20], [22, 6], [28, 31], [10, 15]];   // (none inside the village: a lava basin among the ovens read as wrong)
   for (const [a, b] of vents) { const k = tile(a, b); if (k < 0 || MAT[k] === M.LAVA || RES[k]) continue; P('hdsvent', a, b, { fp: [1, 1], v: (a + b) & 3, block: true }); F.vents.push(W(a, b)); TWM.lights.push({ biome: 'hds', i: x0 + a, j: y0 + b, r: 34, col: '255,110,40', kind: 'fire' }); }
   for (const [a, b] of [[23, 24], [29, 25], [28, 28], [25, 32], [21, 27]]) { const k = tile(a, b); if (k >= 0 && MAT[k] !== M.LAVA && !RES[k]) { P('hdsrock', a, b, { fp: [1, 1], v: (a * 3 + b) & 3, block: true }); } }
   for (let n = 0; n < 40; n++) { const a = Math.floor(R() * L.w), b = Math.floor(R() * L.h), k = tile(a, b); if (k < 0 || RES[k] || PATHC[k] || MAT[k] === M.LAVA || MAT[k] === M.WARM || H[k] > 9) continue; if (n % 3) continue; P('hdstree', a, b, { fp: [1, 1], v: n & 3, block: true }); }
@@ -123,6 +124,9 @@ window.TW_FIRE_BUILD = function (X) {
     q = []; for (const k of F.tiles) { const i = k % N, j = Math.floor(k / N); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inMap(i + a, j + b) || inB(i + a, j + b)) continue; const z = id(i + a, j + b); if (!dOut.has(z) && MAT[z] !== M.VOID) { dOut.set(z, 1); q.push(z); } } }
     for (let h = 0; h < q.length; h++) { const k = q[h], d = dOut.get(k); if (d >= 7) continue; const i = k % N, j = Math.floor(k / N); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inMap(i + a, j + b) || inB(i + a, j + b)) continue; const z = id(i + a, j + b); if (MAT[z] === M.VOID || TWM.biomes[BIO[z]].built) continue; if (!dOut.has(z)) { dOut.set(z, d + 1); q.push(z); } } } }
   const neighbourOf = (k) => { const i = k % N, j = Math.floor(k / N); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) if (inMap(i + a, j + b) && !inB(i + a, j + b) && MAT[id(i + a, j + b)] !== M.VOID) return TWM.biomes[BIO[id(i + a, j + b)]].id; return null; };
+  // the cliff faces of every unbuilt tile near the volcano (including the world-rim wall) are painted in its scorched, ember-seamed stone (tw-art.js faceCol)
+  TWM.fireNear = new Uint8Array(N * N); { const q = []; for (const k of F.tiles) { TWM.fireNear[k] = 1; q.push([k, 0]); }
+    for (let h = 0; h < q.length; h++) { const [k, d] = q[h]; if (d >= 16) continue; const i = k % N, j = Math.floor(k / N); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inMap(i + a, j + b)) continue; const z = id(i + a, j + b); if (TWM.fireNear[z]) continue; if (BIO[z] !== B && TWM.biomes[BIO[z]].built) continue; TWM.fireNear[z] = 1; q.push([z, d + 1]); } } }
   // (a0) where the biome meets a BUILT neighbour (Bàn Tơ Động) the ground does not stop at a cliff: it slopes, step by step, into the neighbour's level (a talus band)
   for (const k of F.tiles) { const d = dIn.get(k), src = srcOf.get(k); if (d === undefined || d > 4 || src === undefined || MAT[k] === M.LAVA || PATHC[k]) continue; if (!TWM.biomes[BIO[src]].built || BIO[src] === B) continue;
     const w = d / 5; H[k] = clamp(Math.round(H[k] * w + (H[src] + 1) * (1 - w)), 1, 14); if (d <= 2 && MAT[k] !== M.CINDER) MAT[k] = d <= 1 ? M.ASH : M.SCORCH; }
@@ -144,7 +148,7 @@ window.TW_FIRE_BUILD = function (X) {
   P('hdsruin', 2, 33, { fp: [2, 2], v: 0, block: true }); Q('overlook', 4, 35, { cap: 3, face: 'right' });
   route([[6, 31, 3], [4, 33, 4], [3, 36, 5], [4, 37, 5]]);
   P('hdsruin', 31, 36, { fp: [2, 2], v: 1, block: true });
-  for (const [a, b] of [[1, 24], [2, 29], [8, 37], [14, 37], [19, 38], [27, 37], [33, 34], [35, 12], [36, 6], [4, 3], [9, 1]]) { const k = tile(a, b); if (k >= 0 && !RES[k] && MAT[k] !== M.LAVA && !PATHC[k]) { P(a % 2 ? 'hdstree' : 'hdsvent', a, b, { fp: [1, 1], v: (a + b) & 3, block: true }); if (!(a % 2)) F.edgeVents.push(W(a, b)); } }
+  for (const [a, b] of [[1, 24], [2, 29], [8, 37], [14, 37], [19, 38], [27, 37], [33, 34], [35, 12], [36, 6], [4, 3], [9, 1]]) { const k = tile(a, b); if (k >= 0 && !RES[k] && MAT[k] !== M.LAVA && !PATHC[k]) { { const vil = a >= 1 && a <= 22 && b >= 22 && b <= 39, vent = !(a % 2) && !vil && b < 30 && a > 3; P(vent ? 'hdsvent' : (vil ? 'hdsrock' : 'hdstree'), a, b, { fp: [1, 1], v: (a + b) & 3, block: true }); if (vent) F.edgeVents.push(W(a, b)); } } }
   for (const [a, b] of [[10, 36], [20, 36], [30, 33], [3, 20], [1, 8]]) { const k = tile(a, b); if (k >= 0 && !RES[k] && MAT[k] !== M.LAVA && !PATHC[k] && !F.vents.some(v => v[0] === x0 + a && v[1] === y0 + b)) { P('hdsrock', a, b, { fp: [1, 1], v: (a * 3 + b) & 1, block: true }); } }
 
   // ------------------------------------------------------------ 7. cracks (glowing fissure tiles on the high ground; the fx layer pulses them) and the greening order

@@ -55,6 +55,28 @@
       for (let q = 0; q < 16; q++) { const a = hash(q, c.id, 143), age = (t * 0.1 + q / 16 + a * 0.1) % 1, X = c.X + Math.sin(age * 4 + a * 9) * (8 + age * 20) * c.sc + age * 70 * f.wind * c.sc, Y = c.Y - 6 - age * 190 * c.sc, r = Math.min(14, (4 + age * 10) * c.sc | 0), al = (1 - age) * (0.42 + 0.15 * burst) * (1 - cool * 0.85);
         if (al < 0.02) continue; g.fillStyle = `rgba(54,44,50,${al})`; g.fillRect(Math.round(X - r), Math.round(Y - r), r * 2, r * 2 - 1); g.fillStyle = `rgba(120,100,104,${al * 0.5})`; g.fillRect(Math.round(X - r), Math.round(Y - r), r, 1); } } }
 
+  // ---------------------------------------------------------------- lava FALLS: every lava tile that drops a level shows a flowing, glinting, splashing face
+  let falls = null;
+  function buildFalls() { falls = []; const N = TWM.N, H = TWM.H, lo = (i, j) => TWM.inMap(i, j) && TWM.MAT[TWM.id(i, j)] !== TWM.M.VOID ? H[TWM.id(i, j)] : -6;
+    for (const k of F.lava) { const i = k % N, j = Math.floor(k / N), h = H[k], dL = Math.max(0, h - lo(i, j + 1)), dR = Math.max(0, h - lo(i + 1, j)); if (dL || dR) falls.push({ i, j, h, dL, dR }); } }
+  function drawFalls(g, R, f, t, x0, y0, x1, y1) {
+    if (!falls) buildFalls(); const amt = 1 - clamp(f.g * 1.7, 0, 1); if (amt < 0.03) return; g.globalCompositeOperation = 'lighter';
+    for (const q of falls) { const X = sx(q.i, q.j), Y = sy(q.i, q.j, q.h); if (X < x0 - 40 || X > x1 + 40 || Y < y0 - 20 || Y > y1 + 16 * Math.max(q.dL, q.dR) + 40) continue;
+      for (const side of [0, 1]) { const drop = (side ? q.dR : q.dL) * 16; if (!drop) continue; const ph = hash(q.i, q.j, 160 + side) * 6.28, bx = X + (side ? 0 : -32), top0 = Y + (side ? 32 : 16);
+        // glow breathing over the whole face
+        g.fillStyle = `rgba(255,140,40,${(0.05 + 0.06 * (0.5 + 0.5 * Math.sin(t * 2.2 + ph))) * amt})`; g.beginPath(); if (side) { g.moveTo(X, Y + 32); g.lineTo(X + 32, Y + 16); g.lineTo(X + 32, Y + 16 + drop); g.lineTo(X, Y + 32 + drop); } else { g.moveTo(X - 32, Y + 16); g.lineTo(X, Y + 32); g.lineTo(X, Y + 32 + drop); g.lineTo(X - 32, Y + 16 + drop); } g.closePath(); g.fill();
+        // bright streaks sliding down the face
+        for (let c = 0; c < 9; c++) { const a = hash(q.i * 5 + c, q.j, 162 + side), lx = Math.floor(a * 31), age = (t * (0.45 + a * 0.5) + a * 7 + c * 0.13) % 1, rt = side ? Math.floor((95 - (32 + lx)) / 2) + 1 : Math.floor((lx + 32) / 2) + 1, yy = Y + rt + age * (drop - 3), len = 3 + Math.floor(a * 6);
+          g.fillStyle = `rgba(255,${215 + Math.floor(a * 40)},${120 + Math.floor(a * 60)},${(0.35 + 0.5 * Math.sin(age * 3.14)) * amt})`; g.fillRect(Math.round(bx + lx), Math.round(yy), 1 + (c & 1), len); }
+        // splash and foam at the foot of the fall, mist above it
+        const base = (side ? 0 : 0); for (let c = 0; c < 7; c++) { const a = hash(q.i * 3 + c, q.j, 165 + side), lx = Math.floor(a * 30) + 1, rt = side ? Math.floor((95 - (32 + lx)) / 2) + 1 : Math.floor((lx + 32) / 2) + 1, age = (t * (1.1 + a) + a * 5) % 1, yb = Y + rt + drop;
+          g.fillStyle = `rgba(255,${210 + Math.floor(a * 40)},130,${(1 - age) * 0.9 * amt})`; g.fillRect(Math.round(bx + lx + (a - 0.5) * 8 * age), Math.round(yb - 2 - Math.sin(age * 3.14) * (4 + a * 8)), 2, 1);
+          if (c < 3) { g.fillStyle = `rgba(255,255,230,${(0.5 + 0.4 * Math.sin(t * 6 + c + ph)) * amt})`; g.fillRect(Math.round(bx + lx), Math.round(yb - 1), 3 + (c & 1), 1); } } } }
+    g.globalCompositeOperation = 'source-over';
+    for (const q of falls) { const X = sx(q.i, q.j), Y = sy(q.i, q.j, q.h); if (X < x0 - 40 || X > x1 + 40 || Y < y0 - 20 || Y > y1 + 16 * Math.max(q.dL, q.dR) + 80) continue; const drop = Math.max(q.dL, q.dR) * 16;
+      for (let c = 0; c < 3; c++) { const a = hash(q.i, q.j * 3 + c, 168), age = (t * 0.25 + a) % 1; g.fillStyle = `rgba(210,205,205,${(1 - age) * 0.2 * amt})`; const r = 3 + age * 5; g.fillRect(Math.round(X + (a - 0.5) * 30), Math.round(Y + 30 + drop - age * 26), Math.round(r * 2), Math.round(r)); } }
+  }
+
   // ---------------------------------------------------------------- overlays (drawn in world space, over the ground and the sorted objects)
   function draw(g, S, R, x0, y0, W, Hh) {
     const f = st(); if (!f || !F.tiles || !nearBiome(R)) return; const t = R.t, N = TWM.N, cool = clamp(f.g * 1.5, 0, 1), heat = f.heat;
@@ -70,6 +92,7 @@
           g.fillStyle = `rgba(255,${200 + Math.floor(a * 55)},120,${0.75 * lavaAmt * (1 - Math.abs(age - 0.5) * 1.4)})`; g.fillRect(Math.round(fx), Math.round(fy), 7, 1); g.fillRect(Math.round(fx) + 2, Math.round(fy) + 1, 4, 1); } }
       g.globalCompositeOperation = 'source-over';
     }
+    drawFalls(g, R, f, t, x0, y0, x1, y1);
     // -- cracks: glowing seams breathe (brighter while it heats up, dying out with the greening)
     if (cool < 0.9) { g.globalCompositeOperation = 'lighter';
       for (const k of F.cracks) { const i = k % N, j = Math.floor(k / N), X = sx(i, j), Y = sy(i, j, TWM.H[k]); if (X < x0 - 40 || X > x1 + 40 || Y < y0 - 20 || Y > y1 + 40) continue;

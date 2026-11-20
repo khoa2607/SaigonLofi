@@ -2518,6 +2518,31 @@
    "action": null,
    "source": "pixellab",
    "role": "mule"
+  },
+  "sa_tang": {
+   "file": "chars/sa_tang.png",
+   "title": [
+    "Sa Tăng",
+    "Sha Wujing"
+   ],
+   "biome": "hds",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "sha"
   }
  }
 }
