@@ -1,0 +1,72 @@
+{
+  "format": "pixel-art-studio-atlas-v1",
+  "name": "nong_phu",
+  "image": "atlas.png",
+  "canvas": [
+    37,
+    50
+  ],
+  "size": [
+    151,
+    50
+  ],
+  "padding": 1,
+  "frames": [
+    {
+      "name": "nong_phu-d1",
+      "rect": [
+        0,
+        0,
+        37,
+        50
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        18,
+        49
+      ]
+    },
+    {
+      "name": "nong_phu-d2",
+      "rect": [
+        38,
+        0,
+        37,
+        50
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        18,
+        49
+      ]
+    },
+    {
+      "name": "nong_phu-d3",
+      "rect": [
+        76,
+        0,
+        37,
+        50
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        18,
+        49
+      ]
+    },
+    {
+      "name": "nong_phu-d4",
+      "rect": [
+        114,
+        0,
+        37,
+        50
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        18,
+        49
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "format": "pixel-art-studio-atlas-v1",
+  "name": "khi_chien_binh",
+  "image": "atlas.png",
+  "canvas": [
+    50,
+    48
+  ],
+  "size": [
+    203,
+    48
+  ],
+  "padding": 1,
+  "frames": [
+    {
+      "name": "khi_chien_binh-d1",
+      "rect": [
+        0,
+        0,
+        50,
+        48
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        25,
+        47
+      ]
+    },
+    {
+      "name": "khi_chien_binh-d2",
+      "rect": [
+        51,
+        0,
+        50,
+        48
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        25,
+        47
+      ]
+    },
+    {
+      "name": "khi_chien_binh-d3",
+      "rect": [
+        102,
+        0,
+        50,
+        48
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        25,
+        47
+      ]
+    },
+    {
+      "name": "khi_chien_binh-d4",
+      "rect": [
+        153,
+        0,
+        50,
+        48
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        25,
+        47
+      ]
+    }
+  ]
+}

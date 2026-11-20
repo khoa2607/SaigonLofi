@@ -1,0 +1,72 @@
+{
+  "format": "pixel-art-studio-atlas-v1",
+  "name": "cao_thai_cong",
+  "image": "atlas.png",
+  "canvas": [
+    35,
+    56
+  ],
+  "size": [
+    143,
+    56
+  ],
+  "padding": 1,
+  "frames": [
+    {
+      "name": "cao_thai_cong-d1",
+      "rect": [
+        0,
+        0,
+        35,
+        56
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        17,
+        55
+      ]
+    },
+    {
+      "name": "cao_thai_cong-d2",
+      "rect": [
+        36,
+        0,
+        35,
+        56
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        17,
+        55
+      ]
+    },
+    {
+      "name": "cao_thai_cong-d3",
+      "rect": [
+        72,
+        0,
+        35,
+        56
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        17,
+        55
+      ]
+    },
+    {
+      "name": "cao_thai_cong-d4",
+      "rect": [
+        108,
+        0,
+        35,
+        56
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        17,
+        55
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "format": "pixel-art-studio-atlas-v1",
+  "name": "dan_lang_nu",
+  "image": "atlas.png",
+  "canvas": [
+    26,
+    51
+  ],
+  "size": [
+    107,
+    51
+  ],
+  "padding": 1,
+  "frames": [
+    {
+      "name": "dan_lang_nu-d1",
+      "rect": [
+        0,
+        0,
+        26,
+        51
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        13,
+        50
+      ]
+    },
+    {
+      "name": "dan_lang_nu-d2",
+      "rect": [
+        27,
+        0,
+        26,
+        51
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        13,
+        50
+      ]
+    },
+    {
+      "name": "dan_lang_nu-d3",
+      "rect": [
+        54,
+        0,
+        26,
+        51
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        13,
+        50
+      ]
+    },
+    {
+      "name": "dan_lang_nu-d4",
+      "rect": [
+        81,
+        0,
+        26,
+        51
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        13,
+        50
+      ]
+    }
+  ]
+}
