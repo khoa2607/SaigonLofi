@@ -284,6 +284,7 @@ const TWR = (function () {
       addCols(columnsInFront(a.x, a.y, a.gz, X - 16, Y - 48 - (a.lift || 0) * 4, 32, 48), Math.floor(a.gz / 4 + 0.01));
     }
     if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
+    if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
     for (const f of TWM.falls) D.push([(f.i + f.j + 1) * 8 + 2, 2, f]);
     for (const [k, lvl] of cols) { const i = k % TWM.N, j = Math.floor(k / TWM.N); D.push([(i + j + 1) * 8 - 0.01, 3, k, lvl]); }
     D.sort((a, b) => a[0] - b[0] || a[1] - b[1]);

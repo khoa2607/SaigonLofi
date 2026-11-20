@@ -12,6 +12,8 @@ export function loadTW(files) {
   if (files.includes('tw-sim.js') && !files.includes('tw-fire-data.js') && fs.existsSync(path.join(dir, 'tw-fire-data.js'))) files.splice(files.indexOf('tw-palm-data.js') + 1 || files.indexOf('tw-sim.js') + 1, 0, 'tw-fire-data.js');
   if (files.includes('tw-map.js') && !files.includes('tw-lion.js') && fs.existsSync(path.join(dir, 'tw-lion.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-lion.js');   // Sư Đà Lĩnh map section
   if (files.includes('tw-sim.js') && !files.includes('tw-lion-data.js') && fs.existsSync(path.join(dir, 'tw-lion-data.js'))) files.splice(files.indexOf('tw-fire-data.js') + 1, 0, 'tw-lion-data.js');
+  if (files.includes('tw-map.js') && !files.includes('tw-river.js') && fs.existsSync(path.join(dir, 'tw-river.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-river.js');   // Thông Thiên Hà map section
+  if (files.includes('tw-sim.js') && !files.includes('tw-river-data.js') && fs.existsSync(path.join(dir, 'tw-river-data.js'))) files.splice(files.indexOf('tw-lion-data.js') + 1, 0, 'tw-river-data.js');
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

@@ -77,3 +77,7 @@ World stays **124 x 124**. Sư Đà Lĩnh takes **1,517 tiles** (squircle 47 x 3
 **Adjacency** (derived): Sư Đà Lĩnh touches `hds, lhd, tth, nnq, clt`. Director rules unchanged: 900 s runs on seeds 7 / 21 / 33 have no adjacent simultaneous signatures. The valley road starts where Hỏa Diệm Sơn's east road ends (level 1) and leaves through the east edge at level 2, so the ridge is connected both ways (map15 PASS: 15 regions reachable).
 
 **Border blending.** (1) Hỏa Diệm Sơn side: ash and scorched ground eat into the slate within 4 tiles of the border while cold slate creeps into the volcano's edge (colour only; geometry untouched). (2) Placeholders near the ridge turn slate and dead scrub with dead pines within 6 tiles and their seam tone blends toward slate (`TWM.seamK`). (3) The rim: every unbuilt tile within 14 tiles (including the world-rim wall) paints its cliff faces in slate with bone strata, mossy drips and an ink lip (`TWM.lionNear`, tw-art.js faceCol); where Hỏa Diệm Sơn is nearer, its scorched faces win.
+
+## Update 2026-11-23 - Thông Thiên Hà
+
+World stays **124 x 124**. Thông Thiên Hà takes **1,732 tiles** (squircle 46 x 39 at world (77, 84), the south and east rim strips, and the placeholder pocket between Sư Đà Lĩnh's corner and the west bank). Adjacent: `sdl, nhs, ntq, lhd`. Placeholders were re-planned over the smaller free land; `tests/tayduky-v2-map15.mjs` still passes (15 regions, global walk component, Director).

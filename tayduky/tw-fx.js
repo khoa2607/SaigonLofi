@@ -17,6 +17,7 @@ const TWFX = (function () {
   function draw(g, S, R, x0, y0, W, Hh) {
     if (window.TWFX && TWFX.palm) TWFX.palm.draw(g, S, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.lion) TWFX.lion.draw(g, S, R, x0, y0, W, Hh);   // Sư Đà Lĩnh (tw-lion-fx.js)
+    if (window.TWFX && TWFX.river) TWFX.river.draw(g, S, R, x0, y0, W, Hh);   // Thông Thiên Hà (tw-river-fx.js)
     if (window.TWFX && TWFX.fire) TWFX.fire.draw(g, S, R, x0, y0, W, Hh);   // Hỏa Diệm Sơn (tw-fire-fx.js)   // Buddha's Palm atmosphere (tw-palm-fx.js)
     const t = R.t;
     beacon(g, S, R, x0, y0);
@@ -71,6 +72,7 @@ const TWFX = (function () {
     if (window.TWFX && TWFX.palm) TWFX.palm.light(g, S, R, amt);
     if (window.TWFX && TWFX.fire) TWFX.fire.light(g, S, R, amt);
     if (window.TWFX && TWFX.lion) TWFX.lion.light(g, S, R, amt);
+    if (window.TWFX && TWFX.river) TWFX.river.light(g, S, R, amt);
     // characters keep their own colour at night: the sprite is re-drawn additively over itself (after the night grade), so people stay readable without lighting the ground
     if (amt > 0.1) { const x0 = R.cx - R.cv.width / 2 - 70, x1 = R.cx + R.cv.width / 2 + 70, y0 = R.cy - R.cv.height / 2 - 80, y1 = R.cy + R.cv.height / 2 + 100;
       g.globalAlpha = Math.min(0.62, 0.12 + amt * 0.7);

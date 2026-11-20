@@ -86,6 +86,7 @@ const TWA = (function () {
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     if (TWM.bleed && TWM.bleed[k] && TWA.fire && m < M.PH) { const c0 = top0(m, I, J, X, Y, k, dith), v = TWM.bleed[k] / 5, r = hash2(X, Y, 130), nn = vnoise(I * 0.8, J * 0.8, 131); if (r < v * (0.35 + nn * 0.6)) { const a = TWA.fire.seamTone(I, J, n0, n1); if (r < 0.012 * v) { SH.em = [255, 150, 60]; return [255, 150, 60]; } return mix(c0, a, 0.78); } return c0; }   // Hỏa Diệm Sơn ash staining on built neighbours (dithered, colour only)
     if (m < M.PH && TWA.fire && TWM.seam[k] && TWM.seamK[k] === TWM.bi.hds && m !== M.SKYC) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 7), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
+    if (m < M.PH && TWA.river && TWM.seam[k] && TWM.seamK[k] === TWM.bi.tth) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 6), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.river.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Thông Thiên Hà river-bank seam
     if (m < M.PH && TWA.lion && TWM.seam[k] && TWM.seamK[k] === TWM.bi.sdl) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 6), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.lion.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Sư Đà Lĩnh slate seam
     if (m !== M.SKYC && m !== M.SKYD && m < M.PH && TWA.ext && TWM.seam[k] && TWM.seamK[k] === TWM.bi.btp) {      // provisional paths inside the palm's cloud fade ring dissolve into cloud too
       const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 3) / 15), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12));
@@ -96,7 +97,9 @@ const TWA = (function () {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     if (TWA.lion && TWM.BIO[k] === TWM.bi.sdl && (m === M.CHASM || m === M.STREAM || m === M.POOL)) return TWA.lion.top(m, I, J, X, Y, k, dith, SH);   // Sư Đà Lĩnh gorge and river
+    if (TWA.river && (TWM.BIO[k] === TWM.bi.tth || (TWM.tthNear && TWM.tthNear[k])) && (m === M.STREAM || m === M.POOL || m === M.SEA)) return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà: the great river
     switch (m) {
+      case M.BANK: case M.WSAND: case M.WREED: case M.COBBLE: case M.DOCK: case M.BLUFF: case M.PAVER: return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà (tw-river-art.js)
       case M.SLATE: case M.BONE: case M.RAMP: case M.MIRE: case M.YARD: case M.PLANK: case M.SCRUB: return TWA.lion.top(m, I, J, X, Y, k, dith, SH);   // Sư Đà Lĩnh (tw-lion-art.js)
       case M.ASH: case M.BASALT: case M.LAVA: case M.WARM: case M.CINDER: case M.SCORCH: case M.LBRIDGE: case M.CRUST: return TWA.fire.top(m, I, J, X, Y, k, dith, SH);   // Hỏa Diệm Sơn (tw-fire-art.js)
       case M.SKYC: case M.SKYD: return TWA.ext.top(m, I, J, X, Y, k, dith, SH);        // Buddha's Palm cloud terraces (tw-palm-art.js)
@@ -183,6 +186,7 @@ const TWA = (function () {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
           const sm = TWM.seam[k]; if (sm && TWM.seamK[k] === TWM.bi.hds && TWA.fire) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 7); return mix(c, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
+          if (sm && TWM.seamK[k] === TWM.bi.tth && TWA.river) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 6); return mix(c, TWA.river.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
           if (sm && TWM.seamK[k] === TWM.bi.sdl && TWA.lion) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 6); return mix(c, TWA.lion.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
           if (sm && TWM.seamK[k] === TWM.bi.btp && TWA.ext) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 3) / 15); return mix(c, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12)); }
           if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : (sm & 3) === 2 ? tone(P.gorge, 1 + n0 * 2 + n1) : tone(P.heaven, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
@@ -217,6 +221,7 @@ const TWA = (function () {
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) return TWA.lion.face(side, lx, ry, drop, elev, gx, k, SH);
+    if ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) return TWA.river.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) return TWA.fire.face(side, lx, ry, drop, elev, gx, k, SH);
     // b: biome id; side 0 = front-left (lit), 1 = front-right (shade); lx = global column; ry = px below the lip; elev = absolute px height
     const sea = TWM.MAT[k] === M.SEA;
@@ -327,7 +332,7 @@ const TWA = (function () {
     for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!TWM.inMap(i + di, j + dj)) continue; const q = TWM.id(i + di, j + dj); if (H[q] !== h) continue; if (TWM.isWater(MAT[q])) nearW = true; else if (!landM && MAT[q] !== M.BRIDGE && MAT[q] !== M.SILKB && MAT[q] !== M.VOID) landM = MAT[q]; }
     if (!landM) landM = b === 'btd' ? M.CAVEF : b === 'hqs' && m === M.SEA ? M.SAND : M.MOSSY;
     // Heaven's narrow cloud channel is tile-authored rather than an analytic lake.
-    if (b === 'tc' || b === 'tth' || b === 'sdl') nearW = false;   // (Sư Đà Lĩnh's river is tile-authored too: cascades, no analytic shore)
+    if (b === 'tc' || b === 'tth' || b === 'sdl' || (TWM.tthNear && TWM.tthNear[k])) nearW = false;   // (Sư Đà Lĩnh's river is tile-authored too: cascades, no analytic shore)
     if (m === M.BRIDGE || m === M.SILKB || m === M.CHASM) nearW = false;
     for (let r = 0; r < 32; r++) {
       const hw = r < 16 ? 2 * r + 2 : 2 * (31 - r) + 2, y = sy + r;
@@ -357,14 +362,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {

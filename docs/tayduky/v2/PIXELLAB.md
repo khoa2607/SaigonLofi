@@ -84,3 +84,11 @@ Balance before **985.65**, after **809.65**: **176 generations** (target <= 500 
 **Characters** (v3 `create_character`, 2 gens + `animate_character` templates, 1 gen per direction, 4 directions): `thanh_su` 54bb0bc8 (72 px; walking-8-frames + cross-punch), `bach_tuong` 220601ab (76 px; walking + two-footed-jump), `kim_si` 3e75f88c (72 px; walking + fireball), `sdl_guard` f064ecfc (52 px; walking + cross-punch), `sdl_porter` ec7a79fa (48 px; walking). The three kings are drawn at normal size and are scaled x2 (integer) in the signature (`a.scale`, tw-render.js).
 
 Packed with `tools/sprite_picks.json` -> `pack_sprites.py` and `tools/pl_cast.json` -> `pack_pl_chars.py` (`cross_punch*` and `two_footed_jump` were added to the `act` list; PixelLab names the clips `cross_punch_attack` / `two_footed_jump`).
+
+## Thông Thiên Hà batch (2026-11-23)
+
+Account balance before **809.65**, after **589.65**; this biome's own generations: **183** (the rest of the 220 drop came from other jobs on the account). Target <= 500 per cycle.
+
+**Objects** (`create_1_direction_object`, "isometric 3/4 view pixel art, dark outline"): 256 px, 10 gens: `tth_turtle` d9ece2c7 (divine golden turtle) + `animate_object` swim 8 frames (8 gens), `tth_dock` 498c7d2e (ferry station + pier), `tth_shrine` b72c703d (river-god shrine on a rocky islet), `tth_tower` 4edd0703 (signal pagoda). 128/96 px (4 candidates, 10 gens): `tth_boat` c2a33921, `tth_hut` 4352a669, `tth_willow` 3eb74d09, `tth_rocks` 8f433d64, `tth_netrack` a7c0c12d, `tth_reeds` cb441203, `tth_statue` f4b40060. 170 px (15 gens): `tth_wreck` d5097144, `tth_gate` c2158936. Candidate frames were downloaded from the review packs (`tayduky/sprites/raw/tth_*_<n>.png`); the turtle swim frames live in `tayduky/sprites/anim/` (uncropped 256 px, drawn by `tw-river-fx.js`).
+
+**Characters** (v3, 2 gens each + template clips, 1 gen per direction x 4): `tth_fisher` 836a8df9 (walking + throw_object), `tth_ferryman` cd2267c4 (walking + picking_up), `tth_imp` 1e2bb695 (walking + cross-punch). `bach_long_ma` 81bb1816: **standard quadruped horse, 1 gen** + walk-8-frames. The clips are named `throw_object` / `picking_up` in the zip (added to the packer's `act` list).

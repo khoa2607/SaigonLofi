@@ -456,5 +456,97 @@
  "sdl_totem_a": [
   "sdl_totem_0",
   0.12
+ ],
+ "tth_dock_a": [
+  "tth_dock_0",
+  0.2
+ ],
+ "tth_shrine_a": [
+  "tth_shrine_0",
+  0.2
+ ],
+ "tth_tower_a": [
+  "tth_tower_0",
+  0.17
+ ],
+ "tth_turtle_a": [
+  "tth_turtle_0",
+  0.2
+ ],
+ "tth_boat_a": [
+  "tth_boat_0",
+  0.2
+ ],
+ "tth_boat_b": [
+  "tth_boat_1",
+  0.2
+ ],
+ "tth_hut_a": [
+  "tth_hut_0",
+  0.2
+ ],
+ "tth_hut_b": [
+  "tth_hut_1",
+  0.2
+ ],
+ "tth_willow_a": [
+  "tth_willow_0",
+  0.2
+ ],
+ "tth_willow_b": [
+  "tth_willow_3",
+  0.2
+ ],
+ "tth_rock_a": [
+  "tth_rocks_0",
+  0.2
+ ],
+ "tth_rock_b": [
+  "tth_rocks_1",
+  0.2
+ ],
+ "tth_rock_c": [
+  "tth_rocks_2",
+  0.2
+ ],
+ "tth_wreck_a": [
+  "tth_wreck_0",
+  0.2
+ ],
+ "tth_wreck_b": [
+  "tth_wreck_2",
+  0.2
+ ],
+ "tth_gate_a": [
+  "tth_gate_0",
+  0.2
+ ],
+ "tth_gate_b": [
+  "tth_gate_2",
+  0.2
+ ],
+ "tth_netrack_a": [
+  "tth_netrack_0",
+  0.17
+ ],
+ "tth_netrack_b": [
+  "tth_netrack_3",
+  0.17
+ ],
+ "tth_reeds_a": [
+  "tth_reeds_0",
+  0.12
+ ],
+ "tth_reeds_b": [
+  "tth_reeds_2",
+  0.12
+ ],
+ "tth_statue_a": [
+  "tth_statue_0",
+  0.17
+ ],
+ "tth_statue_b": [
+  "tth_statue_2",
+  0.17
  ]
 }

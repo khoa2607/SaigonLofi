@@ -18,7 +18,7 @@ for (let k = 0; k < secs * 10; k++) {
     const i = Math.floor(a.x / 8), j = Math.floor(a.y / 8), t = M.id(i, j), m = M.MAT[t];
     const ok = M.WALK[t] || m === M.M.POOL || m === M.M.SPRING || a.lift > 1 || (a.cur && ['nudge', 'jump', 'climb', 'perch'].includes(a.cur.k));   // up a tree is allowed
     a._bad = ok ? 0 : (a._bad || 0) + 1; if (a._bad > 15 && bad.length < 8) bad.push([a.char, a.task, a.cur && a.cur.k, i, j, m]);   // on a blocked tile for more than 1.5 s
-    const p = prev.get(a); if (p && Math.hypot(a.x - p[0], a.y - p[1]) > 3.5 && tele.length < 8 && !a.flying && !(a.cur && a.cur.k === 'arc') && !a.ride) tele.push([a.char, a.task, a.cur && a.cur.k, +(Math.hypot(a.x - p[0], a.y - p[1])).toFixed(1)]);
+    const p = prev.get(a); if (p && Math.hypot(a.x - p[0], a.y - p[1]) > 3.5 && tele.length < 8 && !a.flying && !(a.cur && a.cur.k === 'arc') && !a.ride && !a.rideSlot) tele.push([a.char, a.task, a.cur && a.cur.k, +(Math.hypot(a.x - p[0], a.y - p[1])).toFixed(1)]);
     prev.set(a, [a.x, a.y]);
   }
 }

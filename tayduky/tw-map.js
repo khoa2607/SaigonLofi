@@ -36,7 +36,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
     GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, SKYC: 30, SKYD: 31, PH: 32,
     ASH: 100, BASALT: 101, LAVA: 102, WARM: 103, CINDER: 104, SCORCH: 105, LBRIDGE: 106, CRUST: 107,
-    SLATE: 110, BONE: 111, RAMP: 112, MIRE: 113, YARD: 114, PLANK: 115, SCRUB: 116 };   // Sư Đà Lĩnh (tw-lion.js)   // Hỏa Diệm Sơn (tw-fire.js); ids above any placeholder (PH + 15)
+    SLATE: 110, BONE: 111, RAMP: 112, MIRE: 113, YARD: 114, PLANK: 115, SCRUB: 116,
+    BANK: 120, WSAND: 121, WREED: 122, COBBLE: 123, DOCK: 124, BLUFF: 125, PAVER: 126 };   // Thông Thiên Hà (tw-river.js)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -498,6 +499,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   if (window.TW_FIRE_BUILD) TW_FIRE_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
   // Sư Đà Lĩnh (tw-lion.js): world-space build after Hỏa Diệm Sơn (it blends into the volcano's edge)
   if (window.TW_LION_BUILD) TW_LION_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+  // Thông Thiên Hà (tw-river.js): world-space build east of Sư Đà Lĩnh
+  if (window.TW_RIVER_BUILD) TW_RIVER_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
@@ -522,7 +525,10 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       for (let k = 0; k < NN; k++) { if (BIO[k] !== b.k || comp[k] >= 0 || !walk0(k)) continue; const q = [k]; comp[k] = c;
         for (let n = 0; n < q.length; n++) { const x = q[n] % N, y = Math.floor(q[n] / N); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inMap(x + dx, y + dy)) continue; const z = id(x + dx, y + dy); if (BIO[z] === b.k && comp[z] < 0 && step0(q[n], z)) { comp[z] = c; q.push(z); } } }
         sizes.push(q.length); c++; }
-      if (!c) continue; const main = sizes.indexOf(Math.max(...sizes));
+      if (!c) continue;
+      // a biome split by an uncrossable river (Thông Thiên Hà) opens each of its two largest banks onto the world; every other biome has one gate
+      const order = sizes.map((v, n) => [v, n]).sort((a, c2) => c2[0] - a[0]).slice(0, b.id === 'tth' ? 2 : 1).map(v => v[1]);
+      for (const main of order) {
       let best = null;
       for (let j = 2; j < N - 2; j++) for (let i = 2; i < N - 2; i++) { const k = id(i, j); if (comp[k] !== main) continue;
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const p = id(i + dx, j + dy); if (BIO[p] === b.k || TWM.biomes[BIO[p]].built) continue;
@@ -538,11 +544,12 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
         if (H[prev] !== H[k]) { if (H[k] > H[prev]) addStair(prev, k); else addStair(k, prev); }
         prev = k; }
       TWM.gates.push({ biome: b.id, at: [best.i, best.j], dir: [best.dx, best.dy], len: best.need });
+      }
     }
   }
   // Reserved river corridor in the unfinished TTH region; route crossings are
   // kept walkable. Its detailed banks and story terrain remain unbuilt.
-  for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j);if(isB(i,j,'tth') && !PATHC[k] && !RES[k] && (i%16<7 || i%16>9) && Math.abs(j-(Math.round(TWM.biomes[TWM.bi.tth].centre[1])+1+Math.sin(i*.07)*3))<1.5)MAT[k]=M.PLACEWATER;}
+  if(!TWM.biomes[TWM.bi.tth].built)for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j);if(isB(i,j,'tth') && !PATHC[k] && !RES[k] && (i%16<7 || i%16>9) && Math.abs(j-(Math.round(TWM.biomes[TWM.bi.tth].centre[1])+1+Math.sin(i*.07)*3))<1.5)MAT[k]=M.PLACEWATER;}
 
   // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
   { const seenB = new Uint8Array(NN);
@@ -602,7 +609,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     if (H[a] === H[b]) return true;
     return TWM.stairs.has(a + ',' + b);
   };
-  if (window.TW_LION_FINAL) TW_LION_FINAL({ TWM, WALK, id, N });   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
+  if (window.TW_LION_FINAL) TW_LION_FINAL({ TWM, WALK, id, N });
+  if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;
 
   // A* (8 directions, no corner cutting, binary heap), bounded to a biome's box

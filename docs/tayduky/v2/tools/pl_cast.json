@@ -368,5 +368,50 @@
   "biome": "sdl",
   "speed": 19,
   "role": "porter"
+ },
+ {
+  "name": "bach_long_ma",
+  "id": "81bb1816-e6cd-46ec-9038-c3e899656e91",
+  "title": [
+   "Bạch Long Mã",
+   "White Dragon Horse"
+  ],
+  "biome": "tth",
+  "speed": 24,
+  "role": "horse",
+  "shadow": 22
+ },
+ {
+  "name": "tth_fisher",
+  "id": "836a8df9-da4a-48f2-a523-8cc93231ab78",
+  "title": [
+   "Ngư dân",
+   "River Fisherman"
+  ],
+  "biome": "tth",
+  "speed": 17,
+  "role": "fisher"
+ },
+ {
+  "name": "tth_ferryman",
+  "id": "cd2267c4-d40d-4858-a330-f989afb7f6e5",
+  "title": [
+   "Lão lái đò",
+   "Old Ferryman"
+  ],
+  "biome": "tth",
+  "speed": 13,
+  "role": "ferryman"
+ },
+ {
+  "name": "tth_imp",
+  "id": "1e2bb695-e5e9-4f74-9d7f-2b484966633e",
+  "title": [
+   "Tiểu yêu thủy tộc",
+   "River Imp"
+  ],
+  "biome": "tth",
+  "speed": 20,
+  "role": "imp"
  }
 ]
