@@ -232,5 +232,16 @@
   "biome": "tc",
   "speed": 24,
   "role": "trickster"
+ },
+ {
+  "name": "palm_attendant",
+  "id": "03c3b2e3-74e1-4e97-ab54-7063c279866e",
+  "title": [
+   "Tiên Đồng Phật Quang",
+   "Palm Attendant"
+  ],
+  "biome": "btp",
+  "speed": 13,
+  "role": "attendant"
  }
 ]

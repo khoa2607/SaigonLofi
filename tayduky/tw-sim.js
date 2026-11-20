@@ -6,7 +6,7 @@
 // The Director allows at most TW_DATA.maxSignatures stories at once and never two in biomes that share a border (TWM.adj).
 // Randomness only through TWS.R (seeded). Rendering reads this state and never drives it.
 const TWS = (function () {
-  const T = 8, S = { t: 0, R: null, agents: [], biomes: {}, fx: [], speed: 1, hour: 10, web: { ext: 0.55, target: 0.55, rate: 0, glow: false, base: 0.55 }, litter: [], log: [], counts: { minis: {}, acts: {}, stories: {} } };
+  const T = 8, S = { stepExt: {}, opExt: {}, pointExt: {}, t: 0, R: null, agents: [], biomes: {}, fx: [], speed: 1, hour: 10, web: { ext: 0.55, target: 0.55, rate: 0, glow: false, base: 0.55 }, litter: [], log: [], counts: { minis: {}, acts: {}, stories: {} } };
   const D = () => window.TW_DATA;
   const rnd = (a, b) => a + S.R() * (b - a), pick = arr => arr[Math.floor(S.R() * arr.length)];
   const tileOf = a => [Math.floor(a.x / T), Math.floor(a.y / T)];
@@ -29,6 +29,7 @@ const TWS = (function () {
     // interrupted up a tree or on a thread: come down first (never drop or teleport)
     const k0 = TWM.id(Math.floor(a.x / T), Math.floor(a.y / T));
     if (!TWM.WALK[k0] && !TWM.isWater(TWM.MAT[k0]) && !(a.q[0] && a.q[0].k === 'nudge')) { const nw = nearestWalk(a.x, a.y, a.biome, 3); if (nw) a.q.unshift({ k: 'nudge', x: nw[0], y: nw[1] }); }
+    if (a.ride) a.q.unshift({ k: 'land', t: 0.5 });                // interrupted while flying: come down first
     if (a.lift > 1 && (a.pose === 'perch' || a.pose === 'climb' || a.thread)) a.q.unshift({ k: a.thread ? 'thread' : 'climb', to: 0, t: Math.max(0.6, a.lift / 9) });
     else if (a.lift && a.pose !== 'fly') a.lift = 0;
     a.cur = null; a.task = task || null; if (a.pose !== 'perch' && a.pose !== 'climb') a.pose = 'idle'; a.moving = false; }
@@ -49,6 +50,7 @@ const TWS = (function () {
   // ---------------------------------------------------------------- steps
   const go = (x, y, o) => Object.assign({ k: 'go', x, y }, o || {});
   function stepRun(a, st, dt) {
+    if (S.stepExt[st.k]) return S.stepExt[st.k](a, st, dt);      // extension steps (tw-palm-data.js: soar, flip, land ...)
     switch (st.k) {
       case 'go': {
         if (!st.path) {
@@ -295,6 +297,7 @@ const TWS = (function () {
 
   // ---------------------------------------------------------------- story runner (signature, foreshadow and recovery beats)
   function point(B, spec, R) {
+    if (S.pointExt[spec]) return S.pointExt[spec](B, R);
     if (Array.isArray(spec)) return C(spec[0], spec[1]);
     if (spec === 'canopy') return C(TWM.btd.canopy[0], TWM.btd.canopy[1]);
     if (spec === 'mouthE') return C(R && R.kind === 'sig' && R.i < 8 ? 97 : 104, 143);
@@ -351,6 +354,7 @@ const TWS = (function () {
       case 'reweave': B.reweave = S.t + o.dur; break;
       case 'leave': if (W) { const p = o.to ? (nearestWalk(...point(B, o.to, R), B.id, 4) || point(B, o.to, R)) : null; W.story = R; if (o.by === 'sky') assign(W, [{ k: 'fly', t: 2.2 }, { k: 'call', fn: a => { a.gone = true; } }]); else assign(W, [p && go(p[0], p[1], { run: 1 }), { k: 'fade', t: 1.2, gone: true }]); R.pend = () => W.gone; } break;
       case 'disperse': for (const a of S.agents) if (a.gathered === R) { a.gathered = null; assign(a, [{ k: 'idle', t: rnd(0.5, 3) }]); } break;
+      default: if (S.opExt[op]) S.opExt[op](R, o, B, W); break;
     }
   }
   function endRun(R) {
@@ -442,7 +446,7 @@ const TWS = (function () {
     for (let k = 0; k < 300; k++) tick(0.1);                       // warm start: the world is already living on the first frame
     S.counts = { minis: {}, acts: {}, stories: {} };
   }
-  return Object.assign(S, { init, tick, ACT, MINI });
+  return Object.assign(S, { init, tick, ACT, MINI, H: { assign, go, nearestWalk, point, who, fx, bubble, rnd, pick, C, T, poiFree, pois, claim, count, dirTo, free, tileOf, freeOf, ring } });
 })();
 window.TWS = TWS;
 if (typeof module !== 'undefined') module.exports = { TWS };
