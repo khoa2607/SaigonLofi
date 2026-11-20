@@ -18,6 +18,8 @@ CLS = {
     'tc_palace': ('heaven', ['tc'], '1x1', 'palace landmark', 'tcpalace', 'eac2e662'),
     'tc_furnace': ('heaven', ['tc'], '1x1', 'flickering glow, rising smoke', 'tcfurnace', 'e52bfc0f'),
     'tc_bridge': ('heaven', ['tc'], 'cloud-channel crossing', 'walkable bridge over animated cloud stream', 'tcbridge', '3c8beb65'),
+    'tc_lantern': ('heaven', ['tc'], '1x1', 'golden glow', 'tclantern', '380f2729'),
+    'tc_peach': ('heaven', ['tc'], '1x1', 'sway and drifting petals', 'tcpeach', 'c4da708e'),
     'peachtree': ('trees', ['hqs', 'earthly'], '1x1 (canopy 2.5 tiles)', 'sway (6 px strips), drifting petals', 'bigpeach', '1423100d'),
     'hut': ('buildings', ['hqs', 'earthly'], '2x2', 'residents enter and leave (door POI), lantern glow at night', 'hut', '64e8709c'),
     'shrine': ('buildings', ['hqs', 'heaven'], '2x2', 'residents pray / sit at the steps', 'shrine', '0e249abe'),

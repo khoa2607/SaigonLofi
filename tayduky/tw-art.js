@@ -42,12 +42,15 @@ const TWA = (function () {
     faceH: ramp(['#34403c', '#3f4c46', '#4b5a52', '#58685e', '#677a6c', '#7a8e7e']),
     faceB: ramp(['#18131f', '#1f1928', '#262032', '#2e273c', '#383048', '#433a56']),
     faceS: ramp(['#14385e', '#1a4470', '#215080', '#2a5e90']),
+    heaven: ramp(['#c9b9d0', '#d7c9dd', '#e8dfea', '#f3ebef', '#fff3e3']),
+    cloud: ramp(['#9fb8c9', '#bed0da', '#dce4e8', '#f5eced', '#fff8ed']),
     vine: ramp(['#244a32', '#2f6040', '#3e7a4c', '#56965a']),
   };
   const PH = {   // development placeholder palettes (3 tones + accent) per biome (design palette table)
     lat: ['#cdb27a', '#d8c08a', '#e4cf9c', '#fff0b0'], hds: ['#7e3420', '#8e3c24', '#9e4a2c', '#ffb04a'], nnq: ['#78b468', '#84c070', '#90cc7c', '#f4a6c0'],
     bcl: ['#827c8c', '#8e8898', '#9a94a4', '#ece6dc'], clt: ['#9a7e52', '#a88a5a', '#b69866', '#e8c860'], tth: ['#36689e', '#3e74aa', '#4a80b6', '#9adcff'],
     tc: ['#ddd0e2', '#e6dbea', '#efe6f2', '#e8c860'], btp: ['#e2c880', '#ead490', '#f2e0a4', '#fff2c8'], nhs: ['#7c8894', '#88949e', '#94a0aa', '#7ea06a'],
+    ntq: ['#708e78','#87a18a','#9fb49b','#e8d6a0'], hvd: ['#8a5146','#a96350','#c47c60','#f2b77b'], lhd: ['#79647c','#927a8c','#ae9298','#e3bf97'], sdl: ['#776758','#927d69','#ad9680','#d9bd8a'],
   };
   const PHR = {}; for (const k in PH) PHR[k] = ramp(PH[k]);
   const biomeId = k => TWM.biomes[TWM.BIO[k]].id;
@@ -60,6 +63,11 @@ const TWA = (function () {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     switch (m) {
+      case M.HEAVEN: { const r=P.heaven; let c=tone(r,1+n0*1.8+n1*0.6); if (((X+Y*2)%48)<2) c=mix(c,P.cloud[3],0.3); return c; }
+      case M.HEAVENPAVE: { const u=I*1.5,v=J*1.5,fu=u-Math.floor(u),fv=v-Math.floor(v); const c=tone(P.heaven,2+hash2(Math.floor(u),Math.floor(v),182)); return fu<.055||fv<.055?mix(c,[181,160,157],.4):c; }
+      case M.CLOUD: case M.HEAVENBRIDGE: { SH.water=2; return tone(P.cloud,1+n0*1.5+n1*0.6); }
+      case M.TRAIL: { const r=PHR[biomeId(k)]||PHR.tc; return mix(tone(r,1+n0*1.4),[223,200,164],0.35); }
+      case M.PLACEWATER: { SH.water=2; return tone(P.stream,1+n0*1.5); }
       case M.GRASS: case M.LUSH: case M.FLOWER: {
         const r = m === M.LUSH ? P.lush : P.grass;
         let t = 1.4 + n0 * 2.0 + n1 * 0.9 + (d ? 0.25 : 0);
@@ -107,7 +115,8 @@ const TWA = (function () {
       default: {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
-          const sm = TWM.seam[k]; if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : tone(P.gorge, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
+          const sm = TWM.seam[k]; if (sm) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 1.6) / 5.5), tgt = (sm & 3) === 1 ? tone(P.grass, 1.2 + n0 * 2.2 + n1) : (sm & 3) === 2 ? tone(P.gorge, 1 + n0 * 2 + n1) : tone(P.heaven, 1 + n0 * 2 + n1); c = mix(c, tgt, Math.min(0.97, t * 1.05)); return c; }
+          if(TWM.edgeOther[k]!==255){const other=PHR[TWM.biomes[TWM.edgeOther[k]].id]||PHR.tc, w=Math.max(0,(5-TWM.edgeDist[k])/10);c=mix(c,tone(other,1+n0*1.5),w);}
           if (((X + Y * 2) % 24) < 2) c = shade(c, 0.9); if (hp < 0.01) c = r[3];
           return c;
         }
@@ -219,6 +228,8 @@ const TWA = (function () {
     let nearW = water, landM = water ? 0 : m;
     for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!TWM.inMap(i + di, j + dj)) continue; const q = TWM.id(i + di, j + dj); if (H[q] !== h) continue; if (TWM.isWater(MAT[q])) nearW = true; else if (!landM && MAT[q] !== M.BRIDGE && MAT[q] !== M.SILKB && MAT[q] !== M.VOID) landM = MAT[q]; }
     if (!landM) landM = b === 'btd' ? M.CAVEF : b === 'hqs' && m === M.SEA ? M.SAND : M.MOSSY;
+    // Heaven's narrow cloud channel is tile-authored rather than an analytic lake.
+    if (b === 'tc' || b === 'tth') nearW = false;
     if (m === M.BRIDGE || m === M.SILKB || m === M.CHASM) nearW = false;
     for (let r = 0; r < 32; r++) {
       const hw = r < 16 ? 2 * r + 2 : 2 * (31 - r) + 2, y = sy + r;
@@ -499,7 +510,7 @@ const TWA = (function () {
   const IMG = {};
   // life masks built from the sprite itself: GLOW = saturated bright violet/green/teal pixels (crystals, mushrooms, eggs) that pulse and come back at night;
   // SILK = bright desaturated pixels (webs, silk wraps) that shimmer. Which sprites get which is a name-prefix table.
-  const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
+  const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_', 'tc_furnace_', 'tc_lantern_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
   function lifeMask(im, kind) {
     const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const g = cv.getContext('2d'); g.drawImage(im, 0, 0);
     const id = g.getImageData(0, 0, cv.width, cv.height), d = id.data; let n = 0;
@@ -517,11 +528,11 @@ const TWA = (function () {
     return Promise.all(Object.entries(window.TW_SPRITES || {}).map(([n, m]) => new Promise(res => { const im = new Image(); im.onload = () => {
       IMG[n] = { im, w: m.w, h: m.h, py: m.py, name: n, glow: GLOWS.some(p => n.startsWith(p)) ? lifeMask(im, 'glow') : null, silk: SILKS.some(p => n.startsWith(p)) ? lifeMask(im, 'silk') : null }; res(); }; im.onerror = res; im.src = 'sprites/' + n + '.png'; })));
   }
-  const SWAY = { bigpeach: 1.7, bigbamboo: 1.3, hut: 0.5, stall: 0.5, silkrack: 1.2 };
+  const SWAY = { bigpeach: 1.7, tcpeach: 1.7, bigbamboo: 1.3, hut: 0.5, stall: 0.5, silkrack: 1.2 };
   const IMGKINDS = { hut: ['hut_a', 'hut_b', 'hut_c'], shrine: ['shrine_a', 'shrine_b', 'shrine_c'], stall: ['stall_a', 'stall_b'], hbridge: ['bridge_a'], tent: ['tent_a', 'tent_b'],
     altar: ['altar_a', 'altar_b'], pcrystals: ['crystals_a', 'crystals_b', 'crystals_c'], silkbr: ['silkbridge_a'], hall: ['hall_a', 'hall_b'], statue: ['statue_a', 'statue_b'], playground: ['playground_a'],
     bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], caveent: ['cave_a', 'cave_b'], gate: ['gate_a', 'gate_b'], bigbamboo: ['bamboo_a', 'bamboo_b', 'bamboo_c'], scholar: ['scholar_a', 'scholar_b'],
-    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'] };
+    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'], tcgate: ['tc_gate_a','tc_gate_b'], tcpalace: ['tc_palace_a','tc_palace_b'], tcfurnace: ['tc_furnace_a','tc_furnace_b'], tcbridge: ['tc_bridge_a','tc_bridge_b'], tcpeach:['tc_peach_a','tc_peach_b'], tclantern:['tc_lantern_a','tc_lantern_b'] };
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {

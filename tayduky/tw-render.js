@@ -98,7 +98,7 @@ const TWR = (function () {
     const name = a.look || a.char, S = sheet(name); if (!S || !S.im.complete) return;
     const C = S.C, [w, h] = C.size, dirs = window.TD2_CHARS.dirs, px0 = C.pivot[0], py0 = C.pivot[1];
     const col = frameCol(C, a), row = dirs.indexOf(a.dir) >= 0 ? dirs.indexOf(a.dir) : 0;
-    const action = a.pose === 'act' && !a.moving && !a.inWater && C.action && (C.role === 'king' || C.role === 'sister') ? actionSheet(name, C) : null;
+    const action = a.pose === 'act' && !a.moving && !a.inWater && C.action && (C.role === 'king' || C.role === 'sister' || (C.role === 'laojun' && (a.task === 'heaven_furnace' || a.task === 'mini')) || C.role === 'heavenguard' || (C.role === 'fairy' && (a.task === 'heaven_tend' || a.task === 'heaven_harvest' || a.task === 'mini'))) ? actionSheet(name, C) : null;
     const actionReady = action && action.complete && action.naturalWidth;
     // working (act) poses bounce a little so a still idle frame still reads as effort
     const bob = !actionReady && a.pose === 'act' && !(C.anim && C.anim.act) ? Math.round(Math.abs(Math.sin((R.t + (a.phase || 0)) * 7)) * 1.4) : 0;
@@ -213,6 +213,13 @@ const TWR = (function () {
       for (let k = 0; k < f.n; k++) { const x = cx + Math.cos(f.a * 2 + k) * 10 + k * 6, y = cy + Math.sin(f.a * 3 + k * 1.7) * 6 + k * 3, X = Math.round(wx(x, y)), Y = Math.round(wy(x, y, 60 + Math.sin(R.t + k) * 4)), up = Math.floor(R.t * 6 + k) % 2;
         g.fillStyle = '#2a1726'; g.fillRect(X - 3, Y - up, 3, 1); g.fillRect(X + 1, Y - up, 3, 1); g.fillRect(X, Y, 1, 1); } }
   }
+  function drawHeavenCranes(g) {
+    if (!TWM.tc) return;
+    for (let k=0;k<3;k++) { const x=(72+k*8)*8+Math.sin(R.t*.14+k)*28, y=(17+k*5)*8+Math.cos(R.t*.13+k)*20;
+      const X=Math.round(wx(x,y)),Y=Math.round(wy(x,y,35+Math.sin(R.t+k)*3)), wing=Math.floor(R.t*4+k)%2;
+      g.fillStyle='#f7f2ea';g.fillRect(X-4,Y,9,2);g.fillRect(X-2,Y-2-wing*2,3,3);g.fillRect(X+2,Y-2-wing*2,3,3);
+      g.fillStyle='#2a1726';g.fillRect(X+4,Y-1,2,1);g.fillRect(X-5,Y+1,2,1); }
+  }
   function drawFlies(g) { for (const f of AMB.flies) { const t = R.t * 0.6 + f.ph, x = f.hx + Math.sin(t) * 12 + Math.sin(t * 2.7) * 4, y = f.hy + Math.cos(t * 0.8) * 10, z = TWM.groundZ(f.hx, f.hy) + 6 + Math.sin(t * 1.7) * 4; if ((Math.floor(t * 3) % 5) === 0) continue; g.fillStyle = f.c; g.fillRect(Math.round(wx(x, y)), Math.round(wy(x, y, z)), 1, 1); } }
 
   // ---------------------------------------------------------------- frame
@@ -275,7 +282,7 @@ const TWR = (function () {
     // overlays: web canopy, creatures, particles, FX
     for (const Wb of TWM.webs) { const ext = sim && sim.web ? sim.web.ext : Wb.base, cvw = webCanvas(Wb, ext), X = wx(Wb.x, Wb.y), Y = wy(Wb.x, Wb.y, Wb.z), sw = Math.round(Math.sin(R.t * 0.5) * 1.2);
       if (X + cvw.width / 2 > x0 && X - cvw.width / 2 < x0 + W && Y + cvw.height / 2 > y0 && Y - cvw.height / 2 < y0 + Hh) { g.globalAlpha = sim && sim.web && sim.web.glow ? 1 : 0.85; g.drawImage(cvw, Math.round(X - cvw.width / 2) + sw, Math.round(Y - cvw.height / 2)); g.globalAlpha = 1; } }
-    drawButterflies(g); drawFlies(g); drawBirds(g);
+    drawButterflies(g); drawFlies(g); drawBirds(g); drawHeavenCranes(g);
     if (sim && window.TWFX) TWFX.draw(g, sim, R, x0, y0, W, Hh);
     // time of day + gorge gloom
     if (R.tod === 'auto') R.clock = (R.clock + dt * 24 / 480) % 24;

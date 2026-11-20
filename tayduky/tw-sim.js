@@ -123,7 +123,18 @@ const TWS = (function () {
   function fx(kind, x, y, dur, biome, o) { const f = Object.assign({ kind, x, y, z: TWM.groundZ(x, y), t: 0, dur, biome, r: 40 }, o || {}); S.fx.push(f); return f; }
 
   // ---------------------------------------------------------------- ambient activities (one builder per name)
+  function heavenTask(a, kind, label, carry) {
+    const p = poiFree(a.biome, kind); if (!p) return null;
+    claim(a,p); count(label);
+    return [go(p.x,p.y), {k:'face',dir:p.face||'up'}, {k:'act',t:rnd(5,9)}, carry && {k:'carry',what:'peach'}, {k:'bubble',kind:'note'}, {k:'idle',t:2}, {k:'carry',what:null}, {k:'release',poi:p}];
+  }
   const ACT = {
+    heaven_tend(a) { return heavenTask(a,'orchard','heaven_tend',false); },
+    heaven_harvest(a) { return heavenTask(a,'orchard','heaven_harvest',true); },
+    heaven_banquet(a) { return heavenTask(a,'banquet','heaven_banquet',true); },
+    heaven_furnace(a) { return heavenTask(a,'furnace','heaven_furnace',false); },
+    heaven_patrol(a) { return heavenTask(a,'heavenpath','heaven_patrol',false); },
+    heaven_watch(a) { return heavenTask(a,'gatepost','heaven_watch',false); },
     wander(a) { const p = near(a, 12); return p && [go(p[0], p[1]), { k: 'idle', t: rnd(2, 6) }, S.R() < 0.3 && { k: 'bubble', kind: pick(['note', 'dots']) }]; },
     stroll(a) { const p = near(a, 16); return p && [go(p[0], p[1], { run: 0.8 }), { k: 'idle', t: rnd(3, 7) }]; },
     rest(a) {
@@ -229,7 +240,7 @@ const TWS = (function () {
   }
   function chooseActivity(a) {
     const B = S.biomes[a.biome]; if (!B || !B.data) return;
-    if (B.cleaning > S.t && (a.role === 'citizen' || a.role === 'kid') && S.litter.some(l => l.biome === a.biome && !l.claimed) && S.R() < 0.7) { const s = ACT.clean(a); if (s) { assign(a, s, 'clean'); return; } }
+    if (B.cleaning > S.t && (a.role === 'citizen' || a.role === 'kid' || a.role === 'fairy') && S.litter.some(l => l.biome === a.biome && !l.claimed) && S.R() < 0.7) { const s = ACT.clean(a); if (s) { assign(a, s, 'clean'); return; } }
     if (B.reweave > S.t && a.role === 'spiderling' && S.R() < 0.6) { const s = ACT.thread(a); if (s) { assign(a, s, 'reweave'); return; } }
     let list = B.data.roles[a.role]; if (!list) return;
     const night = S.hour < 6 || S.hour > 20.5; if (night && (a.role === 'citizen' || a.role === 'elder' || a.role === 'kid') && S.R() < 0.55) list = [['rest', 1]];
@@ -242,6 +253,12 @@ const TWS = (function () {
   function freeOf(b, roles, n, nearXY) { let L = S.agents.filter(a => a.biome === b && free(a) && (!roles || roles.includes(a.role))); if (nearXY) L.sort((p, q) => Math.hypot(p.x - nearXY[0], p.y - nearXY[1]) - Math.hypot(q.x - nearXY[0], q.y - nearXY[1])); else L.sort(() => S.R() - 0.5); return L.slice(0, n); }
   function ring(b, cx, cy, r, k, n) { const a = (k / Math.max(1, n)) * Math.PI * 2 + 0.4; return nearestWalk(cx + Math.cos(a) * r * T, cy + Math.sin(a) * r * T * 0.8, b, 3); }
   const MINI = {
+    heaven_shift(b) { const L=freeOf(b,['heavenguard'],3); const posts=pois(b,'gatepost'); if(L.length<2 || posts.length<2)return false;
+      L.forEach((a,k)=>{const p=posts[k%posts.length];assign(a,[go(p.x,p.y),{k:'face',dir:'down'},{k:'act',t:4},{k:'bubble',kind:'excl'},{k:'idle',t:5}],'mini');});return true; },
+    heaven_furnace_flare(b) { const L=freeOf(b,['laojun'],1), p=pick(pois(b,'furnace')); if(!L.length||!p)return false;
+      assign(L[0],[go(p.x,p.y),{k:'face',dir:'right'},{k:'act',t:8},{k:'call',fn:()=>fx('sparks',p.x,p.y,5,b)},{k:'idle',t:3}],'mini');return true; },
+    heaven_peach_baskets(b) { const L=freeOf(b,['fairy'],3), trees=pois(b,'orchard'), target=pick(pois(b,'banquet')); if(L.length<2||!trees.length||!target)return false;
+      L.forEach((a,k)=>{const p=trees[k%trees.length];assign(a,[go(p.x,p.y),{k:'act',t:4},{k:'carry',what:'peach'},go(target.x,target.y),{k:'bubble',kind:'heart'},{k:'carry',what:null}],'mini');});return true; },
     fruit_raid(b) {
       const tree = poiFree(b, 'tree'); if (!tree) return false; const kids = freeOf(b, ['kid'], 3, [tree.x, tree.y]); if (kids.length < 2) return false;
       const guard = freeOf(b, ['elder', 'guard'], 1, [tree.x, tree.y])[0]; claim(kids[0], tree);
@@ -300,7 +317,9 @@ const TWS = (function () {
     const [op, o] = R.beats[R.i++];
     const W = o.who ? who(B, o.who, R) : null;
     switch (op) {
-      case 'depart': if (W && !W.hidden) { W.story = R; assign(W, [{ k: 'bubble', kind: 'excl' }, { k: 'wait', t: 1 }, { k: 'fly', t: 2.2 }]); R.pend = () => W.hidden; for (const a of S.agents) if (a.biome === B.id && free(a) && Math.hypot(a.x - W.x, a.y - W.y) < 90) assign(a, [{ k: 'face', x: W.x, y: W.y }, { k: 'bubble', kind: 'heart' }, { k: 'hop', t: 2 }], 'wave'); } break;
+      case 'depart': if (W && !W.hidden) { // Do not interrupt a jump over a blocked tile: let it land before taking off.
+        if (W.cur && W.cur.k === 'jump') { R.i--; R.wait = 0.2; break; }
+        W.story = R; assign(W, [{ k: 'bubble', kind: 'excl' }, { k: 'wait', t: 1 }, { k: 'fly', t: 2.2 }]); R.pend = () => W.hidden; for (const a of S.agents) if (a.biome === B.id && free(a) && Math.hypot(a.x - W.x, a.y - W.y) < 90) assign(a, [{ k: 'face', x: W.x, y: W.y }, { k: 'bubble', kind: 'heart' }, { k: 'hop', t: 2 }], 'wave'); } break;
       case 'arrive': { const p = nearestWalk(...point(B, o.at, R), B.id, 4) || point(B, o.at, R); const a = W || agent(o.char || 'wukong', B.id, 'actor', Math.floor(p[0] / T), Math.floor(p[1] / T));
         a.x = p[0]; a.y = p[1]; a.gz = TWM.groundZ(a.x, a.y); a.hidden = false; a.away = false; a.alpha = 1; a.story = R; assign(a, [{ k: 'fly', down: true, t: 2.4 }, { k: 'bubble', kind: 'star' }]); R.pend = () => !a.q.length && !a.cur; break; }
       case 'spawn': {

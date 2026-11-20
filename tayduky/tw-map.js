@@ -2,8 +2,8 @@
 // ===== Tây Du Ký v2 — world map (DOM-free) =====
 // One persistent 160 x 160-tile isometric map. Projection is the shared Lofi Worlds one (js/core.js): isoX = x - y, isoY = (x + y)/2 - z,
 // tile T = 8 world units, drawn at K = 4 art px per unit (64 x 32 tiles). Terrain has integer height levels (1 level = 4 units = 16 art px).
-// The 11 approved biomes sit on the design's 1-3-3-3-1 diamond (TAYDUKY-DESIGN §2.2); their cells are noise-warped Voronoi regions.
-// Hoa Quả Sơn and Bàn Tơ Động are authored in full here; the other nine are flat, clearly marked development placeholders.
+// The original 11 cells retain their general diamond layout; four additional regions subdivide placeholder land.
+// Hoa Quả Sơn, Bàn Tơ Động and Thiên Cung have authored terrain; the other 12 remain development placeholders.
 // Everything is deterministic (map seed fixed). Output: TWM (grids, props, POIs, stairs, waterfalls, nav).
 
 const TWM = { N: 160, T: 8, LV: 4, K: 4 };
@@ -29,15 +29,13 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     ['tth', 'Thông Thiên Hà', 'The River That Reaches Heaven', C(0, 246)], ['tc', 'Thiên Cung', 'The Heavenly Palace', C(64, 92)],
     ['btp', 'Lòng Bàn Tay Phật Tổ', "The Buddha's Palm", C(64, 159)], ['nhs', 'Ngũ Hành Sơn', 'Five Elements Mountain', C(64, 226)],
     ['hqs', 'Hoa Quả Sơn', 'Flower-Fruit Mountain', C(120, 159)]];
-  TWM.biomes = BIOMES.map(([id, vi, en, c], k) => ({ id, k, title: [vi, en], centre: c, built: id === 'hqs' || id === 'btd' }));
+  TWM.biomes = BIOMES.map(([id, vi, en, c], k) => ({ id, k, title: [vi, en], centre: c, built: id === 'hqs' || id === 'btd' || id === 'tc' }));
   TWM.bi = Object.fromEntries(TWM.biomes.map(b => [b.id, b.k]));
-  TWM.adj = { lat: ['hds', 'nnq', 'btd'], hds: ['lat', 'nnq', 'bcl'], nnq: ['lat', 'hds', 'btd', 'clt'], btd: ['lat', 'nnq', 'tth'], bcl: ['hds', 'clt', 'tc'],
-    clt: ['nnq', 'bcl', 'tth', 'btp'], tth: ['btd', 'clt', 'nhs'], tc: ['bcl', 'btp', 'hqs'], btp: ['clt', 'tc', 'nhs', 'hqs'], nhs: ['tth', 'btp', 'hqs'], hqs: ['tc', 'btp', 'nhs'] };
 
   // ---------------------------------------------------------------- materials
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
-    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, PH: 30 };
-  TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM;
+    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PH: 30 };
+  TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
   const NN = N * N, H = new Int8Array(NN), MAT = new Uint8Array(NN), BIO = new Uint8Array(NN), WALK = new Uint8Array(NN), PATHC = new Uint8Array(NN), RES = new Uint8Array(NN);
@@ -68,6 +66,48 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       }
     }
   }
+  // Preserve the complete existing pilot masks; only subdivide unbuilt cells.
+  const extra = [
+    ['ntq', 'Ngũ Trang Quán', 'Wuzhuang Temple', [96, 63], 15],
+    ['hvd', 'Hỏa Vân Động', 'Fire Cloud Cave', [25, 57], 15],
+    ['lhd', 'Liên Hoa Động', 'Lotus Cave', [62, 96], 15],
+    ['sdl', 'Sư Đà Lĩnh', 'Lion Camel Ridge', [42, 143], 14]
+  ];
+  for (const [bid, vi, en, centre] of extra) { TWM.bi[bid] = TWM.biomes.length; TWM.biomes.push({id: bid, k: TWM.biomes.length, title: [vi, en], centre, built: false}); }
+  for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
+    const k = id(i, j), original = TWM.biomes[BIO[k]].id;
+    if (original === 'hqs' || original === 'btd') continue;
+    const wi = i + (vnoise(i * 0.07, j * 0.07, 11) - 0.5) * 18, wj = j + (vnoise(i * 0.07, j * 0.07, 12) - 0.5) * 18;
+    let best = -1, score = 1;
+    for (const [bid, , , c, radius] of extra) { const d = ((wi-c[0])**2 + (wj-c[1])**2) / (radius*radius); if (d < score) { score = d; best = TWM.bi[bid]; } }
+    if (best >= 0) BIO[k] = best;
+  }
+  // A warped cut can leave an island of an unbuilt cell: attach each small
+  // component to the unbuilt neighbour with the longest shared edge.
+  for (const biome of TWM.biomes.filter(b => !b.built)) {
+    const seen = new Uint8Array(NN), parts = [];
+    for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
+      const start = id(i,j); if (seen[start] || BIO[start] !== biome.k) continue;
+      const q = [start]; seen[start] = 1;
+      for (let n = 0; n < q.length; n++) { const x = q[n] % N, y = Math.floor(q[n] / N);
+        for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const a=x+dx,b=y+dy; if (a<1 || b<1 || a>=N-1 || b>=N-1) continue;
+          const t=id(a,b); if (!seen[t] && BIO[t] === biome.k) { seen[t]=1; q.push(t); } } }
+      parts.push(q);
+    }
+    parts.sort((a,b) => b.length-a.length);
+    for (const part of parts.slice(1)) { const counts = new Map();
+      for (const k of part) { const x=k%N,y=Math.floor(k/N); for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const a=x+dx,b=y+dy; if (a<1 || b<1 || a>=N-1 || b>=N-1) continue;
+        const v=BIO[id(a,b)]; if (v !== biome.k && !TWM.biomes[v].built) counts.set(v,(counts.get(v)||0)+1); } }
+      if (counts.size) { const target=[...counts].sort((a,b)=>b[1]-a[1])[0][0]; for (const k of part) BIO[k]=target; }
+    }
+  }
+  // Director adjacency is the actual four-neighbour tile boundary, not a design sketch.
+  TWM.adj = Object.fromEntries(TWM.biomes.map(b => [b.id, []]));
+  for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) for (const [di,dj] of [[1,0],[0,1]]) {
+    if (i + di >= N - 1 || j + dj >= N - 1) continue;
+    const a = TWM.biomes[BIO[id(i,j)]].id, b = TWM.biomes[BIO[id(i+di,j+dj)]].id;
+    if (a !== b && !TWM.adj[a].includes(b)) { TWM.adj[a].push(b); TWM.adj[b].push(a); }
+  }
   const isB = (i, j, b) => inMap(i, j) && BIO[id(i, j)] === TWM.bi[b];
 
   // placeholders: flat level 1 in each biome's own material slot (rendered with its palette and a dev hatch)
@@ -77,6 +117,15 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   const set = (i, j, hh, m) => { if (!inMap(i, j) || MAT[id(i, j)] === M.VOID) return; if (hh !== null) H[id(i, j)] = hh; if (m !== null) MAT[id(i, j)] = m; };
   const R = mulberry32(20261120);
+
+  // Heaven remains on ground, with an ivory cloud stream and walkable jade crossings.
+  TWM.tc = { gate: [76, 9], court: [83, 18], furnace: [94, 25], orchard: [75, 29] };
+  for (let j = 1; j < N-1; j++) for (let i = 1; i < N-1; i++) if (isB(i,j,'tc')) {
+    const stream = j > 14 && j < 38 && Math.abs(i - (82 + Math.sin(j * 0.19) * 3)) < 1.3;
+    const plaza = (i>=70 && i<=100 && j>=6 && j<=21) || (i>=90 && i<=100 && j>=22 && j<=28);
+    set(i,j,1,stream ? M.CLOUD : plaza ? M.HEAVENPAVE : M.HEAVEN);
+  }
+  for (const j of [19, 28, 34]) for (let i=76; i<=90; i++) if (isB(i,j,'tc') && MAT[id(i,j)]===M.CLOUD) set(i,j,1,M.HEAVENBRIDGE);
 
   // =====================================================================================================  HOA QUẢ SƠN (east tip)
   // Back (small j, along the map's upper-right edge): a jade massif. Then terraces stepping down toward the viewer: upper (4), middle (2),
@@ -338,9 +387,42 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   }
   for (const b of TWM.biomes) if (!b.built) { const [ci, cj] = b.centre.map(Math.round); prop('stele', ci, cj, { block: true, placeholder: true }); }
 
+  // Heaven landmarks are independent, blocked sprites with reachable work positions.
+  for (const [kind,i,j,v] of [['tcgate',76,8,0],['tcpalace',91,8,0],['tcpalace',69,15,1],['tcfurnace',96,25,0],['tclantern',90,18,0],['tclantern',72,20,1],['banner',89,14,0],['banner',72,13,0]]) {
+    if (isB(i,j,'tc') && !TWM.isWater(MAT[id(i,j)])) { prop(kind,i,j,{v,fp:[1,1]}); if (kind==='tcfurnace') { poi('furnace','tc',i-1,j,{cap:2,face:'right'}); TWM.lights.push({biome:'tc',i,j,r:65,col:'255,185,95',kind:'fire'}); } }
+  }
+  for (const [i,j] of [[70,25],[73,29],[76,33],[91,29],[95,32],[98,17],[68,32],[88,34]]) if (isB(i,j,'tc') && isB(i,j+1,'tc') && !TWM.isWater(MAT[id(i,j)]) && !TWM.isWater(MAT[id(i,j+1)]) && !RES[id(i,j)]) {
+    prop('tcpeach',i,j,{v:(i+j)%2}); poi('orchard','tc',i,j+1,{cap:1,face:'up'});
+  }
+  for (const [kind,i,j] of [['court',86,18],['banquet',88,22],['gatepost',75,11],['gatepost',78,11],['heavenpath',71,23],['heavenpath',93,30],['heavenpath',95,14]]) {
+    if (isB(i,j,'tc') && !TWM.isWater(MAT[id(i,j)])) poi(kind,'tc',i,j,{cap:12});
+  }
+  if (isB(89,23,'tc') && !TWM.isWater(MAT[id(89,23)])) { prop('table',89,23,{block:true}); prop('basket',90,24,{block:false}); }
+  for (let j=12;j<=35;j++) for (let i=65;i<=100;i++) if (isB(i,j,'tc') && (j===19 || j===28 || i===74 || i===90)) PATHC[id(i,j)]=1;
+  // Small decorative garden groups, keeping work positions and routes clear.
+  for(let j=12;j<38;j+=3)for(let i=62;i<103;i+=3){const k=id(i,j);if(!isB(i,j,'tc')||RES[k]||PATHC[k]||MAT[k]===M.CLOUD||MAT[k]===M.HEAVENBRIDGE)continue;
+    if(TWM.pois.some(p=>p.biome==='tc'&&Math.abs(p.i-i)<=1&&Math.abs(p.j-j)<=1))continue;
+    const h=hash2(i,j,181);if(h<.14)prop('tclantern',i,j,{block:true,v:(i+j)%2});else if(h<.24)prop('flowers',i,j,{block:false});else if(h<.31)prop('scholar',i,j,{block:true,v:(i+j)%2});
+  }
+
+  // Provisional routes in empty regions: connect their centre to each actual
+  // border using a four-neighbour search. Pilot geometry is never rewritten.
+  for (const b of TWM.biomes.filter(b=>!b.built)) {
+    let start=-1, best=Infinity;
+    for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++) {const k=id(i,j);if(BIO[k]!==b.k || RES[k])continue;const d=(i-b.centre[0])**2+(j-b.centre[1])**2;if(d<best){best=d;start=k;}}
+    if(start<0)continue;
+    const prev=new Int32Array(NN).fill(-1),q=[start],ends={};prev[start]=start;
+    for(let n=0;n<q.length;n++){const k=q[n],x=k%N,y=Math.floor(k/N);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const i=x+dx,j=y+dy;if(i<1||j<1||i>=N-1||j>=N-1)continue;const z=id(i,j),other=TWM.biomes[BIO[z]].id;
+      if(other!==b.id){if(ends[other]===undefined)ends[other]=k;continue;}if(prev[z]<0&&!RES[z]){prev[z]=k;q.push(z);}}}
+    for(const end of Object.values(ends))for(let k=end;;k=prev[k]){if(MAT[k]>=M.PH){MAT[k]=M.TRAIL;PATHC[k]=1;}if(k===start||prev[k]<0)break;}
+  }
+  // Reserved river corridor in the unfinished TTH region; route crossings are
+  // kept walkable. Its detailed banks and story terrain remain unbuilt.
+  for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j);if(isB(i,j,'tth') && !PATHC[k] && !RES[k] && (i%16<7 || i%16>9) && Math.abs(j-(124+Math.sin(i*.07)*3))<1.5)MAT[k]=M.PLACEWATER;}
+
   // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
   { const seenB = new Uint8Array(NN);
-    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr'], [M.HEAVENBRIDGE, 'tcbridge']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const k = id(i, j); if (MAT[k] !== mat || seenB[k]) continue;
       let n = 0; while (inMap(i, j + n) && MAT[id(i, j + n)] === mat) n++; let m2 = 0; while (inMap(i + m2, j) && MAT[id(i + m2, j)] === mat) m2++;
       if (n >= m2) { for (let a = 0; a < n; a++) seenB[id(i, j + a)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [1, n], block: false, v: 0, bridge: true }); }
@@ -350,9 +432,16 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // TWM.seam[k] = distance (1..6) << 2 | built biome (1 hqs, 2 btd); 0 = none. (Design: borders carry both palettes.)
   TWM.seam = new Uint8Array(NN);
   { const q = [], dist = new Int8Array(NN).fill(-1), own = new Uint8Array(NN);
-    for (let k = 0; k < NN; k++) { const b = TWM.biomes[BIO[k]]; if (b.built && MAT[k] !== M.VOID) { dist[k] = 0; own[k] = b.id === 'hqs' ? 1 : 2; q.push(k); } }
+    for (let k = 0; k < NN; k++) { const b = TWM.biomes[BIO[k]]; if (b.built && MAT[k] !== M.VOID) { dist[k] = 0; own[k] = b.id === 'hqs' ? 1 : b.id === 'btd' ? 2 : 3; q.push(k); } }
     for (let h = 0; h < q.length; h++) { const k = q[h], i = k % N, j = Math.floor(k / N); if (dist[k] >= 6) continue;
       for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = i + di, c = j + dj; if (!inMap(a, c)) continue; const n = id(a, c); if (dist[n] >= 0) continue; dist[n] = dist[k] + 1; own[n] = own[k]; if (!TWM.biomes[BIO[n]].built) TWM.seam[n] = (dist[n] << 2) | own[n]; q.push(n); } } }
+  // Placeholder-to-placeholder transition bands; retain both palettes without
+  // assigning either region's future authored geography.
+  TWM.edgeOther=new Uint8Array(NN).fill(255);TWM.edgeDist=new Uint8Array(NN).fill(255);
+  {const q=[];for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=id(i,j),b=BIO[k];if(TWM.biomes[b].built)continue;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const z=id(i+dx,j+dy),v=BIO[z];if(v!==b&&!TWM.biomes[v].built){TWM.edgeOther[k]=v;TWM.edgeDist[k]=0;q.push(k);break;}}}
+    for(let h=0;h<q.length;h++){const k=q[h],i=k%N,j=Math.floor(k/N),d=TWM.edgeDist[k];if(d>=4)continue;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=i+dx,y=j+dy;if(x<1||y<1||x>=N-1||y>=N-1)continue;const z=id(x,y);if(BIO[z]===BIO[k]&&TWM.edgeDist[z]>d+1){TWM.edgeDist[z]=d+1;TWM.edgeOther[z]=TWM.edgeOther[k];q.push(z);}}}}
   // wall spots: where a walkable foot tile sits below a cliff of 2+ levels, residents can crawl up the face along runs of 3+ tiles
   for (const bid of ['hqs', 'btd']) {
     let n = 0;

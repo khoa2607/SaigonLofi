@@ -2,8 +2,39 @@
 
 Branch `feature/tayduky-redesign-v2`. Not merged to `main`. Last update: 2026-11-20.
 
-Hoa Quả Sơn and Bàn Tơ Động are built to the vertical-slice standard in the real runtime. The other nine biomes are reserved,
-clearly marked development placeholders. The work **stops here** until the owner approves the two biomes visually.
+Hoa Quả Sơn, Bàn Tơ Động and Thiên Cung now have runtime activity and stories; twelve other regions are development placeholders. The 15-region framework and the Heaven milestone below supersede the older two-biome counts in historical sections. All visual work remains subject to owner review.
+
+## 15-region framework and Thiên Cung (2026-11-20)
+
+The 160×160 grid now assigns 15 named masks, including Ngũ Trang Quán, Hỏa Vân Động, Liên Hoa Động and Sư Đà Lĩnh. HQS and BTD terrain, walkability and static-prop snapshots match the pre-change hashes. Unbuilt cells have provisional path connections, a reserved Thông Thiên Hà river corridor and placeholder colour transition bands; these are not finished biome geography. The Director's adjacency is derived from actual four-neighbour mask boundaries. The measured graph has 31 edges, not the conceptual graph in the review report. A 15-region synthetic Director stress run reached five simultaneous active/fore regions, with zero adjacency violations and all 15 started.
+
+Thiên Cung uses independent PixelLab gate, palaces, furnace and jade bridges, with a cloud channel, orchard, lights, smoke, swaying peach trees, petals and flying crane silhouettes. It has 15 residents: eight fairies, five guards, Lao Jun and a local Wukong. Six ambient task types, three mini-events and the Havoc in Heaven/Peach Banquet stories use the existing simulation and recovery system. Detailed story choreography is still simplified: soldiers hop rather than individually tumble, and the banquet table has only a basket; art/animation need visual review. The new actions include fairy harvest, guard salute and furnace tending; other idle uses scale-matched walk-derived breathing. See `PIXELLAB.md` for sources and the 115-generation batches.
+
+`tests/tayduky-v2-map15.mjs` checks region connectivity, actual adjacency, HQS/BTD snapshots, TC points of interest and the all-region Director stress case. The interior areas in tiles are LAT 1533, HDS 1389, NNQ 1818, BTD 1101, BCL 2784, CLT 2378, TTH 3321, TC 2231, BTP 2099, NHS 2187, HQS 1406, NTQ 615, HVD 788, LHD 662, SDL 652. These sum to the 158×158 interior; rim tiles are void. TC has 15 checked reachable POIs. Existing HQS/BTD have some disconnected walkable tiles (778/791 and 634/656 reachable from the chosen component); their geometry was deliberately preserved. The BTP placeholder has one isolated walkable tile. A global four-neighbour walkability component reaches all 15 regions, but five shared borders have no direct walkable crossing: HQS–TC, HQS–NHS, BTD–NNQ, BTD–SDL and BTD–LAT. Alternative routes exist in the grid; normal resident pathfinding remains biome-restricted. Future authored borders need review rather than modifying the two protected biomes now.
+
+Actual adjacency (shared cardinal tile edges, not walkability):
+
+| Region | Neighbours |
+|---|---|
+| LAT | HDS, NNQ, SDL, BTD |
+| HDS | BCL, HVD, CLT, NNQ, LAT |
+| NNQ | CLT, HDS, LHD, LAT, TTH, BTD, SDL |
+| BTD | TTH, NNQ, SDL, LAT |
+| BCL | TC, HDS, HVD, CLT |
+| CLT | TC, BTP, BCL, NTQ, HDS, NNQ, LHD, NHS, TTH |
+| TTH | NHS, CLT, NNQ, BTD |
+| TC | BCL, HQS, BTP, CLT |
+| BTP | TC, HQS, NHS, CLT, NTQ |
+| NHS | HQS, BTP, CLT, TTH |
+| HQS | TC, BTP, NHS |
+| NTQ | BTP, CLT |
+| HVD | BCL, HDS |
+| LHD | CLT, NNQ |
+| SDL | NNQ, LAT, BTD |
+
+The original D11 request to see 3–5 biomes at widest zoom remains unmet; camera and zoom are unchanged. The 15-mask overview screenshot is a diagnostic, not an in-game wide view. Weather/seasons, fully animated clouds/banners and detailed interactions remain incomplete; the 12 other biomes are still placeholders. Screenshots and measured test results are recorded in the milestone handoff.
+
+Validation on 2026-11-20: `node tests/tayduky-v2-sim.mjs 900 7` and `900 31` passed for all three active biomes, both Heaven signatures, all three Heaven minis and six activity types; no blocked agents, teleports or adjacent active signatures were reported. Heaven litter fell from 18 to 0 and 10 to 0 in seed 7, and 18 to 0 and 10 to 1 in seed 31, during observed after phases. The scheduler now lets a jumping resident land before story departure; interrupting that jump had stranded Wukong and caused a later teleport. `node tests/tayduky-v2-world.mjs 60 --shots docs/tayduky/v2/screenshots/thien-cung-pass` passed with all three active biomes and no console errors. `node tests/tayduky-v2-heaven-assets.mjs` verified the four walk sheets, three action sheets, loaded TC landmarks and finite depth keys. `node tests/tayduky-v2-heaven.mjs` captured both Heaven stories and the diagnostic map. In its headless Chrome run, zoom 1 and zoom 2 each sampled 16.7 ms median/p90 animation-frame intervals; canvas script time was 0.5 ms median at both, with p90 0.6 ms at both. These are environment-specific samples, not a mobile, GPU or worst-case guarantee.
 
 ## Refinement pass 2 (2026-11-20): tighter, denser, more alive
 

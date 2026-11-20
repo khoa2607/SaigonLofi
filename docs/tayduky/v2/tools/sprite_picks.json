@@ -127,6 +127,10 @@
  "tc_furnace_b": ["tc_furnace_2", 0.16],
  "tc_bridge_a": ["tc_bridge_0", 0.20],
  "tc_bridge_b": ["tc_bridge_1", 0.20],
+ "tc_lantern_a": ["tc_lantern_1", 0.17],
+ "tc_lantern_b": ["tc_lantern_2", 0.17],
+ "tc_peach_a": ["tc_peach_1", 0.10],
+ "tc_peach_b": ["tc_peach_2", 0.10],
  "lotus_b": [
   "lotus_3",
   0.2

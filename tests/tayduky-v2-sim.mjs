@@ -6,12 +6,13 @@ import { loadTW } from './tw-load.mjs';
 const secs = +(process.argv[2] || 900), seed = +(process.argv[3] || 7);
 const C = loadTW(['tw-map.js', 'chars/chars.js', 'tw-data.js', 'tw-sim.js']);
 const M = C.TWM, S = C.TWS; S.init(seed);
-const prev = new Map(); let bad = [], tele = [], adjV = 0, maxAct = 0; const phases = {};
+const prev = new Map(); let bad = [], tele = [], adjV = 0, maxAct = 0; const phases = {}, tcRecovery = {};
 for (let k = 0; k < secs * 10; k++) {
   S.hour = 6 + (k / 10 / 480 * 24) % 24; S.tick(0.1);
   const act = Object.values(S.biomes).filter(B => B.phase === 'fore' || B.phase === 'sig').map(B => B.id); maxAct = Math.max(maxAct, act.length);
   for (const a of act) for (const b of act) if (a < b && (M.adj[a] || []).includes(b)) adjV++;
   for (const B of Object.values(S.biomes)) if (B.data) (phases[B.id] = phases[B.id] || new Set()).add(B.phase);
+  const heaven=S.biomes.tc;if(heaven.phase==='after'&&heaven.story){const id=heaven.story.id,n=S.litter.filter(l=>l.biome==='tc').length,r=tcRecovery[id]||(tcRecovery[id]={max:0,min:Infinity});r.max=Math.max(r.max,n);r.min=Math.min(r.min,n);}
   for (const a of S.agents) {
     if (a.gone || a.hidden) { prev.delete(a); continue; }
     const i = Math.floor(a.x / 8), j = Math.floor(a.y / 8), t = M.id(i, j), m = M.MAT[t];
@@ -22,8 +23,9 @@ for (let k = 0; k < secs * 10; k++) {
   }
 }
 const res = { seconds: secs, agents: S.agents.length, phases: Object.fromEntries(Object.entries(phases).map(([k, v]) => [k, [...v]])), stories: S.counts.stories, minis: S.counts.minis, acts: S.counts.acts,
-  log: S.log.map(l => l.slice(1).join(':')), maxActive: maxAct, adjacencyViolations: adjV, badTiles: bad, teleports: tele, web: +S.web.ext.toFixed(2), litter: S.litter.length };
+  log: S.log.map(l => l.slice(1).join(':')), maxActive: maxAct, adjacencyViolations: adjV, badTiles: bad, teleports: tele, web: +S.web.ext.toFixed(2), litter: S.litter.length,tcRecovery };
 console.log(JSON.stringify(res, null, 1));
-const allPh = ['hqs', 'btd'].every(b => ['peace', 'fore', 'sig', 'after'].every(p => res.phases[b] && res.phases[b].includes(p)));
-const ok = allPh && Object.keys(res.minis).length >= 6 && Object.keys(res.acts).length >= 10 && adjV === 0 && !bad.length && !tele.length;
+const allPh = ['hqs', 'btd', 'tc'].every(b => ['peace', 'fore', 'sig', 'after'].every(p => res.phases[b] && res.phases[b].includes(p)));
+const tcCoverage = ['havoc_heaven','peach_banquet'].every(k => res.log.includes('tc:after:'+k) && tcRecovery[k] && tcRecovery[k].max>tcRecovery[k].min) && ['heaven_shift','heaven_furnace_flare','heaven_peach_baskets'].every(k => res.minis[k] > 0) && ['heaven_tend','heaven_harvest','heaven_furnace','heaven_patrol','heaven_watch','heaven_banquet'].every(k => res.acts[k] > 0);
+const ok = allPh && tcCoverage && Object.keys(res.minis).length >= 6 && Object.keys(res.acts).length >= 10 && maxAct <= 5 && adjV === 0 && !bad.length && !tele.length;
 console.log(ok ? 'PASS' : 'FAIL'); process.exitCode = ok ? 0 : 1;

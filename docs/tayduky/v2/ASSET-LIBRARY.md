@@ -69,6 +69,10 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `tc_furnace_b` | 85x117 | tc | 1x1 | flickering glow, rising smoke | pixellab create_1_direction_object job e52bfc0f |
 | `tc_bridge_a` | 120x92 | tc | cloud-channel crossing | walkable bridge over animated cloud stream | pixellab create_1_direction_object job 3c8beb65 |
 | `tc_bridge_b` | 123x94 | tc | cloud-channel crossing | walkable bridge over animated cloud stream | pixellab create_1_direction_object job 3c8beb65 |
+| `tc_lantern_a` | 86x115 | tc | 1x1 | golden glow | pixellab create_1_direction_object job 380f2729 |
+| `tc_lantern_b` | 79x122 | tc | 1x1 | golden glow | pixellab create_1_direction_object job 380f2729 |
+| `tc_peach_a` | 130x144 | tc | 1x1 | sway and drifting petals | pixellab create_1_direction_object job c4da708e |
+| `tc_peach_b` | 150x143 | tc | 1x1 | sway and drifting petals | pixellab create_1_direction_object job c4da708e |
 
 ## misc
 

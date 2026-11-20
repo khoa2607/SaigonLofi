@@ -10,13 +10,21 @@ const TWFX = (function () {
   }
   function beacon(g, S, R, x0, y0) {
     for (const B of Object.values(S.biomes)) { if (B.phase !== 'fore' || !B.data) continue; const col = window.TW_DATA.beacon[B.id] || '255,255,255';
-      const p = B.id === 'hqs' ? TWM.pois.find(q => q.kind === 'court') : TWM.pois.find(q => q.kind === 'circle'); if (!p) continue;
+      const p = TWM.pois.find(q => q.biome === B.id && q.kind === (B.id === 'btd' ? 'circle' : 'court')); if (!p) continue;
       const X = R.wx(p.x, p.y), Y = R.wy(p.x, p.y, TWM.groundZ(p.x, p.y)), top = y0 - 20, pulse = 0.16 + 0.08 * Math.sin(R.t * 3);
       for (let s = 0; s < 3; s++) { g.fillStyle = `rgba(${col},${pulse * (1 - s * 0.28)})`; const w = 14 - s * 4; g.fillRect(Math.round(X - w / 2), top, w, Y - top); } }
   }
   function draw(g, S, R, x0, y0, W, Hh) {
     const t = R.t;
     beacon(g, S, R, x0, y0);
+    // Furnace sparks/smoke and drifting cloud wisps are separate from the terrain.
+    for (const st of R.statics) if (st.p.kind === 'tcfurnace' && st.X < x0+W+80 && st.X+st.sp.w > x0-80 && st.Y < y0+Hh+80 && st.Y+st.sp.h > y0-80) {
+      for (let q=0;q<10;q++) { const ph=(t*0.23+q/10)%1, x=st.X+st.sp.w/2+Math.sin(t+q)*5, y=st.Y+st.sp.h*.35-ph*45;
+        g.globalAlpha=(1-ph)*.45; px(g,x,y,3+q%3,2,q%2?'#eee5f4':'#ffd48a'); } g.globalAlpha=1;
+    }
+    if (TWM.tc) { const cx=R.wx(80*T,25*T), cy=R.wy(80*T,25*T,4);
+      if(cx>x0-350&&cx<x0+W+350&&cy>y0-250&&cy<y0+Hh+250) for(let q=0;q<7;q++){const x=cx+((t*8+q*71)%440)-220,y=cy-50+(q%3)*22;g.globalAlpha=.18;px(g,x,y,28,3,'#ffffff');px(g,x+6,y-2,15,2,'#ffffff');g.globalAlpha=1;}
+    }
     // spring steam (always), loom threads while weaving
     const sp = TWM.btd.spring, sx = R.wx((sp[0] + 0.5) * T, (sp[1] + 0.5) * T), sy = R.wy((sp[0] + 0.5) * T, (sp[1] + 0.5) * T, 12);
     if (sx > x0 - 100 && sx < x0 + W + 100 && sy > y0 - 120 && sy < y0 + Hh + 60)
@@ -25,9 +33,9 @@ const TWFX = (function () {
       g.fillStyle = 'rgba(240,236,255,0.85)'; for (let k = 0; k < 3; k++) { const n = 14; for (let s = 0; s <= n; s++) { const f = s / n; g.fillRect(Math.round(ax + (lx - ax) * f), Math.round(ay + (ly + k * 8 - ay) * f + Math.sin(f * Math.PI + t * 4 + k) * 1.5), 1, 1); } } }
     // ambient life on static sprites: petals drift off the big peach trees, glowing spores rise from mushrooms and crystals, the web canopy twinkles
     for (const st of R.statics) {
-      const kind = st.p.kind; if (kind !== 'bigpeach' && kind !== 'bigmush' && kind !== 'pcrystals' && kind !== 'altar') continue;
+      const kind = st.p.kind; if (kind !== 'bigpeach' && kind !== 'tcpeach' && kind !== 'bigmush' && kind !== 'pcrystals' && kind !== 'altar') continue;
       if (st.X > x0 + W + 40 || st.X + st.sp.w < x0 - 40 || st.Y > y0 + Hh + 40 || st.Y + st.sp.h < y0 - 40) continue;
-      if (kind === 'bigpeach') { for (let q = 0; q < 5; q++) { const a = TWM.hash2(st.ph, q, 71), ph = (t * 0.16 + a * 3) % 1, X = st.X + st.sp.w * (0.15 + a * 0.7) + Math.sin(t * 0.9 + q * 2) * 6 + ph * 10, Y = st.Y + st.sp.h * 0.32 + ph * st.sp.h * 0.62;
+      if (kind === 'bigpeach' || kind === 'tcpeach') { for (let q = 0; q < 5; q++) { const a = TWM.hash2(st.ph, q, 71), ph = (t * 0.16 + a * 3) % 1, X = st.X + st.sp.w * (0.15 + a * 0.7) + Math.sin(t * 0.9 + q * 2) * 6 + ph * 10, Y = st.Y + st.sp.h * 0.32 + ph * st.sp.h * 0.62;
         g.fillStyle = q % 2 ? '#ffc0d4' : '#fff0f6'; g.fillRect(Math.round(X), Math.round(Y), 2, 1); if (q % 3 === 0) g.fillRect(Math.round(X) + 1, Math.round(Y) - 1, 1, 1); } }
       else { const cols = kind === 'bigmush' ? ['#7ef0d0', '#c8fff0'] : kind === 'altar' ? ['#c890ff', '#f0d8ff'] : ['#c8a0ff', '#9cff8a'];
         for (let q = 0; q < 4; q++) { const a = TWM.hash2(st.ph, q, 72), ph = (t * 0.22 + a * 5) % 1, X = st.X + st.sp.w * (0.25 + a * 0.5) + Math.sin(t * 1.3 + q * 3) * 4, Y = st.Y + st.sp.h * 0.55 - ph * st.sp.h * 0.5;

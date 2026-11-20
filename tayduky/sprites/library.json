@@ -880,6 +880,70 @@
    "runtime_kind": "tcbridge",
    "source": "pixellab create_1_direction_object job 3c8beb65"
   },
+  "tc_lantern_a": {
+   "file": "sprites/tc_lantern_a.png",
+   "size": [
+    86,
+    115
+   ],
+   "anchor_y": 95,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "golden glow",
+   "runtime_kind": "tclantern",
+   "source": "pixellab create_1_direction_object job 380f2729"
+  },
+  "tc_lantern_b": {
+   "file": "sprites/tc_lantern_b.png",
+   "size": [
+    79,
+    122
+   ],
+   "anchor_y": 101,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "golden glow",
+   "runtime_kind": "tclantern",
+   "source": "pixellab create_1_direction_object job 380f2729"
+  },
+  "tc_peach_a": {
+   "file": "sprites/tc_peach_a.png",
+   "size": [
+    130,
+    144
+   ],
+   "anchor_y": 130,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "sway and drifting petals",
+   "runtime_kind": "tcpeach",
+   "source": "pixellab create_1_direction_object job c4da708e"
+  },
+  "tc_peach_b": {
+   "file": "sprites/tc_peach_b.png",
+   "size": [
+    150,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "sway and drifting petals",
+   "runtime_kind": "tcpeach",
+   "source": "pixellab create_1_direction_object job c4da708e"
+  },
   "lotus_b": {
    "file": "sprites/lotus_b.png",
    "size": [

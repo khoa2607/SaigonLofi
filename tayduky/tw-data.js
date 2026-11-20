@@ -13,8 +13,28 @@ window.TW_DATA = {
   loop: { peace: [150, 300], fore: [30, 45], after: [70, 110] },      // seconds; a full loop takes about 5-9 minutes (design D15)
   maxSignatures: 5,
   miniGap: [30, 70],
-  beacon: { hqs: '255,214,120', btd: '190,140,255' },
+  beacon: { hqs: '255,214,120', btd: '190,140,255', tc: '255,211,150' },
   biomes: {
+    tc: {
+      residents: [['tc_fairy', 8, 'fairy'], ['tc_guard', 5, 'heavenguard'], ['tc_laojun', 1, 'laojun'], ['tc_wukong', 1, 'trickster']],
+      roles: {
+        fairy: [['heaven_tend',4],['heaven_harvest',3],['heaven_banquet',2],['talk',1],['stroll',1]],
+        heavenguard: [['heaven_patrol',5],['heaven_watch',3],['stroll',1]],
+        laojun: [['heaven_furnace',7],['heaven_patrol',1],['stroll',1]],
+        trickster: [['heaven_harvest',3],['heaven_patrol',2],['stroll',2]]
+      },
+      minis: ['heaven_shift','heaven_furnace_flare','heaven_peach_baskets'],
+      stories: [
+        { id:'havoc_heaven', title:['Đại náo Thiên Cung','Havoc in Heaven'],
+          fore:[['depart',{who:'trickster'}],['gather',{at:'gatepost',r:2,roles:['heavenguard'],n:4}],['fx',{kind:'goldtrail',at:'court',dur:38}]],
+          beats:[['arrive',{who:'trickster',at:'court'}],['gather',{at:'court',r:3,roles:['heavenguard','fairy'],n:8}],['go',{who:'trickster',to:'orchard',run:1.4}],['act',{who:'trickster',t:4}],['go',{who:'trickster',to:'court',run:1.4}],['act',{who:'trickster',t:7,wait:false}],['fx',{kind:'sparks',at:'furnace',dur:8}],['hop',{who:'crowd',t:5}],['fx',{kind:'peaches',at:'court',dur:12}],['litter',{at:'court',n:18,r:4}],['depart',{who:'trickster'}],['disperse',{}]],
+          after:{fx:'petals',at:'court',r:50}, recover:[['clean',{roles:['fairy'],dur:90}]] },
+        { id:'peach_banquet', title:['Hội Bàn Đào','The Peach Banquet'],
+          fore:[['gather',{at:'banquet',r:3,roles:['fairy'],n:6}],['fx',{kind:'petals',at:'banquet',dur:36}]],
+          beats:[['gather',{at:'banquet',r:3,roles:['fairy','heavenguard'],n:10}],['bubble',{who:'crowd',kind:'heart'}],['act',{who:'crowd',t:10}],['fx',{kind:'peaches',at:'banquet',dur:12}],['sit',{who:'crowd',t:10}],['litter',{at:'banquet',n:10,r:3}],['disperse',{}]],
+          after:{fx:'petals',at:'banquet',r:45}, recover:[['clean',{roles:['fairy'],dur:90}]] }
+      ]
+    },
     hqs: {
       residents: [['wukong', 1, 'king'], ['khi_linh', 3, 'guard'], ['khi_lao', 2, 'elder'], ['khi_con', 6, 'kid'], ['khi_dan', 5, 'citizen'], ['khi_dan_b', 5, 'citizen']],
       roles: {
