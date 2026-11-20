@@ -3,10 +3,11 @@
 Updated 2026-11-20 after the integration of Buddha's Palm. Scope: Tây Du Ký only (`tayduky/`, `docs/tayduky/`, `tests/tayduky-*.mjs`). Read `AGENTS.md` (same folder) for rules, code map and commands.
 
 ## 1. Where things are
-- Branch **`feature/tayduky-redesign-v2`** is the single integration branch (nothing merged into `main`, nothing pushed in this pass). It contains the 15-region map, **five built biomes** (hqs, btd, tc, btp, hds) and ten placeholders. World 124 x 124.
+- Branch **`feature/tayduky-redesign-v2`** is the single integration branch (nothing merged into `main`, nothing pushed in this pass). It contains the 15-region map, **six built biomes** (hqs, btd, tc, btp, hds, sdl) and nine placeholders. World 124 x 124.
 - Built: **Hoa Quả Sơn (`hqs`)**, **Bàn Tơ Động (`btd`)**, **Thiên Cung (`tc`, elevated jade terraces, Codex's redesign)**, **Lòng Bàn Tay Phật Tổ (`btp`, cloud sea with five finger pillars)**.
 - Built last: **Hoa Diem Son (`hds`)**, authored in world space: see `docs/tayduky/v2/STATUS.md` (2026-11-21) and `tw-fire*.js`.
-- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, nhs, nnq, ntq, sdl, tth. Their regions, masks, adjacency and the Director's rules are real.
+- Built after that: **Sư Đà Lĩnh (`sdl`)**, also world-space: `docs/tayduky/v2/STATUS.md` (2026-11-22) and `tw-lion*.js`.
+- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, nhs, nnq, ntq, tth. Their regions, masks, adjacency and the Director's rules are real.
 - The source branch `feature/tayduky-buddha-palm` (`b8f2006`) is kept for now; its worktree was `E:/game/web-lofi/testFableLofi-palm`.
 - Untracked and deliberately preserved: `tmp-tayduky-animation/`, `tmp-tayduky-review/` (owner decides about deleting).
 

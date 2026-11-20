@@ -310,5 +310,63 @@
   "biome": "hds",
   "speed": 14,
   "role": "sha"
+ },
+ {
+  "name": "thanh_su",
+  "id": "54bb0bc8-51d8-4a32-99be-b2642e4d4364",
+  "title": [
+   "Thanh Sư Vương",
+   "Azure Lion King"
+  ],
+  "biome": "sdl",
+  "speed": 19,
+  "role": "lion_king",
+  "shadow": 20
+ },
+ {
+  "name": "bach_tuong",
+  "id": "220601ab-20b0-47ef-9de5-79be9daa1029",
+  "title": [
+   "Bạch Tượng Vương",
+   "White Elephant King"
+  ],
+  "biome": "sdl",
+  "speed": 16,
+  "role": "elephant_king",
+  "shadow": 24
+ },
+ {
+  "name": "kim_si",
+  "id": "3e75f88c-2b32-4269-949e-b2dffd16e5e1",
+  "title": [
+   "Kim Sí Đại Bàng",
+   "Golden-Winged Roc"
+  ],
+  "biome": "sdl",
+  "speed": 20,
+  "role": "roc_king",
+  "shadow": 20
+ },
+ {
+  "name": "sdl_guard",
+  "id": "f064ecfc-b31a-4a75-ab7b-bb4c47aa685c",
+  "title": [
+   "Tiểu yêu canh",
+   "Imp Guard"
+  ],
+  "biome": "sdl",
+  "speed": 21,
+  "role": "guard"
+ },
+ {
+  "name": "sdl_porter",
+  "id": "ec7a79fa-3853-462e-804c-36fb51bbdc98",
+  "title": [
+   "Tiểu yêu khuân vác",
+   "Imp Porter"
+  ],
+  "biome": "sdl",
+  "speed": 19,
+  "role": "porter"
  }
 ]

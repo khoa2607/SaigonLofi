@@ -35,7 +35,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // ---------------------------------------------------------------- materials
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
     GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, SKYC: 30, SKYD: 31, PH: 32,
-    ASH: 100, BASALT: 101, LAVA: 102, WARM: 103, CINDER: 104, SCORCH: 105, LBRIDGE: 106, CRUST: 107 };   // Hỏa Diệm Sơn (tw-fire.js); ids above any placeholder (PH + 15)
+    ASH: 100, BASALT: 101, LAVA: 102, WARM: 103, CINDER: 104, SCORCH: 105, LBRIDGE: 106, CRUST: 107,
+    SLATE: 110, BONE: 111, RAMP: 112, MIRE: 113, YARD: 114, PLANK: 115, SCRUB: 116 };   // Sư Đà Lĩnh (tw-lion.js)   // Hỏa Diệm Sơn (tw-fire.js); ids above any placeholder (PH + 15)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -495,6 +496,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // Hỏa Diệm Sơn (tw-fire.js): authored directly in world space inside the footprint reserved by tw-layout.js
   if (window.TW_FIRE_BUILD) TW_FIRE_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+  // Sư Đà Lĩnh (tw-lion.js): world-space build after Hỏa Diệm Sơn (it blends into the volcano's edge)
+  if (window.TW_LION_BUILD) TW_LION_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
@@ -543,7 +546,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // bridge sprites: every contiguous run of bridge tiles gets one sprite (stone arch over the stream, silk bridge over the chasm), mirrored when it spans along i
   { const seenB = new Uint8Array(NN);
-    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr'], [M.HEAVENBRIDGE, 'tcbridge'], [M.LBRIDGE, 'lbridge']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    for (const [mat, kind] of [[M.BRIDGE, 'hbridge'], [M.SILKB, 'silkbr'], [M.HEAVENBRIDGE, 'tcbridge'], [M.LBRIDGE, 'lbridge'], [M.PLANK, 'sdlbridge']]) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const k = id(i, j); if (MAT[k] !== mat || seenB[k]) continue;
       let n = 0; while (inMap(i, j + n) && MAT[id(i, j + n)] === mat) n++; let m2 = 0; while (inMap(i + m2, j) && MAT[id(i + m2, j)] === mat) m2++;
       if (n >= m2) { for (let a = 0; a < n; a++) seenB[id(i, j + a)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [1, n], block: false, v: 0, bridge: true }); }
@@ -599,6 +602,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     if (H[a] === H[b]) return true;
     return TWM.stairs.has(a + ',' + b);
   };
+  if (window.TW_LION_FINAL) TW_LION_FINAL({ TWM, WALK, id, N });   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;
 
   // A* (8 directions, no corner cutting, binary heap), bounded to a biome's box

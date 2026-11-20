@@ -117,6 +117,7 @@ const TWR = (function () {
       return;
     }
     if (a.ride && window.TWFX && TWFX.palm && TWFX.palm.drawRide) TWFX.palm.drawRide(g, a, X, Y, px0, py0);   // Wukong's somersault cloud
+    const big = a.scale > 1 ? (g.save(), g.translate(X + px0, Y + py0), g.scale(a.scale, a.scale), g.translate(-(X + px0), -(Y + py0)), true) : false;   // giant kings (Sư Đà Lĩnh signature): integer scale about the feet
     const sw = Math.max(10, Math.round((C.shadow || 14)));
     // contact shadow on the ground (stays on the ground while jumping or climbing)
     if (!a.inWater) { const sY = Math.round(wy(a.x, a.y, gz)); g.fillStyle = 'rgba(30,16,36,0.28)'; g.fillRect(X + px0 - (sw >> 1), sY - 2, sw, 3); g.fillRect(X + px0 - (sw >> 1) + 2, sY - 3, sw - 4, 5); }
@@ -129,10 +130,11 @@ const TWR = (function () {
     else if (sitDrop) { const cut = py0 - sitDrop - 2; g.drawImage(S.im, col * w, row * h, w, cut + 2, X, Y + sitDrop, w, cut + 2); }
     else g.drawImage(S.im, col * w, row * h, w, h, X, Y, w, h);
     g.globalAlpha = 1; if (spun) g.restore();
+    if (big) g.restore();
     if (a.hasFan && window.TWFX && TWFX.fire) TWFX.fire.drawFan(g, a, X, Y, px0, py0);
     if (a.robe) { const ry = Y + (C.top || 6) + Math.round((py0 - (C.top || 6)) * 0.34); g.fillStyle = '#2a1726'; g.fillRect(X + px0 - 9, ry - 1, 18, 9); g.fillStyle = '#f4f0fa'; g.fillRect(X + px0 - 8, ry, 16, 7); g.fillStyle = '#c8c0dc'; g.fillRect(X + px0 - 8, ry + 5, 16, 2); g.fillStyle = '#f4b0c8'; g.fillRect(X + px0 - 1, ry, 2, 5); }   // tasteful bathing robe
     if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; const top = Y + (C.top || 6) + 14; for (let k = 0; k < 7; k++) g.fillRect(X + px0 - 8, top + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + px0 - 7 + k * 5, top - 2, 1, 28); }
-    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'cake' ? '#f0b64a' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
+    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'cake' ? '#f0b64a' : a.carry === 'sack' ? '#8a6a48' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
     if (a.bubble) bubble(g, X + C.pivot[0], Y + (C.top || 6) - 4, a.bubble);
   }
   const ICON = { note: ['00110', '00101', '00100', '11100', '11100'], dots: ['00000', '00000', '10101', '00000', '00000'], heart: ['01010', '11111', '11111', '01110', '00100'],

@@ -74,3 +74,13 @@ Balance before **1,209.65**, after **991.65**: **218 generations**. Tier 1 = 8 c
 Packed with `tools/sprite_picks.json` -> `pack_sprites.py` (raw frames in `tayduky/sprites/raw/hds_*`) and `tools/pl_cast.json` -> `pack_pl_chars.py` (the `casting_*` clip name was added to the `act` list).
 
 Follow-up (2026-11-21): `sa_tang` 1cab0b0a-2e39-437f-ac3d-4d1394b5d445 (Sha Wujing, v3 60 px, 2 gens + 4 for `walking-8-frames`); balance 991.65 -> 985.65. Tam Tạng reuses the existing `tam_tang` sheet.
+
+## Sư Đà Lĩnh batch (2026-11-22)
+
+Balance before **985.65**, after **809.65**: **176 generations** (target <= 500 per cycle). All prompts began "isometric 2:1 view pixel art ... dark plum outline, transparent background".
+
+**Objects** (`create_1_direction_object`): 256 px, one candidate, 10 gens each: `sdl_gate` 684952d7 (skull fortress gate), `sdl_keep` bd3d6841 (lion-head pagoda keep), `sdl_nest` a158aacf (golden roc nest on a crag), `sdl_den` e3d162cc (Thanh Sư's lion-mouth den), `sdl_tusk` 09ce5eea (Bạch Tượng's ivory tusk hall). 128 / 96 / 64 px, 4 candidates, 10 gens each, one or two kept: `sdl_tent` d5139cf0 (candidates 0, 2), `sdl_banner` 1a05f2d8 (0, 3), `sdl_rack` 4f85cd36 (rack + war drum, 2), `sdl_brazier` 6aa05146 (green witchfire bowl, 0, 5), `sdl_bridge` 1d8b2458 (rope-and-plank bridge, 0), `sdl_pine` ab867c7c (0, 2), `sdl_rock` 5fa785cd (1, 3), `sdl_totem` e90cda48 (skull totem, 1).
+
+**Characters** (v3 `create_character`, 2 gens + `animate_character` templates, 1 gen per direction, 4 directions): `thanh_su` 54bb0bc8 (72 px; walking-8-frames + cross-punch), `bach_tuong` 220601ab (76 px; walking + two-footed-jump), `kim_si` 3e75f88c (72 px; walking + fireball), `sdl_guard` f064ecfc (52 px; walking + cross-punch), `sdl_porter` ec7a79fa (48 px; walking). The three kings are drawn at normal size and are scaled x2 (integer) in the signature (`a.scale`, tw-render.js).
+
+Packed with `tools/sprite_picks.json` -> `pack_sprites.py` and `tools/pl_cast.json` -> `pack_pl_chars.py` (`cross_punch*` and `two_footed_jump` were added to the `act` list; PixelLab names the clips `cross_punch_attack` / `two_footed_jump`).

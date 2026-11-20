@@ -63,15 +63,26 @@ const TW_LAYOUT = (function () {
       H[n] = H0[k]; MAT[n] = MAT0[k]; BIO[n] = BIO0[k]; PATHC[n] = PATHC0[k]; RES[n] = RES0[k]; fixed[n] = 1; }
     // ---- 2b. Hỏa Diệm Sơn is authored directly in world space (tw-fire.js): reserve its footprint (a rounded blob, local 36 x 38) before the placeholders are planned
     // squircle core + the two map-edge strips (the biome hugs the world's south-west corner, so no dead wedge is left between it and the rim)
-    const HDS = { x0: 1, y0: 83, w: 37, h: 39, cx: 18, cy: 19, rx: 19, ry: 20, p: 3.2 };
+    const HDS = { x0: 1, y0: 83, w: 37, h: 40, cx: 18, cy: 19, rx: 19, ry: 20, p: 3.2 };   // h 39 -> 40: the strip reaches the rim row so no sliver of placeholder is left under it
     HDS.q = (a, b) => (Math.abs(a - HDS.cx) / HDS.rx) ** HDS.p + (Math.abs(b - HDS.cy) / HDS.ry) ** HDS.p;
-    HDS.inside = (a, b) => a >= 0 && b >= 0 && a < HDS.w && b < HDS.h && (HDS.q(a, b) < 1 || (a <= 4 && b >= 8) || (b >= HDS.h - 5 && a <= HDS.w - 9));
+    HDS.inside = (a, b) => a >= 0 && b >= 0 && a < HDS.w && b < HDS.h && (HDS.q(a, b) < 1 || (a <= 4 && b >= 8) || (b >= 34 && a <= HDS.w - 9));
     built.add(bi.hds); TWM.biomes[bi.hds].built = true;
     let hdsN = 0;
     for (let b = 0; b < HDS.h; b++) for (let a = 0; a < HDS.w; a++) { if (!HDS.inside(a, b)) continue; const n = id(HDS.x0 + a, HDS.y0 + b);
       if (fixed[n] || HDS.x0 + a < 1 || HDS.y0 + b < 1 || HDS.x0 + a > N - 2 || HDS.y0 + b > N - 2) throw new Error('tw-layout: Hỏa Diệm Sơn footprint collides at ' + a + ',' + b);
       BIO[n] = bi.hds; fixed[n] = 1; hdsN++; }
     TWM.biomes[bi.hds].centre = [HDS.x0 + HDS.cx, HDS.y0 + HDS.cy];
+    // ---- 2c. Sư Đà Lĩnh (Lion Camel Ridge) is also authored in world space (tw-lion.js): a squircle plus the south rim strip, east of Hỏa Diệm Sơn (never over its tiles)
+    const SDL = { x0: 30, y0: 84, w: 47, h: 39, cx: 23.5, cy: 19, rx: 24.5, ry: 20, p: 3.4, p: 3.4 };
+    SDL.q = (a, b) => (Math.abs(a - SDL.cx) / SDL.rx) ** SDL.p + (Math.abs(b - SDL.cy) / SDL.ry) ** SDL.p;
+    SDL.inside = (a, b) => a >= 0 && b >= 0 && a < SDL.w && b < SDL.h && (SDL.q(a, b) < 1 || (b >= SDL.h - 4 && a < SDL.w - 6));
+    built.add(bi.sdl); TWM.biomes[bi.sdl].built = true;
+    let sdlN = 0;
+    for (let b = 0; b < SDL.h; b++) for (let a = 0; a < SDL.w; a++) { if (!SDL.inside(a, b)) continue; const n = id(SDL.x0 + a, SDL.y0 + b);
+      if (fixed[n]) continue;   // Hỏa Diệm Sơn keeps its tiles
+      if (SDL.x0 + a < 1 || SDL.y0 + b < 1 || SDL.x0 + a > N - 2 || SDL.y0 + b > N - 2) continue;
+      BIO[n] = bi.sdl; fixed[n] = 1; sdlN++; }
+    TWM.biomes[bi.sdl].centre = [SDL.x0 + SDL.cx, SDL.y0 + SDL.cy];
     // ---- 3. re-plan the placeholders: Lloyd relaxation of the mapped old centres over the free land
     const unb = TWM.biomes.filter(b => !b.built), free = [];
     for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) if (!fixed[id(i, j)]) free.push([i, j]);
@@ -112,7 +123,7 @@ const TW_LAYOUT = (function () {
           const touch = new Map(); for (const k of part) { const x = k % N, y = Math.floor(k / N); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const v = BIO[id(x + dx, y + dy)]; if ((v === bi.btp || v === bi.tc)) touch.set(v, (touch.get(v) || 0) + 1); } }
           if (touch.size) { const target = [...touch].sort((a, c) => c[1] - a[1])[0][0]; for (const k of part) { BIO[k] = target; fixed[k] = 1; H[k] = target === bi.btp ? 0 : -1; MAT[k] = target === bi.btp ? M.SKYD : M.CLOUD; } } } }
     }
-    for (const b of TWM.biomes) if (b.built && b.k !== bi.hds) { const o = offOf(b.k); b.centre = [b.centre[0] + o[0], b.centre[1] + o[1]]; }
+    for (const b of TWM.biomes) if (b.built && b.k !== bi.hds && b.k !== bi.sdl) { const o = offOf(b.k); b.centre = [b.centre[0] + o[0], b.centre[1] + o[1]]; }
 
     // ---- 4. objects
     // every authored object moves with the biome that owns its tile (authoring-space owner), so a biome is only ever translated
@@ -152,7 +163,7 @@ const TW_LAYOUT = (function () {
       P.edges = P.edges.map(e => pairs(e)).map(e => [Math.max(2, Math.min(N - 3, e[0])), Math.max(2, Math.min(N - 3, e[1]))]);   // the 'edge of the universe' points float in the sea beyond the footprint
     }
     const unmap = (i, j) => { const b = BIO[id(i, j)], o = offOf(b); return [i - o[0], j - o[1]]; };   // world -> authoring (valid on built biomes' tiles)
-    TWM.layout = { N0, N, hds: HDS, hdsTiles: hdsN, map: tf, unmap, offsets: { cluster: OFF_CLUSTER, btd: OFF_BTD }, keptTiles: Array.from(keep).reduce((s, v) => s + v, 0), rules: { TC_CORE, TC_RING, TC_EXIT, BTP_RING } };
+    TWM.layout = { N0, N, hds: HDS, hdsTiles: hdsN, sdl: SDL, sdlTiles: sdlN, map: tf, unmap, offsets: { cluster: OFF_CLUSTER, btd: OFF_BTD }, keptTiles: Array.from(keep).reduce((s, v) => s + v, 0), rules: { TC_CORE, TC_RING, TC_EXIT, BTP_RING } };
     return { N, NN, H, MAT, BIO, WALK, PATHC, RES };
   }
   return { apply, N2 };

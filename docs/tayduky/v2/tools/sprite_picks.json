@@ -384,5 +384,77 @@
  "hds_volcano_b": [
   "hds_volcano_big_0",
   0.2
+ ],
+ "sdl_gate_a": [
+  "sdl_gate_0",
+  0.2
+ ],
+ "sdl_keep_a": [
+  "sdl_keep_0",
+  0.2
+ ],
+ "sdl_nest_a": [
+  "sdl_nest_0",
+  0.17
+ ],
+ "sdl_den_a": [
+  "sdl_den_0",
+  0.2
+ ],
+ "sdl_tusk_a": [
+  "sdl_tusk_0",
+  0.2
+ ],
+ "sdl_tent_a": [
+  "sdl_tent_0",
+  0.16
+ ],
+ "sdl_tent_b": [
+  "sdl_tent_1",
+  0.16
+ ],
+ "sdl_banner_a": [
+  "sdl_banner_0",
+  0.15
+ ],
+ "sdl_banner_b": [
+  "sdl_banner_1",
+  0.15
+ ],
+ "sdl_rack_a": [
+  "sdl_rack_0",
+  0.16
+ ],
+ "sdl_brazier_a": [
+  "sdl_brazier_0",
+  0.2
+ ],
+ "sdl_brazier_b": [
+  "sdl_brazier_1",
+  0.2
+ ],
+ "sdl_bridge_a": [
+  "sdl_bridge_0",
+  0.2
+ ],
+ "sdl_pine_a": [
+  "sdl_pine_0",
+  0.12
+ ],
+ "sdl_pine_b": [
+  "sdl_pine_1",
+  0.12
+ ],
+ "sdl_rock_a": [
+  "sdl_rock_0",
+  0.15
+ ],
+ "sdl_rock_b": [
+  "sdl_rock_1",
+  0.15
+ ],
+ "sdl_totem_a": [
+  "sdl_totem_0",
+  0.12
  ]
 }

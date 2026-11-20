@@ -22,6 +22,7 @@ A cozy, observation-only **living isometric diorama** (Journey to the West), van
 | `tw-sim.js` | simulation (`TWS`): step-queue activities, mini events, Director, Living Story Loop, recovery. Randomness only via `TWS.R` | no |
 | `tw-layout.js` | footprint normalisation: trims built biomes to their footprint, relocates them into the 104 x 104 world (`TW_LAYOUT`, `TWM.layout`), re-plans the placeholders; see `docs/tayduky/v2/FOOTPRINT.md` | yes (via tw-map) |
 | `tw-fire.js`, `tw-fire-art.js`, `tw-fire-fx.js`, `tw-fire-data.js` | Hoa Diem Son (`hds`): world-space map build (loaded before tw-map), terrain/face/sprite-cooling art (`TWA.fire`), living fx (`TWFX.fire`) + stale-chunk hook, sim data (state, minis, signature) | build + data yes |
+| `tw-lion.js`, `tw-lion-art.js`, `tw-lion-fx.js`, `tw-lion-data.js` | Sư Đà Lĩnh (`sdl`): world-space map build (loaded before tw-map), slate / bone / brick art + waterfall face (`TWA.lion`), living fx (`TWFX.lion`), sim data (state, minis, the Three Kings signature) | build + data yes |
 | `tw-palm.js`, `tw-palm-art.js`, `tw-palm-fx.js`, `tw-palm-data.js` | Buddha's Palm (`btp`): map build hook (loaded before tw-map), terrain/finger art (`TWA.ext`), fx (`TWFX.palm`), sim state and events (`TWS.stepExt/opExt/ACT/MINI`) | partly (build + data) |
 | `tw-art.js` | code-painted terrain/cliffs/stairs, prop painters, PixelLab sprite loader with life masks (`GLOWS`, `SILKS`, `SWAY`, `IMGKINDS`) | canvas |
 | `tw-fx.js` | story/ambient effects, night character pass | render |
