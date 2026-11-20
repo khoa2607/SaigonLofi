@@ -14,6 +14,16 @@ SP = os.path.join(ROOT, 'tayduky', 'sprites'); CH = os.path.join(ROOT, 'tayduky'
 
 # prefix -> (category, biome tags, footprint hint in tiles, life behaviours the renderer gives it, runtime kind, PixelLab job)
 CLS = {
+    'tc_monument': ('heaven', ['tc'], '5x2 landmark', 'ceremonial gate, integer 2x', 'tcgate', '1348df9c'),
+    'tc_kiln': ('heaven', ['tc'], '2x2', 'trigram fire mouth, smoke and sparks', 'tcfurnace', '855cdb4e'),
+    'tc_bank': ('heaven', ['tc'], 'cloud sea', 'slow drifting banks', 'tccloud', '445431e5'),
+    'tc_silklamp': ('heaven', ['tc'], '1x1', 'red lantern glow', 'tcsilklamp', '6507a136'),
+    'tc_gatehouse': ('heaven', ['tc'], '2x2', 'gatehouse behind main arch', 'tcgatehouse', '94673d0b'),
+    'tc_pavilion': ('heaven', ['tc'], '2x2', 'banquet pavilion', 'tcpavilion', 'e2fdc359'),
+    'tc_pillar': ('heaven', ['tc'], '1x1', 'paired jade huabiao', 'tcpillar', '9c2b0f9e'),
+    'tc_brazier': ('heaven', ['tc'], '1x1', 'firelight', 'tcbrazier', 'd65dbacd'),
+    'tc_cloud': ('heaven', ['tc'], 'cloud sea', 'slow drift', 'tccloud', '81f96319'),
+    'tc_scroll': ('heaven', ['tc'], 'cloud sea', 'slow drift', 'tccloud', 'a81498c0'),
     'tc_gate': ('heaven', ['tc'], '1x1', 'gate landmark', 'tcgate', '1348df9c'),
     'tc_palace': ('heaven', ['tc'], '1x1', 'palace landmark', 'tcpalace', 'eac2e662'),
     'tc_furnace': ('heaven', ['tc'], '1x1', 'flickering glow, rising smoke', 'tcfurnace', 'e52bfc0f'),
@@ -42,7 +52,8 @@ man = json.loads(open(os.path.join(SP, 'sprites.js'), encoding='utf-8').read().s
 for name, m in man.items():
     pre = re.sub(r'_[a-d]$', '', name)
     c = CLS.get(pre, ('misc', [], '', '', '', ''))
-    catalog['sprites'][name] = {'file': 'sprites/%s.png' % name, 'size': [m['w'], m['h']], 'anchor_y': m['py'], 'category': c[0], 'biomes': c[1], 'footprint': c[2], 'life': c[3], 'runtime_kind': c[4], 'source': 'pixellab create_1_direction_object job ' + c[5]}
+    tool = 'create_map_object' if pre in {'tc_bank','tc_silklamp','tc_gatehouse','tc_pillar','tc_brazier','tc_cloud','tc_scroll'} else 'create_1_direction_object'
+    catalog['sprites'][name] = {'file': 'sprites/%s.png' % name, 'size': [m['w'], m['h']], 'anchor_y': m['py'], 'category': c[0], 'biomes': c[1], 'footprint': c[2], 'life': c[3], 'runtime_kind': c[4], 'source': 'pixellab ' + tool + ' job ' + c[5]}
 chars = json.loads(open(os.path.join(CH, 'chars.js'), encoding='utf-8').read().split('window.TD2_CHARS = ', 1)[1].strip().rstrip(';'))['chars']
 for name, c in chars.items():
     catalog['characters'][name] = {'file': c['src'], 'title': c.get('title'), 'biome': c.get('biome'), 'size': c['size'], 'anim': c['anim'], 'action': c.get('action'), 'source': c.get('source', 'hand-authored (docs/tayduky/v2/src)'), 'role': c.get('role')}

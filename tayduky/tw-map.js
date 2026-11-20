@@ -34,7 +34,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // ---------------------------------------------------------------- materials
   const M = TWM.M = { VOID: 0, GRASS: 1, LUSH: 2, DIRT: 3, PAVE: 4, ROCK: 5, SAND: 6, POOL: 7, SEA: 8, FLOWER: 9, MOSSY: 10,
-    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PH: 30 };
+    GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, PH: 30 };
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -118,14 +118,32 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   const set = (i, j, hh, m) => { if (!inMap(i, j) || MAT[id(i, j)] === M.VOID) return; if (hh !== null) H[id(i, j)] = hh; if (m !== null) MAT[id(i, j)] = m; };
   const R = mulberry32(20261120);
 
-  // Heaven remains on ground, with an ivory cloud stream and walkable jade crossings.
-  TWM.tc = { gate: [76, 9], court: [83, 18], furnace: [94, 25], orchard: [75, 29] };
-  for (let j = 1; j < N-1; j++) for (let i = 1; i < N-1; i++) if (isB(i,j,'tc')) {
-    const stream = j > 14 && j < 38 && Math.abs(i - (82 + Math.sin(j * 0.19) * 3)) < 1.3;
-    const plaza = (i>=70 && i<=100 && j>=6 && j<=21) || (i>=90 && i<=100 && j>=22 && j<=28);
-    set(i,j,1,stream ? M.CLOUD : plaza ? M.HEAVENPAVE : M.HEAVEN);
+  // Heaven is a set of connected courts above a low cloud sea, within its original mask.
+  const TC = TWM.tc = { gate: [80, 15], court: [84, 21], orchard: [75, 23], banquet: [76, 27], furnace: [93, 14] };
+  const within = (i, j, x0, y0, x1, y1, bevel = 0) =>
+    i >= x0 && j >= y0 && i <= x1 && j <= y1 &&
+    Math.min(i - x0, x1 - i) + Math.min(j - y0, y1 - j) >= bevel;
+
+  for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
+    if (!isB(i, j, 'tc')) continue;
+    // The cloud sea meets the existing land through a processional causeway to the south.
+    let level = -1, mat = M.CLOUD;
+    if ((i >= 84 && i <= 86 && j >= 29) || (j === 38 && i <= 85) || (i === 71 && j >= 38)) { level = 1; mat = M.HEAVENPAVE; }
+    if (within(i,j,71,18,81,30,2)) { level = 7; mat = M.PEACHLAWN; }
+    if (within(i,j,79,15,90,26,2)) { level = 5; mat = M.HEAVENPAVE; }
+    if (within(i,j,74,10,85,18,2)) { level = 7; mat = M.HEAVENPAVE; }
+    if (within(i,j,89,10,97,18,2)) { level = 5; mat = M.BRONZE; }
+    if (mat === M.BRONZE && i >= 91 && j <= 14) { level = 7; mat = M.BRONZE; }
+    if (within(i,j,81,25,89,28,1)) { level = 3; mat = M.HEAVENPAVE; }
+    if (within(i,j,84,32,86,33)) { level = 3; mat = M.HEAVENPAVE; }
+    if (i === 85 && j >= 29 && j <= 31) { level = 3; mat = M.HEAVENBRIDGE; }
+    else if (i >= 84 && i <= 86 && j >= 29 && j <= 31) { level = -1; mat = M.CLOUD; }
+    if (i === 85 && j === 15) { level = 5; mat = M.HEAVENPAVE; }
+    if (j === 15 && i >= 86 && i <= 88) { level = 5; mat = M.HEAVENBRIDGE; }
+    set(i, j, level, mat);
   }
-  for (const j of [19, 28, 34]) for (let i=76; i<=90; i++) if (isB(i,j,'tc') && MAT[id(i,j)]===M.CLOUD) set(i,j,1,M.HEAVENBRIDGE);
+  // Leave cloud visible below the lateral bridge rather than a continuous paved bank.
+  for (let i = 86; i <= 88; i++) for (const j of [14,16]) set(i,j,-1,M.CLOUD);
 
   // =====================================================================================================  HOA QUẢ SƠN (east tip)
   // Back (small j, along the map's upper-right edge): a jade massif. Then terraces stepping down toward the viewer: upper (4), middle (2),
@@ -387,22 +405,70 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   }
   for (const b of TWM.biomes) if (!b.built) { const [ci, cj] = b.centre.map(Math.round); prop('stele', ci, cj, { block: true, placeholder: true }); }
 
-  // Heaven landmarks are independent, blocked sprites with reachable work positions.
-  for (const [kind,i,j,v] of [['tcgate',76,8,0],['tcpalace',91,8,0],['tcpalace',69,15,1],['tcfurnace',96,25,0],['tclantern',90,18,0],['tclantern',72,20,1],['banner',89,14,0],['banner',72,13,0]]) {
-    if (isB(i,j,'tc') && !TWM.isWater(MAT[id(i,j)])) { prop(kind,i,j,{v,fp:[1,1]}); if (kind==='tcfurnace') { poi('furnace','tc',i-1,j,{cap:2,face:'right'}); TWM.lights.push({biome:'tc',i,j,r:65,col:'255,185,95',kind:'fire'}); } }
+  // Stair flights are explicit so a resident never scales a parapet. Several side-by-side
+  // lanes read as one broad ceremonial flight. Each pair is (low landing, high landing).
+  function heavenFlight(i, j, di, dj) {
+    addStair(id(i,j), id(i+di,j+dj));
+    PATHC[id(i,j)] = PATHC[id(i+di,j+dj)] = 1;
   }
-  for (const [i,j] of [[70,25],[73,29],[76,33],[91,29],[95,32],[98,17],[68,32],[88,34]]) if (isB(i,j,'tc') && isB(i,j+1,'tc') && !TWM.isWater(MAT[id(i,j)]) && !TWM.isWater(MAT[id(i,j+1)]) && !RES[id(i,j)]) {
-    prop('tcpeach',i,j,{v:(i+j)%2}); poi('orchard','tc',i,j+1,{cap:1,face:'up'});
+  for (let i=80; i<=83; i++) heavenFlight(i,19,0,-1);
+  for (let i=83; i<=87; i++) heavenFlight(i,25,0,-1);
+  for (let i=84; i<=86; i++) heavenFlight(i,34,0,-1);
+  for (let j=21; j<=23; j++) heavenFlight(79,j,-1,0);
+  for (let i=92; i<=94; i++) heavenFlight(i,15,0,-1);
+  heavenFlight(85,15,-1,0);
+
+
+  // The orchard alley bends twice to leave clear picking and banquet positions.
+  for (let i=71; i<=81; i++) for (let j=19; j<=30; j++) {
+    const k = id(i,j);
+    if (MAT[k] === M.PEACHLAWN && (j === 23 || i === (j < 23 ? 74 : 76) || within(i,j,73,25,79,29,1))) {
+      MAT[k] = M.HEAVEN; PATHC[k] = 1;
+    }
   }
-  for (const [kind,i,j] of [['court',86,18],['banquet',88,22],['gatepost',75,11],['gatepost',78,11],['heavenpath',71,23],['heavenpath',93,30],['heavenpath',95,14]]) {
-    if (isB(i,j,'tc') && !TWM.isWater(MAT[id(i,j)])) poi(kind,'tc',i,j,{cap:12});
+  prop('tcgate',77,14,{fp:[7,2],piers:[[0,1],[2,1],[4,0],[6,0]],v:0});
+  prop('tcgatehouse',79,10,{fp:[2,2],v:0});
+  prop('tcpalace',75,11,{fp:[2,2],v:0});
+  prop('tcpalace',83,11,{fp:[2,2],v:0,flip:true});
+  prop('tcpavilion',73,25,{fp:[2,2],v:0});
+  prop('tcfurnace',92,12,{fp:[2,2],v:1});
+  TWM.lights.push({biome:'tc',i:93,j:13,r:100,col:'255,143,60',kind:'fire'});
+  for (const [i,j] of [[90,14],[95,16]]) {
+    prop('tcbrazier',i,j,{v:0});
+    TWM.lights.push({biome:'tc',i,j,r:46,col:'255,159,80',kind:'fire'});
   }
-  if (isB(89,23,'tc') && !TWM.isWater(MAT[id(89,23)])) { prop('table',89,23,{block:true}); prop('basket',90,24,{block:false}); }
-  for (let j=12;j<=35;j++) for (let i=65;i<=100;i++) if (isB(i,j,'tc') && (j===19 || j===28 || i===74 || i===90)) PATHC[id(i,j)]=1;
-  // Small decorative garden groups, keeping work positions and routes clear.
-  for(let j=12;j<38;j+=3)for(let i=62;i<103;i+=3){const k=id(i,j);if(!isB(i,j,'tc')||RES[k]||PATHC[k]||MAT[k]===M.CLOUD||MAT[k]===M.HEAVENBRIDGE)continue;
-    if(TWM.pois.some(p=>p.biome==='tc'&&Math.abs(p.i-i)<=1&&Math.abs(p.j-j)<=1))continue;
-    const h=hash2(i,j,181);if(h<.14)prop('tclantern',i,j,{block:true,v:(i+j)%2});else if(h<.24)prop('flowers',i,j,{block:false});else if(h<.31)prop('scholar',i,j,{block:true,v:(i+j)%2});
+  for (const [i,j] of [[77,17],[84,17],[80,24],[88,24]]) prop('tcpillar',i,j,{v:0});
+  for (const [i,j] of [[79,18],[84,18],[82,26],[88,26],[72,28],[89,16]]) {
+    prop(j === 26 ? 'tclantern' : 'tcsilklamp',i,j,{v:1});
+    TWM.lights.push({biome:'tc',i,j,r:48,col:'255,202,125',kind:'lantern'});
+  }
+  for (const [n,[i,j]] of [[71,21],[73,19],[76,19],[77,21],[71,24],[74,22],[78,23],[78,28]].entries()) {
+    prop('tcpeach',i,j,{v:n%2});
+    poi('orchard','tc',i+1,j,{face:'left',cap:1});
+  }
+  for (const [i,j] of [[72,20],[73,22],[75,27],[77,28],[72,27]]) prop('flowers',i,j,{block:false});
+  prop('tcfeast',75,27,{v:0});
+  prop('tcfeast',77,29,{v:0});
+  poi('court','tc',...TC.court,{cap:15});
+  poi('banquet','tc',...TC.banquet,{cap:12});
+  poi('furnace','tc',...TC.furnace,{cap:2,face:'up'});
+  for (const [i,j] of [[79,17],[83,17]]) poi('gatepost','tc',i,j,{cap:3});
+  for (const [i,j] of [[80,22],[89,18],[85,27]]) poi('heavenpath','tc',i,j,{cap:5});
+
+  // Pierced jade balustrades follow exposed upper edges. Keep the stairs and crossings open.
+  for (let j=10; j<=28; j++) for (let i=71; i<=97; i++) {
+    const k = id(i,j);
+    if (H[k] < 3 || MAT[k] === M.HEAVENBRIDGE) continue;
+    for (const [di,dj] of [[1,0],[0,1]]) {
+      const next = id(i+di,j+dj);
+      if (H[next] >= H[k] || TWM.stairs.has(k+','+next) || MAT[next] === M.HEAVENBRIDGE) continue;
+      prop('tcrail',i,j,{block:false,v:0,edge:di ? 'i' : 'j',flip:!di});
+    }
+  }
+  // Free-standing cloud banks sit below the architecture at the cloud-sea elevation.
+  // Alternate large cloud banks with thin cloud scrolls.
+  for (const [i,j] of [[76,9],[87,8],[82,5],[73,13],[70,26],[73,32],[79,32],[87,30],[94,21],[97,19],[100,12],[93,7],[68,14],[71,12],[72,16],[68,22],[72,30],[77,31],[81,30],[90,28],[92,23],[96,20],[98,15],[89,9],[80,8],[76,6],[67,18],[88,32],[99,22]]) {
+    if (MAT[id(i,j)] === M.CLOUD) prop('tccloud',i,j,{block:false,v:Math.floor(hash2(i,j,48)*4),flip:i%2===0});
   }
 
   // Provisional routes in empty regions: connect their centre to each actual
@@ -428,6 +494,10 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
       if (n >= m2) { for (let a = 0; a < n; a++) seenB[id(i, j + a)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [1, n], block: false, v: 0, bridge: true }); }
       else { for (let a = 0; a < m2; a++) seenB[id(i + a, j)] = 1; TWM.props.push({ kind, biome: TWM.biomes[BIO[k]].id, i, j, fp: [m2, 1], block: false, v: 0, bridge: true, flip: true }); }
     } }
+  const heavenSpans = new Map();
+  for (const p of TWM.props) if (p.kind === 'tcbridge') {
+    for (let di=0; di<p.fp[0]; di++) for (let dj=0; dj<p.fp[1]; dj++) heavenSpans.set(id(p.i+di,p.j+dj),p);
+  }
   // ---------------------------------------------------------------- seam band: placeholder ground near a built biome blends toward that biome's colours
   // TWM.seam[k] = distance (1..6) << 2 | built biome (1 hqs, 2 btd); 0 = none. (Design: borders carry both palettes.)
   TWM.seam = new Uint8Array(NN);
@@ -457,7 +527,12 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     if (m === M.BRIDGE || m === M.SILKB) w = true;
     WALK[k] = w ? 1 : 0;
   }
-  for (const p of TWM.props) if (p.block) { const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1; for (let b = 0; b < fh; b++) for (let a = 0; a < fw; a++) if (inMap(p.i + a, p.j + b)) WALK[id(p.i + a, p.j + b)] = 0; }
+  for (const p of TWM.props) if (p.block) {
+    if (p.piers) {
+      for (const [di,dj] of p.piers) WALK[id(p.i+di,p.j+dj)] = 0;
+      continue;
+    }
+    const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1; for (let b = 0; b < fh; b++) for (let a = 0; a < fw; a++) if (inMap(p.i + a, p.j + b)) WALK[id(p.i + a, p.j + b)] = 0; }
   // stair tiles stay walkable
   for (const s of TWM.props) if (s.kind === 'stairs') WALK[id(s.i, s.j)] = 1;
   // water tiles usable by bathers / swimmers
@@ -499,6 +574,11 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   TWM.tileOf = (x, y) => [Math.floor(x / 8), Math.floor(y / 8)];
   TWM.groundZ = (x, y) => {
     const i = Math.floor(x / 8), j = Math.floor(y / 8); if (!inMap(i, j)) return 0; const k = id(i, j), st = TWM.stairAt.get(k);
+    if (MAT[k] === M.HEAVENBRIDGE) {
+      const p = heavenSpans.get(k);
+      const t = p.flip ? (x/8-p.i)/p.fp[0] : (y/8-p.j)/p.fp[1];
+      return H[k]*TWM.LV + 5*Math.sin(Math.PI*t);
+    }
     if (!st) return H[k] * TWM.LV;
     const f = st.dir === 'j' ? 1 - (y / 8 - j) : 1 - (x / 8 - i);           // 0 at the front edge, 1 at the back edge of the flight
     return (H[k] + st.dh * Math.max(0, Math.min(1, f))) * TWM.LV;

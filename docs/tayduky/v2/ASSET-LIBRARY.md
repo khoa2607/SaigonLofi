@@ -61,6 +61,16 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 
 | Sprite | Size | Biomes | Footprint | Life | Source |
 |---|---|---|---|---|---|
+| `tc_monument_a` | 300x306 | tc | 5x2 landmark | ceremonial gate, integer 2x | pixellab create_1_direction_object job 1348df9c |
+| `tc_kiln_a` | 142x175 | tc | 2x2 | trigram fire mouth, smoke and sparks | pixellab create_1_direction_object job 855cdb4e |
+| `tc_bank_a` | 260x152 | tc | cloud sea | slow drifting banks | pixellab create_map_object job 445431e5 |
+| `tc_silklamp_a` | 28x70 | tc | 1x1 | red lantern glow | pixellab create_map_object job 6507a136 |
+| `tc_gatehouse_a` | 145x164 | tc | 2x2 | gatehouse behind main arch | pixellab create_map_object job 94673d0b |
+| `tc_pavilion_a` | 128x145 | tc | 2x2 | banquet pavilion | pixellab create_1_direction_object job e2fdc359 |
+| `tc_pillar_a` | 30x113 | tc | 1x1 | paired jade huabiao | pixellab create_map_object job 9c2b0f9e |
+| `tc_brazier_a` | 52x58 | tc | 1x1 | firelight | pixellab create_map_object job d65dbacd |
+| `tc_cloud_a` | 126x38 | tc | cloud sea | slow drift | pixellab create_map_object job 81f96319 |
+| `tc_scroll_a` | 117x65 | tc | cloud sea | slow drift | pixellab create_map_object job a81498c0 |
 | `tc_gate_a` | 136x155 | tc | 1x1 | gate landmark | pixellab create_1_direction_object job 1348df9c |
 | `tc_gate_b` | 150x153 | tc | 1x1 | gate landmark | pixellab create_1_direction_object job 1348df9c |
 | `tc_palace_a` | 148x142 | tc | 1x1 | palace landmark | pixellab create_1_direction_object job eac2e662 |

@@ -3,7 +3,7 @@
 (function () {
   const Q = new URLSearchParams(location.search), cv = document.getElementById('c');
   const sim = window.TWS || null;
-  const START = { hqs: [138, 24], btd: [80, 140], tc: [85, 20], fall: [131, 16], spring: [92, 143] };
+  const START = { hqs: [138, 24], btd: [80, 140], tc: [81, 18], fall: [131, 16], spring: [92, 143] };
   function boot() {
     TWR.init(cv);
     if (sim && sim.init) sim.init(+(Q.get('seed') || (Date.now() % 100000)));

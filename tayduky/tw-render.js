@@ -19,6 +19,9 @@ const TWR = (function () {
       if (sp.py === undefined) sp.py = pivotOf(sp.frames[0]);
       const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1, x = (p.i + fw / 2) * 8, y = (p.j + fh / 2) * 8, z = TWM.H[TWM.id(p.i, p.j)] * 4;
       const s = { p, sp, x, y, z, X: Math.round(wx(x, y) - sp.w / 2), Y: Math.round(wy(x, y, z) - sp.py + 2), key: x + y, ph: (p.i * 7 + p.j * 3) % 17 };
+      if (p.kind === 'tcbridge') s.Y += 10;
+      if (p.edge) s.key += 4; // balustrade is half a tile in front of the centre
+      if (p.kind === 'tcbridge') s.key -= (fw + fh) * 4;
       if (sp.flat) R.flats.push(s); else R.statics.push(s);
       const ck = Math.floor(s.X / CH) + ',' + Math.floor(s.Y / CH); if (!R.grid.has(ck)) R.grid.set(ck, []); R.grid.get(ck).push(s);
       // static occlusion: terrain columns in front of this prop that rise above its base
@@ -215,10 +218,19 @@ const TWR = (function () {
   }
   function drawHeavenCranes(g) {
     if (!TWM.tc) return;
-    for (let k=0;k<3;k++) { const x=(72+k*8)*8+Math.sin(R.t*.14+k)*28, y=(17+k*5)*8+Math.cos(R.t*.13+k)*20;
-      const X=Math.round(wx(x,y)),Y=Math.round(wy(x,y,35+Math.sin(R.t+k)*3)), wing=Math.floor(R.t*4+k)%2;
-      g.fillStyle='#f7f2ea';g.fillRect(X-4,Y,9,2);g.fillRect(X-2,Y-2-wing*2,3,3);g.fillRect(X+2,Y-2-wing*2,3,3);
-      g.fillStyle='#2a1726';g.fillRect(X+4,Y-1,2,1);g.fillRect(X-5,Y+1,2,1); }
+    for (let k=0;k<3;k++) {
+      const phase = R.t * 0.095 + k * 0.17;
+      const x = (83 + Math.cos(phase)*13 + k)*8, y = (21 + Math.sin(phase)*9)*8;
+      const X = Math.round(wx(x,y)), Y = Math.round(wy(x,y,58+Math.sin(phase*4+k)*2));
+      const dir = Math.cos(phase)*9 + Math.sin(phase)*13 > 0 ? -1 : 1;
+      const wing = Math.round(Math.sin(R.t*5+k)*3);
+      g.save(); g.translate(X,Y); g.scale(dir,1);
+      g.fillStyle='#f9eee1'; g.fillRect(-5,0,11,2); g.fillRect(3,-2,6,2);
+      g.fillRect(-3,-3+wing,4,4); g.fillRect(-6,-5+wing,4,3);
+      g.fillStyle='#49425a'; g.fillRect(-8,-6+wing,3,2); g.fillRect(-8,2,5,1);
+      g.fillStyle='#b75a46'; g.fillRect(7,-3,2,2); g.fillStyle='#bb9966'; g.fillRect(9,-2,3,1);
+      g.restore();
+    }
   }
   function drawFlies(g) { for (const f of AMB.flies) { const t = R.t * 0.6 + f.ph, x = f.hx + Math.sin(t) * 12 + Math.sin(t * 2.7) * 4, y = f.hy + Math.cos(t * 0.8) * 10, z = TWM.groundZ(f.hx, f.hy) + 6 + Math.sin(t * 1.7) * 4; if ((Math.floor(t * 3) % 5) === 0) continue; g.fillStyle = f.c; g.fillRect(Math.round(wx(x, y)), Math.round(wy(x, y, z)), 1, 1); } }
 
@@ -271,6 +283,13 @@ const TWR = (function () {
     for (const it of D) {
       if (it[1] === 0) { const s = it[2], fr = s.sp.frames, f = fr.length === 1 ? fr[0] : fr.length === 2 ? fr[Math.floor(R.t * 0.8 + s.ph) % 2] : fr[Math.floor(R.t * 4 + s.ph) % fr.length];
         if (s.p.kind === 'dummy' && s.p.hit > 0) g.drawImage(f, s.X + (Math.floor(R.t * 30) % 2 ? 1 : -1), s.Y);
+        else if (s.p.kind === 'tccloud') {
+          const dx = Math.round(Math.sin(R.t * 0.12 + s.ph) * 10);
+          const dy = Math.round(Math.cos(R.t * 0.17 + s.ph) * 3);
+          g.save(); g.globalAlpha = s.p.v === 3 ? 0.46 : 0.72;
+          g.translate(s.X + dx + (s.p.flip ? f.width : 0), s.Y + dy);
+          g.scale(s.p.flip ? -1 : 1, 1); g.drawImage(f,0,0); g.restore();
+        }
         else if (s.sp.sway) sway(g, f, s, s.sp.sway);
         else if (s.p.flip) { g.save(); g.translate(s.X + f.width, s.Y); g.scale(-1, 1); g.drawImage(f, 0, 0); g.restore(); } else g.drawImage(f, s.X, s.Y);
         if (s.sp.glow || s.sp.silk) lifeOverlay(g, s);

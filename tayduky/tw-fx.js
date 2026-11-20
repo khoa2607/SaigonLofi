@@ -22,9 +22,6 @@ const TWFX = (function () {
       for (let q=0;q<10;q++) { const ph=(t*0.23+q/10)%1, x=st.X+st.sp.w/2+Math.sin(t+q)*5, y=st.Y+st.sp.h*.35-ph*45;
         g.globalAlpha=(1-ph)*.45; px(g,x,y,3+q%3,2,q%2?'#eee5f4':'#ffd48a'); } g.globalAlpha=1;
     }
-    if (TWM.tc) { const cx=R.wx(80*T,25*T), cy=R.wy(80*T,25*T,4);
-      if(cx>x0-350&&cx<x0+W+350&&cy>y0-250&&cy<y0+Hh+250) for(let q=0;q<7;q++){const x=cx+((t*8+q*71)%440)-220,y=cy-50+(q%3)*22;g.globalAlpha=.18;px(g,x,y,28,3,'#ffffff');px(g,x+6,y-2,15,2,'#ffffff');g.globalAlpha=1;}
-    }
     // spring steam (always), loom threads while weaving
     const sp = TWM.btd.spring, sx = R.wx((sp[0] + 0.5) * T, (sp[1] + 0.5) * T), sy = R.wy((sp[0] + 0.5) * T, (sp[1] + 0.5) * T, 12);
     if (sx > x0 - 100 && sx < x0 + W + 100 && sy > y0 - 120 && sy < y0 + Hh + 60)
@@ -71,7 +68,7 @@ const TWFX = (function () {
     // characters keep their own colour at night: the sprite is re-drawn additively over itself (after the night grade), so people stay readable without lighting the ground
     if (amt > 0.1) { const x0 = R.cx - R.cv.width / 2 - 70, x1 = R.cx + R.cv.width / 2 + 70, y0 = R.cy - R.cv.height / 2 - 80, y1 = R.cy + R.cv.height / 2 + 100;
       g.globalAlpha = Math.min(0.62, 0.12 + amt * 0.7);
-      for (const a of S.agents) { if (a.gone || a.hidden || (a.alpha !== undefined && a.alpha < 0.5)) continue; const X = R.wx(a.x, a.y), Y = R.wy(a.x, a.y, a.gz); if (X < x0 || X > x1 || Y < y0 || Y > y1 || a.inWater) continue; R.drawAgent(g, a, true); }
+      for (const a of S.agents) { if (a.biome === 'tc' || a.gone || a.hidden || (a.alpha !== undefined && a.alpha < 0.5)) continue; const X = R.wx(a.x, a.y), Y = R.wy(a.x, a.y, a.gz); if (X < x0 || X > x1 || Y < y0 || Y > y1 || a.inWater) continue; R.drawAgent(g, a, true); }
       g.globalAlpha = 1; }
     // characters carry a soft light at night so they stay readable (violet spirit glow in the gorge, warm lantern light elsewhere)
     if (amt > 0.12 || true) for (const a of S.agents) { if (a.gone || a.hidden) continue; const btd = a.biome === 'btd', k = btd ? 0.2 + amt * 0.35 : amt * 0.4; if (k < 0.03) continue;

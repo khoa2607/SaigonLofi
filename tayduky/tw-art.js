@@ -43,6 +43,10 @@ const TWA = (function () {
     faceB: ramp(['#18131f', '#1f1928', '#262032', '#2e273c', '#383048', '#433a56']),
     faceS: ramp(['#14385e', '#1a4470', '#215080', '#2a5e90']),
     heaven: ramp(['#c9b9d0', '#d7c9dd', '#e8dfea', '#f3ebef', '#fff3e3']),
+    jade: ramp(['#607e80','#83a29a','#a9c8b7','#cedfc6','#f5e9ca']),
+    garden: ramp(['#64847c','#84a88d','#a2bd98','#bbd0a4','#e0d9ab']),
+    bronze: ramp(['#514151','#675361','#806969','#a38777','#c6a475']),
+    goldInlay: ramp(['#927358','#c5a468','#ead099','#fff0c8']),
     cloud: ramp(['#9fb8c9', '#bed0da', '#dce4e8', '#f5eced', '#fff8ed']),
     vine: ramp(['#244a32', '#2f6040', '#3e7a4c', '#56965a']),
   };
@@ -56,6 +60,24 @@ const TWA = (function () {
   const biomeId = k => TWM.biomes[TWM.BIO[k]].id;
   const tone = (r, v) => r[Math.max(0, Math.min(r.length - 1, Math.floor(v)))];
 
+  // Bake prop contact shadows into the receiving terrace only. Coordinates are in tiles.
+  const shadowTiles = new Map();
+  const shadowRadii = {tcgate:[3.8,0.8],tcgatehouse:[1.35,1.1],tcpalace:[1.45,1.1],
+    tcpavilion:[1.5,1.3],tcpeach:[1.25,1],tcfurnace:[1.3,1.15],tcpillar:[0.65,0.35],
+    tclantern:[0.6,0.5],tcsilklamp:[0.48,0.28],tcbrazier:[0.45,0.38]};
+  for (const p of TWM.props) {
+    const radii = shadowRadii[p.kind];
+    if (!radii) continue;
+    const [a,b] = radii, [w,h] = p.fp || [1,1];
+    const x = p.i + w/2 + 0.35, y = p.j + h/2, level = TWM.h(p.i,p.j);
+    for (let j=Math.floor(y-b); j<=Math.floor(y+b); j++) for (let i=Math.floor(x-a); i<=Math.floor(x+a); i++) {
+      if (TWM.h(i,j) !== level) continue;
+      const k = TWM.id(i,j);
+      if (!shadowTiles.has(k)) shadowTiles.set(k,[]);
+      shadowTiles.get(k).push({x,y,a,b});
+    }
+  }
+
   // ---------------------------------------------------------------- terrain top shader (world-space)
   // returns colour; sets SH.em (emissive colour or null) and SH.water (glint type or 0)
   const SH = { em: null, water: 0 };
@@ -63,9 +85,39 @@ const TWA = (function () {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     switch (m) {
-      case M.HEAVEN: { const r=P.heaven; let c=tone(r,1+n0*1.8+n1*0.6); if (((X+Y*2)%48)<2) c=mix(c,P.cloud[3],0.3); return c; }
-      case M.HEAVENPAVE: { const u=I*1.5,v=J*1.5,fu=u-Math.floor(u),fv=v-Math.floor(v); const c=tone(P.heaven,2+hash2(Math.floor(u),Math.floor(v),182)); return fu<.055||fv<.055?mix(c,[181,160,157],.4):c; }
-      case M.CLOUD: case M.HEAVENBRIDGE: { SH.water=2; return tone(P.cloud,1+n0*1.5+n1*0.6); }
+      case M.HEAVEN: return tone(P.heaven, 1.6 + n0 + n1 * 0.8);
+      case M.PEACHLAWN: {
+        const grass = tone(P.garden, 1 + n0 * 2.3 + n1 * 0.7);
+        if (hash2(X >> 1,Y,84) < 0.008) return P.flowers[1];
+        return grass;
+      }
+      case M.HEAVENPAVE: case M.BRONZE: {
+        const forge = m === M.BRONZE, r = forge ? P.bronze : P.jade;
+        const row = Math.floor(J), u = (I + (row % 2)) / 2;
+        const seam = u % 1 < 0.018 || J % 1 < 0.032;
+        let c = seam ? r[1] : mix(r[2], r[3], 0.25 + hash2(Math.floor(u), row, 182) * 0.47 + n1 * 0.12);
+        const centre = forge ? TWM.tc.furnace : TWM.tc.court;
+        const dx = I - centre[0] - 0.5, dy = J - centre[1] - 0.5;
+        const radius = Math.hypot(dx,dy);
+        if (forge) {
+          const oct = Math.max(Math.abs(dx), Math.abs(dy), (Math.abs(dx) + Math.abs(dy)) * 0.707);
+          if (Math.abs(oct-2.25)<0.065 || Math.abs(oct-2.48)<0.035) c = P.goldInlay[1];
+        } else if (radius < 2.7) {
+          const a = Math.atan2(dy,dx);
+          if (radius < 2.49) c = mix(c, P.jade[1], 0.5);
+          const petal = 1.02 + 0.73*Math.cos(4*a)**2;
+          if (Math.abs(radius-2.6)<0.06 || Math.abs(radius-2.38)<0.05 ||
+              Math.abs(radius-petal)<0.065 || Math.abs(radius-0.45)<0.07) c = P.goldInlay[2];
+          if (radius < 0.28) c = P.goldInlay[1];
+        }
+        return c;
+      }
+      case M.CLOUD: case M.HEAVENBRIDGE: {
+        // Broad curling banks share world coordinates so they continue beneath the bridges.
+        const swell = vnoise(I * 0.14 + n0 * 0.18, J * 0.23 + n1 * 0.12, 83);
+        const veil = vnoise((I-J)*0.042, (I+J)*0.23+swell, 85);
+        return mix([160,179,206], [247,234,229], swell * 0.48 + veil * 0.50 + n0 * 0.02);
+      }
       case M.TRAIL: { const r=PHR[biomeId(k)]||PHR.tc; return mix(tone(r,1+n0*1.4),[223,200,164],0.35); }
       case M.PLACEWATER: { SH.water=2; return tone(P.stream,1+n0*1.5); }
       case M.GRASS: case M.LUSH: case M.FLOWER: {
@@ -148,6 +200,21 @@ const TWA = (function () {
     // b: biome id; side 0 = front-left (lit), 1 = front-right (shade); lx = global column; ry = px below the lip; elev = absolute px height
     const sea = TWM.MAT[k] === M.SEA;
     const R = sea ? P.faceS : b === 'btd' ? P.faceB : b === 'hqs' ? P.faceH : null;
+    if (b === 'tc') {
+      const r = TWM.MAT[k] === M.BRONZE ? P.bronze : P.jade, shadow = side ? 0.76 : 0.90;
+      if (ry < 3 || (drop > 24 && ry >= 9 && ry < 11)) return shade(P.goldInlay[2], shadow);
+      if (ry < 7 || ry > drop - 5) return shade(r[1], shadow);
+      if (drop >= 48 && ry >= 12 && ry < 28) {
+        // Carved lozenges and a gilt bead repeat underneath the terrace cornice.
+        const x = Math.abs(gx%24 - 12), y = Math.abs(ry - 19);
+        if (x + y*1.7 < 3) return shade(P.goldInlay[1],shadow);
+        if (Math.abs(x+y*1.7-10)<1.5 || ry === 27) return shade(r[3],shadow);
+        return shade(r[1],shadow);
+      }
+      const course = Math.floor((ry - 7) / 10);
+      const joint = (gx + course * 15) % 32 < 2 || (ry - 7) % 10 < 2;
+      return shade(r[joint ? 1 : 2], shadow + hash2((gx + course * 15) >> 5, course, 223)*0.07);
+    }
     if (!R) { const r = PHR[b] || PHR.tc; return shade(r[side ? 0 : 1], side ? 0.62 : 0.75); }
     const band = Math.floor((elev + vnoise(gx * 0.08, 0.5, 30) * 6) / 7);
     let t = (side ? 1.2 : 2.6) + hash2(band, Math.floor(gx / 9), 31) * 1.6 + (vnoise(gx * 0.2, elev * 0.15, 32) - 0.5) * 1.4;
@@ -201,8 +268,16 @@ const TWA = (function () {
   function drawTile(i, j, k, m, h, sx, sy, put) {
     const b = biomeId(k), H = TWM.H, MAT = TWM.MAT;
     // silk bridge over the chasm: the abyss first, then the deck
+    if (m === M.HEAVENBRIDGE) {
+      drawTop(i,j,k,M.CLOUD,-1,sx,SY(i,j,-1),put,b,0,0);
+      // A continuous jade deck seats the illustrated arch against both abutments.
+      drawTop(i,j,k,M.HEAVENPAVE,h,sx,sy,put,b,0,0);
+      return;
+    }
     if (m === M.SILKB) drawTop(i, j, k, M.CHASM, 0, sx, SY(i, j, 0), put, b, -1, -1);
-    const hl = lowerN(i, j + 1), hr = lowerN(i + 1, j);
+    // Bridge decks have air underneath. The bank still needs its full vertical face.
+    const hl = b === 'tc' && MAT[k+N] === M.HEAVENBRIDGE ? -1 : lowerN(i, j + 1);
+    const hr = b === 'tc' && MAT[k+1] === M.HEAVENBRIDGE ? -1 : lowerN(i + 1, j);
     const dropL = m === M.SILKB ? 0 : Math.max(0, h - hl) * LV, dropR = m === M.SILKB ? 0 : Math.max(0, h - hr) * LV;
     drawTop(i, j, k, m, h, sx, sy, put, b, dropL, dropR);
     // faces
@@ -224,6 +299,7 @@ const TWA = (function () {
   }
   function drawTop(i, j, k, m, h, sx, sy, put, b, dropL, dropR) {
     const H = TWM.H, MAT = TWM.MAT, water = TWM.isWater(m);
+    const shadows = b === 'tc' && shadowTiles.get(k);
     // near water (this tile or a same-level neighbour is water): shoreline comes from the analytic shapes, not the tile edge
     let nearW = water, landM = water ? 0 : m;
     for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!TWM.inMap(i + di, j + dj)) continue; const q = TWM.id(i + di, j + dj); if (H[q] !== h) continue; if (TWM.isWater(MAT[q])) nearW = true; else if (!landM && MAT[q] !== M.BRIDGE && MAT[q] !== M.SILKB && MAT[q] !== M.VOID) landM = MAT[q]; }
@@ -237,7 +313,7 @@ const TWA = (function () {
         const X = sx - 32 + lx, dx = lx + 0.5 - 32, dy = r + 0.5, fi = (dy / 16 + dx / 32) / 2, fj = (dy / 16 - dx / 32) / 2;
         let I = i + fi, J = j + fj, mm = m;
         // organic borders between land materials of the same level
-        if (!water && m !== M.BRIDGE && m !== M.SILKB && m !== M.CHASM) {
+        if (b !== 'tc' && !water && m !== M.BRIDGE && m !== M.SILKB && m !== M.CHASM) {
           const wi = I + (vnoise(I * 1.3, J * 1.3, 50) - 0.5) * 0.9, wj = J + (vnoise(I * 1.3, J * 1.3, 51) - 0.5) * 0.9, ti = Math.floor(wi), tj = Math.floor(wj);
           if ((ti !== i || tj !== j) && TWM.inMap(ti, tj)) { const q = TWM.id(ti, tj), m2 = MAT[q]; if (H[q] === h && m2 !== M.VOID && !TWM.isWater(m2) && m2 !== M.BRIDGE && m2 !== M.SILKB && m2 !== M.CHASM && m2 !== M.ROCK) mm = m2; }
         }
@@ -247,6 +323,14 @@ const TWA = (function () {
           if (wd < 0) { c = top(wm, I, J, X, y, k, (X + y) & 1); wt = SH.water; em = null; if (wd > -0.09) c = mix(c, [240, 252, 252], 0.75); else if (wd > -0.22) c = mix(c, [225, 245, 245], 0.3); }
           else { c = top(water ? landM : mm, I, J, X, y, k, (X + y) & 1); em = SH.em; wt = 0; if (wd < 0.1) c = shade(c, 0.72); else if (wd < 0.2) c = shade(c, 0.88); }
         } else { c = top(mm, I, J, X, y, k, (X + y) & 1); em = SH.em; wt = SH.water; }
+        if (shadows) {
+          let weight = 0;
+          for (const s of shadows) {
+            const q = ((I-s.x)/s.a)**2 + ((J-s.y)/s.b)**2;
+            weight = Math.max(weight, q < 0.65 ? 0.23 : q < 1 ? 0.12 : 0);
+          }
+          if (weight) c = mix(c, [61,64,79], weight);
+        }
         // cliff lip: ink on the drop edge, a lit row above it
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
@@ -258,7 +342,7 @@ const TWA = (function () {
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'btd' ? P.ledgeB : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -266,10 +350,11 @@ const TWA = (function () {
         // tread: tile-local (fi, fj) at height z
         const dyT = dy0 + z, fiT = (dyT / 16 + dx / 32) / 2, fjT = (dyT / 16 - dx / 32) / 2;
         const along = st.dir === 'j' ? 1 - fjT : 1 - fiT, across = st.dir === 'j' ? fiT : fjT;
-        const inT = fiT >= 0 && fjT >= 0 && fiT < 1 && fjT < 1 && along >= f0 && along < f1 && across > 0.12 && across < 0.88;
+        const margin = b === 'tc' ? 0 : 0.12;
+        const inT = fiT >= 0 && fjT >= 0 && fiT < 1 && fjT < 1 && along >= f0 && along < f1 && across >= margin && across <= 1-margin;
         // riser: front face of the step, between heights z - rz and z
         let inR = false, rr = 0;
-        for (let zz = z - rz; zz < z && !inR; zz++) { const dyR = dy0 + zz, fiR = (dyR / 16 + dx / 32) / 2, fjR = (dyR / 16 - dx / 32) / 2, al = st.dir === 'j' ? 1 - fjR : 1 - fiR, ac = st.dir === 'j' ? fiR : fjR; if (Math.abs(al - f0) < 0.035 && ac > 0.12 && ac < 0.88 && fiR >= -0.05 && fjR >= -0.05 && fiR <= 1.05 && fjR <= 1.05) { inR = true; rr = z - zz; } }
+        for (let zz = z - rz; zz < z && !inR; zz++) { const dyR = dy0 + zz, fiR = (dyR / 16 + dx / 32) / 2, fjR = (dyR / 16 - dx / 32) / 2, al = st.dir === 'j' ? 1 - fjR : 1 - fiR, ac = st.dir === 'j' ? fiR : fjR; if (Math.abs(al - f0) < 0.035 && ac >= margin && ac <= 1-margin && fiR >= -0.05 && fjR >= -0.05 && fiR <= 1.05 && fjR <= 1.05) { inR = true; rr = z - zz; } }
         if (inT) put(sx - 32 + lx, sy + r, along - f0 < 0.06 ? mix(pal[pal.length - 1], [255, 255, 240], 0.3) : tone(pal, 2.4 + hash2(lx >> 2, s, 60)), null, 0);
         else if (inR) put(sx - 32 + lx, sy + r, rr === 1 ? INK : tone(pal, st.dir === 'j' ? 1.3 : 0.6), null, 0);
       }
@@ -497,7 +582,21 @@ const TWA = (function () {
       if (q > 1) continue; let c = null;
       if (q > 0.9) c = STONE[1]; else if (q > 0.82) c = GOLD[1]; else if (q > 0.74) c = STONE[3]; else if (q < 0.2) c = GOLD[q < 0.1 ? 3 : 2]; else if (Math.abs(((a / Math.PI * 4 + 8) % 1) - 0.5) < 0.12 && q < 0.7) c = GOLD[1]; else if (q < 0.42 && q > 0.36) c = RED[2];
       if (c) S.set(x, y, c); } return [S]; }
+  // One carved span along the near edge of a diamond. Flip it for the other face.
+  function jadeRail() {
+    const s = new Spr(70,42);
+    for (let x=0; x<=32; x++) {
+      const y = 37 - (x >> 1), px = 35 + x;
+      for (let h=0; h<=14; h++) {
+        const pier = x%16 < 3, bar = h < 3 || (h >= 8 && h <= 11);
+        if (pier || bar) s.set(px,y-h,h === 11 ? P.goldInlay[2] : h === 2 || h === 14 ? P.jade[4] : P.jade[pier ? 2 : 1]);
+      }
+      if (x%16 === 1) { blob(s,px,y-15,3,2,P.jade); s.set(px,y-18,P.goldInlay[2]); }
+    }
+    return [s];
+  }
   const PAINT = {
+    tcrail: jadeRail, tcfeast: table,
     medallion: () => medallion(),
     peach: p => peachTree(p.v), pine: p => pine(p.v), bamboo: p => bamboo(p.v), bush: p => bush(p.v), flowers: p => flowersSpr(p.v), tuft: p => tuft(p.v), fern: p => fern(p.v),
     rock: p => rock(p.v, p.size || 1, p.dark || p.biome === 'btd'), crag: p => crag(p.v), lily: p => lily(p.v), shell: p => shell(p.v),
@@ -510,7 +609,7 @@ const TWA = (function () {
   const IMG = {};
   // life masks built from the sprite itself: GLOW = saturated bright violet/green/teal pixels (crystals, mushrooms, eggs) that pulse and come back at night;
   // SILK = bright desaturated pixels (webs, silk wraps) that shimmer. Which sprites get which is a name-prefix table.
-  const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_', 'tc_furnace_', 'tc_lantern_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
+  const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_', 'tc_furnace_', 'tc_lantern_', 'tc_brazier_', 'tc_silklamp_', 'tc_kiln_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
   function lifeMask(im, kind) {
     const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const g = cv.getContext('2d'); g.drawImage(im, 0, 0);
     const id = g.getImageData(0, 0, cv.width, cv.height), d = id.data; let n = 0;
@@ -532,7 +631,7 @@ const TWA = (function () {
   const IMGKINDS = { hut: ['hut_a', 'hut_b', 'hut_c'], shrine: ['shrine_a', 'shrine_b', 'shrine_c'], stall: ['stall_a', 'stall_b'], hbridge: ['bridge_a'], tent: ['tent_a', 'tent_b'],
     altar: ['altar_a', 'altar_b'], pcrystals: ['crystals_a', 'crystals_b', 'crystals_c'], silkbr: ['silkbridge_a'], hall: ['hall_a', 'hall_b'], statue: ['statue_a', 'statue_b'], playground: ['playground_a'],
     bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], caveent: ['cave_a', 'cave_b'], gate: ['gate_a', 'gate_b'], bigbamboo: ['bamboo_a', 'bamboo_b', 'bamboo_c'], scholar: ['scholar_a', 'scholar_b'],
-    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'], tcgate: ['tc_gate_a','tc_gate_b'], tcpalace: ['tc_palace_a','tc_palace_b'], tcfurnace: ['tc_furnace_a','tc_furnace_b'], tcbridge: ['tc_bridge_a','tc_bridge_b'], tcpeach:['tc_peach_a','tc_peach_b'], tclantern:['tc_lantern_a','tc_lantern_b'] };
+    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'], tcgate: ['tc_monument_a'], tcgatehouse: ['tc_gatehouse_a'], tcpavilion: ['tc_pavilion_a'], tcpillar: ['tc_pillar_a'], tcbrazier: ['tc_brazier_a'], tcsilklamp: ['tc_silklamp_a'], tccloud: ['tc_bank_a','tc_bank_a','tc_cloud_a','tc_scroll_a'], tcpalace: ['tc_palace_a','tc_palace_b'], tcfurnace: ['tc_kiln_a'], tcbridge: ['tc_bridge_a','tc_bridge_b'], tcpeach:['tc_peach_a','tc_peach_b'], tclantern:['tc_lantern_a','tc_lantern_b'] };
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {
@@ -543,6 +642,7 @@ const TWA = (function () {
     const paint = PAINT[p.kind]; if (!paint && !IMGKINDS[p.kind]) return null; if (!paint) return null;
     const frames = paint(Object.assign({}, p, { v: vv * 7919 + 13 })), f0 = frames[0];
     const out = { w: f0.w, h: f0.h, frames: frames.map(S => S.canvas()), em: f0.e ? f0.canvas(true) : null, flat: !!p.flat };
+    if (p.kind === 'tcrail') out.py = 21;
     cache.set(key, out); return out;
   }
   return { loadSprites, IMG, OX, OY, LV, CH, WORLD_W, WORLD_H, SX, SY, bakeChunk, sprite, P, INK, Spr, blob, line, tone, ramp, mix, LEAF, GOLD, RED, STONE, VROCK };

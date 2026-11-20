@@ -433,7 +433,11 @@ const TWS = (function () {
     for (const b of TWM.biomes) {
       const data = D().biomes[b.id]; const B = S.biomes[b.id] = { id: b.id, data: data || null, phase: 'peace', timer: rnd(25, 90), miniT: rnd(5, 25), run: null, story: null };
       if (!data) continue;
-      for (const [ch, n, role] of data.residents) for (let k = 0; k < n; k++) { const p = TWM.randomWalkable(b.id, S.R); if (p) agent(ch, b.id, role, p[0], p[1]); }
+      for (const [ch, n, role] of data.residents) for (let k = 0; k < n; k++) {
+        const home = b.id === 'tc' && TWM.tc[{fairy:'orchard',heavenguard:'gate',laojun:'furnace',trickster:'court'}[role]];
+        const p = home ? TWM.randomWalkable(b.id,S.R,home,3) : TWM.randomWalkable(b.id,S.R);
+        if (p) agent(ch, b.id, role, p[0], p[1]);
+      }
     }
     for (let k = 0; k < 300; k++) tick(0.1);                       // warm start: the world is already living on the first frame
     S.counts = { minis: {}, acts: {}, stories: {} };

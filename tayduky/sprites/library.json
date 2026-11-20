@@ -752,6 +752,166 @@
    "runtime_kind": "",
    "source": "pixellab create_1_direction_object job "
   },
+  "tc_monument_a": {
+   "file": "sprites/tc_monument_a.png",
+   "size": [
+    300,
+    306
+   ],
+   "anchor_y": 239,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "5x2 landmark",
+   "life": "ceremonial gate, integer 2x",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_kiln_a": {
+   "file": "sprites/tc_kiln_a.png",
+   "size": [
+    142,
+    175
+   ],
+   "anchor_y": 152,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "trigram fire mouth, smoke and sparks",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job 855cdb4e"
+  },
+  "tc_bank_a": {
+   "file": "sprites/tc_bank_a.png",
+   "size": [
+    260,
+    152
+   ],
+   "anchor_y": 119,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drifting banks",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job 445431e5"
+  },
+  "tc_silklamp_a": {
+   "file": "sprites/tc_silklamp_a.png",
+   "size": [
+    28,
+    70
+   ],
+   "anchor_y": 66,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "red lantern glow",
+   "runtime_kind": "tcsilklamp",
+   "source": "pixellab create_map_object job 6507a136"
+  },
+  "tc_gatehouse_a": {
+   "file": "sprites/tc_gatehouse_a.png",
+   "size": [
+    145,
+    164
+   ],
+   "anchor_y": 136,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "gatehouse behind main arch",
+   "runtime_kind": "tcgatehouse",
+   "source": "pixellab create_map_object job 94673d0b"
+  },
+  "tc_pavilion_a": {
+   "file": "sprites/tc_pavilion_a.png",
+   "size": [
+    128,
+    145
+   ],
+   "anchor_y": 126,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "banquet pavilion",
+   "runtime_kind": "tcpavilion",
+   "source": "pixellab create_1_direction_object job e2fdc359"
+  },
+  "tc_pillar_a": {
+   "file": "sprites/tc_pillar_a.png",
+   "size": [
+    30,
+    113
+   ],
+   "anchor_y": 106,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "paired jade huabiao",
+   "runtime_kind": "tcpillar",
+   "source": "pixellab create_map_object job 9c2b0f9e"
+  },
+  "tc_brazier_a": {
+   "file": "sprites/tc_brazier_a.png",
+   "size": [
+    52,
+    58
+   ],
+   "anchor_y": 52,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "firelight",
+   "runtime_kind": "tcbrazier",
+   "source": "pixellab create_map_object job d65dbacd"
+  },
+  "tc_cloud_a": {
+   "file": "sprites/tc_cloud_a.png",
+   "size": [
+    126,
+    38
+   ],
+   "anchor_y": 30,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drift",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job 81f96319"
+  },
+  "tc_scroll_a": {
+   "file": "sprites/tc_scroll_a.png",
+   "size": [
+    117,
+    65
+   ],
+   "anchor_y": 46,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drift",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job a81498c0"
+  },
   "tc_gate_a": {
    "file": "sprites/tc_gate_a.png",
    "size": [
