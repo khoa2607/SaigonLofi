@@ -9,7 +9,7 @@ const secs = +(process.argv[2] || 40), shots = process.argv.includes('--shots');
 await withChrome(1600, 900, async ({ base, send, ev, on }) => {
   const errs = [];
   on(m => { if (m.method === 'Runtime.exceptionThrown') errs.push(JSON.stringify(m.params.exceptionDetails).slice(0, 400)); if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error' && !/favicon/.test(m.params.entry.url || '')) errs.push(m.params.entry.text + ' ' + (m.params.entry.url || '')); });
-  await send('Page.navigate', { url: base + 'tayduky/index.html?speed=10&seed=7&zoom=2' });
+  await send('Page.navigate', { url: base + 'tayduky/alpha/index.html?speed=10&seed=7&zoom=2' });
   await wait(4000);
   const ADJ = JSON.parse(await ev('JSON.stringify(TD_WORLD.adj)'));
   let maxActive = 0, adjViol = 0, starts = new Set(), samples = 0, nhsFreed = 0, nhsReburied = 0, wasFree = false;

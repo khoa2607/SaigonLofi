@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tây Du Ký — Huyền Thoại Sống</title>
 <style>
-  :root { --bg: #efe4f0; --ink: #2b1a22; --plate: rgba(43, 26, 34, .82); --gold: #e8b03a; --fg: #f6ecd8; --muted: #c9b8a0; }
+  :root { --bg: #e8e2ef; --plate: rgba(42, 23, 38, .84); --gold: #e8b03a; --fg: #f6ecd8; --muted: #c9b8a0; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; font: 14px/1.4 system-ui, sans-serif; color: var(--fg); }
   canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
-  #hud { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--plate); padding: 8px 10px; border-radius: 8px; }
-  #hud b { color: var(--gold); margin-right: 6px; }
+  #hud { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--plate); padding: 8px 10px; border-radius: 8px; max-width: calc(100% - 52px); }
+  #hud b { color: var(--gold); margin-right: 4px; }
   #hud button, #hud select { background: #3a2a34; color: var(--fg); border: 1px solid #6a5060; border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
   #hud label { color: var(--muted); font-size: 12px; display: flex; gap: 4px; align-items: center; }
   #card { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); background: var(--plate); border: 2px solid var(--gold); border-radius: 8px;
-          padding: 6px 20px; text-align: center; opacity: 0; transition: opacity .9s; pointer-events: none; }
+          padding: 6px 20px; text-align: center; opacity: 0; transition: opacity .9s; pointer-events: none; max-width: calc(100% - 40px); }
   #card b { display: block; font-size: 19px; color: var(--gold); } #card span { color: var(--muted); font-size: 12px; }
-  #foot { position: absolute; left: 16px; bottom: 12px; color: #7a6070; font-size: 12px; }
+  #load { position: absolute; inset: 0; display: grid; place-items: center; color: #6a5070; font-size: 15px; background: var(--bg); }
 </style>
 </head>
 <body>
-<canvas id="c" aria-label="Tây Du Ký: a living map of eleven legendary places"></canvas>
+<canvas id="c" aria-label="Tây Du Ký: a living isometric map of eleven legendary places"></canvas>
 <div id="hud">
   <b>Tây Du Ký — Huyền Thoại Sống</b>
   <button id="zin" title="Phóng to">＋</button><button id="zout" title="Thu nhỏ">－</button>
@@ -27,11 +27,14 @@
   <label><input id="names" type="checkbox" checked> Tên địa danh</label>
 </div>
 <div id="card"><b></b><span></span></div>
-<div id="foot">Kéo để đi khắp bản đồ · bánh xe/＋－ để phóng · bản dựng đầu tiên (alpha)</div>
-<script src="world/world.js"></script>
-<script src="world/chars.js"></script>
-<script src="td-data.js"></script>
-<script src="td-sim.js"></script>
-<script src="td-main.js"></script>
+<div id="load">Đang dựng thế giới…</div>
+<script src="tw-map.js"></script>
+<script src="chars/chars.js"></script>
+<script src="tw-data.js"></script>
+<script src="tw-sim.js"></script>
+<script src="tw-art.js"></script>
+<script src="tw-fx.js"></script>
+<script src="tw-render.js"></script>
+<script src="tw-main.js"></script>
 </body>
 </html>
