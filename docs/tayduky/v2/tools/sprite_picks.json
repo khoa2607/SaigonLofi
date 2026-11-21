@@ -800,5 +800,13 @@
  "lat_gate_a": [
   "lat_gate_0",
   0.1
+ ],
+ "clt_gao_a": [
+  "clt_gao_0",
+  0.2
+ ],
+ "clt_gao_b": [
+  "clt_gao_1",
+  0.2
  ]
 }

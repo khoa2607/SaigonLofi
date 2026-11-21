@@ -306,6 +306,8 @@ const TWR = (function () {
     if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
     if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.lat && TWFX.lat.drawables) TWFX.lat.drawables(D, R, x0, y0, W, Hh, sim);   // Đại Lôi Âm Tự: banners, lotus, incense, cranes, dragonflies
+    if (window.TWFX && TWFX.clt && TWFX.clt.drawables) TWFX.clt.drawables(D, R, x0, y0, W, Hh, sim);   // Cao Lão Trang: rice, smoke, ducks, wheel water, poofs
+    if (window.TWFX && TWFX.lhd && TWFX.lhd.drawables) TWFX.lhd.drawables(D, R, x0, y0, W, Hh, sim);   // Liên Hoa Động
     if (window.TWFX && TWFX.tc2 && TWFX.tc2.drawables) TWFX.tc2.drawables(D, R, x0, y0, W, Hh, sim);   // Thiên Cung: banners, brazier flames, falling peaches, the flying lid
     if (window.TWFX && TWFX.bcl && TWFX.bcl.drawables) TWFX.bcl.drawables(D, R, x0, y0, W, Hh, sim);   // Bạch Cốt Lĩnh: crows, bone-rats, flags, corpses
     if (window.TWFX && TWFX.hqs && TWFX.hqs.drawables) TWFX.hqs.drawables(D, R, x0, y0, W, Hh, sim);   // Hoa Quả Sơn: cranes, rabbits, squirrels, flags, drums, the feast

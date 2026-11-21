@@ -529,6 +529,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // Bạch Cốt Lĩnh (tw-bcl.js): world-space build on the planner's region north-west of the Heaven cloud sea
   if (window.TW_BCL_BUILD) TW_BCL_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
   if (window.TW_LAT_BUILD) TW_LAT_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+  if (window.TW_CLT_BUILD) TW_CLT_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });   // Cao Lão Trang
+  if (window.TW_LHD_BUILD) TW_LHD_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });   // Liên Hoa Động
   if (window.TW_TC2_BUILD) TW_TC2_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
   // Hỏa Vân Động: authored over the current planner footprint after Claude's completed neighbours claim their tiles.
@@ -650,6 +652,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   if (window.TW_BCL_FINAL) TW_BCL_FINAL({ TWM, WALK, id, N });
   if (window.TW_TC2_FINAL) TW_TC2_FINAL({ TWM, WALK, id, N });
   if (window.TW_LAT_FINAL) TW_LAT_FINAL({ TWM, WALK, id, N });
+  if (window.TW_CLT_FINAL) TW_CLT_FINAL({ TWM, WALK, id, N });
+  if (window.TW_LHD_FINAL) TW_LHD_FINAL({ TWM, WALK, id, N });
   if (window.TW_HVD_FINAL) TW_HVD_FINAL({ TWM, WALK, id, N });
   if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;

@@ -99,6 +99,8 @@ const TWA = (function () {
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     if (TWA.hvd && ((m >= M.HCRIM && m <= M.HBRIDGE) || (TWM.BIO[k] === TWM.bi.hvd && (m === M.STREAM || m === M.CHASM)))) return TWA.hvd.top(m, I, J, X, Y, k, dith, SH);
     if (TWA.hps && TWM.BIO[k] === TWM.bi.hps && (m === M.STREAM || m === M.POOL)) return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn stream
+    if (TWA.clt && ((m >= M.CGRASS && m <= M.CREED) || (TWM.BIO[k] === TWM.bi.clt && (m === M.STREAM || m === M.POOL)))) return TWA.clt.top(m, I, J, X, Y, k, dith, SH);   // Cao Lão Trang (tw-clt-art.js)
+    if (TWA.lhd && ((m >= M.LRFLOOR && m <= M.LRMOSS) || (TWM.BIO[k] === TWM.bi.lhd && (m === M.STREAM || m === M.POOL)))) return TWA.lhd.top(m, I, J, X, Y, k, dith, SH);   // Liên Hoa Động (tw-lhd-art.js)
     if (TWA.lat && TWM.BIO[k] === TWM.bi.lat && (m === M.STREAM || m === M.POOL)) return TWA.lat.top(m, I, J, X, Y, k, dith, SH);   // Linh Sơn holy water
     if (TWA.bcl && TWM.BIO[k] === TWM.bi.bcl && (m === M.STREAM || m === M.POOL)) return TWA.bcl.top(m, I, J, X, Y, k, dith, SH);   // Bạch Cốt Lĩnh black water
     if (TWA.hqs && TWM.BIO[k] === TWM.bi.hqs && (m === M.STREAM || m === M.POOL)) return TWA.hqs.top(m, I, J, X, Y, k, dith, SH);   // Hoa Quả Sơn water
@@ -237,6 +239,8 @@ const TWA = (function () {
     if (b === 'hvd' && TWA.hvd) return TWA.hvd.face(side, lx, ry, drop, elev, gx, k, SH);
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) return TWA.lion.face(side, lx, ry, drop, elev, gx, k, SH);
+    if (b === 'clt' && TWA.clt) return TWA.clt.face(side, lx, ry, drop, elev, gx, k, SH);
+    if (b === 'lhd' && TWA.lhd) return TWA.lhd.face(side, lx, ry, drop, elev, gx, k, SH);
     if (b === 'lat' && TWA.lat) return TWA.lat.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) return TWA.bcl.face(side, lx, ry, drop, elev, gx, k, SH);
     if (((b === 'hqs' && TWM.MAT[k] !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k] && TWM.MAT[k] !== M.SEA)) && TWA.hqs) return TWA.hqs.face(side, lx, ry, drop, elev, gx, k, SH);
@@ -384,14 +388,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'hvd' && TWA.hvd) ? TWA.hvd.edge(c, k) : (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : (b === 'lat' && TWA.lat) ? TWA.lat.edge(c) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'clt' && TWA.clt) ? TWA.clt.edge(c) : (b === 'lhd' && TWA.lhd) ? TWA.lhd.edge(c) : (b === 'hvd' && TWA.hvd) ? TWA.hvd.edge(c, k) : (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : (b === 'lat' && TWA.lat) ? TWA.lat.edge(c) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'lat' && TWA.lat ? TWA.lat.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : b === 'hvd' && TWA.hvd ? TWA.hvd.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'clt' && TWA.clt ? TWA.clt.stairPal : b === 'lhd' && TWA.lhd ? TWA.lhd.stairPal : b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'lat' && TWA.lat ? TWA.lat.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : b === 'hvd' && TWA.hvd ? TWA.hvd.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -691,6 +695,8 @@ const TWA = (function () {
     if (TWA.ntq && TWA.ntq.sprite) { const r = TWA.ntq.sprite(p); if (r) return r; }
     if (TWA.hqs && TWA.hqs.sprite) { const r = TWA.hqs.sprite(p); if (r) return r; }
     if (TWA.bcl && TWA.bcl.sprite) { const r = TWA.bcl.sprite(p); if (r) return r; }
+    if (TWA.clt && TWA.clt.painters[p.kind]) return TWA.clt.painters[p.kind](p);
+    if (TWA.lhd && TWA.lhd.painters[p.kind]) return TWA.lhd.painters[p.kind](p);
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
     if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: r.glow, glow: r.glow, silk: r.silk, sway: SWAY[p.kind] || 0, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);

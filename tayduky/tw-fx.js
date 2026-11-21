@@ -22,6 +22,8 @@ const TWFX = (function () {
     if (window.TWFX && TWFX.ntq) TWFX.ntq.draw(g, S, R, x0, y0, W, Hh);   // Ngũ Trang Quán (tw-ntq-fx.js)   // Ngũ Hành Sơn (tw-nhs-fx.js)
     if (window.TWFX && TWFX.hqs) TWFX.hqs.draw(g, S, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.lat) TWFX.lat.draw(g, S, R, x0, y0, W, Hh);   // Đại Lôi Âm Tự (tw-lat-fx.js)
+    if (window.TWFX && TWFX.clt) TWFX.clt.draw(g, S, R, x0, y0, W, Hh);   // Cao Lão Trang (tw-clt-fx.js)
+    if (window.TWFX && TWFX.lhd) TWFX.lhd.draw(g, S, R, x0, y0, W, Hh);   // Liên Hoa Động (tw-lhd-fx.js)
     if (window.TWFX && TWFX.tc2) TWFX.tc2.draw(g, S, R, x0, y0, W, Hh);   // Thiên Cung (tw-tc2-fx.js)
     if (window.TWFX && TWFX.bcl) TWFX.bcl.draw(g, S, R, x0, y0, W, Hh);   // Bạch Cốt Lĩnh (tw-bcl-fx.js)   // Hoa Quả Sơn (tw-hqs-fx.js)
     if (window.TWFX && TWFX.hps) TWFX.hps.draw(g, S, R, x0, y0, W, Hh);   // Hắc Phong Sơn (tw-hps-fx.js)   // Thông Thiên Hà (tw-river-fx.js)
@@ -86,6 +88,8 @@ const TWFX = (function () {
     if (window.TWFX && TWFX.ntq) TWFX.ntq.light(g, S, R, amt);
     if (window.TWFX && TWFX.hqs) TWFX.hqs.light(g, S, R, amt);
     if (window.TWFX && TWFX.lat) TWFX.lat.light(g, S, R, amt);
+    if (window.TWFX && TWFX.clt) TWFX.clt.light(g, S, R, amt);
+    if (window.TWFX && TWFX.lhd) TWFX.lhd.light(g, S, R, amt);
     if (window.TWFX && TWFX.tc2) TWFX.tc2.light(g, S, R, amt);
     if (window.TWFX && TWFX.bcl) TWFX.bcl.light(g, S, R, amt);
     if (window.TWFX && TWFX.hvd) TWFX.hvd.light(g, S, R, amt);
