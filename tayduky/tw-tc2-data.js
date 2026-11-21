@@ -6,7 +6,7 @@
 (function () {
   const S = TWS, H = S.H, D = window.TW_DATA, B = 'tc', T = 8;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), ease = (v, t, r, dt) => Math.abs(t - v) <= r * dt ? t : v + Math.sign(t - v) * r * dt;
-  const newState = () => ({ heat: 0.3, heatT: 0.3, lid: 0, lidT: 0, runes: 0, runesT: 0, storm: 0, stormT: 0, flash: 0, shake: 0, shakeT: 0, bursts: [], flocks: [], peachfall: [], rainbow: 0, rainbowT: 0, lampPulse: 0, cloud: 0, cloudT: 0, petalBoost: 0, caption: null, capT: 0, focus: null, focusT: 0, flameUp: 0, lidFly: null });
+  const newState = () => ({ heat: 0.3, heatT: 0.3, lid: 0, lidT: 0, runes: 0, runesT: 0, storm: 0, stormT: 0, flash: 0, shake: 0, shakeT: 0, bursts: [], flocks: [], peachfall: [], rainbow: 0, rainbowT: 0, lampPulse: 0, cloud: 0, cloudT: 0, petalBoost: 0, caption: null, capT: 0, focus: null, focusT: 0, flameUp: 0, lidFly: null, debris: [], crack: 0 });
   const baseInit = S.init, baseTick = S.tick;
   S.init = function (seed) { S.tc2 = newState(); baseInit(seed); };
   const timers = []; const later = (sec, fn) => timers.push({ at: S.t + sec, fn });
@@ -15,7 +15,7 @@
     f.heat = ease(f.heat, f.heatT, 0.5, dt); f.lid = ease(f.lid, f.lidT, 2, dt); f.runes = ease(f.runes, f.runesT, 0.8, dt); f.storm = ease(f.storm, f.stormT, 0.35, dt); f.rainbow = ease(f.rainbow, f.rainbowT, 0.25, dt); f.cloud = ease(f.cloud, f.cloudT, 0.25, dt);
     f.flash = Math.max(0, f.flash - dt * 1.8); f.shake = ease(f.shake, f.shakeT, 1.6, dt); f.lampPulse = Math.max(0, f.lampPulse - dt * 0.5); f.flameUp = Math.max(0, f.flameUp - dt * 0.5); f.petalBoost = Math.max(0, f.petalBoost - dt * 0.05);
     for (const q of f.flocks) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; } f.flocks = f.flocks.filter(q => q.t < q.life); for (const b of f.bursts) b.t += dt; f.bursts = f.bursts.filter(b => b.t < 3.2);
-    for (const q of f.peachfall) q.t += dt; f.peachfall = f.peachfall.filter(q => q.t < 3.5); if (f.lidFly) { f.lidFly.t += dt; if (f.lidFly.t > 3) f.lidFly = null; }
+    for (const q of f.peachfall) q.t += dt; f.peachfall = f.peachfall.filter(q => q.t < 3.5); if (f.lidFly) { f.lidFly.t += dt; if (f.lidFly.t > 3) f.lidFly = null; } for (const d of f.debris) { d.t += dt; d.x += d.vx * dt; d.y += d.vy * dt; d.z += d.vz * dt; d.vz -= 140 * dt; if (d.z < 0) { d.z = 0; d.vz *= -0.3; d.vx *= 0.6; d.vy *= 0.6; } } f.debris = f.debris.filter(d => d.t < 4); f.crack = ease(f.crack, f.crackT || 0, 0.8, dt);
     for (let i = timers.length - 1; i >= 0; i--) if (S.t >= timers[i].at) { const t = timers.splice(i, 1)[0]; t.fn(); }
   };
   const burst = (x, y, kind) => S.tc2.bursts.push({ x, y, t: 0, kind: kind || 'gold' });
@@ -77,14 +77,14 @@
   O.tc_f_enter = (R, o) => { const k = king(); if (!k) { R.wait = 1; return; } k.story = R; k.hidden = false; k.alpha = 1; focus(COURT, 8); cap('Ngộ Không bị giải vào Lò Bát Quái', 'Wukong is marched to the Eight-Trigram Furnace', 6);
     const f = FURN(); H.assign(k, [H.go(COURT[0], COURT[1], { run: 1.2 }), H.go(f[0] - 6, f[1] + 8, { run: 3.6 }), { k: 'bubble', kind: 'excl' }, { k: 'idle', t: 600 }], 'story'); pend(R, () => k.cur && k.cur.k === 'idle'); };
   O.tc_f_seal = (R, o) => { const f = S.tc2, k = king(); f.lidT = 1; f.heatT = 1; f.runesT = 1; f.stormT = 0.5; focus(FURN(), 10); cap('Nắp lò đóng lại — phù chú xoay tròn', 'The lid shuts; the talismans spin', 5); if (k) { k.hidden = true; burst(...FURN(), 'gold'); } R.wait = o.t || 3.5; };
-  O.tc_f_burn = (R, o) => { const f = S.tc2; f.heatT = 1; f.flameUp = 1; f.stormT = 1; f.shakeT = 0.35; focus(FURN(), 10); cap('Lửa lên cao — mây đen kéo tới, mặt đất rung', 'The fire climbs; black clouds gather; the ground trembles', 6);
+  O.tc_f_burn = (R, o) => { const f = S.tc2; f.crackT = 1; f.heatT = 1; f.flameUp = 1; f.stormT = 1; f.shakeT = 0.35; focus(FURN(), 10); cap('Lửa lên cao — mây đen kéo tới, mặt đất rung', 'The fire climbs; black clouds gather; the ground trembles', 6);
     for (let q = 0; q < 5; q++) later(q * 1.4, () => { burst(FURN()[0] + (S.R() - 0.5) * 16, FURN()[1], 'ember'); f.shakeT = 0.35 + q * 0.12; f.flameUp = 1; }); for (const a of fairies(4)) look(FURN(), [a]); R.wait = o.t || 7; };
   O.tc_f_break = (R, o) => { const f = S.tc2, k = king(), fp = FURN(); f.lidT = 0; f.lidFly = { t: 0 }; f.flash = 1.2; f.shakeT = 1.4; f.runesT = 0; f.heatT = 1; focus(COURT, 10); cap('Ngộ Không đạp tung lò bay ra!', 'Wukong kicks the furnace apart and bursts out!', 6);
-    burst(fp[0], fp[1], 'shock'); later(0.4, () => burst(fp[0], fp[1], 'gold')); later(0.9, () => burst(COURT[0], COURT[1], 'ember')); flock(18, fp[0], fp[1], -6, -10, 14);
-    if (k) { k.hidden = false; k.x = fp[0]; k.y = fp[1] - 4; H.assign(k, [{ k: 'mount' }, { k: 'soar', x: COURT[0], y: COURT[1], lift: 90, speed: 62 }, { k: 'flip', t: 0.7, rise: 22, keepFly: true }, { k: 'land', t: 0.6 }, { k: 'act', t: 1.2 }, { k: 'idle', t: 600 }], 'story'); }
+    burst(fp[0], fp[1], 'shock'); f.crackT = 0; for (let q = 0; q < 18; q++) { const a = q * 0.35 + S.R(); f.debris.push({ x: fp[0], y: fp[1] - 6, z: 30 + S.R() * 50, vx: Math.cos(a) * (30 + S.R() * 50), vy: Math.sin(a) * (20 + S.R() * 30) - 10, vz: 60 + S.R() * 110, t: 0, s: 3 + Math.floor(S.R() * 4), r: S.R() * 6 }); } later(0.4, () => burst(fp[0], fp[1], 'gold')); later(0.9, () => burst(COURT[0], COURT[1], 'ember')); flock(18, fp[0], fp[1], -6, -10, 14);
+    if (k) { k.hidden = false; k.alpha = 1; k.x = fp[0]; k.y = fp[1] + 7; H.assign(k, [{ k: 'face', dir: 'up' }, { k: 'act', t: 0.7 }, { k: 'mount' }, { k: 'soar', x: COURT[0], y: COURT[1], lift: 90, speed: 62 }, { k: 'flip', t: 0.7, rise: 22, keepFly: true }, { k: 'land', t: 0.6 }, { k: 'act', t: 1.2 }, { k: 'idle', t: 600 }], 'story'); }
     scatter(guards(6), fp); for (const a of fairies(6)) scatter([a], fp); later(1.6, () => { f.shakeT = 0; f.stormT = 0.4; }); R.wait = o.t || 4; pend(R, () => !k || (k.cur && k.cur.k === 'idle')); };
   O.tc_f_land = (R, o) => { const f = S.tc2; f.petalBoost = 1; f.flash = 0.4; focus(COURT, 8); cap('Thiên binh hoảng loạn tản ra', 'The heavenly guard scatters in panic', 5); burst(COURT[0], COURT[1], 'shock'); R.wait = o.t || 3; };
-  O.tc_f_settle = (R, o) => { const f = S.tc2; f.heatT = 0.3; f.stormT = 0; f.runesT = 0; f.shakeT = 0; f.lidT = 0; focus(FURN(), 8); cap('Lò dịu dần — Thiên Cung trở lại yên tĩnh', 'The furnace dies down; the palace grows calm again', 5); O.tc_release(R, o); R.wait = o.t || 3; };
+  O.tc_f_settle = (R, o) => { const f = S.tc2; f.heatT = 0.3; f.stormT = 0; f.runesT = 0; f.shakeT = 0; f.lidT = 0; f.crackT = 0; focus(FURN(), 8); cap('Lò dịu dần — Thiên Cung trở lại yên tĩnh', 'The furnace dies down; the palace grows calm again', 5); O.tc_release(R, o); R.wait = o.t || 3; };
   O.tc_peace = (R, o) => { const f = S.tc2; f.heatT = 0.3; f.stormT = 0; f.runesT = 0; f.shakeT = 0; f.lidT = 0; f.focus = null; f.cloudT = 0; f.rainbowT = 0; O.tc_release(R, o); };
   D.beacon.tc = '255,211,150';
   const old = D.biomes.tc;
