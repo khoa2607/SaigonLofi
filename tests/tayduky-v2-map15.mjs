@@ -4,8 +4,8 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 const M = loadTW().TWM, N = M.N;
 assert.equal(N, 124);   // footprint normalisation: 160 -> 104 -> 124 (Hỏa Diệm Sơn) (docs/tayduky/v2/FOOTPRINT.md) assert.equal(M.biomes.length, 15);
-const expected = {hqs:'f31de9435a202b878a9b02a0d0c11261870b3e28347cf9dc3c4918d75608db4c', btd:'99fb3f52f87a8eb80b22922cda9e1ef788c30283b68940d023d122d6583ea4b7'   /* interior tiles in authoring coordinates; identical to the pre-normalisation world (verified against commit 404b90f) */};
-const expectedProps={hqs:'2a8b96947d4e8aa7a744770f433411c35f51dd50db19d6485616d9640987a8e6',btd:'1cef16d696ccefb6322591810e7ccfd911781b18ea412fe3360765f71fdf8de4'};
+const expected = {/* hqs: rebuilt in world space (tw-hqs.js) - no longer the translated pilot */ btd:'99fb3f52f87a8eb80b22922cda9e1ef788c30283b68940d023d122d6583ea4b7'   /* interior tiles in authoring coordinates; identical to the pre-normalisation world (verified against commit 404b90f) */};
+const expectedProps={btd:'1cef16d696ccefb6322591810e7ccfd911781b18ea412fe3360765f71fdf8de4'};
 const area = {}, walk = {}, components = {}, reachable = {}, edges = new Set();
 for (const b of M.biomes) {
   const tiles = [], oldTiles = [], todo = new Set(); let passable = 0;

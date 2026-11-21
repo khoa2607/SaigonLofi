@@ -163,7 +163,7 @@ const TWR = (function () {
   // ---------------------------------------------------------------- dynamic world objects
   function drawFall(g, f) {
     // the curtain covers the massif face over f.w tiles; streaks move down; foam and mist at the foot
-    const j = f.j, top = f.top, bot = f.bottom, t = R.t;
+    const j = f.j, top = f.top, bot = f.bottom, t = R.t; if (f.trans) g.globalAlpha = f.trans;   // a see-through curtain lets the cave behind it show (Thủy Liêm Động)
     for (let ti = 0; ti < f.w; ti++) { const i = f.i + ti, sx = A.SX(i, j);
       for (let c = 0; c < 32; c++) {
         const lx = c, gx = sx - 32 + lx, rtop = Math.floor((lx + 32) / 2) + 1, yTop = A.SY(i, j, top) + rtop - 3, yBot = A.SY(i, j, bot) + rtop + 2, edge = (ti === 0 && c < 3) || (ti === f.w - 1 && c > 28);
@@ -173,6 +173,7 @@ const TWR = (function () {
         for (let s = 0; s < 3; s++) { const ph = ((t * (90 + hc * 50) + hc * 400 + s * 37) % (yBot - yTop + 30)) - 15, y0 = yTop + ph; if (y0 > yTop && y0 < yBot - 4) g.fillRect(gx, Math.round(y0), 1, 3 + Math.round(hc * 5)); }
       }
     }
+    g.globalAlpha = 1;
     // foot: white water churning on the channel
     const fx = A.SX(f.i, j + 1), fy = A.SY(f.i, j + 1, bot);
     for (let k = 0; k < 26; k++) { const a = TWM.hash2(k, 1, 91), ph = (t * 2 + a * 6) % 1; g.fillStyle = `rgba(255,255,255,${0.9 - ph * 0.7})`; const px = fx - 24 + a * 60 + Math.sin(t * 3 + k) * 2, py = fy + 4 + ph * 14 - Math.sin(ph * Math.PI) * 10; g.fillRect(Math.round(px), Math.round(py), 2 + (k % 2), 2); }
@@ -286,6 +287,7 @@ const TWR = (function () {
     if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
     if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);
+    if (window.TWFX && TWFX.hqs && TWFX.hqs.drawables) TWFX.hqs.drawables(D, R, x0, y0, W, Hh, sim);   // Hoa Quả Sơn: cranes, rabbits, squirrels, flags, drums, the feast
     if (window.TWFX && TWFX.ntq && TWFX.ntq.drawables) TWFX.ntq.drawables(D, R, x0, y0, W, Hh, sim);   // Ngũ Trang Quán: cranes, rabbits, fallen fruit, the feast
     if (window.TWFX && TWFX.nhs && TWFX.nhs.drawables) TWFX.nhs.drawables(D, R, x0, y0, W, Hh, sim);   // Ngũ Hành Sơn: the prison, the seal, the riders   // Hắc Phong Sơn: the great hall's ruin / scaffold / new faces
     for (const f of TWM.falls) D.push([(f.i + f.j + 1) * 8 + 2, 2, f]);
