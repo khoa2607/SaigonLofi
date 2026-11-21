@@ -111,7 +111,7 @@ const TWA = (function () {
       case M.HROCK: case M.HMOSS: case M.HGRAV: case M.HFLAG: case M.HDECK: return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn (tw-hps-art.js)
       case M.SLATE: case M.BONE: case M.RAMP: case M.MIRE: case M.YARD: case M.PLANK: case M.SCRUB: return TWA.lion.top(m, I, J, X, Y, k, dith, SH);   // Sư Đà Lĩnh (tw-lion-art.js)
       case M.ASH: case M.BASALT: case M.LAVA: case M.WARM: case M.CINDER: case M.SCORCH: case M.LBRIDGE: case M.CRUST: return TWA.fire.top(m, I, J, X, Y, k, dith, SH);   // Hỏa Diệm Sơn (tw-fire-art.js)
-      case M.SKYC: case M.SKYD: return TWA.ext.top(m, I, J, X, Y, k, dith, SH);        // Buddha's Palm cloud terraces (tw-palm-art.js)
+      case M.SKYC: case M.SKYD: case M.PGOLD: case M.PLINE: case M.PFING: case M.PLOT: return TWA.ext.top(m, I, J, X, Y, k, dith, SH);        // Buddha's Palm cloud terraces (tw-palm-art.js)
       case M.HEAVEN: return tone(P.heaven, 1.6 + n0 + n1 * 0.8);
       case M.PEACHLAWN: {
         const grass = tone(P.garden, 1 + n0 * 2.3 + n1 * 0.7);

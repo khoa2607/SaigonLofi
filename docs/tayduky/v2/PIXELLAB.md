@@ -122,3 +122,7 @@ The fruit, the aura, the talisman, the ropes, the nectar, Guanyin's light, the w
 ## Hoa Quả Sơn rebuild (2026-11-21)
 
 No PixelLab generation: balance before **82.65**, after **82.65** (0 generations). Reused sprites: peach trees (`peachtree_*`), maples / pines / pavilion / rocks (`hps_*`), jade broadleaf (`nhs_tree_*`), willows / boulders / boat (`tth_*`), huts (`hut_*`), shrine, hall, statue, arch, scholar rocks, lotus, lanterns, crates (`hds_crates_*`), the Heaven pavilion and bridge; characters `wukong`, `khi_linh`, `khi_lao`, `khi_con`, `khi_dan(_b)`, `nhs_deer`. Painted by code: terrain, the cave arch, shrubs, flower beds, flags, drums, cranes, koi, rabbits, squirrels, all falls and weather.
+
+## Buddha's Palm rebuild (2026-11-22)
+
+No PixelLab generation: balance before **82.65**, after **82.65**. Reused sprites: `buddha_a`, `pcloud_*`, `pcloudw_*`, `pcloudt_*`, `pwheel_a`, `pbell_a`, `plotus_*`, `plantern_a`; characters `wukong`, `palm_attendant`, `tc_fairy`. Painted by code: the hand (palm, fingers, thumb, wrist, lotus terrace), the cloud sea, cranes, lotus blooms, all beams, rings, runes, light and weather.

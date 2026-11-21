@@ -104,3 +104,7 @@ Heights: gate court 3, forecourt 4, herb terrace 5, Ginseng Court 6, hall terrac
 ## Hoa Quả Sơn rebuild (2026-11-21)
 
 The planner region (1,406 tiles) is kept; `tw-hqs.js` rebuilds it in world space. Heights: back wall 11-13 (plateau 13), lake / plaza / orchard 3-5, village 6, summit 10, yard 2, gate and beach 1. Neighbours: `bcl`, `clt`, `lat` (placeholders: 12-tile foothill band on the west, sea + beach band on the east), `btp` (cliff over the cloud sea), `ntq` (the Huaguo gate road meets Ngũ Trang Quán's west road at (91, 38) on level 1). The old pilot assertion (translated tile hash) is replaced by the regular map15 checks (15 regions connected, adjacency from the tile mask).
+
+## Buddha's Palm rebuild (2026-11-22)
+
+The planner region (953 tiles, x 53-90 / y 30-76) is kept and rebuilt by `tw-btp.js`. Heights: palm 6, fingers 12-18, thumb 10, Buddha terrace 10, wrist 5 -> 3, cloud terraces 2-3, cloud sea -1..2 (0-1 at the borders). Neighbours: `hqs` (north-east; the east cloud walkway meets Hoa Quả Sơn / Ngũ Trang Quán on level 1), `ntq` (east), `hps` (south-east), `clt` (west) and `lhd` (south-west) (placeholders get an 11-tile cloud band). The old `tw-palm.js` authoring (translated by the layout) is purged.
