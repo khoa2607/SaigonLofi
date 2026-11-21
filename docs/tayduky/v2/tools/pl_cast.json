@@ -302,7 +302,7 @@
  },
  {
   "name": "sa_tang",
-  "id": "1cab0b0a-2e39-437f-ac3d-4d1394b5d445",
+  "id": "318f3356-3422-45e4-b263-1bf39978dad9",
   "title": [
    "Sa Tăng",
    "Sha Wujing"
@@ -625,5 +625,50 @@
   "biome": "bcl",
   "speed": 14,
   "role": "servant"
+ },
+ {
+  "name": "hvd_redboy",
+  "id": "a39c1d6d-baf3-4fa5-9487-0bd572abece0",
+  "title": ["Hồng Hài Nhi", "Red Boy"],
+  "biome": "hvd",
+  "speed": 17,
+  "role": "redboy",
+  "use_generated_idle": true
+ },
+ {
+  "name": "hvd_guanyin",
+  "id": "fbce4534-84b2-424b-9e77-66e84c48c133",
+  "title": ["Quan Âm", "Guanyin"],
+  "biome": "hvd",
+  "speed": 15,
+  "role": "guanyin",
+  "use_generated_idle": true
+ },
+ {
+  "name": "hvd_guard",
+  "id": "e5693498-3bcb-4067-bf95-18631e845b81",
+  "title": ["Tiểu yêu canh núi", "Fire Cloud Guard"],
+  "biome": "hvd",
+  "speed": 20,
+  "role": "guard",
+  "use_generated_idle": true
+ },
+ {
+  "name": "hvd_worker",
+  "id": "ccec92b3-d349-47ba-843f-095b93534405",
+  "title": ["Tiểu yêu thợ", "Fire Cloud Worker"],
+  "biome": "hvd",
+  "speed": 18,
+  "role": "worker",
+  "use_generated_idle": true
+ },
+ {
+  "name": "hvd_trainee",
+  "id": "9726d8e0-9b63-41b8-aeed-90d1f497c60e",
+  "title": ["Tiểu yêu tập sự", "Young Demon Trainee"],
+  "biome": "hvd",
+  "speed": 19,
+  "role": "trainee",
+  "use_generated_idle": true
  }
 ]

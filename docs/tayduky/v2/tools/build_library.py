@@ -14,6 +14,19 @@ SP = os.path.join(ROOT, 'tayduky', 'sprites'); CH = os.path.join(ROOT, 'tayduky'
 
 # prefix -> (category, biome tags, footprint hint in tiles, life behaviours the renderer gives it, runtime kind, PixelLab job)
 CLS = {
+    'hvd_fortress': ('hvd-props', ['hvd'], '3x3', 'monumental cave fortress, fire glow', 'hvdfortress', '9e37745f'),
+    'hvd_mountain': ('hvd-props', ['hvd'], '3x3', 'crimson mountain landmark', 'hvdpeak', '82e1c210'),
+    'hvd_hut': ('hvd-props', ['hvd'], '2x2', 'demon settlement', 'hvdhut', 'f2a42172'),
+    'hvd_ritual': ('hvd-props', ['hvd'], '2x2', 'True Fire ritual platform', 'hvdritual', '9556cccf'),
+    'hvd_tower': ('hvd-props', ['hvd'], '2x2', 'mountain watchtower', 'hvdtower', '21303d99'),
+    'hvd_pine': ('hvd-props', ['hvd'], '1x1', 'wind sway', 'hvdpine', 'b0093b9e'),
+    'hvd_bridge': ('hvd-props', ['hvd'], '2x1', 'ravine bridge', 'hvdbridge', 'ad981b8c'),
+    'hvd_brazier': ('hvd-props', ['hvd'], '1x1', 'fire glow', 'hvdbrazier', '92d25200'),
+    'hvd_banner': ('hvd-props', ['hvd'], '1x1', 'wind sway', 'hvdbanner', '973f52b7'),
+    'hvd_waterfall': ('hvd-props', ['hvd'], '2x1', 'animated spray overlay', 'hvdwaterfall', 'f8883123'),
+    'bt_cave': ('silk-props', ['btd'], '3x1', 'landmark cave', 'btcave', '0c90a2ec'),
+    'bt_throne': ('silk-props', ['btd'], '2x2', 'ritual throne', 'btthrone', '20f9d434'),
+    'bt_prison': ('silk-props', ['btd'], '2x2', 'elevated silk prison', 'btprison', '1c1ce3f8'),
     'tc_monument': ('heaven', ['tc'], '5x2 landmark', 'ceremonial gate, integer 2x', 'tcgate', '1348df9c'),
     'tc_kiln': ('heaven', ['tc'], '2x2', 'trigram fire mouth, smoke and sparks', 'tcfurnace', '855cdb4e'),
     'tc_bank': ('heaven', ['tc'], 'cloud sea', 'slow drifting banks', 'tccloud', '445431e5'),
@@ -52,11 +65,13 @@ man = json.loads(open(os.path.join(SP, 'sprites.js'), encoding='utf-8').read().s
 for name, m in man.items():
     pre = re.sub(r'_[a-d]$', '', name)
     c = CLS.get(pre, ('misc', [], '', '', '', ''))
-    tool = 'create_map_object' if pre in {'tc_bank','tc_silklamp','tc_gatehouse','tc_pillar','tc_brazier','tc_cloud','tc_scroll'} else 'create_1_direction_object'
+    tool = 'create_map_object' if pre in {'bt_cave','bt_throne','bt_prison','tc_bank','tc_silklamp','tc_gatehouse','tc_pillar','tc_brazier','tc_cloud','tc_scroll'} else 'create_1_direction_object'
     catalog['sprites'][name] = {'file': 'sprites/%s.png' % name, 'size': [m['w'], m['h']], 'anchor_y': m['py'], 'category': c[0], 'biomes': c[1], 'footprint': c[2], 'life': c[3], 'runtime_kind': c[4], 'source': 'pixellab ' + tool + ' job ' + c[5]}
 chars = json.loads(open(os.path.join(CH, 'chars.js'), encoding='utf-8').read().split('window.TD2_CHARS = ', 1)[1].strip().rstrip(';'))['chars']
 for name, c in chars.items():
     catalog['characters'][name] = {'file': c['src'], 'title': c.get('title'), 'biome': c.get('biome'), 'size': c['size'], 'anim': c['anim'], 'action': c.get('action'), 'source': c.get('source', 'hand-authored (docs/tayduky/v2/src)'), 'role': c.get('role')}
+    if c.get('bantoAction'): catalog['characters'][name]['bantoAction'] = c['bantoAction']
+    if c.get('hvdAction'): catalog['characters'][name]['hvdAction'] = c['hvdAction']
 json.dump(catalog, open(os.path.join(SP, 'library.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # contact sheets per category
@@ -89,6 +104,6 @@ for cat, names in sorted(cats.items()):
         c = catalog['sprites'][n]; md.append('| `%s` | %dx%d | %s | %s | %s | %s |' % (n, c['size'][0], c['size'][1], ', '.join(c['biomes']), c['footprint'], c['life'], c['source']))
     md.append('')
 md += ['## characters', '', '![characters](library/characters.png)\n', '| Name | Biome | Canvas | Animations | Source |', '|---|---|---|---|---|']
-for n, c in catalog['characters'].items(): md.append('| `%s` | %s | %dx%d | %s | %s |' % (n, c['biome'], c['size'][0], c['size'][1], ', '.join('%s x%d' % (k, v[1]) for k, v in c['anim'].items()) + (', ' + c['action']['clip'] if c.get('action') else ''), c['source']))
+for n, c in catalog['characters'].items(): md.append('| `%s` | %s | %dx%d | %s | %s |' % (n, c['biome'], c['size'][0], c['size'][1], ', '.join('%s x%d' % (k, v[1]) for k, v in c['anim'].items()) + (', ' + c['action']['clip'] if c.get('action') else '') + (', ' + c['bantoAction']['clip'] if c.get('bantoAction') else '') + (', ' + c['hvdAction']['clip'] if c.get('hvdAction') else ''), c['source']))
 open(os.path.join(DOC, 'ASSET-LIBRARY.md'), 'w', encoding='utf-8').write('\n'.join(md) + '\n')
 print(len(catalog['sprites']), 'sprites,', len(catalog['characters']), 'characters,', len(cats), 'categories')

@@ -740,5 +740,57 @@
  "ntq_hall_b": [
   "ntq_hall_1",
   0.16
+ ],
+ "bt_cave_a": [
+  "banto-redesign/cave",
+  0.12
+ ],
+ "bt_throne_a": [
+  "banto-redesign/throne",
+  0.12
+ ],
+ "bt_prison_a": [
+  "banto-redesign/prison",
+  0.12
+ ],
+ "hvd_fortress_a": [
+  "hvd/cave_fortress",
+  0.08
+ ],
+ "hvd_mountain_a": [
+  "hvd/cliff_spire",
+  0.14
+ ],
+ "hvd_hut_a": [
+  "hvd/hut",
+  0.15
+ ],
+ "hvd_ritual_a": [
+  "hvd/ritual",
+  0.13
+ ],
+ "hvd_tower_a": [
+  "hvd/tower",
+  0.12
+ ],
+ "hvd_pine_a": [
+  "hvd/pine",
+  0.11
+ ],
+ "hvd_bridge_a": [
+  "hvd/bridge",
+  0.22
+ ],
+ "hvd_brazier_a": [
+  "hvd/brazier",
+  0.18
+ ],
+ "hvd_banner_a": [
+  "hvd/banner",
+  0.16
+ ],
+ "hvd_waterfall_a": [
+  "hvd/waterfall",
+  0.1
  ]
 }

@@ -76,7 +76,7 @@ const TWR = (function () {
   // ---------------------------------------------------------------- characters
   const SHEETS = {};
   function sheet(name) { if (!SHEETS[name]) { const C = window.TD2_CHARS.chars[name]; if (!C) return null; const im = new Image(); im.src = 'chars/' + name + '.png'; SHEETS[name] = { im, C }; } return SHEETS[name]; }
-  function actionSheet(name, C) { const key = name + ':action'; if (!SHEETS[key]) { const im = new Image(); im.src = C.action.src; SHEETS[key] = im; } return SHEETS[key]; }
+  function actionSheet(name, A) { const key = name + ':' + A.src; if (!SHEETS[key]) { const im = new Image(); im.src = A.src; SHEETS[key] = im; } return SHEETS[key]; }
   // frame selection from the character's animation table (C.anim = {idle:[col0,n], walk:[col0,n], act:[col0,n], sit:[col0,n]?}).
   // Walk advances with distance travelled (feet never slide), idle and act with time.
   function frameCol(C, a) {
@@ -102,12 +102,21 @@ const TWR = (function () {
     const name = a.look || a.char, S = sheet(name); if (!S || !S.im.complete) return;
     const C = S.C, [w, h] = C.size, dirs = window.TD2_CHARS.dirs, px0 = C.pivot[0], py0 = C.pivot[1];
     const col = frameCol(C, a), row = dirs.indexOf(a.dir) >= 0 ? dirs.indexOf(a.dir) : 0;
-    const action = a.pose === 'act' && !a.moving && !a.inWater && C.action && (C.role === 'king' || C.role === 'sister' || (C.role === 'laojun' && (a.task === 'heaven_furnace' || a.task === 'mini')) || C.role === 'heavenguard' || (C.role === 'fairy' && (a.task === 'heaven_tend' || a.task === 'heaven_harvest' || a.task === 'mini'))) ? actionSheet(name, C) : null;
+    const clip = a.biome === 'hvd' && C.hvdAction ? C.hvdAction
+      : a.biome === 'btd' && C.bantoAction && (name !== 'wukong' || a.task === 'summon') ? C.bantoAction
+      : a.biome === 'hvd' && (name === 'bajie' || name === 'sa_tang') && C.bantoAction ? C.bantoAction
+      : C.action;
+    const actionRole = a.biome === 'hvd' && (C.hvdAction || name === 'bajie' || name === 'sa_tang' || name === 'wukong')
+      || C.role === 'king' || C.role === 'sister' || C.role === 'fire_bajie' || C.role === 'sha' || (C.role === 'visitor' && a.wrap)
+      || (C.role === 'laojun' && (a.task === 'heaven_furnace' || a.task === 'mini')) || C.role === 'heavenguard'
+      || (C.role === 'fairy' && (a.task === 'heaven_tend' || a.task === 'heaven_harvest' || a.task === 'mini'));
+    const action = a.pose === 'act' && !a.moving && !a.inWater && clip && actionRole ? actionSheet(name, clip) : null;
     const actionReady = action && action.complete && action.naturalWidth;
     // working (act) poses bounce a little so a still idle frame still reads as effort
     const bob = !actionReady && a.pose === 'act' && !(C.anim && C.anim.act) ? Math.round(Math.abs(Math.sin((R.t + (a.phase || 0)) * 7)) * 1.4) : 0;
-    const X = Math.round(wx(a.x, a.y) - px0), gz = a.gz, Y = Math.round(wy(a.x, a.y, gz + (a.lift || 0)) - py0) - bob;
-    const drawAction = () => { const A = C.action, [aw, ah] = A.size, ac = Math.floor((R.t + (a.phase || 0)) / A.duration) % A.count;
+    const prisonLift = a.biome === 'btd' && a.wrap && a.char === 'tam_tang' ? 6 : 0;
+    const X = Math.round(wx(a.x, a.y) - px0), gz = a.gz, Y = Math.round(wy(a.x, a.y, gz + (a.lift || 0) + prisonLift) - py0) - bob;
+    const drawAction = () => { const A = clip, [aw, ah] = A.size, ac = Math.floor((R.t + (a.phase || 0)) / A.duration) % A.count;
       g.drawImage(action, ac * aw, row * ah, aw, ah, X + px0 - A.pivot[0], Y + py0 - A.pivot[1], aw, ah); };
     const sitDrop = a.pose === 'sit' && C.anim && !C.anim.sit ? (C.sitDrop || 5) : 0;
     if (glowOnly) { // Match the seated crop in the normal pass; never restore hidden legs at night.
@@ -168,7 +177,11 @@ const TWR = (function () {
       for (let c = 0; c < 32; c++) {
         const lx = c, gx = sx - 32 + lx, rtop = Math.floor((lx + 32) / 2) + 1, yTop = A.SY(i, j, top) + rtop - 3, yBot = A.SY(i, j, bot) + rtop + 2, edge = (ti === 0 && c < 3) || (ti === f.w - 1 && c > 28);
         const hc = TWM.hash2(gx, 0, 90);
-        g.fillStyle = edge ? '#2f8fb0' : hc < 0.3 ? '#55bed4' : '#7fd2e2'; g.fillRect(gx, yTop, 1, yBot - yTop);
+        if (f.biome === 'btd') {
+          if (c < 3 || c > 28 || hc < 0.12) continue;
+          g.fillStyle = hc < 0.42 ? 'rgba(75,150,195,0.56)' : 'rgba(135,206,229,0.68)';
+          g.fillRect(gx, yTop + (c % 5 === 0 ? 2 : 0), 1, yBot - yTop - (c % 7 === 0 ? 5 : 0));
+        } else { g.fillStyle = edge ? '#2f8fb0' : hc < 0.3 ? '#55bed4' : '#7fd2e2'; g.fillRect(gx, yTop, 1, yBot - yTop); }
         g.fillStyle = 'rgba(255,255,255,0.85)';
         for (let s = 0; s < 3; s++) { const ph = ((t * (90 + hc * 50) + hc * 400 + s * 37) % (yBot - yTop + 30)) - 15, y0 = yTop + ph; if (y0 > yTop && y0 < yBot - 4) g.fillRect(gx, Math.round(y0), 1, 3 + Math.round(hc * 5)); }
       }
@@ -178,7 +191,7 @@ const TWR = (function () {
     const fx = A.SX(f.i, j + 1), fy = A.SY(f.i, j + 1, bot);
     for (let k = 0; k < 26; k++) { const a = TWM.hash2(k, 1, 91), ph = (t * 2 + a * 6) % 1; g.fillStyle = `rgba(255,255,255,${0.9 - ph * 0.7})`; const px = fx - 24 + a * 60 + Math.sin(t * 3 + k) * 2, py = fy + 4 + ph * 14 - Math.sin(ph * Math.PI) * 10; g.fillRect(Math.round(px), Math.round(py), 2 + (k % 2), 2); }
     // lip at the top
-    for (let ti = 0; ti < f.w; ti++) { const sx = A.SX(f.i + ti, j), sy = A.SY(f.i + ti, j, top); g.fillStyle = '#b8ecf4'; for (let c = 0; c < 32; c++) g.fillRect(sx - 32 + c, sy + Math.floor((c + 32) / 2) - 2, 1, 2); }
+    for (let ti = 0; ti < f.w; ti++) { const sx = A.SX(f.i + ti, j), sy = A.SY(f.i + ti, j, top); g.fillStyle = f.biome === 'btd' ? '#8fc9df' : '#b8ecf4'; for (let c = f.biome === 'btd' ? 3 : 0; c < (f.biome === 'btd' ? 29 : 32); c++) g.fillRect(sx - 32 + c, sy + Math.floor((c + 32) / 2) - 2, 1, 2); }
   }
   function drawCurtain(g, s) {
     // silk curtains hanging in the cave mouth: strands sway
@@ -310,11 +323,13 @@ const TWR = (function () {
         if (s.sp.glow || s.sp.silk) lifeOverlay(g, s);
         if (s.sp.after) s.sp.after(g, s, f, R);
         if (s.p.kind === 'fire') drawFire(g, s); if (s.p.kind === 'curtain') drawCurtain(g, s); }
-      else if (it[1] === 1) drawAgent(g, it[2]);
+      else if (it[1] === 1 && !(it[2].biome === 'btd' && it[2].wrap && it[2].char === 'tam_tang')) drawAgent(g, it[2]);
       else if (it[1] === 5) it[2].draw(g, R);
       else if (it[1] === 2) drawFall(g, it[2]);
       else drawColumn(g, it[2], it[3]);
     }
+    // The prison platform is tall; keep the wrapped monk in front of its railings.
+    if (sim) for (const a of sim.agents) if (!a.gone && !a.hidden && a.biome === 'btd' && a.wrap && a.char === 'tam_tang') drawAgent(g, a);
     // overlays: web canopy, creatures, particles, FX
     for (const Wb of TWM.webs) { const ext = sim && sim.web ? sim.web.ext : Wb.base, cvw = webCanvas(Wb, ext), X = wx(Wb.x, Wb.y), Y = wy(Wb.x, Wb.y, Wb.z), sw = Math.round(Math.sin(R.t * 0.5) * 1.2);
       if (X + cvw.width / 2 > x0 && X - cvw.width / 2 < x0 + W && Y + cvw.height / 2 > y0 && Y - cvw.height / 2 < y0 + Hh) { g.globalAlpha = sim && sim.web && sim.web.glow ? 1 : 0.85; g.drawImage(cvw, Math.round(X - cvw.width / 2) + sw, Math.round(Y - cvw.height / 2)); g.globalAlpha = 1; } }

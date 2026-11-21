@@ -5,8 +5,8 @@ const out=process.argv[2]||'docs/tayduky/v2/screenshots/thien-cung-pass';fs.mkdi
 await withChrome(1920,1080,async ({base,send,ev,on})=>{
   const errors=[];on(m=>{if(m.method==='Runtime.exceptionThrown')errors.push(JSON.stringify(m.params.exceptionDetails));});
   for(const story of ['havoc_heaven','peach_banquet']){
-    await send('Page.navigate',{url:base+'tayduky/index.html?at=tc&tod=day&zoom=2&seed=7&speed=8'});await wait(4000);
-    await ev(`(()=>{for(const b of Object.values(TWS.biomes))if(b.id!=='tc')b.timer=1e8;const b=TWS.biomes.tc;b.last='${story==='havoc_heaven'?'peach_banquet':'havoc_heaven'}';b.timer=.1;})()`);
+    await send('Page.navigate',{url:base+'tayduky/index.html?at=tc&tod=day&zoom=2&seed=7&speed=1'});await wait(4000);
+    await ev(`(()=>{for(const b of Object.values(TWS.biomes))if(b.id!=='tc')b.timer=1e8;const b=TWS.biomes.tc;b.last='${story==='havoc_heaven'?'peach_banquet':'havoc_heaven'}';b.timer=.1;TWS.speed=8;})()`);
     let found=false;for(let i=0;i<120;i++){const v=await ev(`(()=>{const b=TWS.biomes.tc;return !!(b.phase==='sig'&&b.story&&b.story.id==='${story}'&&b.run&&b.run.i>=3)})()`);if(v){found=true;break;}await wait(500);}
     if(!found)throw Error('signature not reached: '+story);
     await ev(`(()=>{const c=TWM.layout.map(86,20);TWR.lookAt(c[0]*8,c[1]*8,4)})()`);await wait(1200);

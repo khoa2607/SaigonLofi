@@ -84,6 +84,23 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `tc_peach_a` | 130x144 | tc | 1x1 | sway and drifting petals | pixellab create_1_direction_object job c4da708e |
 | `tc_peach_b` | 150x143 | tc | 1x1 | sway and drifting petals | pixellab create_1_direction_object job c4da708e |
 
+## hvd-props
+
+![hvd-props](library/hvd-props.png)
+
+| Sprite | Size | Biomes | Footprint | Life | Source |
+|---|---|---|---|---|---|
+| `hvd_fortress_a` | 189x154 | hvd | 3x3 | monumental cave fortress, fire glow | pixellab create_1_direction_object job 9e37745f |
+| `hvd_mountain_a` | 162x175 | hvd | 3x3 | crimson mountain landmark | pixellab create_1_direction_object job 82e1c210 |
+| `hvd_hut_a` | 82x85 | hvd | 2x2 | demon settlement | pixellab create_1_direction_object job f2a42172 |
+| `hvd_ritual_a` | 132x123 | hvd | 2x2 | True Fire ritual platform | pixellab create_1_direction_object job 9556cccf |
+| `hvd_tower_a` | 106x151 | hvd | 2x2 | mountain watchtower | pixellab create_1_direction_object job 21303d99 |
+| `hvd_pine_a` | 84x114 | hvd | 1x1 | wind sway | pixellab create_1_direction_object job b0093b9e |
+| `hvd_bridge_a` | 120x96 | hvd | 2x1 | ravine bridge | pixellab create_1_direction_object job ad981b8c |
+| `hvd_brazier_a` | 68x86 | hvd | 1x1 | fire glow | pixellab create_1_direction_object job 92d25200 |
+| `hvd_banner_a` | 59x124 | hvd | 1x1 | wind sway | pixellab create_1_direction_object job 973f52b7 |
+| `hvd_waterfall_a` | 77x172 | hvd | 2x1 | animated spray overlay | pixellab create_1_direction_object job f8883123 |
+
 ## misc
 
 ![misc](library/misc.png)
@@ -149,6 +166,95 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `hds_ruin_b` | 111x111 |  |  |  | pixellab create_1_direction_object job  |
 | `hds_gate_a` | 215x237 |  |  |  | pixellab create_1_direction_object job  |
 | `hds_volcano_b` | 249x241 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_gate_a` | 240x246 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_keep_a` | 234x242 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_nest_a` | 164x224 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_den_a` | 238x245 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_tusk_a` | 229x248 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_tent_a` | 124x110 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_tent_b` | 120x120 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_banner_a` | 58x117 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_banner_b` | 59x119 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_rack_a` | 119x107 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_brazier_a` | 48x60 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_brazier_b` | 45x61 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_bridge_a` | 123x112 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_pine_a` | 66x83 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_pine_b` | 72x80 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_rock_a` | 77x87 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_rock_b` | 85x83 |  |  |  | pixellab create_1_direction_object job  |
+| `sdl_totem_a` | 63x92 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_dock_a` | 247x248 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_shrine_a` | 224x221 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_tower_a` | 117x239 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_turtle_a` | 241x183 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_boat_a` | 116x90 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_boat_b` | 116x95 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_hut_a` | 117x117 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_hut_b` | 117x120 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_willow_a` | 100x115 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_willow_b` | 104x119 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_rock_a` | 76x67 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_rock_b` | 85x56 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_rock_c` | 86x80 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_wreck_a` | 136x127 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_wreck_b` | 142x131 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_gate_a` | 125x148 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_gate_b` | 123x149 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_netrack_a` | 80x85 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_netrack_b` | 80x86 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_reeds_a` | 67x85 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_reeds_b` | 79x81 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_statue_a` | 106x119 |  |  |  | pixellab create_1_direction_object job  |
+| `tth_statue_b` | 109x117 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_temple_a` | 222x222 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_ruin_a` | 242x219 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_scaffold_a` | 236x224 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pagoda_a` | 207x246 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_gate_a` | 216x233 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_lair_a` | 244x232 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_bell_a` | 96x119 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_bell_b` | 102x121 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_dorm_a` | 120x99 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_dorm_b` | 123x107 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_dorm_c` | 121x102 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_kitchen_a` | 117x124 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_kitchen_b` | 120x123 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_burner_a` | 84x121 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_burner_b` | 90x120 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pine_a` | 108x106 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pine_b` | 102x109 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pine_c` | 115x110 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pavilion_a` | 97x122 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_pavilion_b` | 85x125 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_stupa_a` | 108x114 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_stupa_b` | 110x114 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_rock_a` | 85x71 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_rock_b` | 71x88 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_rock_c` | 83x87 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_wayshrine_a` | 84x90 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_wayshrine_b` | 84x87 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_well_a` | 92x83 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_well_b` | 90x71 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_sutra_a` | 103x116 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_sutra_b` | 114x118 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_bamboo_a` | 69x90 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_bamboo_b` | 73x87 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_maple_a` | 114x117 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_maple_b` | 83x109 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_maple_c` | 121x108 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_lantern_a` | 24x62 |  |  |  | pixellab create_1_direction_object job  |
+| `hps_lantern_b` | 48x61 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_summit_a` | 221x247 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_prison_a` | 118x97 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_prison_b` | 116x115 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_tree_a` | 74x88 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_tree_b` | 92x83 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_tree_c` | 86x85 |  |  |  | pixellab create_1_direction_object job  |
+| `nhs_tree_d` | 84x86 |  |  |  | pixellab create_1_direction_object job  |
+| `ntq_tree_a` | 214x242 |  |  |  | pixellab create_1_direction_object job  |
+| `ntq_hall_a` | 122x117 |  |  |  | pixellab create_1_direction_object job  |
+| `ntq_hall_b` | 112x119 |  |  |  | pixellab create_1_direction_object job  |
 
 ## mushrooms
 
@@ -172,6 +278,9 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `spire_a` | 105x141 | btd, cave | 1x1 or 2x2 | silk shimmer | pixellab create_1_direction_object job 3e2ddeec |
 | `spire_b` | 102x142 | btd, cave | 1x1 or 2x2 | silk shimmer | pixellab create_1_direction_object job 3e2ddeec |
 | `loom_a` | 118x117 | btd, cave | 2x2 | sisters weave here; silk threads run from their sleeves | pixellab create_1_direction_object job cd7a9fd8 |
+| `bt_cave_a` | 95x148 | btd | 3x1 | landmark cave | pixellab create_map_object job 0c90a2ec |
+| `bt_throne_a` | 123x154 | btd | 2x2 | ritual throne | pixellab create_map_object job 20f9d434 |
+| `bt_prison_a` | 137x132 | btd | 2x2 | elevated silk prison | pixellab create_map_object job 1c1ce3f8 |
 
 ## stalls
 
@@ -217,13 +326,13 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 
 | Name | Biome | Canvas | Animations | Source |
 |---|---|---|---|---|
-| `wukong` | hqs | 64x64 | idle x4, walk x8, staff-practice | pixellab |
+| `wukong` | hqs | 64x64 | idle x4, walk x8, staff-practice, btd_hair_clones | pixellab |
 | `khi_linh` | hqs | 60x60 | idle x4, walk x8 | pixellab |
 | `khi_lao` | hqs | 60x60 | idle x4, walk x8 | pixellab |
 | `khi_con` | hqs | 36x36 | idle x4, walk x8 | pixellab |
 | `khi_dan` | hqs | 56x56 | idle x4, walk x8 | pixellab |
 | `khi_dan_b` | hqs | 56x56 | idle x4, walk x8 | pixellab |
-| `tam_tang` | btd | 64x64 | idle x4, walk x8 | pixellab |
+| `tam_tang` | btd | 64x64 | idle x4, walk x8, btd_tam_tang_combat | pixellab |
 | `sister1_violet` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
 | `sister2_teal` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
 | `sister3_rose` | btd | 64x64 | idle x4, walk x8, silk-weaving | pixellab |
@@ -238,9 +347,42 @@ Provenance: object sprites and characters are **PixelLab-generated** (see `PIXEL
 | `tc_laojun` | tc | 60x60 | idle x4, walk x8, tend-furnace | pixellab |
 | `tc_wukong` | tc | 64x64 | idle x4, walk x8 | pixellab |
 | `palm_attendant` | btp | 52x52 | idle x4, walk x8 | pixellab |
-| `bajie` | hds | 60x60 | idle x4, walk x8 | pixellab |
+| `bajie` | hds | 60x60 | idle x4, walk x8, btd_bajie_combat | pixellab |
 | `hds_baker` | hds | 52x52 | idle x4, walk x8 | pixellab |
 | `hds_seller` | hds | 52x52 | idle x4, walk x8 | pixellab |
 | `tiefan` | hds | 60x60 | idle x4, walk x8, act x6 | pixellab |
 | `hds_mule` | hds | 68x68 | idle x4, walk x8 | pixellab |
-| `sa_tang` | hds | 60x60 | idle x4, walk x8 | pixellab |
+| `sa_tang` | hds | 60x60 | idle x4, walk x8, btd_straight_staff_combat | pixellab |
+| `thanh_su` | sdl | 72x72 | idle x4, walk x8, act x6 | pixellab |
+| `bach_tuong` | sdl | 76x76 | idle x4, walk x8, act x7 | pixellab |
+| `kim_si` | sdl | 72x72 | idle x4, walk x8, act x6 | pixellab |
+| `sdl_guard` | sdl | 52x52 | idle x4, walk x8, act x6 | pixellab |
+| `sdl_porter` | sdl | 48x48 | idle x4, walk x8 | pixellab |
+| `bach_long_ma` | tth | 92x92 | idle x4, walk x8 | pixellab |
+| `tth_fisher` | tth | 64x64 | idle x4, walk x8, act x7 | pixellab |
+| `tth_ferryman` | tth | 64x64 | idle x4, walk x8, act x5 | pixellab |
+| `tth_imp` | tth | 64x64 | idle x4, walk x8, act x6 | pixellab |
+| `hps_monk` | hps | 52x52 | idle x4, walk x8, act x5 | pixellab |
+| `hps_novice` | hps | 44x44 | idle x4, walk x8 | pixellab |
+| `hps_abbot` | hps | 56x56 | idle x4, walk x8 | pixellab |
+| `hac_hung_tinh` | hps | 88x88 | idle x4, walk x8, act x6 | pixellab |
+| `hps_minion` | hps | 52x52 | idle x4, walk x8, act x7 | pixellab |
+| `guanyin` | hps | 60x60 | idle x4, walk x8 | pixellab |
+| `wk_pilgrim` | nhs | 56x56 | idle x4, walk x8 | pixellab |
+| `nhs_hermit` | nhs | 52x52 | idle x4, walk x8 | pixellab |
+| `nhs_deer` | nhs | 68x68 | idle x4, walk x8 | pixellab |
+| `nhs_horse` | nhs | 92x92 | idle x4, walk x8 | pixellab |
+| `nhs_goat` | nhs | 56x56 | idle x4, walk x8 | pixellab |
+| `ntq_zhenyuan` | ntq | 56x56 | idle x4, walk x8 | pixellab |
+| `ntq_qingfeng` | ntq | 44x44 | idle x4, walk x8 | pixellab |
+| `ntq_mingyue` | ntq | 44x44 | idle x4, walk x8 | pixellab |
+| `bgt_girl` | bcl | 52x52 | idle x4, walk x8 | pixellab |
+| `bgt_crone` | bcl | 52x52 | idle x4, walk x8 | pixellab |
+| `bgt_elder` | bcl | 52x52 | idle x4, walk x8 | pixellab |
+| `bgt_bone` | bcl | 60x60 | idle x4, walk x8 | pixellab |
+| `bgt_skel` | bcl | 44x44 | idle x4, walk x8 | pixellab |
+| `hvd_redboy` | hvd | 64x64 | idle x4, walk x6, hvd_true_fire | pixellab |
+| `hvd_guanyin` | hvd | 64x64 | idle x4, walk x6, hvd_divine_water | pixellab |
+| `hvd_guard` | hvd | 64x64 | idle x4, walk x6, hvd_spear | pixellab |
+| `hvd_worker` | hvd | 64x64 | idle x4, walk x6 | pixellab |
+| `hvd_trainee` | hvd | 64x64 | idle x4, walk x6, hvd_spell | pixellab |

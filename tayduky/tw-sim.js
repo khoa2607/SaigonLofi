@@ -300,7 +300,7 @@ const TWS = (function () {
     if (S.pointExt[spec]) return S.pointExt[spec](B, R);
     if (Array.isArray(spec)) return C(spec[0], spec[1]);
     if (spec === 'canopy') return C(TWM.btd.canopy[0], TWM.btd.canopy[1]);
-    if (spec === 'mouthE') { const m = TWM.layout ? TWM.layout.map : (i, j) => [i, j]; return C(...m(R && R.kind === 'sig' && R.i < 8 ? 97 : 104, 143)); }   // authoring coordinates -> world (footprint normalisation)
+    if (spec === 'mouthE') { const m = TWM.layout ? TWM.layout.map : (i, j) => [i, j]; return C(...m(97, 143)); }   // BTD's east entrance remains inside the relocated footprint
     const p = pick(pois(B.id, spec)); if (p) return [p.x, p.y];
     const a = who(B, spec, R); if (a && !Array.isArray(a)) return [a.x, a.y];
     return C(...TWM.biomes[TWM.bi[B.id]].centre.map(Math.round));
@@ -331,7 +331,7 @@ const TWS = (function () {
         const a = agent(o.char, B.id, 'actor', Math.floor(p[0] / T), Math.floor(p[1] / T)); a.x = p[0]; a.y = p[1]; a.gz = TWM.groundZ(a.x, a.y); a.story = R; R.actors[o.id] = a;
         if (o.from === 'sky') { assign(a, [{ k: 'fly', down: true, t: 2.2 }]); R.pend = () => !a.q.length && !a.cur; } else { a.alpha = 0; assign(a, [{ k: 'fade', t: 1, in: true }]); }
         break; }
-      case 'go': if (W) { const p0 = point(B, o.to, R), p = nearestWalk(p0[0] + (o.off ? o.off[0] * T : 0), p0[1] + (o.off ? o.off[1] * T : 0), B.id, 5) || p0; W.story = R; assign(W, [go(p[0], p[1], { run: o.run || 1.1 })]); R.pend = () => !W.q.length && !W.cur; } break;
+      case 'go': if (W) { const p0 = point(B, o.to, R), p = nearestWalk(p0[0] + (o.off ? o.off[0] * T : 0), p0[1] + (o.off ? o.off[1] * T : 0), B.id, 5) || p0; W.story = R; if (B.id === 'btd' && W.role === 'actor') W.alpha = 1; assign(W, [go(p[0], p[1], { run: o.run || 1.1 })]); R.pend = () => !W.q.length && !W.cur; } break;
       case 'gather': {
         const c = point(B, o.at, R), cx = c[0] + (o.off ? o.off[0] * T : 0), cy = c[1] + (o.off ? o.off[1] * T : 0);
         let L = S.agents.filter(a => a.biome === B.id && !a.hidden && !a.gone && a.role !== 'actor' && a.role !== 'king' && !a.wrap && (!o.roles || o.roles.includes(a.role)) && (a.gathered === null || a.gathered !== R));
@@ -344,7 +344,7 @@ const TWS = (function () {
       case 'fx': { const p = o.at && who(B, o.at, R) && !Array.isArray(who(B, o.at, R)) ? who(B, o.at, R) : null; const xy = p ? [p.x, p.y] : point(B, o.at, R); fx(o.kind, xy[0], xy[1], o.dur || 4, B.id, { r: o.r || 40, a: p }); break; }
       case 'wait': R.wait = o.t; break;
       case 'strike': { const tg = who(B, o.at, R); if (W && tg) { W.dir = dirTo(W, tg.x, tg.y); assign(W, [{ k: 'act', t: 1.2 }]); fx('flash', tg.x, tg.y, 0.6, B.id, { r: 26 }); fx('sparks', tg.x, tg.y, 1.4, B.id, { r: 24 }); count('strike'); } R.wait = 1.4; break; }
-      case 'wrap': if (W) { W.wrap = !!o.on; if (o.on) assign(W, [{ k: 'idle', t: 600 }]); else assign(W, []); } break;
+      case 'wrap': if (W) { W.wrap = !!o.on; if (o.on) { if (W.char === 'tam_tang') { W.dir = 'down'; W.alpha = 1; } assign(W, [{ k: W.char === 'tam_tang' ? 'act' : 'idle', t: 600 }]); } else assign(W, []); } break;
       case 'web': if (o.target !== undefined) { S.web.target = o.target; S.web.rate = o.rate || 0.05; } if (o.glow !== undefined) S.web.glow = o.glow; break;
       case 'litter': { const c = point(B, o.at, R); for (let k = 0; k < o.n; k++) { const p = nearestWalk(c[0] + rnd(-o.r, o.r) * T, c[1] + rnd(-o.r, o.r) * T * 0.8, B.id, 2); if (p) S.litter.push({ x: p[0] + rnd(-2, 2), y: p[1] + rnd(-2, 2), biome: B.id, kind: S.R() < 0.6 ? 'pit' : 'petal' }); } break; }
       case 'clean': B.cleaning = S.t + o.dur; for (const a of S.agents) if (a.biome === B.id && free(a) && o.roles.includes(a.role) && S.R() < 0.7) assign(a, ACT.clean(a) || [], 'clean'); break;
@@ -446,7 +446,7 @@ const TWS = (function () {
     for (let k = 0; k < 300; k++) tick(0.1);                       // warm start: the world is already living on the first frame
     S.counts = { minis: {}, acts: {}, stories: {} };
   }
-  return Object.assign(S, { init, tick, ACT, MINI, H: { assign, go, nearestWalk, point, who, fx, bubble, rnd, pick, C, T, poiFree, pois, claim, count, dirTo, free, tileOf, freeOf, ring } });
+  return Object.assign(S, { init, tick, ACT, MINI, H: { agent, assign, go, nearestWalk, point, who, fx, bubble, rnd, pick, C, T, poiFree, pois, claim, count, dirTo, free, tileOf, freeOf, ring } });
 })();
 window.TWS = TWS;
 if (typeof module !== 'undefined') module.exports = { TWS };

@@ -107,3 +107,13 @@ Rebuild: `python docs/tayduky/v2/tools/author_cast.py && python docs/tayduky/v2/
 2. Design the modular **tile set** and **object set** for Hoa Quả Sơn and Bàn Tơ Động in the same style: ground tiles and transitions, water, cliffs as stacked tiles, trees, huts and cave props as separate sprites with footprints.
 3. Rebuild those two biomes as a small runtime (map in design units, nav grid, the Director, stories) on the Holdfast module template (`td-map`, `td-art`, `td-sim`, `td-render`, `td-main`).
 4. Then the remaining nine biomes, one at a time.
+
+## 9. Current Bàn Tơ Động stage (2026-11-20 review candidate)
+
+This section records the later runtime redesign; sections 1–8 above remain the historical pilot proposal. The authoritative implementation status is in `STATUS.md`.
+
+The gorge keeps its compact footprint in the latest committed 15-region layout. The back wall is a high cave gallery, the west shelf carries the ritual throne and weaving village, the east shelf carries Tang Sanzang's raised prison, and the center is a smaller web battle court. Stone and silk stairs connect the shelves to the court and the hot-spring terrace. A running stream crosses the front chasm below the silk bridges. A large web canopy spans the entire arena, while mushrooms, crystals, lanterns and silk tents act as accents around usable activity points.
+
+The Battle of Silk Web Cave is choreographed around these locations: seven sisters walk from their daily routines into the court during foreshadowing; Tang is carried to the raised prison and cocooned with his head visible; Wukong, Bajie and Sha arrive from their routes; sisters and spiderlings close around the three disciples; Wukong's hair clones advance to the prison and cut the trap; the pilgrims leave, silk remains torn, then sisters and spiderlings return in stages and repair it. No scene switch or player action is involved. The Global Story Director still sets the event timing and adjacency limit.
+
+The biome's reusable art is catalogued in `ASSET-LIBRARY.md`; PixelLab source IDs and spending are in `PIXELLAB.md`. The stage remains a visual-review candidate, especially the thin cascades and strong contrast from Hỏa Diệm Sơn at the wide view.

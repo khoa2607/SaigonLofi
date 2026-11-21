@@ -16,8 +16,8 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
 RAW = os.path.join(ROOT, 'tayduky', 'chars-pl', 'raw'); OUT = os.path.join(ROOT, 'tayduky', 'chars'); os.makedirs(RAW, exist_ok=True)
 DIRS = [('down', 'south'), ('left', 'west'), ('right', 'east'), ('up', 'north')]
-WALK = ['walking-8-frames', 'walking-6-frames', 'walking-4-frames', 'walking', 'walk']
-IDLE = ['breathing-idle', 'fight-stance-idle-8-frames']
+WALK = ['hvd_walk', 'walking-8-frames', 'walking-6-frames', 'walking-4-frames', 'walking', 'walk']
+IDLE = ['hvd_breathing', 'breathing-idle', 'fight-stance-idle-8-frames']
 ACT = ['throw_object', 'picking_up', 'fireball', 'casting', 'cross_punch', 'two_footed_jump', 'cross-punch', 'throw-object', 'picking-up', 'drinking', 'two-footed-jump']
 
 
@@ -59,9 +59,33 @@ def breathe(im, up=1):
     return out
 
 
+def fit_generated_idle(frames, walk, width, height):
+    """Keep generated idle frames at the walking figure's scale and feet line."""
+    def box(im): return im.getchannel('A').point(lambda a: 255 if a > 8 else 0).getbbox()
+    boxes = [box(im) for im in frames]
+    if any(b is None for b in boxes): raise ValueError('empty generated idle frame')
+    left, top = min(b[0] for b in boxes), min(b[1] for b in boxes)
+    right, bottom = max(b[2] for b in boxes), max(b[3] for b in boxes)
+    wboxes = [b for b in (box(im) for im in walk) if b]
+    if not wboxes: return frames
+    target_h = sorted(b[3] - b[1] for b in wboxes)[len(wboxes)//2]
+    target_bottom = sorted(b[3] for b in wboxes)[len(wboxes)//2]
+    scale = min(target_h / (bottom - top), (width - 4) / (right - left))
+    w, h = round((right - left) * scale), round((bottom - top) * scale)
+    x, y = (width - w)//2, target_bottom - h
+    if x < 0 or y < 0 or x+w > width or y+h > height: raise ValueError('generated idle clips')
+    out = []
+    for im in frames:
+        cell = Image.new('RGBA', (width, height))
+        cell.alpha_composite(im.crop((left, top, right, bottom)).resize((w, h), Image.Resampling.NEAREST), (x, y))
+        out.append(cell)
+    return out
+
+
 def pack(entry):
     name, cid = entry['name'], entry['id']
     z = fetch(name, cid, entry.get('refresh', False) or '--refresh' in sys.argv); meta = json.loads(z.read('metadata.json'))
+    meta['states'] = [next(st for st in meta['states'] if st['character']['id'] == cid)]
     st0 = meta['states'][0]; W, H = st0['character']['size']['width'], st0['character']['size']['height']
     rot = {d: Image.open(io.BytesIO(z.read(st0['frames']['rotations'][d]))).convert('RGBA') for _, d in DIRS}
     idle, walk, act = {}, {}, {}
@@ -69,6 +93,7 @@ def pack(entry):
     for _, d in DIRS:
         ia, idle[d] = frames_of(z, meta, IDLE, d) if entry.get('use_generated_idle') else (None, None)
         wa, walk[d] = frames_of(z, meta, WALK, d); aa, act[d] = frames_of(z, meta, ACT, d)
+        if idle[d] and walk[d]: idle[d] = fit_generated_idle(idle[d], walk[d], W, H)
         if not idle[d]:
             base = standing(walk[d]) if walk[d] and len(walk[d]) > 1 else rot[d]       # the walk clips are drawn a little smaller than the base rotation: take idle from a walk frame so the scale never pops
             b = breathe(base); idle[d] = [base, b, b, base]
@@ -104,8 +129,12 @@ if __name__ == '__main__':
         if only and e['name'] not in only: continue
         try:
             action = meta['chars'].get(e['name'], {}).get('action')
+            banto_action = meta['chars'].get(e['name'], {}).get('bantoAction')
+            hvd_action = meta['chars'].get(e['name'], {}).get('hvdAction')
             meta['chars'][e['name']] = pack(e)
             if action: meta['chars'][e['name']]['action'] = action
+            if banto_action: meta['chars'][e['name']]['bantoAction'] = banto_action
+            if hvd_action: meta['chars'][e['name']]['hvdAction'] = hvd_action
             print('packed', e['name'], meta['chars'][e['name']]['anim'], meta['chars'][e['name']]['size'], 'top', meta['chars'][e['name']]['top'], 'feet', meta['chars'][e['name']]['pivot'][1])
         except Exception as ex: print('FAILED', e['name'], repr(ex)[:160])
     # the runtime carries only the PixelLab cast; the hand-authored v2 pilot sheets stay in docs/tayduky/v2 (pilot page and src/)

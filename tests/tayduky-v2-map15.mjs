@@ -4,8 +4,8 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 const M = loadTW().TWM, N = M.N;
 assert.equal(N, 124);   // footprint normalisation: 160 -> 104 -> 124 (Hỏa Diệm Sơn) (docs/tayduky/v2/FOOTPRINT.md) assert.equal(M.biomes.length, 15);
-const expected = {/* hqs: rebuilt in world space (tw-hqs.js) - no longer the translated pilot */ btd:'99fb3f52f87a8eb80b22922cda9e1ef788c30283b68940d023d122d6583ea4b7'   /* interior tiles in authoring coordinates; identical to the pre-normalisation world (verified against commit 404b90f) */};
-const expectedProps={btd:'1cef16d696ccefb6322591810e7ccfd911781b18ea412fe3360765f71fdf8de4'};
+const expected = {};   // HQS and BTD are both intentional world-space rebuilds now.
+const expectedProps = {};
 const area = {}, walk = {}, components = {}, reachable = {}, edges = new Set();
 for (const b of M.biomes) {
   const tiles = [], oldTiles = [], todo = new Set(); let passable = 0;
@@ -23,6 +23,8 @@ for (const b of M.biomes) {
   for(let x=0;x<q.length;x++){const k=q[x],i=k%N,j=Math.floor(k/N);for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){const ii=i+di,jj=j+dj;if(ii<1||jj<1||ii>=N-1||jj>=N-1)continue;const z=M.id(ii,jj);if(M.BIO[z]===b.k&&!seen.has(z)&&M.canStep(k,z)){seen.add(z);q.push(z);}}}
   reachable[b.id]=seen.size;
 }
+assert.equal(area.hvd, 991, 'HVD footprint drifted from Claude planner allocation');
+assert.deepEqual([M.M.BANK,M.M.PAVER,M.M.HCRIM,M.M.HBRIDGE], [120,126,156,161], 'TTH/HVD material ranges overlap');
 for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++)for(const [di,dj] of [[1,0],[0,1]]) {if(i+di>=N-1||j+dj>=N-1)continue;const a=M.biomeAt(i,j),b=M.biomeAt(i+di,j+dj);if(a!==b)edges.add([a,b].sort().join(':'));}
 for(const b of M.biomes)for(const other of M.adj[b.id]) {assert(M.adj[other].includes(b.id));assert(edges.has([b.id,other].sort().join(':')));}
 assert.equal(Object.values(area).reduce((a,b)=>a+b,0),(N-2)*(N-2));

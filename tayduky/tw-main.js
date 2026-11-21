@@ -12,6 +12,7 @@
   if (TWM.layout && TWM.layout.hqs) Object.assign(START, { hqs: [82, 17], hqsfall: [74, 11], hqssource: [74, 4], hqscourt: [88, 21], hqsthrone: [88, 16], hqsvillage: [93, 11], hqssummit: [91, 5], hqsorchard: [66, 19], hqsyard: [80, 26], hqsgate: [91, 35], hqsbeach: [96, 25], hqslook: [74, 30], hqscave: [74, 9], hqsrim: [66, 3], hqsborder: [64, 28], hqsseam: [91, 38], hqswest: [62, 14] });   // Hoa Quả Sơn camera targets (?at=hqsfall ...)
   if (TWM.layout && TWM.layout.ntq) Object.assign(START, { ntq: [111, 42], ntqtree: [109, 43], ntqhall: [105, 36], ntqgate: [118, 47], ntqpond: [116, 41], ntqfall: [121, 41], ntqwest: [95, 43], ntqlook: [119, 38], ntqrear: [104, 32], ntqrim: [121, 44], ntqborder: [99, 38], ntqseam: [118, 50] });   // Ngũ Trang Quán camera targets (?at=ntqtree ...)
   if (TWM.layout && TWM.layout.tth) { const T = TWM.layout.tth, TL = (a, b) => [T.x0 + a, T.y0 + b]; Object.assign(START, { tth: TL(22, 24), tthcove: TL(12, 29), tthfall: TL(22, 35), tthrapid: TL(22, 6), tthland: TL(34, 27), tthisle: TL(24, 14), tthtower: TL(9, 9), tthb: TL(2, 30), tthrim: TL(40, 36), tthvill: TL(39, 19), tthwhirl: TL(23, 28) }); }   // Thông Thiên Hà camera targets (?at=tthcove ...)
+  if (TWM.hvd) Object.assign(START, { hvd: [15, 36], hvdfort: [12, 34], hvdfall: [29, 37], hvdrim: [4, 73], hvdseam: [24, 47] });
   function boot() {
     TWR.init(cv);
     if (sim && sim.init) sim.init(+(Q.get('seed') || (Date.now() % 100000)));

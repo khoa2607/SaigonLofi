@@ -43,7 +43,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     QLAWN: 136, QPAVE: 137, QROCK: 138, QGRAV: 139,
     FLAWN: 140, FMOSS: 141, FROCK: 142, FPATH: 143, FPLAZA: 144, FBLOSS: 145,
     PGOLD: 146, PLINE: 147, PFING: 148, PLOT: 149,
-    BDIRT: 150, BMOSS: 151, BROCK: 152, BGRASS: 153, BTOMB: 154, BBONE: 155 };   // Bạch Cốt Lĩnh (tw-bcl.js)   // Buddha's Palm rebuild (tw-btp.js)   // Hoa Quả Sơn rebuild (tw-hqs.js)   // Ngũ Trang Quán (tw-ntq.js)   // Ngũ Hành Sơn (tw-nhs.js)
+    BDIRT: 150, BMOSS: 151, BROCK: 152, BGRASS: 153, BTOMB: 154, BBONE: 155,
+    HCRIM: 156, HCOPPER: 157, HPINE: 158, HPATH: 159, HASH: 160, HBRIDGE: 161 };   // Hỏa Vân Động; 120–126 remain reserved for Thông Thiên Hà
       // Hắc Phong Sơn (tw-hps.js)   // Thông Thiên Hà (tw-river.js)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
@@ -487,6 +488,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // Footprint normalisation (tw-layout.js): relocate the authored content into the compact world, trim built biomes to their footprints and
   // re-plan the placeholder regions. Everything below (routes, bridges, seam, walkability, nav) is built in the final world space.
+  if (window.TW_BANTO_BUILD) TW_BANTO_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, id, isB, prop, poi, addStair });
   if (window.TW_LAYOUT) {
     const L = TW_LAYOUT.apply({ TWM, N, H, MAT, BIO, PATHC, RES, M, vnoise });
     ({ N, NN, H, MAT, BIO, WALK, PATHC, RES } = L); TWM.N = N;
@@ -526,6 +528,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // Bạch Cốt Lĩnh (tw-bcl.js): world-space build on the planner's region north-west of the Heaven cloud sea
   if (window.TW_BCL_BUILD) TW_BCL_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+
+  // Hỏa Vân Động: authored over the current planner footprint after Claude's completed neighbours claim their tiles.
+  if (window.TW_HVD_BUILD) TW_HVD_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, id, inMap, vnoise, hash2, prop, poi, addStair });
 
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
@@ -641,6 +646,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   if (window.TW_HQS_FINAL) TW_HQS_FINAL({ TWM, WALK, id, N });
   if (window.TW_BTP_FINAL) TW_BTP_FINAL({ TWM, WALK, id, N });
   if (window.TW_BCL_FINAL) TW_BCL_FINAL({ TWM, WALK, id, N });
+  if (window.TW_HVD_FINAL) TW_HVD_FINAL({ TWM, WALK, id, N });
   if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;
 

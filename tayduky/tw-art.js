@@ -97,6 +97,7 @@ const TWA = (function () {
   function top0(m, I, J, X, Y, k, dith) {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
+    if (TWA.hvd && ((m >= M.HCRIM && m <= M.HBRIDGE) || (TWM.BIO[k] === TWM.bi.hvd && (m === M.STREAM || m === M.CHASM)))) return TWA.hvd.top(m, I, J, X, Y, k, dith, SH);
     if (TWA.hps && TWM.BIO[k] === TWM.bi.hps && (m === M.STREAM || m === M.POOL)) return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn stream
     if (TWA.bcl && TWM.BIO[k] === TWM.bi.bcl && (m === M.STREAM || m === M.POOL)) return TWA.bcl.top(m, I, J, X, Y, k, dith, SH);   // Bạch Cốt Lĩnh black water
     if (TWA.hqs && TWM.BIO[k] === TWM.bi.hqs && (m === M.STREAM || m === M.POOL)) return TWA.hqs.top(m, I, J, X, Y, k, dith, SH);   // Hoa Quả Sơn water
@@ -231,6 +232,7 @@ const TWA = (function () {
 
   // ---------------------------------------------------------------- cliff faces
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
+    if (b === 'hvd' && TWA.hvd) return TWA.hvd.face(side, lx, ry, drop, elev, gx, k, SH);
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) return TWA.lion.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) return TWA.bcl.face(side, lx, ry, drop, elev, gx, k, SH);
@@ -379,14 +381,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'hvd' && TWA.hvd) ? TWA.hvd.edge(c, k) : (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : b === 'hvd' && TWA.hvd ? TWA.hvd.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -651,7 +653,7 @@ const TWA = (function () {
   };
   // ---------------------------------------------------------------- PixelLab object sprites (tayduky/sprites/, packed by docs/tayduky/v2/tools/pack_sprites.py)
   const IMG = {};
-  const seamArt = k => TWM.seamK[k] === TWM.bi.hps ? TWA.hps : TWM.seamK[k] === TWM.bi.nhs ? TWA.nhs : TWM.seamK[k] === TWM.bi.ntq ? TWA.ntq : TWM.seamK[k] === TWM.bi.hqs ? TWA.hqs : TWM.seamK[k] === TWM.bi.bcl ? TWA.bcl : null;
+  const seamArt = k => TWM.seamK[k] === TWM.bi.hps ? TWA.hps : TWM.seamK[k] === TWM.bi.nhs ? TWA.nhs : TWM.seamK[k] === TWM.bi.ntq ? TWA.ntq : TWM.seamK[k] === TWM.bi.hqs ? TWA.hqs : TWM.seamK[k] === TWM.bi.bcl ? TWA.bcl : TWM.seamK[k] === TWM.bi.hvd ? TWA.hvd : null;
   // life masks built from the sprite itself: GLOW = saturated bright violet/green/teal pixels (crystals, mushrooms, eggs) that pulse and come back at night;
   // SILK = bright desaturated pixels (webs, silk wraps) that shimmer. Which sprites get which is a name-prefix table.
   const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_', 'tc_furnace_', 'tc_lantern_', 'tc_brazier_', 'tc_silklamp_', 'tc_kiln_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
@@ -676,7 +678,7 @@ const TWA = (function () {
   const IMGKINDS = { hut: ['hut_a', 'hut_b', 'hut_c'], shrine: ['shrine_a', 'shrine_b', 'shrine_c'], stall: ['stall_a', 'stall_b'], hbridge: ['bridge_a'], tent: ['tent_a', 'tent_b'],
     altar: ['altar_a', 'altar_b'], pcrystals: ['crystals_a', 'crystals_b', 'crystals_c'], silkbr: ['silkbridge_a'], hall: ['hall_a', 'hall_b'], statue: ['statue_a', 'statue_b'], playground: ['playground_a'],
     bigpeach: ['peachtree_a', 'peachtree_b', 'peachtree_c', 'peachtree_d'], caveent: ['cave_a', 'cave_b'], gate: ['gate_a', 'gate_b'], bigbamboo: ['bamboo_a', 'bamboo_b', 'bamboo_c'], scholar: ['scholar_a', 'scholar_b'],
-    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'], tcgate: ['tc_monument_a'], tcgatehouse: ['tc_gatehouse_a'], tcpavilion: ['tc_pavilion_a'], tcpillar: ['tc_pillar_a'], tcbrazier: ['tc_brazier_a'], tcsilklamp: ['tc_silklamp_a'], tccloud: ['tc_bank_a','tc_bank_a','tc_cloud_a','tc_scroll_a'], tcpalace: ['tc_palace_a','tc_palace_b'], tcfurnace: ['tc_kiln_a'], tcbridge: ['tc_bridge_a','tc_bridge_b'], tcpeach:['tc_peach_a','tc_peach_b'], tclantern:['tc_lantern_a','tc_lantern_b'] };
+    lantern2: ['lantern_a', 'lantern_b'], silkrack: ['silkrack_a'], rockarch: ['arch_a', 'arch_b'], lotus: ['lotus_a', 'lotus_b'], bspire: ['spire_a', 'spire_b'], bigmush: ['mush_a', 'mush_b'], bath: ['bath_a'], bloom: ['loom_a'], btcave: ['bt_cave_a'], btthrone: ['bt_throne_a'], btprison: ['bt_prison_a'], tcgate: ['tc_monument_a'], tcgatehouse: ['tc_gatehouse_a'], tcpavilion: ['tc_pavilion_a'], tcpillar: ['tc_pillar_a'], tcbrazier: ['tc_brazier_a'], tcsilklamp: ['tc_silklamp_a'], tccloud: ['tc_bank_a','tc_bank_a','tc_cloud_a','tc_scroll_a'], tcpalace: ['tc_palace_a','tc_palace_b'], tcfurnace: ['tc_kiln_a'], tcbridge: ['tc_bridge_a','tc_bridge_b'], tcpeach:['tc_peach_a','tc_peach_b'], tclantern:['tc_lantern_a','tc_lantern_b'] };
   // footprint anchor: sprite bottom-centre sits on the prop's ground point (tile centre, or the centre of a multi-tile footprint)
   const cache = new Map();
   function sprite(p) {
