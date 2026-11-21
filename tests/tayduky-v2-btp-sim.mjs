@@ -12,5 +12,5 @@ const king = S.agents.find(a => a.biome === 'btp' && a.role === 'monkeyking'), f
 const out = { phases: [...seen], mx, minCover: +minCover.toFixed(2), ops: [...ops], bound: f.bound, kingVisible: !!(king && !king.hidden && !king.gone), actors: S.agents.filter(a => a.biome === 'btp' && a.role === 'actor').length };
 console.log(JSON.stringify(out));
 assert(seen.has('sig') && seen.has('after'), 'signature ran'); assert(mx.beams > 0.9 && mx.column > 0.9 && mx.inscr > 0.9 && mx.bound === 1 && mx.flash > 0.7, 'divine states reached'); assert(minCover < 0.05, 'the clouds parted');
-assert(['btp_swagger', 'btp_leap', 'btp_fingers', 'btp_reveal', 'btp_inscribe', 'btp_seal', 'btp_bind', 'btp_hold', 'btp_settle'].every(o => ops.has(o)), 'every phase op ran'); assert(out.bound === 1 && out.kingVisible, 'Wukong stays held and visible');
+assert(['btp_swagger', 'btp_leap', 'btp_mark', 'btp_fingers', 'btp_reveal', 'btp_inscribe', 'btp_seal', 'btp_bind', 'btp_hold', 'btp_settle'].every(o => ops.has(o)), 'every phase op ran'); assert(out.bound === 1 && out.kingVisible, 'Wukong stays held and visible');
 console.log('PASS');

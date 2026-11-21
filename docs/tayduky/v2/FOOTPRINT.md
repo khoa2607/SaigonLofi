@@ -112,3 +112,6 @@ The planner region (953 tiles, x 53-90 / y 30-76) is kept and rebuilt by `tw-btp
 ## Bạch Cốt Lĩnh (White Bone Ridge)
 
 The planner's `bcl` region (1,005 tiles) is a C that wraps the Heaven cloud sea; it is authored by `tw-bcl.js` with no footprint change. Heights: entry 2, valley floor 3, canyon walls up to 13 (east wall = Hoa Quả Sơn's rim), lair and palace terraces 7, ridge 8-9, chasm floor 1. Neighbours: `tc` (the cloud sea below the cliffs), `hqs` (east, rim matched), `clt` (south, placeholder; the road leaves the pocket through the entry pass at (44, 39)), `hvd` (west, placeholder), the world rim (north).
+
+## Lòng Bàn Tay Phật Tổ — hand rebuild (2026-11-22)
+Region unchanged (953 tiles, x 53-90 / y 30-76). The hand is centred on (74, 50), fingers pointing screen-right (toward Hoa Quả Sơn's rim, fingertips about x 80-88 / y 35-46), wrist toward the Buddha's lotus mountain (centre (62.5, 61.5), levels 7-10). Hand tiles are flat level 6, hidden (`VOID`) under the sprite. Cloud walkway from the middle fingertip to the Hoa Quả Sơn rim at (90, 39). Seams: a cloud band over unbuilt neighbours (existing) and a mist curtain along built ones.

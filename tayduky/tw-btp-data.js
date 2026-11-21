@@ -8,14 +8,14 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), ease = (v, t, r, dt) => Math.abs(t - v) <= r * dt ? t : v + Math.sign(t - v) * r * dt;
   const wp = (a, b) => [(a + 0.5) * T, (b + 0.5) * T];
   const newState = () => ({ cover: 0.55, coverT: 0.55, wind: 1, windT: 1, glow: [0, 0, 0, 0, 0], glowT: [0.15, 0.15, 0.15, 0.15, 0.15], lotus: 0.5, lotusT: 0.5, runes: 0, runesT: 0, inscr: 0, inscrT: 0, beams: 0, beamsT: 0, column: 0, columnT: 0, halo: 0.35, haloT: 0.35,
-    thunder: 0, flash: 0, shake: 0, bound: 0, boundVis: 0, dust: 0, dustT: 0, bursts: [], flocks: [], landings: [], petalBoost: 0, caption: null, capT: 0, focus: null, focusT: 0, lamp: 0 });
+    thunder: 0, flash: 0, shake: 0, bound: 0, boundVis: 0, dust: 0, dustT: 0, bursts: [], flocks: [], landings: [], petalBoost: 0, caption: null, capT: 0, focus: null, focusT: 0, lamp: 0, mark: 0, markT: 0 });
   const baseInit = S.init, baseTick = S.tick;
   S.init = function (seed) { S.btp = newState(); baseInit(seed); };
   const timers = []; const later = (sec, fn) => timers.push({ at: S.t + sec, fn });
   S.tick = function (dt) {
     baseTick(dt); const f = S.btp; if (!f) return;
-    f.cover = ease(f.cover, f.coverT, 0.2, dt); f.wind = ease(f.wind, f.windT, 0.4, dt); for (let k = 0; k < 5; k++) f.glow[k] = ease(f.glow[k], f.glowT[k], 0.45, dt); f.lotus = ease(f.lotus, f.lotusT, 0.25, dt); f.runes = ease(f.runes, f.runesT, 0.5, dt);
-    f.inscr = ease(f.inscr, f.inscrT, 0.35, dt); f.beams = ease(f.beams, f.beamsT, 0.45, dt); f.column = ease(f.column, f.columnT, 0.4, dt); f.halo = ease(f.halo, f.haloT, 0.3, dt); f.thunder = Math.max(0, f.thunder - dt * 1.4); f.flash = Math.max(0, f.flash - dt * 1.8);
+    f.cover = ease(f.cover, f.coverT, 0.5, dt); f.wind = ease(f.wind, f.windT, 0.6, dt); for (let k = 0; k < 5; k++) f.glow[k] = ease(f.glow[k], f.glowT[k], 1.2, dt); f.lotus = ease(f.lotus, f.lotusT, 0.4, dt); f.runes = ease(f.runes, f.runesT, 0.9, dt); f.mark = ease(f.mark, f.markT, 0.9, dt);
+    f.inscr = ease(f.inscr, f.inscrT, 0.8, dt); f.beams = ease(f.beams, f.beamsT, 1.1, dt); f.column = ease(f.column, f.columnT, 1.0, dt); f.halo = ease(f.halo, f.haloT, 0.3, dt); f.thunder = Math.max(0, f.thunder - dt * 1.4); f.flash = Math.max(0, f.flash - dt * 1.8);
     f.shake = Math.max(0, f.shake - dt * 1.2); f.boundVis = ease(f.boundVis, f.bound, 0.3, dt); f.dust = ease(f.dust, f.dustT, 0.4, dt);
     for (const q of f.flocks) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; } f.flocks = f.flocks.filter(q => q.t < q.life); for (const b of f.bursts) b.t += dt; f.bursts = f.bursts.filter(b => b.t < 3); for (const q of f.landings) q.t += dt; f.landings = f.landings.filter(q => q.t < q.dur);
     for (let i = timers.length - 1; i >= 0; i--) if (S.t >= timers[i].at) { const t = timers.splice(i, 1)[0]; t.fn(); }
@@ -23,8 +23,8 @@
   const burst = (x, y, kind) => S.btp.bursts.push({ x, y, t: 0, kind: kind || 'gold' });
   const X = S.stepExt, P = S.pointExt, A = S.ACT, pois = k => H.pois(B, k), free = a => H.free(a);
   X.btpcall = (a, st) => { st.fn(a); return true; };
-  const SEAL = wp(74, 53), TOP = [74.5 * T, 40 * T];
-  P.btp_seal = () => SEAL; P.btp_palm = () => wp(74, 55); P.btp_buddha = () => wp(65, 55); P.btp_top = () => TOP;
+  const SEAL = [74 * T, 50 * T], L = (u, v) => { const w = F.geo.toWorld(u, v); return [w[0] * T, w[1] * T]; }, TOP = L(13, -2);
+  P.btp_seal = () => SEAL; P.btp_palm = () => L(1, 1); P.btp_buddha = () => wp(63, 62); P.btp_top = () => TOP;
   const king = () => S.agents.find(a => a.biome === B && a.role === 'monkeyking' && !a.gone);
   const cap = (a, b, dur) => { const f = S.btp; f.caption = [a, b]; f.capT = S.t + (dur || 6); };
   const focus = (xy, dur) => { const f = S.btp; f.focus = xy; f.focusT = S.t + (dur || 12); };
@@ -56,30 +56,32 @@
   M.btp_gust = b => { const f = S.btp; if (f.coverT < 0.4 || ruleOut()) return false; f.windT = 2.4; f.coverT = 0.1; for (let q = 0; q < 8; q++) f.flocks.push({ kind: 'bird', x: 74 * T + (q - 4) * 6, y: 44 * T, vx: -10, vy: -6, t: -q * 0.15, life: 16, ph: q, z: 60 + S.R() * 40 }); later(12, () => { f.windT = 1; f.coverT = 0.55; }); H.count('gust'); return true; };
 
   // ---------------------------------------------------------------- story ops
-  const O = S.opExt, pend = (R, fn) => { const t0 = S.t; R.pend = () => { R.pendT = 0; return fn() || S.t - t0 > 60; }; };
+  const O = S.opExt, pend = (R, fn) => { const t0 = S.t; R.pend = () => { R.pendT = 0; return fn() || S.t - t0 > 22; }; };
   O.btp_fore = (R, o) => { const f = S.btp; f.bound = 0; f.coverT = 0.8; f.windT = 1.3; f.haloT = 0.5; f.lotusT = 0.8; f.glowT = [0.3, 0.3, 0.3, 0.3, 0.3]; focus(P.btp_palm(), 14); cap('Lòng bàn tay Phật Tổ — nơi Đại Thánh tưởng là cõi vô tận', 'The Buddha\'s palm — what the Great Sage takes for the edge of the world', 7);
     for (const a of S.agents.filter(q => q.biome === B && q.role !== 'monkeyking' && free(q))) H.assign(a, [{ k: 'face', x: SEAL[0], y: SEAL[1] }, { k: 'bubble', kind: 'dots' }, { k: 'idle', t: 20 }], 'mini'); R.wait = o.t || 4; };
-  O.btp_swagger = (R, o) => { const k = king(); if (!k) { R.wait = 1; return; } k.story = R; k.hidden = false; k.alpha = 1; focus(P.btp_palm(), 18); cap('Ngộ Không ngạo nghễ chạy nhảy trên lòng bàn tay', 'Wukong swaggers across the palm', 8);
-    const pts = [[70, 50], [79, 50], [79, 56], [70, 56], [74, 53]].map(p => H.nearestWalk(...wp(p[0], p[1]), B, 3) || wp(p[0], p[1]));
-    H.assign(k, [...pts.flatMap((p, n) => [H.go(p[0], p[1], { run: 1.8 }), { k: n % 2 ? 'hop' : 'act', t: n % 2 ? 0.6 : 1.2 }, { k: 'bubble', kind: n % 2 ? 'star' : 'note' }]), { k: 'idle', t: 1 }], 'story'); pend(R, () => !k.q.length && !k.cur); };
-  O.btp_leap = (R, o) => { const f = S.btp, k = king(); if (!k) { R.wait = 1; return; } cap('Ngộ Không lộn cân đẩu vân — quyết bay thoát khỏi giới hạn', 'Wukong somersaults away, determined to leave the limit behind', 8); focus(TOP, 20);
-    H.assign(k, [{ k: 'bubble', kind: 'excl' }, { k: 'mount' }, { k: 'soar', x: 74 * T, y: 44 * T, lift: 60, speed: 28 }, { k: 'flip', t: 1.4, rise: 22, keepFly: true }, { k: 'soar', x: 76 * T, y: 36 * T, lift: 120, speed: 30 }, { k: 'flip', t: 1.4, rise: 22, keepFly: true }, { k: 'soar', x: 90 * T, y: 32 * T, lift: 130, speed: 30 }, { k: 'bubble', kind: 'star' }, { k: 'idle', t: 8 }], 'story');
-    f.windT = 1.8; later(6, () => { f.coverT = 0.9; }); pend(R, () => k.cur && k.cur.k === 'idle'); };
-  O.btp_fingers = (R, o) => { const f = S.btp, k = king(); cap('Năm ngón tay sáng lên — chặn đường Đại Thánh', 'The five fingers light up and bar his way', 8); focus(P.btp_palm(), 14); for (let q = 0; q < 5; q++) { const kk = q; later(q * 1.2, () => { f.glowT[kk] = 1; burst(F.fingers[kk].cx * T, F.fingers[kk].y0 * T, 'gold'); }); }
-    f.runesT = 1; f.haloT = 0.9; f.windT = 1.6; if (k) { H.assign(k, [{ k: 'bubble', kind: 'q' }, { k: 'soar', x: 80 * T, y: 40 * T, lift: 90, speed: 28 }, { k: 'idle', t: 8 }], 'story'); } R.wait = o.t || 8; };
-  O.btp_reveal = (R, o) => { const f = S.btp, k = king(); f.coverT = 0; f.windT = 2.4; f.lotusT = 1; f.petalBoost = 1; f.shake = 0.5; f.flash = 0.5; focus(P.btp_palm(), 16); cap('Mây rẽ ra — cả lòng bàn tay hiện trọn vẹn', 'The clouds part: the whole palm is revealed', 8);
-    for (let q = 0; q < 14; q++) f.flocks.push({ kind: q % 3 ? 'bird' : 'crane', x: (70 + S.R() * 10) * T, y: 42 * T, vx: (S.R() - 0.5) * 18, vy: -8 - S.R() * 6, t: -S.R() * 0.5, life: 18, ph: q, z: 60 + S.R() * 60 });
-    if (k) H.assign(k, [{ k: 'soar', x: SEAL[0] + 40, y: SEAL[1] + 20, lift: 40, speed: 28 }, { k: 'land', t: 1.2 }, { k: 'bubble', kind: 'excl' }, { k: 'idle', t: 600 }], 'story'); R.wait = o.t || 6; pend(R, () => !k || (k.cur && k.cur.k === 'idle')); };
-  O.btp_inscribe = (R, o) => { const f = S.btp; f.inscrT = 1; f.runesT = 1; f.haloT = 1; focus(SEAL, 14); cap('Thần chú hiện ra quanh Đại Thánh', 'The divine inscription appears around him', 8); for (const a of S.agents.filter(q => q.biome === B && q.role !== 'monkeyking' && free(q))) H.assign(a, [{ k: 'face', x: SEAL[0], y: SEAL[1] }, { k: 'sit', t: 12 }, { k: 'idle', t: 30 }], 'mini'); R.wait = o.t || 8; };
-  O.btp_seal = (R, o) => { const f = S.btp, k = king(); f.beamsT = 1; f.columnT = 1; f.windT = 2.2; f.haloT = 1; f.shake = 0.4; focus(SEAL, 16); cap('Năm cột ngón khép lại — pháp lực giam giữ', 'The five pillars close in: a prison of divine force', 8);
-    if (k) H.assign(k, [{ k: 'bubble', kind: 'excl' }, { k: 'hop', t: 0.5 }, { k: 'act', t: 1.5 }, { k: 'hop', t: 0.5 }, { k: 'act', t: 1.5 }, { k: 'idle', t: 600 }], 'story'); burst(SEAL[0], SEAL[1], 'gold'); R.wait = o.t || 8; };
-  O.btp_bind = (R, o) => { const f = S.btp, k = king(); f.bound = 1; f.flash = 1; f.thunder = 1; f.shake = 1.2; f.coverT = 0.9; f.windT = 2.8; focus(SEAL, 16); cap('Ngộ Không bị trấn áp giữa lòng bàn tay — sóng thần lực lan ra', 'Wukong is pressed down into the seal; a shock wave rolls outward', 9);
-    burst(SEAL[0], SEAL[1], 'shock'); later(0.8, () => burst(SEAL[0], SEAL[1], 'jade')); for (let q = 0; q < 18; q++) f.flocks.push({ kind: q % 3 ? 'bird' : 'crane', x: SEAL[0] + (S.R() - 0.5) * 80, y: SEAL[1] - 20, vx: (S.R() - 0.5) * 30, vy: -9 - S.R() * 8, t: -S.R() * 0.4, life: 18, ph: q, z: 40 + S.R() * 80 });
-    if (k) H.assign(k, [{ k: 'sit', t: 5 }, { k: 'bubble', kind: 'excl' }, { k: 'sit', t: 600 }], 'story'); R.wait = o.t || 9; };
-  O.btp_hold = (R, o) => { const f = S.btp; f.shake = 0; f.windT = 1.2; focus(P.btp_buddha(), 16); cap('Phật Tổ vẫn ngồi bất động — uy nghiêm như núi', 'The Buddha sits unmoved, majestic as a mountain', 9); f.petalBoost = 1; f.haloT = 1; R.wait = o.t || 10; };
-  O.btp_settle = (R, o) => { const f = S.btp; f.beamsT = 0; f.columnT = 0.0; f.coverT = 0.6; f.windT = 1; f.glowT = [0.35, 0.35, 0.35, 0.35, 0.35]; f.haloT = 0.6; f.inscrT = 0.5; focus(SEAL, 12); cap('Lực giam giữ ổn định — mây lắng xuống', 'The binding steadies and the clouds settle', 8); for (const a of S.agents.filter(q => q.biome === B && q.role !== 'monkeyking')) { a.gathered = null; H.assign(a, [{ k: 'bubble', kind: 'heart' }, { k: 'idle', t: 2 }], 'story'); } R.wait = o.t || 8; };
+  O.btp_swagger = (R, o) => { const k = king(); if (!k) { R.wait = 1; return; } k.story = R; k.hidden = false; k.alpha = 1; focus(P.btp_palm(), 12); cap('Ngộ Không ngạo nghễ chạy nhảy trên lòng bàn tay', 'Wukong swaggers across the palm', 5);
+    const pts = [L(-2, -3.5), L(2.5, 3.5), L(0, 0)].map(p => H.nearestWalk(p[0], p[1], B, 3) || p);
+    H.assign(k, [...pts.flatMap((p, n) => [H.go(p[0], p[1], { run: 4.4 }), { k: n % 2 ? 'hop' : 'act', t: 0.6 }, { k: 'bubble', kind: n % 2 ? 'star' : 'note' }])], 'story'); pend(R, () => !k.q.length && !k.cur); };
+  O.btp_leap = (R, o) => { const f = S.btp, k = king(); if (!k) { R.wait = 1; return; } cap('Ngộ Không lộn cân đẩu vân — quyết bay thoát khỏi giới hạn', 'Wukong somersaults away, determined to leave the limit behind', 5); focus(TOP, 12);
+    H.assign(k, [{ k: 'bubble', kind: 'excl' }, { k: 'mount' }, { k: 'soar', x: TOP[0], y: TOP[1], lift: 110, speed: 64 }, { k: 'flip', t: 0.7, rise: 22, keepFly: true }, { k: 'soar', x: 88 * T, y: 32 * T, lift: 150, speed: 70 }, { k: 'idle', t: 1 }], 'story');
+    f.windT = 2; f.coverT = 0.8; pend(R, () => k.cur && k.cur.k === 'idle'); };
+  O.btp_mark = (R, o) => { const f = S.btp, k = king(); if (!k) { R.wait = 1; return; } cap('Dấu tích trên đầu ngón giữa — hắn vẫn chưa thoát khỏi bàn tay', 'His mark on the middle fingertip: he never left the hand', 6); const tp = F.fingers[1].tip.map(v => v * T); focus(tp, 12);
+    H.assign(k, [{ k: 'soar', x: tp[0], y: tp[1], lift: 40, speed: 70 }, { k: 'land', t: 0.5 }, { k: 'bubble', kind: 'star' }, { k: 'act', t: 1.2 }, { k: 'idle', t: 600 }], 'story'); f.markT = 1; f.coverT = 0.45; burst(tp[0], tp[1], 'jade'); pend(R, () => k.cur && k.cur.k === 'idle'); };
+  O.btp_fingers = (R, o) => { const f = S.btp, k = king(); cap('Năm ngón tay sáng lên — chặn đường Đại Thánh', 'The five fingers light up and bar his way', 5); focus(P.btp_palm(), 10); for (let q = 0; q < 5; q++) { const kk = q; later(q * 0.45, () => { f.glowT[kk] = 1; burst(F.fingers[kk].cx * T, F.fingers[kk].y0 * T, 'gold'); }); }
+    f.runesT = 1; f.haloT = 0.9; f.windT = 1.8; if (k) { H.assign(k, [{ k: 'bubble', kind: 'q' }, { k: 'hop', t: 0.5 }, { k: 'act', t: 1.2 }, { k: 'idle', t: 600 }], 'story'); } R.wait = o.t || 3.5; };
+  O.btp_reveal = (R, o) => { const f = S.btp, k = king(); f.coverT = 0; f.windT = 2.6; f.lotusT = 1; f.petalBoost = 1; f.shake = 0.5; f.flash = 0.5; f.markT = 0; focus(P.btp_palm(), 10); cap('Mây rẽ ra — cả lòng bàn tay hiện trọn vẹn', 'The clouds part: the whole palm is revealed', 5);
+    for (let q = 0; q < 16; q++) f.flocks.push({ kind: q % 3 ? 'bird' : 'crane', x: (70 + S.R() * 10) * T, y: 42 * T, vx: (S.R() - 0.5) * 22, vy: -9 - S.R() * 6, t: -S.R() * 0.4, life: 14, ph: q, z: 60 + S.R() * 60 });
+    if (k) H.assign(k, [{ k: 'soar', x: SEAL[0] + 30, y: SEAL[1] + 14, lift: 36, speed: 70 }, { k: 'land', t: 0.6 }, { k: 'bubble', kind: 'excl' }, { k: 'idle', t: 600 }], 'story'); R.wait = o.t || 3; pend(R, () => !k || (k.cur && k.cur.k === 'idle')); };
+  O.btp_inscribe = (R, o) => { const f = S.btp; f.inscrT = 1; f.runesT = 1; f.haloT = 1; focus(SEAL, 10); cap('Thần chú hiện ra quanh Đại Thánh', 'The divine inscription appears around him', 4); for (const a of S.agents.filter(q => q.biome === B && q.role !== 'monkeyking' && free(q))) H.assign(a, [{ k: 'face', x: SEAL[0], y: SEAL[1] }, { k: 'sit', t: 10 }, { k: 'idle', t: 30 }], 'mini'); R.wait = o.t || 2.5; };
+  O.btp_seal = (R, o) => { const f = S.btp, k = king(); f.beamsT = 1; f.columnT = 1; f.windT = 2.4; f.haloT = 1; f.shake = 0.4; focus(SEAL, 10); cap('Năm ngón khép lại — pháp lực giam giữ', 'The five fingers close in: a prison of divine force', 5);
+    if (k) H.assign(k, [{ k: 'bubble', kind: 'excl' }, { k: 'hop', t: 0.4 }, { k: 'act', t: 1.2 }, { k: 'hop', t: 0.4 }, { k: 'idle', t: 600 }], 'story'); burst(SEAL[0], SEAL[1], 'gold'); R.wait = o.t || 4; };
+  O.btp_bind = (R, o) => { const f = S.btp, k = king(); f.bound = 1; f.flash = 1; f.thunder = 1; f.shake = 1.2; f.coverT = 0.8; f.windT = 3; focus(SEAL, 10); cap('Ngộ Không bị trấn áp giữa lòng bàn tay — sóng thần lực lan ra', 'Wukong is pressed down into the seal; a shock wave rolls outward', 6);
+    burst(SEAL[0], SEAL[1], 'shock'); later(0.6, () => burst(SEAL[0], SEAL[1], 'jade')); for (let q = 0; q < 22; q++) f.flocks.push({ kind: q % 3 ? 'bird' : 'crane', x: SEAL[0] + (S.R() - 0.5) * 80, y: SEAL[1] - 20, vx: (S.R() - 0.5) * 34, vy: -10 - S.R() * 8, t: -S.R() * 0.3, life: 14, ph: q, z: 40 + S.R() * 80 });
+    if (k) H.assign(k, [{ k: 'sit', t: 3 }, { k: 'bubble', kind: 'excl' }, { k: 'sit', t: 600 }], 'story'); R.wait = o.t || 5; };
+  O.btp_hold = (R, o) => { const f = S.btp; f.shake = 0; f.windT = 1.2; focus(P.btp_buddha(), 10); cap('Phật Tổ vẫn ngồi bất động — uy nghiêm như núi', 'The Buddha sits unmoved, majestic as a mountain', 5); f.petalBoost = 1; f.haloT = 1; R.wait = o.t || 4; };
+  O.btp_settle = (R, o) => { const f = S.btp; f.beamsT = 0; f.columnT = 0.0; f.coverT = 0.6; f.windT = 1; f.glowT = [0.35, 0.35, 0.35, 0.35, 0.35]; f.haloT = 0.6; f.inscrT = 0.5; focus(SEAL, 8); cap('Lực giam giữ ổn định — mây lắng xuống', 'The binding steadies and the clouds settle', 5); for (const a of S.agents.filter(q => q.biome === B && q.role !== 'monkeyking')) { a.gathered = null; H.assign(a, [{ k: 'bubble', kind: 'heart' }, { k: 'idle', t: 2 }], 'story'); } R.wait = o.t || 3; };
   O.btp_recover = (R, o) => { const f = S.btp; f.petalBoost = 0.4; f.glowT = [0.15, 0.15, 0.15, 0.15, 0.15]; f.runesT = 0; f.inscrT = 0.25; f.haloT = 0.4; f.focus = null; const k = king(); if (k) { k.story = null; H.assign(k, [{ k: 'idle', t: 2 }], 'story'); } R.wait = o.t || 3; };
-  O.btp_peace = (R, o) => { const f = S.btp; f.windT = 1; f.coverT = 0.55; f.inscrT = 0.3; f.beamsT = 0; f.columnT = 0; f.runesT = 0; f.focus = null; f.petalBoost = 0; };
+  O.btp_peace = (R, o) => { const f = S.btp; f.windT = 1; f.coverT = 0.55; f.markT = 0; f.inscrT = 0.3; f.beamsT = 0; f.columnT = 0; f.runesT = 0; f.focus = null; f.petalBoost = 0; };
 
   D.beacon.btp = '255,226,150';
   D.biomes.btp = {
@@ -88,10 +90,10 @@
     minis: ['btp_clouds', 'btp_cranes', 'btp_lotus', 'btp_runes', 'btp_thunder', 'btp_lamps', 'btp_runner', 'btp_dust', 'btp_gust', 'palm_somersault', 'palm_bounce'],
     stories: [
       { id: 'buddha_subdues_wukong', title: ['Phật Tổ thu phục Ngộ Không', 'The Buddha Subdues Wukong'],
-        fore: [['btp_fore', { t: 4 }]],
-        beats: [['btp_swagger', {}], ['btp_leap', {}], ['btp_fingers', { t: 8 }], ['btp_reveal', { t: 6 }], ['btp_inscribe', { t: 8 }], ['btp_seal', { t: 8 }], ['btp_bind', { t: 9 }], ['btp_hold', { t: 10 }], ['btp_settle', { t: 8 }], ['disperse', {}]],
+        foreT: [6, 8], fore: [['btp_fore', { t: 4 }]],
+        beats: [['btp_swagger', {}], ['btp_leap', {}], ['btp_mark', {}], ['btp_fingers', { t: 3.5 }], ['btp_reveal', { t: 3 }], ['btp_inscribe', { t: 2.5 }], ['btp_seal', { t: 4 }], ['btp_bind', { t: 5 }], ['btp_hold', { t: 4 }], ['btp_settle', { t: 3 }], ['disperse', {}]],
         after: { fx: 'petals', at: 'btp_palm', r: 50 },
-        recover: [['btp_recover', { t: 3 }], ['wait', { t: 14 }], ['btp_peace', {}], ['wait', { t: 2 }]] },
+        recover: [['btp_recover', { t: 2 }], ['wait', { t: 8 }], ['btp_peace', {}], ['wait', { t: 2 }]] },
     ],
   };
 })();

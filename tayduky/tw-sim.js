@@ -375,7 +375,7 @@ const TWS = (function () {
         if (B.timer <= 0) {
           const act = Object.values(S.biomes).filter(o => o.phase === 'fore' || o.phase === 'sig');
           if (act.length >= D().maxSignatures || act.some(o => adjOf(B.id).includes(o.id))) { B.timer = rnd(8, 20); }
-          else { const ch = B.data.stories.filter(s => s.id !== B.last); B.story = pick(ch.length ? ch : B.data.stories); B.last = B.story.id; B.phase = 'fore'; B.timer = rnd(L.fore[0], L.fore[1]); S.counts.stories[B.story.id] = (S.counts.stories[B.story.id] || 0) + 1;
+          else { const ch = B.data.stories.filter(s => s.id !== B.last); B.story = pick(ch.length ? ch : B.data.stories); B.last = B.story.id; B.phase = 'fore'; B.timer = B.story.foreT ? rnd(B.story.foreT[0], B.story.foreT[1]) : rnd(L.fore[0], L.fore[1]); S.counts.stories[B.story.id] = (S.counts.stories[B.story.id] || 0) + 1;
             if (B.run) endRun(B.run); B.run = newRun(B, B.story.fore || [], 'fore'); S.log.push([S.t, B.id, 'fore', B.story.id]); }
         } else if ((B.miniT -= dt) <= 0) {
           const names = B.data.minis.filter(n => n !== B.lastMini); const n = pick(names);

@@ -2,10 +2,10 @@
 //   node tests/tayduky-v2-ntq.mjs [outDir] [speed] [at] [zoom]
 import { withChrome, wait } from './cdp.mjs';
 import fs from 'fs';
-const out = process.argv[2] || 'docs/tayduky/v2/screenshots/btp', speed = +(process.argv[3] || 3), at = process.argv[4] || 'btp', zoom = process.argv[5] || '2'; fs.mkdirSync(out, { recursive: true });
+const out = process.argv[2] || 'docs/tayduky/v2/screenshots/btp', speed = +(process.argv[3] || 3), at = process.argv[4] || 'btp', zoom = process.argv[5] || '1.5'; fs.mkdirSync(out, { recursive: true });
 // op -> [[sim seconds after the beat starts, file name]]
-const PLAN = { btp_fore: [[3, 'a1-calm-foreshadow']], btp_swagger: [[6, 'a2-wukong-swaggers']], btp_leap: [[5, 'a3-somersault-escape']], btp_fingers: [[3, 'a4-fingers-light'], [7, 'a5-all-five-lit']], btp_reveal: [[3, 'a6-clouds-part']], btp_inscribe: [[5, 'b1-inscription']], btp_seal: [[4, 'b2-beams-close'], [7, 'b3-column-of-light']],
-  btp_bind: [[2, 'b4-shockwave'], [7, 'b5-wukong-pressed']], btp_hold: [[5, 'c1-buddha-unmoved']], btp_settle: [[5, 'c2-settling']], btp_recover: [[2, 'c3-recovery']] };
+const PLAN = { btp_fore: [[2, 'a1-calm-foreshadow']], btp_swagger: [[3, 'a2-wukong-swaggers']], btp_leap: [[3, 'a3-somersault-escape']], btp_mark: [[3.5, 'a4-mark-on-the-fingertip']], btp_fingers: [[2.5, 'a5-fingers-light']], btp_reveal: [[2, 'a6-clouds-part']], btp_inscribe: [[2, 'b1-inscription']], btp_seal: [[1.5, 'b2-beams-close'], [3.5, 'b3-column-of-light']],
+  btp_bind: [[1, 'b4-shockwave'], [4, 'b5-wukong-pressed']], btp_hold: [[2.5, 'c1-buddha-unmoved']], btp_settle: [[2, 'c2-settling']], btp_recover: [[1, 'c3-recovery']] };
 await withChrome(1920, 1080, async ({ base, send, ev, on }) => {
   const errs = []; on(m => { if (m.method === 'Runtime.exceptionThrown') errs.push(JSON.stringify(m.params.exceptionDetails).slice(0, 500)); });
   await send('Page.navigate', { url: base + `tayduky/index.html?at=${at}&tod=day&zoom=${zoom}&seed=7&force=btp&speed=` + speed }); await wait(6000);

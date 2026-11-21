@@ -284,7 +284,7 @@ const TWR = (function () {
     const wfI = Math.floor(R.t * 5) % 4;
     for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) continue; g.drawImage(c.cv, ci * CH, cj * CH); if (c.wf) g.drawImage(c.wf[wfI], ci * CH, cj * CH); if (window.TWFX && TWFX.nhs && TWFX.nhs.chunkOverlay) TWFX.nhs.chunkOverlay(g, c, ci * CH, cj * CH); }
     // flat decals
-    for (const s of R.flats) if (s.X < x0 + W && s.X + s.sp.w > x0 && s.Y < y0 + Hh && s.Y + s.sp.h > y0) g.drawImage(s.sp.frames[0], s.X, s.Y);
+    for (const s of R.flats) if (s.X < x0 + W && s.X + s.sp.w > x0 && s.Y < y0 + Hh && s.Y + s.sp.h > y0) g.drawImage(s.sp.pick ? s.sp.pick(s) : s.sp.frames[0], s.X, s.Y);
     if (sim && window.TWFX) TWFX.ground(g, sim, R, x0, y0, W, Hh);
     // sorted drawables
     const D = [], cols = new Map();
