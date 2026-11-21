@@ -405,3 +405,10 @@ Integration branch `integration/tayduky-codex-biomes` starts at Claude commit `3
 - **Assets:** source JSON was merged before regeneration. The integrated registry contains 60 characters and 215 object sprites; HVD and BTD raw PixelLab sources, action sheets, packers and catalog entries are retained.
 
 Verification and review screenshots are recorded in [`INTEGRATION-BTD-HVD.md`](INTEGRATION-BTD-HVD.md). Both 1,800-second simulation seeds, the 15-biome map/director suite, focused BTD/HVD tests, all implemented-biome regression suites and real-Chrome day/night/signature/recovery views pass. Current built count is **12/15**; `lat`, `clt` and `lhd` remain placeholders.
+
+## Checkpoint — tích hợp Codex (2026-11-22)
+
+`feature/tayduky-redesign-v2` đã fast-forward từ `3429cd4` lên `df2ad86` (Bàn Tơ Động + Hỏa Vân Động từ `integration/tayduky-codex-biomes`; báo cáo: `INTEGRATION-BTD-HVD.md`). Không force, không merge `main`, không push.
+**Biome hoàn chỉnh (12/15):** Hoa Quả Sơn, Bàn Tơ Động, Thiên Cung, Lòng Bàn Tay Phật Tổ, Hỏa Diệm Sơn, Sư Đà Lĩnh, Thông Thiên Hà, Hắc Phong Sơn, Ngũ Hành Sơn, Ngũ Trang Quán, Bạch Cốt Lĩnh, Hỏa Vân Động. Còn placeholder: Lôi Âm Tự (`lat`), Cao Lão Trang (`clt`), Liên Hoa Động (`lhd`).
+**Kiểm thử sau tích hợp:** map15 PASS; sim 1800 s seed 7 và 21 PASS; banto, hvd (991 tiles, 25 POI), btp/hqs/bcl/ntq sim PASS; smoke Chrome `at=btd|hvd|bcl|btp|hqs` không lỗi JS; không trùng material ID; HVD 0 ô placeholder, BCL 1.005 ô / 201 props nguyên vẹn; không file nào bị xóa. Lỗi còn lại: `tayduky-v2-river.mjs` FAIL mục `land` (có sẵn từ trước).
+**Việc tiếp theo:** polish Lòng Bàn Tay Phật Tổ (đọc rõ hơn là bàn tay), rồi Thiên Cung và Đại Lôi Âm Tự.
