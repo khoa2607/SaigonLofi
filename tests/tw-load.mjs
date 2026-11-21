@@ -18,6 +18,8 @@ export function loadTW(files) {
   if (files.includes('tw-sim.js') && !files.includes('tw-hps-data.js') && fs.existsSync(path.join(dir, 'tw-hps-data.js'))) files.splice(files.indexOf('tw-river-data.js') + 1, 0, 'tw-hps-data.js');
   if (files.includes('tw-map.js') && !files.includes('tw-nhs.js') && fs.existsSync(path.join(dir, 'tw-nhs.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-nhs.js');   // Ngũ Hành Sơn map section
   if (files.includes('tw-sim.js') && !files.includes('tw-nhs-data.js') && fs.existsSync(path.join(dir, 'tw-nhs-data.js'))) files.splice(files.indexOf('tw-hps-data.js') + 1, 0, 'tw-nhs-data.js');
+  if (files.includes('tw-map.js') && !files.includes('tw-ntq.js') && fs.existsSync(path.join(dir, 'tw-ntq.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-ntq.js');   // Ngũ Trang Quán map section
+  if (files.includes('tw-sim.js') && !files.includes('tw-ntq-data.js') && fs.existsSync(path.join(dir, 'tw-ntq-data.js'))) files.splice(files.indexOf('tw-nhs-data.js') + 1, 0, 'tw-ntq-data.js');
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

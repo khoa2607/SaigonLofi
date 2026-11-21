@@ -111,6 +111,7 @@ Idle characters sometimes **chat**: two neighbours face each other and trade pix
 | Bạch Cốt Lĩnh | Three Disguises |
 | Hắc Phong Sơn | The Black Bear and the Burning Temple (replaces Nữ Nhi Quốc) |
 | Ngũ Hành Sơn (v2) | Five Hundred Years Beneath the Mountain: the 500-year time-lapse of four seasons, Tang Sanzang rides in on the white horse, lifts the golden seal, Wukong bursts out, changes into pilgrim robes and bows |
+| Ngũ Trang Quán (v2) | The Ginseng Fruit: the pilgrims are offered the baby-shaped fruit, Wukong fells the tree, Zhenyuan binds them, Guanyin revives the tree with the sweet dew, a feast follows |
 | Bàn Tơ Động | The Seven Sisters' Net |
 | Hỏa Diệm Sơn | The Palm-Leaf Fan (fire, then rain) |
 | Lôi Âm Tự | The Scriptures Received, The False Thunderclap |

@@ -39,7 +39,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     SLATE: 110, BONE: 111, RAMP: 112, MIRE: 113, YARD: 114, PLANK: 115, SCRUB: 116,
     BANK: 120, WSAND: 121, WREED: 122, COBBLE: 123, DOCK: 124, BLUFF: 125, PAVER: 126,
     HROCK: 127, HMOSS: 128, HGRAV: 129, HFLAG: 130, HDECK: 131,
-    NTURF: 132, NROCK: 133, NGRAV: 134, NFLAG: 135 };   // Ngũ Hành Sơn (tw-nhs.js)
+    NTURF: 132, NROCK: 133, NGRAV: 134, NFLAG: 135,
+    QLAWN: 136, QPAVE: 137, QROCK: 138, QGRAV: 139 };   // Ngũ Trang Quán (tw-ntq.js)   // Ngũ Hành Sơn (tw-nhs.js)
       // Hắc Phong Sơn (tw-hps.js)   // Thông Thiên Hà (tw-river.js)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
@@ -511,6 +512,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // Ngũ Hành Sơn (tw-nhs.js): world-space build on the planner's region east of Hắc Phong Sơn
   if (window.TW_NHS_BUILD) TW_NHS_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
+  // Ngũ Trang Quán (tw-ntq.js): world-space build on the planner's region north of Ngũ Hành Sơn
+  if (window.TW_NTQ_BUILD) TW_NTQ_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
   for (const b of TWM.biomes.filter(b=>!b.built)) {
@@ -621,6 +625,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   if (window.TW_LION_FINAL) TW_LION_FINAL({ TWM, WALK, id, N });
   if (window.TW_HPS_FINAL) TW_HPS_FINAL({ TWM, WALK, id, N });
   if (window.TW_NHS_FINAL) TW_NHS_FINAL({ TWM, WALK, id, N });
+  if (window.TW_NTQ_FINAL) TW_NTQ_FINAL({ TWM, WALK, id, N });
   if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;
 

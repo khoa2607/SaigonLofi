@@ -537,5 +537,38 @@
   "speed": 20,
   "role": "horse",
   "shadow": 22
+ },
+ {
+  "name": "ntq_zhenyuan",
+  "id": "6ecd45c4-7146-435c-b515-42ec5030f6d6",
+  "title": [
+   "Trấn Nguyên Đại Tiên",
+   "Zhenyuan Daxian, Great Immortal of Wuzhuang"
+  ],
+  "biome": "ntq",
+  "speed": 13,
+  "role": "sage"
+ },
+ {
+  "name": "ntq_qingfeng",
+  "id": "d69d8aa6-8620-4a08-b9fd-46851eeea7f9",
+  "title": [
+   "Thanh Phong",
+   "Qingfeng, the azure-robed boy"
+  ],
+  "biome": "ntq",
+  "speed": 18,
+  "role": "boy"
+ },
+ {
+  "name": "ntq_mingyue",
+  "id": "7c162c0a-3ba4-48f3-acd6-cbd25ade91d5",
+  "title": [
+   "Minh Nguyệt",
+   "Mingyue, the white-robed girl"
+  ],
+  "biome": "ntq",
+  "speed": 18,
+  "role": "girl"
  }
 ]
