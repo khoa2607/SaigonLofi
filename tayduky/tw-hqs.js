@@ -44,11 +44,14 @@ window.TW_HQS_BUILD = function (X) {
   const seg = SP => { const tiles = []; for (let n = 0; n < SP.length - 1; n++) { let [a, b, l0] = SP[n]; const [a1, b1, l1] = SP[n + 1], sg = []; while (a !== a1 || b !== b1) { sg.push([a, b]); if (Math.abs(a1 - a) >= Math.abs(b1 - b) && a !== a1) a += Math.sign(a1 - a); else b += Math.sign(b1 - b); } sg.forEach(([qa, qb], t) => tiles.push([qa, qb, Math.round(l0 + (l1 - l0) * t / Math.max(1, sg.length))])); } const l = SP[SP.length - 1]; tiles.push([l[0], l[1], l[2]]); return tiles; };
   const water = (a, b, lv, mat) => { const k = tile(a, b); if (k < 0) return; MAT[k] = mat || M.STREAM; H[k] = lv; FIX[k] = 1; WALLK[k] = 0; if (!F.stream.includes(k)) F.stream.push(k); };
   const rect = (a0, b0, a1, b1) => { const o = []; for (let b = b0; b <= b1; b++) for (let a = a0; a <= a1; a++) o.push([a, b]); return o; };
-  // great fall (x 73..75): plateau stream y 3..7 at L13, landing at y 8..9 at L3; flanking falls at x 69 (L11 -> 3) and x 80
-  for (let b = 3; b <= 7; b++) for (const a of [72, 73, 74, 75, 76]) water(a, b, 13);
+  // great fall (x 72..76): the spring lake narrows to a two-tile crossing before opening into the five-tile curtain.
+  // This gives the summit bridge two firm banks instead of leaving one large bridge sprite floating in the lake.
+  for (const a of [74, 75]) water(a, 4, 13);
+  for (const a of [73, 74, 75]) water(a, 5, 13);
+  for (let b = 6; b <= 7; b++) for (const a of [72, 73, 74, 75, 76]) water(a, b, 13);
   for (const a of [72, 73, 74, 75, 76]) { water(a, 8, 3); water(a, 9, 3); }
   for (const [a, b, lv] of seg([[71, 3, 13], [69, 3, 12], [69, 7, 11]])) water(a, b, lv); for (const [a, b] of [[69, 8], [69, 9], [69, 10], [69, 11], [69, 12], [70, 12]]) water(a, b, 3);
-  for (const [a, b, lv] of seg([[77, 3, 13], [80, 3, 12], [80, 7, 11]])) water(a, b, lv); for (const [a, b] of [[80, 8], [80, 9], [80, 10]]) water(a, b, 3);
+  for (const [a, b, lv] of seg([[77, 3, 13], [80, 3, 12], [80, 7, 11]])) water(a, b, lv); for (const [a, b] of [[80, 8], [79, 9], [80, 9], [80, 10]]) water(a, b, 3);
   for (const [a, b] of rect(72, 2, 76, 3)) water(a, b, 13, M.POOL);                                                      // the spring lake on the plateau
   // the lake at the foot
   ell(77, 14.3, 7.4, 5.2, (k, d) => { if (d < 1) { MAT[k] = M.POOL; H[k] = 3; FIX[k] = 1; WALLK[k] = 0; if (!F.stream.includes(k)) F.stream.push(k); } });
@@ -87,14 +90,14 @@ window.TW_HQS_BUILD = function (X) {
   route([[84, 24], [81, 26]], M.FPATH);
   route([[94, 21], [95, 18], [95, 14], [94, 12]], M.FPATH);                                             // up to the village terrace
   route([[93, 8], [92, 6], [91, 5]], M.FPATH);                                                           // village -> statue summit
-  route([[85, 21], [85, 16], [85, 11], [83, 8], [78, 8]], M.FPATH);                                      // east shore of the lake -> east cave mouth
+  route([[85, 21], [85, 16], [85, 11], [83, 9], [81, 9], [78, 9], [78, 8]], M.FPATH);                     // east shore -> two-tile crossing below the flank fall -> east cave mouth
   route([[78, 21], [72, 21], [67, 18], [64, 14], [65, 10], [68, 8], [71, 8]], M.FPATH);                  // west shore -> west cave mouth
   route([[69, 26], [66, 24], [66, 20], [66, 17]], M.FPATH);                                              // orchard terraces
   route([[76, 26], [71, 26]], M.FPATH);
   route([[80, 28], [76, 30], [74, 31]], M.FPATH);                                                        // the cloud-sea lookout
   route([[94, 34], [96, 30], [96, 26]], M.FPATH);                                                        // the beach path
   route([[90, 28], [90, 12], [93, 12]], M.FPATH);
-  route([[91, 5], [88, 4], [84, 4], [82, 4], [78, 4], [71, 4]], M.FPATH);                              // the mountain trail up to the source (a rope bridge over the east flank)                                                        // village avenue from the south meadow
+  route([[91, 5], [88, 4], [84, 4], [82, 4], [78, 4], [71, 4]], M.FPATH);                                // mountain trail: a short two-tile bridge over the narrowed spring outflow
   relax();
   // stairs on every one-level edge between walkable ground (the mountain wall itself keeps its cliffs)
   F.stairs = 0; for (const k of F.tiles) { const i = k % N, j = Math.floor(k / N); for (const [a, b] of [[1, 0], [0, 1]]) { if (!inB(i + a, j + b)) continue; const z = id(i + a, j + b); if (Math.abs(H[k] - H[z]) !== 1 || isWater(k) || isWater(z) || MAT[k] === M.SEA || MAT[z] === M.SEA || Math.max(H[k], H[z]) > 9 || TWM.stairs.has(k + ',' + z)) continue; TWM.stairs.set(k + ',' + z, 1); TWM.stairs.set(z + ',' + k, 1); F.stairs++; } }

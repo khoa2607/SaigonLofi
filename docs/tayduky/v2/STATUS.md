@@ -493,3 +493,13 @@ Browser: the review runs (`tayduky-v2-newbiome-shots.mjs`, `tayduky-v2-newbiome-
 - **Liên Hoa Động:** the cave door is redrawn as an ancient dressed-stone doorway set into the mountain: radial voussoir frame, three nested recessed arches with floor glow and violet crystal light, two layers of carved stone lotus petals growing out of the rock (gold veins west, silver east), gold and silver horn reliefs, runes, torch niches. No teeth, no mouth.
 - **Bạch Cốt Lĩnh:** the skull-faced black cave (a clone of Hắc Phong Sơn's bear cave) is replaced by Huyệt Bạch Cốt (painted, `blair`): nested rib arches, a spine of vertebrae as the ridge, femur pillars, humerus braces, stacked skulls, a bone altar with ghost fire, dark hall with ghost light; effects: breathing ghost light, a spirit crossing the doorway, bone dust, mist, a crow.
 - Screenshots: `screenshots/landmarks/`. Tests: map15, btp / lat / bcl / clt / lhd sims PASS; `tayduky-v2-sim` 1800 s seeds 7 and 101 PASS, seed 31 FAIL (Thiên Cung coverage window, as documented above).
+
+## Hoa Quả Sơn — bridge and terrain correction (2026-11-21)
+
+Isolated review branch `fix/hqs-bridge-terrain`, based on committed Claude checkpoint `5afbba3`. No BTP, shared renderer, Story Director, camera or other biome logic was changed.
+
+- **Source-lake crossing retained and rebuilt:** it is the only summit route to the spring shrine, so it remains functional. The five-tile sheet of water/bridge was reshaped into a spring lake that funnels through a two-tile channel before widening into the five-tile Great Fall. The bridge now spans only `(74,4)–(75,4)`, runs on the strict isometric axis and lands on path tiles `(73,4)` and `(76,4)`, all at level 13.
+- **Flank-fall crossing retained and moved:** it is required by the east Water-Curtain Cave entrance and the signature procession. The former deck at `(80,8)` directly under the falling water was removed; that tile is water and non-walkable again. The stream now fans out below the fall and is crossed at `(79,9)–(80,9)`, with level-3 path banks at `(78,9)` and `(81,9)`.
+- Both crossings are generated as two-tile `hbridge` spans with the correct orientation. Water remains continuous above and below them; both cave posts remain in the HQS walk component. No new asset or PixelLab generation was used.
+
+Deterministic coverage: `tests/tayduky-v2-hqs-terrain.mjs` checks deck materials, bank heights, preferred paths, `canStep`, water continuity, removal of the old waterfall-foot deck and both cave entrances. Map15, global sim 900 seed 7, HQS sim seeds 7/21/33 and the complete 15-frame Chrome signature pass. The 19-view HQS browser regression reports zero console errors. Before/after normal and wide screenshots are in `screenshots/hqs-bridge-fix/`.
