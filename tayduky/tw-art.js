@@ -99,6 +99,7 @@ const TWA = (function () {
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     if (TWA.hvd && ((m >= M.HCRIM && m <= M.HBRIDGE) || (TWM.BIO[k] === TWM.bi.hvd && (m === M.STREAM || m === M.CHASM)))) return TWA.hvd.top(m, I, J, X, Y, k, dith, SH);
     if (TWA.hps && TWM.BIO[k] === TWM.bi.hps && (m === M.STREAM || m === M.POOL)) return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn stream
+    if (TWA.lat && TWM.BIO[k] === TWM.bi.lat && (m === M.STREAM || m === M.POOL)) return TWA.lat.top(m, I, J, X, Y, k, dith, SH);   // Linh Sơn holy water
     if (TWA.bcl && TWM.BIO[k] === TWM.bi.bcl && (m === M.STREAM || m === M.POOL)) return TWA.bcl.top(m, I, J, X, Y, k, dith, SH);   // Bạch Cốt Lĩnh black water
     if (TWA.hqs && TWM.BIO[k] === TWM.bi.hqs && (m === M.STREAM || m === M.POOL)) return TWA.hqs.top(m, I, J, X, Y, k, dith, SH);   // Hoa Quả Sơn water
     if (TWA.ntq && TWM.BIO[k] === TWM.bi.ntq && (m === M.STREAM || m === M.POOL)) return TWA.ntq.top(m, I, J, X, Y, k, dith, SH);   // Ngũ Trang Quán water
@@ -107,6 +108,7 @@ const TWA = (function () {
     if (TWA.river && (TWM.BIO[k] === TWM.bi.tth || (TWM.tthNear && TWM.tthNear[k])) && (m === M.STREAM || m === M.POOL || m === M.SEA)) return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà: the great river
     switch (m) {
       case M.BANK: case M.WSAND: case M.WREED: case M.COBBLE: case M.DOCK: case M.BLUFF: case M.PAVER: return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà (tw-river-art.js)
+      case M.LROCK: case M.LIVORY: case M.LGOLD: case M.LLAWN: case M.LPATH: case M.LMOSS: return TWA.lat.top(m, I, J, X, Y, k, dith, SH);   // Đại Lôi Âm Tự (tw-lat-art.js)
       case M.BDIRT: case M.BMOSS: case M.BROCK: case M.BGRASS: case M.BTOMB: case M.BBONE: return TWA.bcl.top(m, I, J, X, Y, k, dith, SH);   // Bạch Cốt Lĩnh (tw-bcl-art.js)
       case M.FLAWN: case M.FMOSS: case M.FROCK: case M.FPATH: case M.FPLAZA: case M.FBLOSS: return TWA.hqs.top(m, I, J, X, Y, k, dith, SH);   // Hoa Quả Sơn (tw-hqs-art.js)
       case M.QLAWN: case M.QPAVE: case M.QROCK: case M.QGRAV: return TWA.ntq.top(m, I, J, X, Y, k, dith, SH);   // Ngũ Trang Quán (tw-ntq-art.js)
@@ -235,6 +237,7 @@ const TWA = (function () {
     if (b === 'hvd' && TWA.hvd) return TWA.hvd.face(side, lx, ry, drop, elev, gx, k, SH);
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) return TWA.lion.face(side, lx, ry, drop, elev, gx, k, SH);
+    if (b === 'lat' && TWA.lat) return TWA.lat.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) return TWA.bcl.face(side, lx, ry, drop, elev, gx, k, SH);
     if (((b === 'hqs' && TWM.MAT[k] !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k] && TWM.MAT[k] !== M.SEA)) && TWA.hqs) return TWA.hqs.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) return TWA.ntq.face(side, lx, ry, drop, elev, gx, k, SH);
@@ -381,14 +384,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'hvd' && TWA.hvd) ? TWA.hvd.edge(c, k) : (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'hvd' && TWA.hvd) ? TWA.hvd.edge(c, k) : (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'ntq' || (TWM.ntqNear && TWM.ntqNear[k])) && TWA.ntq) ? TWA.ntq.edge(c, k) : (b === 'lat' && TWA.lat) ? TWA.lat.edge(c) : ((b === 'bcl' || (TWM.bclNear && TWM.bclNear[k])) && TWA.bcl) ? TWA.bcl.edge(c, k) : ((b === 'hqs' && m !== M.SEA) || (TWM.hqsNear && TWM.hqsNear[k])) && TWA.hqs ? TWA.hqs.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : b === 'hvd' && TWA.hvd ? TWA.hvd.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : b === 'ntq' && TWA.ntq ? TWA.ntq.stairPal : b === 'hqs' && TWA.hqs ? TWA.hqs.stairPal : b === 'lat' && TWA.lat ? TWA.lat.stairPal : b === 'bcl' && TWA.bcl ? TWA.bcl.stairPal : b === 'hvd' && TWA.hvd ? TWA.hvd.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {

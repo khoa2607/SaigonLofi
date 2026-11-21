@@ -146,3 +146,6 @@ No PixelLab generations: the hand sprite is code-painted. Balance not touched.
 
 ## Thiên Cung rework (2026-11-22)
 No PixelLab generations (all sprites reused).
+
+## Đại Lôi Âm Tự batch (2026-11-22)
+Objects (`create_1_direction_object`, size 256, 10 generations each): `daleiyin_hall` e8423f01 (the Great Hall, packed as `lat_hall_a`), `lingshan_gate` a66e36bc (the mountain gate, `lat_gate_a`). Characters (v3 `create_character` 52 px, 2 gens; template `walking-8-frames` south / west / east / north, 4 gens): `lat_monk` 1f2e4a57 (young saffron monk), `lat_elder` 03a99660 (Kasyapa), `lat_arhat` 5e50713f (stout arhat). Total 20 + 18 = **38 generations**; balance before 52.65, after 14.65 (1985.35 / 2000 used). Objects packed with `pack_sprites.py` (`sprite_picks.json` extended), characters with `pack_pl_chars.py --refresh --only lat_monk,lat_elder,lat_arhat` (`pl_cast.json` extended). Reused: `buddha_a` (double size), `hps_pagoda_a`, `hps_stupa_a`, `hps_bell_a`, `hps_burner_a`, `hps_sutra_a`, `statue_a/b`, `hps_wayshrine`, `hps_lantern`, `hps_maple`, `hps_pine`, `hps_rock`, `plotus`; characters `tam_tang`, `wk_pilgrim`, `bajie`, `sa_tang`, `bach_long_ma`, `guanyin`, `palm_attendant`.

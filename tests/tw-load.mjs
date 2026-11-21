@@ -28,10 +28,12 @@ export function loadTW(files) {
   if (files.includes('tw-sim.js') && !files.includes('tw-btp-data.js') && fs.existsSync(path.join(dir, 'tw-btp-data.js'))) files.splice(files.indexOf('tw-hqs-data.js') + 1, 0, 'tw-btp-data.js');
   if (files.includes('tw-map.js') && !files.includes('tw-bcl.js') && fs.existsSync(path.join(dir, 'tw-bcl.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-bcl.js');   // Bạch Cốt Lĩnh
   if (files.includes('tw-map.js') && !files.includes('tw-tc2.js') && fs.existsSync(path.join(dir, 'tw-tc2.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-tc2.js');   // Thiên Cung rework
+  if (files.includes('tw-map.js') && !files.includes('tw-lat.js') && fs.existsSync(path.join(dir, 'tw-lat.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-lat.js');   // Đại Lôi Âm Tự
   if (files.includes('tw-sim.js') && !files.includes('tw-bcl-data.js') && fs.existsSync(path.join(dir, 'tw-bcl-data.js'))) files.splice(files.indexOf('tw-btp-data.js') + 1, 0, 'tw-bcl-data.js');
   if (files.includes('tw-map.js') && !files.includes('tw-hvd.js') && fs.existsSync(path.join(dir, 'tw-hvd.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-hvd.js');
   if (files.includes('tw-sim.js') && !files.includes('tw-hvd-data.js') && fs.existsSync(path.join(dir, 'tw-hvd-data.js'))) files.splice(files.indexOf('tw-bcl-data.js') + 1, 0, 'tw-hvd-data.js');
   if (files.includes('tw-sim.js') && !files.includes('tw-tc2-data.js') && fs.existsSync(path.join(dir, 'tw-tc2-data.js'))) files.splice(files.indexOf('tw-bcl-data.js') + 1, 0, 'tw-tc2-data.js');
+  if (files.includes('tw-sim.js') && !files.includes('tw-lat-data.js') && fs.existsSync(path.join(dir, 'tw-lat-data.js'))) files.splice(files.indexOf('tw-tc2-data.js') + 1, 0, 'tw-lat-data.js');
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

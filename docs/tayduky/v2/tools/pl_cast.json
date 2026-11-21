@@ -629,7 +629,10 @@
  {
   "name": "hvd_redboy",
   "id": "a39c1d6d-baf3-4fa5-9487-0bd572abece0",
-  "title": ["Hồng Hài Nhi", "Red Boy"],
+  "title": [
+   "Hồng Hài Nhi",
+   "Red Boy"
+  ],
   "biome": "hvd",
   "speed": 17,
   "role": "redboy",
@@ -638,7 +641,10 @@
  {
   "name": "hvd_guanyin",
   "id": "fbce4534-84b2-424b-9e77-66e84c48c133",
-  "title": ["Quan Âm", "Guanyin"],
+  "title": [
+   "Quan Âm",
+   "Guanyin"
+  ],
   "biome": "hvd",
   "speed": 15,
   "role": "guanyin",
@@ -647,7 +653,10 @@
  {
   "name": "hvd_guard",
   "id": "e5693498-3bcb-4067-bf95-18631e845b81",
-  "title": ["Tiểu yêu canh núi", "Fire Cloud Guard"],
+  "title": [
+   "Tiểu yêu canh núi",
+   "Fire Cloud Guard"
+  ],
   "biome": "hvd",
   "speed": 20,
   "role": "guard",
@@ -656,7 +665,10 @@
  {
   "name": "hvd_worker",
   "id": "ccec92b3-d349-47ba-843f-095b93534405",
-  "title": ["Tiểu yêu thợ", "Fire Cloud Worker"],
+  "title": [
+   "Tiểu yêu thợ",
+   "Fire Cloud Worker"
+  ],
   "biome": "hvd",
   "speed": 18,
   "role": "worker",
@@ -665,10 +677,46 @@
  {
   "name": "hvd_trainee",
   "id": "9726d8e0-9b63-41b8-aeed-90d1f497c60e",
-  "title": ["Tiểu yêu tập sự", "Young Demon Trainee"],
+  "title": [
+   "Tiểu yêu tập sự",
+   "Young Demon Trainee"
+  ],
   "biome": "hvd",
   "speed": 19,
   "role": "trainee",
   "use_generated_idle": true
+ },
+ {
+  "name": "lat_monk",
+  "id": "1f2e4a57-df14-401f-a489-01c2a5514ef0",
+  "title": [
+   "Tăng trẻ Linh Sơn",
+   "Young monk of Linh Sơn"
+  ],
+  "biome": "lat",
+  "speed": 16,
+  "role": "monk"
+ },
+ {
+  "name": "lat_elder",
+  "id": "03a99660-9925-4304-b900-69df087ac0c5",
+  "title": [
+   "Ca Diếp",
+   "Kasyapa, the elder monk"
+  ],
+  "biome": "lat",
+  "speed": 13,
+  "role": "elder"
+ },
+ {
+  "name": "lat_arhat",
+  "id": "5e50713f-4d73-47b8-937f-ef31b91ba6c5",
+  "title": [
+   "La Hán",
+   "An arhat"
+  ],
+  "biome": "lat",
+  "speed": 13,
+  "role": "arhat"
  }
 ]

@@ -134,6 +134,10 @@ const TWR = (function () {
     if (a.alpha !== undefined && a.alpha < 1) g.globalAlpha = Math.max(0, a.alpha);
     const spun = a.spin ? (g.save(), g.translate(X + px0, Y + Math.round(py0 * 0.55)), g.rotate(a.spin), g.translate(-(X + px0), -(Y + Math.round(py0 * 0.55))), true) : false;   // tumbling through the air (the fan blows Wukong away)
     if (actionReady) drawAction();
+    else if (a.pose === 'kneel' && a.kneelP > 0.01) {   // kneeling: the legs fold under the body, the figure drops and bows from the waist (west/east: leaning forward; south/north: the head dips)
+      const p = a.kneelP, bw = a.bowP || 0, waist = Math.round(py0 * 0.52), Lh = py0 - waist, lowH = Math.max(3, Math.round(Lh * (1 - 0.55 * p))), drop = Lh - lowH, dirSign = a.dir === 'left' ? -1 : 1, lean = (a.dir === 'left' || a.dir === 'right') ? bw * 0.42 * dirSign : 0;
+      g.drawImage(S.im, col * w, row * h + waist, w, Lh, X, Y + waist + drop, w, lowH);
+      g.save(); g.translate(X + px0, Y + waist + drop); g.rotate(lean); g.drawImage(S.im, col * w, row * h, w, waist, -px0, -waist + Math.round((a.dir === 'up' || a.dir === 'down') ? bw * 3 : 0), w, waist); g.restore(); }
     else if (a.inWater) { const cut = py0 - 12; g.drawImage(S.im, col * w, row * h, w, cut, X, Y + 6, w, cut);   // bathing / swimming: lower body hidden under the water line
       const wl = Y + 6 + cut; g.fillStyle = 'rgba(220,250,250,0.85)'; g.fillRect(X + px0 - 9, wl - 1, 18, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(X + px0 - 11 + (Math.floor(R.t * 3) % 3), wl, 22, 1); }
     else if (sitDrop) { const cut = py0 - sitDrop - 2; g.drawImage(S.im, col * w, row * h, w, cut + 2, X, Y + sitDrop, w, cut + 2); }
@@ -143,7 +147,8 @@ const TWR = (function () {
     if (a.hasFan && window.TWFX && TWFX.fire) TWFX.fire.drawFan(g, a, X, Y, px0, py0);
     if (a.robe) { const ry = Y + (C.top || 6) + Math.round((py0 - (C.top || 6)) * 0.34); g.fillStyle = '#2a1726'; g.fillRect(X + px0 - 9, ry - 1, 18, 9); g.fillStyle = '#f4f0fa'; g.fillRect(X + px0 - 8, ry, 16, 7); g.fillStyle = '#c8c0dc'; g.fillRect(X + px0 - 8, ry + 5, 16, 2); g.fillStyle = '#f4b0c8'; g.fillRect(X + px0 - 1, ry, 2, 5); }   // tasteful bathing robe
     if (a.wrap) { g.fillStyle = 'rgba(236,232,252,0.9)'; const top = Y + (C.top || 6) + 14; for (let k = 0; k < 7; k++) g.fillRect(X + px0 - 8, top + k * 4 + (k % 2), 16, 1); for (let k = 0; k < 4; k++) g.fillRect(X + px0 - 7 + k * 5, top - 2, 1, 28); }
-    if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'cake' ? '#f0b64a' : a.carry === 'sack' ? '#8a6a48' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
+    if (a.carry === 'sutra' || a.carry === 'blank') { const px = X + C.pivot[0] + (a.dir === 'left' ? -9 : a.dir === 'right' ? 4 : -4), py = Y + (C.top || 6) + (a.pose === 'act' ? 20 : 26); g.fillStyle = '#8a5a20'; g.fillRect(px - 1, py - 1, 10, 9); g.fillStyle = a.carry === 'sutra' ? '#fff0b8' : '#ffffff'; g.fillRect(px, py, 8, 7); g.fillStyle = '#c0902c'; g.fillRect(px - 1, py - 2, 10, 2); g.fillRect(px - 1, py + 7, 10, 2); if (a.carry === 'sutra') { g.fillStyle = '#d8a020'; for (let q = 0; q < 3; q++) g.fillRect(px + 1, py + 1 + q * 2, 6, 1); if (Math.sin(R.t * 6) > 0.2) { g.fillStyle = 'rgba(255,240,160,0.8)'; g.fillRect(px + 3, py - 3, 2, 1); } } }
+    else if (a.carry) { const c = a.carry === 'peach'; g.fillStyle = c ? '#ffa078' : a.carry === 'cake' ? '#f0b64a' : a.carry === 'sack' ? '#8a6a48' : a.carry === 'crystal' ? '#b78cff' : a.carry === 'fish' ? '#9ad8f0' : '#e8e4f8'; const px = X + C.pivot[0] + (a.dir === 'left' ? -7 : a.dir === 'right' ? 5 : -2), py = Y + (C.top || 6) + (a.pose === 'act' ? 22 : 28); g.fillRect(px, py, 4, 4); g.fillStyle = c ? '#f47a62' : '#b4aed4'; g.fillRect(px + 2, py + 2, 2, 2); g.fillStyle = '#4c9454'; g.fillRect(px + 1, py - 1, 2, 1); }
     if (a.bubble) bubble(g, X + C.pivot[0], Y + (C.top || 6) - 4, a.bubble);
   }
   const ICON = { note: ['00110', '00101', '00100', '11100', '11100'], dots: ['00000', '00000', '10101', '00000', '00000'], heart: ['01010', '11111', '11111', '01110', '00100'],
@@ -300,6 +305,7 @@ const TWR = (function () {
     if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
     if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);
+    if (window.TWFX && TWFX.lat && TWFX.lat.drawables) TWFX.lat.drawables(D, R, x0, y0, W, Hh, sim);   // Đại Lôi Âm Tự: banners, lotus, incense, cranes, dragonflies
     if (window.TWFX && TWFX.tc2 && TWFX.tc2.drawables) TWFX.tc2.drawables(D, R, x0, y0, W, Hh, sim);   // Thiên Cung: banners, brazier flames, falling peaches, the flying lid
     if (window.TWFX && TWFX.bcl && TWFX.bcl.drawables) TWFX.bcl.drawables(D, R, x0, y0, W, Hh, sim);   // Bạch Cốt Lĩnh: crows, bone-rats, flags, corpses
     if (window.TWFX && TWFX.hqs && TWFX.hqs.drawables) TWFX.hqs.drawables(D, R, x0, y0, W, Hh, sim);   // Hoa Quả Sơn: cranes, rabbits, squirrels, flags, drums, the feast

@@ -77,12 +77,13 @@ const TWS = (function () {
         stepRun(a, st.sub, dt); return false;
       }
       case 'face': a.dir = st.dir || dirTo(a, st.x, st.y); return true;
-      case 'sit': case 'act': case 'idle': case 'hop': case 'perch': {
+      case 'sit': case 'act': case 'idle': case 'hop': case 'perch': case 'kneel': {
         if (st.left === undefined) { st.left = st.t; if (st.k === 'act') count('act'); }
         st.left -= dt; a.pose = st.k; a.moving = false;
         if (st.k === 'hop') a.lift = Math.abs(Math.sin((st.t - st.left) * 7 + a.phase)) * 3;
         if (st.k === 'act' && st.prop) st.prop.hit = 0.4;
-        if (st.left <= 0) { a.pose = 'idle'; if (st.k === 'hop') a.lift = 0; return true; }
+        if (st.k === 'kneel') { const e = st.t - st.left; a.kneelP = Math.min(1, e / 0.9) * Math.min(1, Math.max(0, st.left / 0.9)); a.bowP = Math.min(1, Math.max(0, (e - 0.9) / 0.8)) * Math.min(1, Math.max(0, (st.left - 0.4) / 0.8)); }
+        if (st.left <= 0) { a.pose = 'idle'; a.kneelP = 0; a.bowP = 0; if (st.k === 'hop') a.lift = 0; return true; }
         return false;
       }
       case 'climb': case 'thread': {

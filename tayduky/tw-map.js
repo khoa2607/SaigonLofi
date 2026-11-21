@@ -43,7 +43,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     QLAWN: 136, QPAVE: 137, QROCK: 138, QGRAV: 139,
     FLAWN: 140, FMOSS: 141, FROCK: 142, FPATH: 143, FPLAZA: 144, FBLOSS: 145,
     PGOLD: 146, PLINE: 147, PFING: 148, PLOT: 149,
-    BDIRT: 150, BMOSS: 151, BROCK: 152, BGRASS: 153, BTOMB: 154, BBONE: 155,
+    BDIRT: 150, BMOSS: 151, BROCK: 152, BGRASS: 153, BTOMB: 154, BBONE: 155, LROCK: 162, LIVORY: 163, LGOLD: 164, LLAWN: 165, LPATH: 166, LMOSS: 167,
     HCRIM: 156, HCOPPER: 157, HPINE: 158, HPATH: 159, HASH: 160, HBRIDGE: 161 };   // Hỏa Vân Động; 120–126 remain reserved for Thông Thiên Hà
       // Hắc Phong Sơn (tw-hps.js)   // Thông Thiên Hà (tw-river.js)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
@@ -528,6 +528,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
 
   // Bạch Cốt Lĩnh (tw-bcl.js): world-space build on the planner's region north-west of the Heaven cloud sea
   if (window.TW_BCL_BUILD) TW_BCL_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+  if (window.TW_LAT_BUILD) TW_LAT_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
   if (window.TW_TC2_BUILD) TW_TC2_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
   // Hỏa Vân Động: authored over the current planner footprint after Claude's completed neighbours claim their tiles.
@@ -648,6 +649,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   if (window.TW_BTP_FINAL) TW_BTP_FINAL({ TWM, WALK, id, N });
   if (window.TW_BCL_FINAL) TW_BCL_FINAL({ TWM, WALK, id, N });
   if (window.TW_TC2_FINAL) TW_TC2_FINAL({ TWM, WALK, id, N });
+  if (window.TW_LAT_FINAL) TW_LAT_FINAL({ TWM, WALK, id, N });
   if (window.TW_HVD_FINAL) TW_HVD_FINAL({ TWM, WALK, id, N });
   if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;

@@ -118,3 +118,6 @@ Region unchanged (953 tiles, x 53-90 / y 30-76). The hand is centred on (74, 50)
 
 ## Thiên Cung (2026-11-22)
 No footprint change (847 tiles, x 10-43 / y 7-34). Camera targets `?at=tcgate|tcfurnace|tcgarden|tcpalace`.
+
+## Đại Lôi Âm Tự (2026-11-22)
+Region kept (692 tiles, x 102-122 / y 1-35). Levels: foot 7-8, gate terrace 10, landing 12, arhat court 13, landing 15, hall terrace 16, dais 17, mountain walls to about 25. Entry at (113, 34) <-> Ngũ Trang Quán (113, 35) level 7 (two connector tiles in Ngũ Trang Quán at (113, 37-38)). Camera targets `?at=latfoot|latgate|latcourt|lathall|latpool|latfall|latbodhi|latrim|latwest|latnorth|latseam`.

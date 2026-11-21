@@ -792,5 +792,13 @@
  "hvd_waterfall_a": [
   "hvd/waterfall",
   0.1
+ ],
+ "lat_hall_a": [
+  "lat_hall_0",
+  0.1
+ ],
+ "lat_gate_a": [
+  "lat_gate_0",
+  0.1
  ]
 }
