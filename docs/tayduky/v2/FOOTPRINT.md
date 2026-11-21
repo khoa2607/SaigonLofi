@@ -115,3 +115,6 @@ The planner's `bcl` region (1,005 tiles) is a C that wraps the Heaven cloud sea;
 
 ## Lòng Bàn Tay Phật Tổ — hand rebuild (2026-11-22)
 Region unchanged (953 tiles, x 53-90 / y 30-76). The hand is centred on (74, 50), fingers pointing screen-right (toward Hoa Quả Sơn's rim, fingertips about x 80-88 / y 35-46), wrist toward the Buddha's lotus mountain (centre (62.5, 61.5), levels 7-10). Hand tiles are flat level 6, hidden (`VOID`) under the sprite. Cloud walkway from the middle fingertip to the Hoa Quả Sơn rim at (90, 39). Seams: a cloud band over unbuilt neighbours (existing) and a mist curtain along built ones.
+
+## Thiên Cung (2026-11-22)
+No footprint change (847 tiles, x 10-43 / y 7-34). Camera targets `?at=tcgate|tcfurnace|tcgarden|tcpalace`.

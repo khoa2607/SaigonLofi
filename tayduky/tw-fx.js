@@ -21,6 +21,7 @@ const TWFX = (function () {
     if (window.TWFX && TWFX.nhs) TWFX.nhs.draw(g, S, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.ntq) TWFX.ntq.draw(g, S, R, x0, y0, W, Hh);   // Ngũ Trang Quán (tw-ntq-fx.js)   // Ngũ Hành Sơn (tw-nhs-fx.js)
     if (window.TWFX && TWFX.hqs) TWFX.hqs.draw(g, S, R, x0, y0, W, Hh);
+    if (window.TWFX && TWFX.tc2) TWFX.tc2.draw(g, S, R, x0, y0, W, Hh);   // Thiên Cung (tw-tc2-fx.js)
     if (window.TWFX && TWFX.bcl) TWFX.bcl.draw(g, S, R, x0, y0, W, Hh);   // Bạch Cốt Lĩnh (tw-bcl-fx.js)   // Hoa Quả Sơn (tw-hqs-fx.js)
     if (window.TWFX && TWFX.hps) TWFX.hps.draw(g, S, R, x0, y0, W, Hh);   // Hắc Phong Sơn (tw-hps-fx.js)   // Thông Thiên Hà (tw-river-fx.js)
     if (window.TWFX && TWFX.hvd) TWFX.hvd.draw(g, S, R, x0, y0, W, Hh);   // Hỏa Vân Động (tw-hvd-fx.js)
@@ -83,6 +84,7 @@ const TWFX = (function () {
     if (window.TWFX && TWFX.nhs) TWFX.nhs.light(g, S, R, amt);
     if (window.TWFX && TWFX.ntq) TWFX.ntq.light(g, S, R, amt);
     if (window.TWFX && TWFX.hqs) TWFX.hqs.light(g, S, R, amt);
+    if (window.TWFX && TWFX.tc2) TWFX.tc2.light(g, S, R, amt);
     if (window.TWFX && TWFX.bcl) TWFX.bcl.light(g, S, R, amt);
     if (window.TWFX && TWFX.hvd) TWFX.hvd.light(g, S, R, amt);
     // characters keep their own colour at night: the sprite is re-drawn additively over itself (after the night grade), so people stay readable without lighting the ground

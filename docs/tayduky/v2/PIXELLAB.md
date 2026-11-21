@@ -143,3 +143,6 @@ Imported runtime characters: `hvd_redboy` (`a39c1d6d`), `hvd_guanyin` (`fbce4534
 
 ## Buddha's Palm hand rescue (2026-11-22)
 No PixelLab generations: the hand sprite is code-painted. Balance not touched.
+
+## Thiên Cung rework (2026-11-22)
+No PixelLab generations (all sprites reused).
