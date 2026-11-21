@@ -24,6 +24,8 @@ export function loadTW(files) {
   if (files.includes('tw-sim.js') && !files.includes('tw-hqs-data.js') && fs.existsSync(path.join(dir, 'tw-hqs-data.js'))) files.splice(files.indexOf('tw-ntq-data.js') + 1, 0, 'tw-hqs-data.js');
   if (files.includes('tw-map.js') && !files.includes('tw-btp.js') && fs.existsSync(path.join(dir, 'tw-btp.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-btp.js');   // Buddha's Palm rebuild
   if (files.includes('tw-sim.js') && !files.includes('tw-btp-data.js') && fs.existsSync(path.join(dir, 'tw-btp-data.js'))) files.splice(files.indexOf('tw-hqs-data.js') + 1, 0, 'tw-btp-data.js');
+  if (files.includes('tw-map.js') && !files.includes('tw-bcl.js') && fs.existsSync(path.join(dir, 'tw-bcl.js'))) files.splice(files.indexOf('tw-map.js'), 0, 'tw-bcl.js');   // Bạch Cốt Lĩnh
+  if (files.includes('tw-sim.js') && !files.includes('tw-bcl-data.js') && fs.existsSync(path.join(dir, 'tw-bcl-data.js'))) files.splice(files.indexOf('tw-btp-data.js') + 1, 0, 'tw-bcl-data.js');
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8') + '\n;this.TWM = typeof TWM !== "undefined" ? TWM : this.TWM; if (typeof TWS !== "undefined") this.TWS = TWS;', ctx, { filename: f });
   return ctx;
 }

@@ -113,6 +113,8 @@ Idle characters sometimes **chat**: two neighbours face each other and trade pix
 | Ngũ Hành Sơn (v2) | Five Hundred Years Beneath the Mountain: the 500-year time-lapse of four seasons, Tang Sanzang rides in on the white horse, lifts the golden seal, Wukong bursts out, changes into pilgrim robes and bows |
 | Ngũ Trang Quán (v2) | The Ginseng Fruit: the pilgrims are offered the baby-shaped fruit, Wukong fells the tree, Zhenyuan binds them, Guanyin revives the tree with the sweet dew, a feast follows |
 | Hoa Quả Sơn (v2 rebuild) | The Great Sage Returns: the troop runs to the court, drums and banners, staff and clones, through the Water-Curtain Cave, the great feast |
+| Lòng Bàn Tay Phật Tổ (v2 rebuild) | The Buddha Subdues Wukong: five fingers light, clouds part, inscription, prison of light |
+| Bạch Cốt Lĩnh (v2) | Three Strikes at the White Bone Demon: girl, old woman, old man, true form, Wukong banished |
 | Bàn Tơ Động | The Seven Sisters' Net |
 | Hỏa Diệm Sơn | The Palm-Leaf Fan (fire, then rain) |
 | Lôi Âm Tự | The Scriptures Received, The False Thunderclap |

@@ -570,5 +570,60 @@
   "biome": "ntq",
   "speed": 18,
   "role": "girl"
+ },
+ {
+  "name": "bgt_girl",
+  "id": "c7645e3e-da5c-48e2-837a-482dec7b7462",
+  "title": [
+   "Bạch Cốt Tinh — cô gái",
+   "White Bone Demon as the girl"
+  ],
+  "biome": "bcl",
+  "speed": 17,
+  "role": "actor"
+ },
+ {
+  "name": "bgt_crone",
+  "id": "11ec412b-75a6-4189-a3aa-1be6c159d64d",
+  "title": [
+   "Bạch Cốt Tinh — bà lão",
+   "White Bone Demon as the old woman"
+  ],
+  "biome": "bcl",
+  "speed": 12,
+  "role": "actor"
+ },
+ {
+  "name": "bgt_elder",
+  "id": "2e3566e9-bb24-4c2a-9e77-60bd5d871167",
+  "title": [
+   "Bạch Cốt Tinh — ông lão",
+   "White Bone Demon as the old man"
+  ],
+  "biome": "bcl",
+  "speed": 13,
+  "role": "actor"
+ },
+ {
+  "name": "bgt_bone",
+  "id": "fbe85c3c-1b69-4a1b-ade1-fc5d724db1a7",
+  "title": [
+   "Bạch Cốt Tinh — nguyên hình",
+   "The White Bone Demon, true form"
+  ],
+  "biome": "bcl",
+  "speed": 16,
+  "role": "demon"
+ },
+ {
+  "name": "bgt_skel",
+  "id": "936013be-d120-4ca1-b1f5-6c73a6d3db2e",
+  "title": [
+   "Tiểu quỷ xương",
+   "Skeleton servant of the White Bone Demon"
+  ],
+  "biome": "bcl",
+  "speed": 14,
+  "role": "servant"
  }
 ]

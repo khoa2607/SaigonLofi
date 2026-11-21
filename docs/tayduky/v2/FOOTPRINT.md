@@ -108,3 +108,7 @@ The planner region (1,406 tiles) is kept; `tw-hqs.js` rebuilds it in world space
 ## Buddha's Palm rebuild (2026-11-22)
 
 The planner region (953 tiles, x 53-90 / y 30-76) is kept and rebuilt by `tw-btp.js`. Heights: palm 6, fingers 12-18, thumb 10, Buddha terrace 10, wrist 5 -> 3, cloud terraces 2-3, cloud sea -1..2 (0-1 at the borders). Neighbours: `hqs` (north-east; the east cloud walkway meets Hoa Quả Sơn / Ngũ Trang Quán on level 1), `ntq` (east), `hps` (south-east), `clt` (west) and `lhd` (south-west) (placeholders get an 11-tile cloud band). The old `tw-palm.js` authoring (translated by the layout) is purged.
+
+## Bạch Cốt Lĩnh (White Bone Ridge)
+
+The planner's `bcl` region (1,005 tiles) is a C that wraps the Heaven cloud sea; it is authored by `tw-bcl.js` with no footprint change. Heights: entry 2, valley floor 3, canyon walls up to 13 (east wall = Hoa Quả Sơn's rim), lair and palace terraces 7, ridge 8-9, chasm floor 1. Neighbours: `tc` (the cloud sea below the cliffs), `hqs` (east, rim matched), `clt` (south, placeholder; the road leaves the pocket through the entry pass at (44, 39)), `hvd` (west, placeholder), the world rim (north).
