@@ -285,6 +285,7 @@ const TWR = (function () {
     }
     if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
+    if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);   // Hắc Phong Sơn: the great hall's ruin / scaffold / new faces
     for (const f of TWM.falls) D.push([(f.i + f.j + 1) * 8 + 2, 2, f]);
     for (const [k, lvl] of cols) { const i = k % TWM.N, j = Math.floor(k / TWM.N); D.push([(i + j + 1) * 8 - 0.01, 3, k, lvl]); }
     D.sort((a, b) => a[0] - b[0] || a[1] - b[1]);

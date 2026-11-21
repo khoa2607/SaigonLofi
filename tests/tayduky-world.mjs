@@ -23,7 +23,7 @@ await withChrome(1600, 900, async ({ base, send, ev, on }) => {
     await wait(1000);
   }
   const res = JSON.parse(await ev(`JSON.stringify({agents: TS.agents.length, biomes: Object.keys(TS.biomes).length, max: TD_DATA.maxSignatures, minis: Object.fromEntries(Object.values(TS.biomes).map(B=>[B.id, B.minis])), recovers: Object.fromEntries(Object.values(TS.biomes).map(B=>[B.id, B.recovers||0]))})`));
-  const APPROVED = ['hqs', 'tc', 'btp', 'nhs', 'clt', 'bcl', 'nnq', 'btd', 'hds', 'tth', 'lat'];
+  const APPROVED = ['hqs', 'tc', 'btp', 'nhs', 'clt', 'bcl', 'hps', 'btd', 'hds', 'tth', 'lat'];
   const missing = APPROVED.filter(b => !(b in res.minis)), quietBiomes = APPROVED.filter(b => !res.minis[b]);
   const recoverOk = Object.keys(finished).every(b => res.recovers[b] > 0);
   console.log(JSON.stringify({ seconds: secs, simSeconds: secs * 10, ...res, maxActive, adjacencyViolations: adjViol, storiesStarted: [...starts], biomesInAftermath: Object.keys(finished), missing, quietBiomes, recoverOk, nhsFreed, nhsReburied, errors: errs }, null, 1));

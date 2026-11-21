@@ -7,7 +7,7 @@ Updated 2026-11-20 after the integration of Buddha's Palm. Scope: Tây Du Ký on
 - Built: **Hoa Quả Sơn (`hqs`)**, **Bàn Tơ Động (`btd`)**, **Thiên Cung (`tc`, elevated jade terraces, Codex's redesign)**, **Lòng Bàn Tay Phật Tổ (`btp`, cloud sea with five finger pillars)**.
 - Built last: **Hoa Diem Son (`hds`)**, authored in world space: see `docs/tayduky/v2/STATUS.md` (2026-11-21) and `tw-fire*.js`.
 - Built after that: **Thông Thiên Hà (`tth`)** (`tw-river*.js`, STATUS 2026-11-23) and **Sư Đà Lĩnh (`sdl`)**, also world-space: `docs/tayduky/v2/STATUS.md` (2026-11-22) and `tw-lion*.js`.
-- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, nhs, nnq, ntq. Their regions, masks, adjacency and the Director's rules are real.
+- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, nhs, ntq (Hắc Phong Sơn, id `hps`, replaced Nữ Nhi Quốc and is built: tw-hps*.js). Their regions, masks, adjacency and the Director's rules are real.
 - The source branch `feature/tayduky-buddha-palm` (`b8f2006`) is kept for now; its worktree was `E:/game/web-lofi/testFableLofi-palm`.
 - Untracked and deliberately preserved: `tmp-tayduky-animation/`, `tmp-tayduky-review/` (owner decides about deleting).
 

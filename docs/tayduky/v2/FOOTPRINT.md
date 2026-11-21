@@ -74,10 +74,17 @@ Frame-time note: headless frame time grows with world size (about 1.5 ms at 104,
 
 World stays **124 x 124**. Sư Đà Lĩnh takes **1,517 tiles** (squircle 47 x 39 at world (30, 84) plus the south rim strip, never over Hỏa Diệm Sơn's tiles); the other nine placeholders are re-planned around it. Hỏa Diệm Sơn's footprint grew by one row (`h` 39 -> 40, strip rule `b >= 34`) so its south strip reaches the rim row: that closed a one-tile placeholder sliver that was left under the volcano (the lhd mask was otherwise cut in two). Hỏa Diệm Sơn's authored content is unchanged.
 
-**Adjacency** (derived): Sư Đà Lĩnh touches `hds, lhd, tth, nnq, clt`. Director rules unchanged: 900 s runs on seeds 7 / 21 / 33 have no adjacent simultaneous signatures. The valley road starts where Hỏa Diệm Sơn's east road ends (level 1) and leaves through the east edge at level 2, so the ridge is connected both ways (map15 PASS: 15 regions reachable).
+**Adjacency** (derived): Sư Đà Lĩnh touches `hds, lhd, tth, hps, clt`. (Hắc Phong Sơn `hps` took the former Nữ Nhi Quốc region.) Director rules unchanged: 900 s runs on seeds 7 / 21 / 33 have no adjacent simultaneous signatures. The valley road starts where Hỏa Diệm Sơn's east road ends (level 1) and leaves through the east edge at level 2, so the ridge is connected both ways (map15 PASS: 15 regions reachable).
 
 **Border blending.** (1) Hỏa Diệm Sơn side: ash and scorched ground eat into the slate within 4 tiles of the border while cold slate creeps into the volcano's edge (colour only; geometry untouched). (2) Placeholders near the ridge turn slate and dead scrub with dead pines within 6 tiles and their seam tone blends toward slate (`TWM.seamK`). (3) The rim: every unbuilt tile within 14 tiles (including the world-rim wall) paints its cliff faces in slate with bone strata, mossy drips and an ink lip (`TWM.lionNear`, tw-art.js faceCol); where Hỏa Diệm Sơn is nearer, its scorched faces win.
 
 ## Update 2026-11-23 - Thông Thiên Hà
 
 World stays **124 x 124**. Thông Thiên Hà takes **1,732 tiles** (squircle 46 x 39 at world (77, 84), the south and east rim strips, and the placeholder pocket between Sư Đà Lĩnh's corner and the west bank). Adjacent: `sdl, nhs, ntq, lhd`. Placeholders were re-planned over the smaller free land; `tests/tayduky-v2-map15.mjs` still passes (15 regions, global walk component, Director).
+
+## Hắc Phong Sơn (Black Wind Mountain) — replaces Nữ Nhi Quốc
+
+The planner's former `nnq` region (758 tiles: a wedge at local 30 x 50 from world (73, 54), a 30 x 30 mountain body plus a 5-wide south tail) is flagged built by `tw-layout.js` (after the placeholders are planned, so the other regions do not move) and authored in world space by `tw-hps.js`.
+Neighbours: `btp` (back / north-west), `ntq` (north tip), `nhs` (east flank), `lhd` (west), `sdl` (tail, west) and `tth` (tail, east; its river rises at the foot of the mountain). Heights: the peak (level 13) at the back falls to level 1-3 on the east and south; terraces of
+11 (great hall), 9 (upper court), 7 (monks' court), 3 (gate plaza), 6 (lair ledge). The south tail is a level-6 ridge-walk that meets Thông Thiên Hà's bluff path, so Sư Đà Lĩnh and the river stay connected to the world.
+Gates: the standard gate opens east onto `nhs`; a second hand-built ramp leaves the lair ledge west into `lhd`. Thông Thiên Hà's old northern river cleft (it cut through this land) was removed; the mountain stream now runs along the south edge and becomes the river's head.

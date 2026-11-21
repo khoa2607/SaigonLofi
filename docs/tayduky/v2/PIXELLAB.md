@@ -92,3 +92,14 @@ Account balance before **809.65**, after **589.65**; this biome's own generation
 **Objects** (`create_1_direction_object`, "isometric 3/4 view pixel art, dark outline"): 256 px, 10 gens: `tth_turtle` d9ece2c7 (divine golden turtle) + `animate_object` swim 8 frames (8 gens), `tth_dock` 498c7d2e (ferry station + pier), `tth_shrine` b72c703d (river-god shrine on a rocky islet), `tth_tower` 4edd0703 (signal pagoda). 128/96 px (4 candidates, 10 gens): `tth_boat` c2a33921, `tth_hut` 4352a669, `tth_willow` 3eb74d09, `tth_rocks` 8f433d64, `tth_netrack` a7c0c12d, `tth_reeds` cb441203, `tth_statue` f4b40060. 170 px (15 gens): `tth_wreck` d5097144, `tth_gate` c2158936. Candidate frames were downloaded from the review packs (`tayduky/sprites/raw/tth_*_<n>.png`); the turtle swim frames live in `tayduky/sprites/anim/` (uncropped 256 px, drawn by `tw-river-fx.js`).
 
 **Characters** (v3, 2 gens each + template clips, 1 gen per direction x 4): `tth_fisher` 836a8df9 (walking + throw_object), `tth_ferryman` cd2267c4 (walking + picking_up), `tth_imp` 1e2bb695 (walking + cross-punch). `bach_long_ma` 81bb1816: **standard quadruped horse, 1 gen** + walk-8-frames. The clips are named `throw_object` / `picking_up` in the zip (added to the packer's `act` list).
+
+## Hắc Phong Sơn batch (2026-11-24)
+
+Balance before **589.65**. All prompts began "isometric 2:1 view pixel art, dark plum outline, transparent background".
+
+**Objects** (`create_1_direction_object`): 256 px, 1 candidate, 10 gens each: `hps_temple` fcbace5d (great hall), `hps_ruin` 534268a0 (burnt and collapsed hall), `hps_scaffold` 06aa9954 (hall under reconstruction), `hps_pagoda` 22ad05e5 (five-tier scripture pagoda),
+`hps_gate` fea41389 (shanmen), `hps_lair` ee45f74d (bear-mouth cave), **`hps_giantbear` 39ca7578 (the GIANT black bear, true form)** + five `animate_object` v3 animations (8 frames -> 9 stored, 1 direction each): walk (stomping), roar, swipe, slam, hurt -> `tayduky/sprites/anim/hps_giantbear_<anim>_<n>.png`.
+128 / 96 / 64 px (4 or 16 candidates, 10 gens, 1-3 kept): bell tower, dormitory, kitchen, incense burner, black pine, cliff pavilion, stupa with prayer flags, basalt rocks, way-shrine, well, sutra pavilion, bamboo, maple, stone lantern.
+**Characters** (v3 `create_character`, 2 gens, + `animate_character` templates, 1 gen per direction x 4): `hps_monk` c8b221bf (walking + picking-up), `hps_novice` 46648ad4 (walking), `hps_abbot` 9f7e29d4 (walking), `hac_hung_tinh` 3c9c7b7d (humanoid demon king, 88 px; walking + cross-punch),
+`hps_minion` e086bebc (walking + throw-object), `guanyin` 23cf3def (walking). The giant bear is a separate sprite (not the humanoid scaled up); its transformation / dissolve smoke, shockwave, aura, golden binding and every environmental reaction are code.
+Packed with `tools/sprite_picks.json` -> `pack_sprites.py` and `tools/pl_cast.json` -> `pack_pl_chars.py`.

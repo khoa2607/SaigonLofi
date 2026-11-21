@@ -413,5 +413,71 @@
   "biome": "tth",
   "speed": 20,
   "role": "imp"
+ },
+ {
+  "name": "hps_monk",
+  "id": "c8b221bf-14eb-4f63-b6d1-bb74ba4c7d25",
+  "title": [
+   "Tăng nhân",
+   "Monastery Monk"
+  ],
+  "biome": "hps",
+  "speed": 13,
+  "role": "monk"
+ },
+ {
+  "name": "hps_novice",
+  "id": "46648ad4-54c8-461c-bbd0-0758647704ee",
+  "title": [
+   "Tiểu sa di",
+   "Novice"
+  ],
+  "biome": "hps",
+  "speed": 15,
+  "role": "novice"
+ },
+ {
+  "name": "hps_abbot",
+  "id": "9f7e29d4-a89e-44fe-87cb-665a0fdc2309",
+  "title": [
+   "Trụ trì",
+   "Abbot"
+  ],
+  "biome": "hps",
+  "speed": 11,
+  "role": "abbot"
+ },
+ {
+  "name": "hac_hung_tinh",
+  "id": "3c9c7b7d-69cd-4466-b843-3c34fe529588",
+  "title": [
+   "Hắc Hùng Tinh",
+   "Black Bear Guai"
+  ],
+  "biome": "hps",
+  "speed": 15,
+  "role": "bear"
+ },
+ {
+  "name": "hps_minion",
+  "id": "e086bebc-c375-46b6-b45f-49a16747e911",
+  "title": [
+   "Tiểu yêu Hắc Phong",
+   "Black Wind Minion"
+  ],
+  "biome": "hps",
+  "speed": 17,
+  "role": "minion"
+ },
+ {
+  "name": "guanyin",
+  "id": "23cf3def-22d2-44bf-9a0f-81b645891a0a",
+  "title": [
+   "Quan Âm Bồ Tát",
+   "Guanyin"
+  ],
+  "biome": "hps",
+  "speed": 14,
+  "role": "guanyin"
  }
 ]

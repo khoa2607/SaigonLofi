@@ -138,6 +138,8 @@ const TW_LAYOUT = (function () {
     }
     for (const b of TWM.biomes) if (b.built && b.k !== bi.hds && b.k !== bi.sdl && b.k !== bi.tth) { const o = offOf(b.k); b.centre = [b.centre[0] + o[0], b.centre[1] + o[1]]; }
 
+    // ---- 3b. Hắc Phong Sơn (Black Wind Mountain) replaces Nữ Nhi Quốc: it is authored in world space (tw-hps.js) over the tiles the planner gave that region
+    built.add(bi.hps); TWM.biomes[bi.hps].built = true; { let n = 0; for (let k = 0; k < NN; k++) if (BIO[k] === bi.hps) n++; TWM.biomes[bi.hps].tiles = n; }
     // ---- 4. objects
     // every authored object moves with the biome that owns its tile (authoring-space owner), so a biome is only ever translated
     const own = (i, j) => { i = Math.floor(i); j = Math.floor(j); return i >= 0 && j >= 0 && i < N0 && j < N0 ? BIO_OLD[id0(i, j)] : bi.hqs; };
@@ -176,7 +178,7 @@ const TW_LAYOUT = (function () {
       P.edges = P.edges.map(e => pairs(e)).map(e => [Math.max(2, Math.min(N - 3, e[0])), Math.max(2, Math.min(N - 3, e[1]))]);   // the 'edge of the universe' points float in the sea beyond the footprint
     }
     const unmap = (i, j) => { const b = BIO[id(i, j)], o = offOf(b); return [i - o[0], j - o[1]]; };   // world -> authoring (valid on built biomes' tiles)
-    TWM.layout = { N0, N, hds: HDS, hdsTiles: hdsN, sdl: SDL, sdlTiles: sdlN, tth: TTH, tthTiles: tthN, map: tf, unmap, offsets: { cluster: OFF_CLUSTER, btd: OFF_BTD }, keptTiles: Array.from(keep).reduce((s, v) => s + v, 0), rules: { TC_CORE, TC_RING, TC_EXIT, BTP_RING } };
+    TWM.layout = { N0, N, hds: HDS, hdsTiles: hdsN, sdl: SDL, sdlTiles: sdlN, tth: TTH, tthTiles: tthN, hpsTiles: TWM.biomes[bi.hps].tiles, map: tf, unmap, offsets: { cluster: OFF_CLUSTER, btd: OFF_BTD }, keptTiles: Array.from(keep).reduce((s, v) => s + v, 0), rules: { TC_CORE, TC_RING, TC_EXIT, BTP_RING } };
     return { N, NN, H, MAT, BIO, WALK, PATHC, RES };
   }
   return { apply, N2 };

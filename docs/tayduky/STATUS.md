@@ -19,7 +19,7 @@ Run `serve.bat` (or `python -m http.server 8765`) from the repo root, then open:
 | URL | What |
 |---|---|
 | `http://localhost:8765/tayduky/` | **The world (alpha):** one map, all 11 approved biomes, the living cast and the Story Director |
-| `http://localhost:8765/tayduky/?at=hqs&tod=night&speed=4` | Start at a biome (`lat hds nnq btd bcl clt tth tc btp nhs hqs`), force the time of day (`day dusk night`), speed up the simulation |
+| `http://localhost:8765/tayduky/?at=hqs&tod=night&speed=4` | Start at a biome (`lat hds hps btd bcl clt tth tc btp nhs hqs`), force the time of day (`day dusk night`), speed up the simulation |
 | `http://localhost:8765/docs/tayduky/pilot/` | The earlier two-biome pilot (Hoa Quả Sơn, Cao Lão Trang) |
 | `http://localhost:8765/docs/tayduky/art-pilot/` | Art pilot pages (v1/v2; history) |
 
@@ -64,10 +64,10 @@ The output is 512 px lossless WebP chunks in `tayduky/world/`.
 **Layout** (hybrid, as decided):
 
 ```
- W  Lôi Âm Tự | Hỏa Diệm Sơn / Nữ Nhi Quốc / Bàn Tơ Động | Bạch Cốt Lĩnh / Cao Lão Trang / Thông Thiên Hà | Thiên Cung / Lòng Bàn Tay Phật Tổ / Ngũ Hành Sơn | Hoa Quả Sơn  E
+ W  Lôi Âm Tự | Hỏa Diệm Sơn / Hắc Phong Sơn / Bàn Tơ Động | Bạch Cốt Lĩnh / Cao Lão Trang / Thông Thiên Hà | Thiên Cung / Lòng Bàn Tay Phật Tổ / Ngũ Hành Sơn | Hoa Quả Sơn  E
 ```
 
-The 11 approved biomes are: Hoa Quả Sơn, Thiên Cung, Lòng Bàn Tay Phật Tổ (`btp`), **Ngũ Hành Sơn (`nhs`)**, Cao Lão Trang, Bạch Cốt Lĩnh, Nữ Nhi Quốc, Bàn Tơ Động,
+The 11 approved biomes are: Hoa Quả Sơn, Thiên Cung, Lòng Bàn Tay Phật Tổ (`btp`), **Ngũ Hành Sơn (`nhs`)**, Cao Lão Trang, Bạch Cốt Lĩnh, Hắc Phong Sơn, Bàn Tơ Động,
 Hỏa Diệm Sơn, Thông Thiên Hà and Lôi Âm Tự. The alpha had merged the palm and the mountain into one biome, because one reference
 (`01_Phat_To_Ngu_Hanh_Son_map_reference.png`) holds both. `compose_world.py` now splits that reference in two:
 
@@ -109,7 +109,7 @@ Idle characters sometimes **chat**: two neighbours face each other and trade pix
 | Ngũ Hành Sơn | Tam Tạng Frees the Monkey: the talisman flickers, Tam Tạng arrives, pebbles burst, Wukong bows, and the two walk off the lower edge and fade |
 | Cao Lão Trang | The Bride Is a Monkey, The Pilgrims Visit |
 | Bạch Cốt Lĩnh | Three Disguises |
-| Nữ Nhi Quốc | The Queen Meets the Monk |
+| Hắc Phong Sơn | The Black Bear and the Burning Temple (replaces Nữ Nhi Quốc) |
 | Bàn Tơ Động | The Seven Sisters' Net |
 | Hỏa Diệm Sơn | The Palm-Leaf Fan (fire, then rain) |
 | Lôi Âm Tự | The Scriptures Received, The False Thunderclap |

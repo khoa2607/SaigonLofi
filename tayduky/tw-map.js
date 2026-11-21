@@ -24,7 +24,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   const C = (u, v) => [(v + u) / 2, (v - u) / 2];
   const BIOMES = [
     ['lat', 'Lôi Âm Tự', 'Thunderclap Monastery', C(-120, 159)], ['hds', 'Hỏa Diệm Sơn', 'The Flaming Mountains', C(-64, 92)],
-    ['nnq', 'Nữ Nhi Quốc', "The Women's Kingdom", C(-64, 159)], ['btd', 'Bàn Tơ Động', 'Silk Web Cave', C(-64, 226)],
+    ['hps', 'Hắc Phong Sơn', 'Black Wind Mountain', C(-64, 159)], ['btd', 'Bàn Tơ Động', 'Silk Web Cave', C(-64, 226)],
     ['bcl', 'Bạch Cốt Lĩnh', 'White Bone Ridge', C(0, 72)], ['clt', 'Cao Lão Trang', "Old Gao's Village", C(0, 159)],
     ['tth', 'Thông Thiên Hà', 'The River That Reaches Heaven', C(0, 246)], ['tc', 'Thiên Cung', 'The Heavenly Palace', C(64, 92)],
     ['btp', 'Lòng Bàn Tay Phật Tổ', "The Buddha's Palm", C(64, 159)], ['nhs', 'Ngũ Hành Sơn', 'Five Elements Mountain', C(64, 226)],
@@ -37,7 +37,8 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     GORGE: 11, GLOW: 12, WEBF: 13, CHASM: 14, SPRING: 15, CAVEF: 16, WEBPATH: 17, LEDGE: 18, BRIDGE: 19, SILKB: 20, STREAM: 21, HEAVEN: 22, CLOUD: 23, HEAVENBRIDGE: 24, TRAIL: 25, PLACEWATER: 26, HEAVENPAVE: 27, PEACHLAWN: 28, BRONZE: 29, SKYC: 30, SKYD: 31, PH: 32,
     ASH: 100, BASALT: 101, LAVA: 102, WARM: 103, CINDER: 104, SCORCH: 105, LBRIDGE: 106, CRUST: 107,
     SLATE: 110, BONE: 111, RAMP: 112, MIRE: 113, YARD: 114, PLANK: 115, SCRUB: 116,
-    BANK: 120, WSAND: 121, WREED: 122, COBBLE: 123, DOCK: 124, BLUFF: 125, PAVER: 126 };   // Thông Thiên Hà (tw-river.js)
+    BANK: 120, WSAND: 121, WREED: 122, COBBLE: 123, DOCK: 124, BLUFF: 125, PAVER: 126,
+    HROCK: 127, HMOSS: 128, HGRAV: 129, HFLAG: 130, HDECK: 131 };   // Hắc Phong Sơn (tw-hps.js)   // Thông Thiên Hà (tw-river.js)
   TWM.isWater = m => m === M.POOL || m === M.SEA || m === M.SPRING || m === M.STREAM || m === M.CLOUD || m === M.PLACEWATER;
 
   // ---------------------------------------------------------------- grids
@@ -502,6 +503,9 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
   // Thông Thiên Hà (tw-river.js): world-space build east of Sư Đà Lĩnh
   if (window.TW_RIVER_BUILD) TW_RIVER_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
 
+  // Hắc Phong Sơn (tw-hps.js): world-space build on the former Nữ Nhi Quốc region
+  if (window.TW_HPS_BUILD) TW_HPS_BUILD({ TWM, N, H, MAT, BIO, PATHC, RES, M, set, prop, poi, isB, id, inMap, vnoise, hash2, carvePath, mulberry32, addStair, reserve });
+
   // Provisional routes in empty regions: connect their centre to each actual
   // border using a four-neighbour search. Pilot geometry is never rewritten.
   for (const b of TWM.biomes.filter(b=>!b.built)) {
@@ -610,6 +614,7 @@ const TWM = { N: 160, T: 8, LV: 4, K: 4 };
     return TWM.stairs.has(a + ',' + b);
   };
   if (window.TW_LION_FINAL) TW_LION_FINAL({ TWM, WALK, id, N });
+  if (window.TW_HPS_FINAL) TW_HPS_FINAL({ TWM, WALK, id, N });
   if (window.TW_RIVER_FINAL) TW_RIVER_FINAL({ TWM, WALK, id, N });   // Thông Thiên Hà: each bank keeps only the posts it can reach   // Sư Đà Lĩnh: drop any POI the walk graph cannot reach
   TWM.cost = k => PATHC[k] ? 1 : MAT[k] === M.PAVE || MAT[k] === M.LEDGE ? 1.1 : 1.6;
 
