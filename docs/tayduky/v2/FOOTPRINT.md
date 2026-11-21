@@ -88,3 +88,9 @@ The planner's former `nnq` region (758 tiles: a wedge at local 30 x 50 from worl
 Neighbours: `btp` (back / north-west), `ntq` (north tip), `nhs` (east flank), `lhd` (west), `sdl` (tail, west) and `tth` (tail, east; its river rises at the foot of the mountain). Heights: the peak (level 13) at the back falls to level 1-3 on the east and south; terraces of
 11 (great hall), 9 (upper court), 7 (monks' court), 3 (gate plaza), 6 (lair ledge). The south tail is a level-6 ridge-walk that meets Thông Thiên Hà's bluff path, so Sư Đà Lĩnh and the river stay connected to the world.
 Gates: the standard gate opens east onto `nhs`; a second hand-built ramp leaves the lair ledge west into `lhd`. Thông Thiên Hà's old northern river cleft (it cut through this land) was removed; the mountain stream now runs along the south edge and becomes the river's head.
+
+## Ngũ Hành Sơn (Five Elements Mountain)
+
+The planner's `nhs` region (744 tiles: a 26 x 42 wedge at world (97, 48), main body x 97-122 / y 55-83, a narrow north tail to y 48, a south tail to y 89) is flagged built by `tw-layout.js` (step 3c) and authored in world space by `tw-nhs.js`.
+Neighbours: `ntq` (north tip, placeholder), `hps` (west flank; the mountain slopes down from Hắc Phong Sơn's level into its own, never a cliff of more than one level at the border), `tth` (south tail; the south road meets the river's bluff path tile (118, 86) on the same level 5), the world rim (east, x = 123, finished with a 7-level moss cliff and the rim waterfall).
+Heights: massif peak level 18 (pad at (13.5, 13)), prison court 4, hermit ledge 9, meadow 3, east foot 3-6. Gates: the Hắc Phong Sơn exit at (102, 80) meets the meadow road at (103, 80) on level 3; the standard gate leaves the north tail at (118, 50) into `ntq`; the south road joins Thông Thiên Hà.

@@ -6,6 +6,7 @@
   const LM = (p) => TWM.layout ? TWM.layout.map(p[0], p[1]) : p;   // START points are authored in the 160-tile authoring space
   const START = { hqs: LM([138, 24]), btd: LM([80, 140]), tc: LM([81, 18]), btp: TWM.palm ? [TWM.palm.centre[0] - 1, TWM.palm.centre[1] + 3] : [111, 47], buddha: TWM.palm ? [TWM.palm.buddha[0], TWM.palm.buddha[1] + 4] : [111, 47], hdsgate: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 12, TWM.layout.hds.y0 + 6] : [10, 100], hdsvolc: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 7, TWM.layout.hds.y0 + 17] : [10, 100], hdsfire: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 26, TWM.layout.hds.y0 + 22] : [10, 100], hdsc: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 5, TWM.layout.hds.y0 + TWM.layout.hds.h - 7] : [10, 110], hdsb: TWM.layout && TWM.layout.hds ? [TWM.layout.hds.x0 + 18, TWM.layout.hds.y0 + 1] : [20, 90], sdl: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 24, TWM.layout.sdl.y0 + 22] : [50, 100], sdlcamp: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 20, TWM.layout.sdl.y0 + 31] : [50, 100], sdlcit: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 21, TWM.layout.sdl.y0 + 13] : [50, 100], sdlfall: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 30, TWM.layout.sdl.y0 + 12] : [50, 100], sdlnest: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 41, TWM.layout.sdl.y0 + 6] : [50, 100], sdlden: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 10, TWM.layout.sdl.y0 + 19] : [50, 100], sdlhall: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 37, TWM.layout.sdl.y0 + 15] : [50, 100], sdlgate: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 21, TWM.layout.sdl.y0 + 18] : [50, 100], sdlb: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 1, TWM.layout.sdl.y0 + 18] : [50, 100], sdlrim: TWM.layout && TWM.layout.sdl ? [TWM.layout.sdl.x0 + 24, TWM.layout.sdl.y0 + 36] : [50, 100], fall: LM([131, 16]), spring: LM([92, 143]) };
   if (TWM.layout && TWM.layout.hps) { const T = TWM.layout.hps, TL = (a, b) => [T.x0 + a, T.y0 + b]; Object.assign(START, { hps: TL(15, 17), hpstemple: TL(13, 9), hpscourt: TL(17, 14), hpsgate: TL(24, 25), hpslair: TL(6, 25), hpsravine: TL(6, 38), hpsdorm: TL(20, 20), hpssummit: TL(14, 4), hpssource: TL(25, 29), hpslook: TL(21, 8), hpsback: TL(10, 12) }); }
+  if (TWM.layout && TWM.layout.nhs) { const T = TWM.layout.nhs, TL = (a, b) => [T.x0 + a, T.y0 + b]; Object.assign(START, { nhs: TL(14, 24), nhsprison: TL(11, 26), nhssummit: TL(14, 14), nhsgate: TL(7, 32), nhsmeadow: TL(15, 32), nhsfall: TL(14, 22), nhseast: TL(23, 20), nhsrim: TL(24, 30), nhshut: TL(8, 21), nhstail: TL(22, 3), nhsback: TL(12, 10), nhsborder: TL(2, 14) }); }   // Ngũ Hành Sơn camera targets (?at=nhsprison ...)
   if (TWM.layout && TWM.layout.tth) { const T = TWM.layout.tth, TL = (a, b) => [T.x0 + a, T.y0 + b]; Object.assign(START, { tth: TL(22, 24), tthcove: TL(12, 29), tthfall: TL(22, 35), tthrapid: TL(22, 6), tthland: TL(34, 27), tthisle: TL(24, 14), tthtower: TL(9, 9), tthb: TL(2, 30), tthrim: TL(40, 36), tthvill: TL(39, 19), tthwhirl: TL(23, 28) }); }   // Thông Thiên Hà camera targets (?at=tthcove ...)
   function boot() {
     TWR.init(cv);
@@ -43,15 +44,15 @@
   }
   // camera: drag, wheel/＋－ zoom in integer steps, arrow keys
   let drag = null;
-  cv.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY, TWR.cx, TWR.cy]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
-  cv.addEventListener('pointermove', e => { if (!drag) return; const dpr = window.devicePixelRatio || 1; TWR.cx = drag[2] - (e.clientX - drag[0]) * dpr / TWR.zoom; TWR.cy = drag[3] - (e.clientY - drag[1]) * dpr / TWR.zoom; TWR.clamp(); });
+  cv.addEventListener('pointerdown', e => { TWR.userT = TWR.t; drag = [e.clientX, e.clientY, TWR.cx, TWR.cy]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+  cv.addEventListener('pointermove', e => { if (!drag) return; TWR.userT = TWR.t; const dpr = window.devicePixelRatio || 1; TWR.cx = drag[2] - (e.clientX - drag[0]) * dpr / TWR.zoom; TWR.cy = drag[3] - (e.clientY - drag[1]) * dpr / TWR.zoom; TWR.clamp(); });
   cv.addEventListener('pointerup', () => { drag = null; cv.style.cursor = 'grab'; });
-  cv.addEventListener('wheel', e => { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1 : -1); }, { passive: false });
+  cv.addEventListener('wheel', e => { TWR.userT = TWR.t; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1 : -1); }, { passive: false });
   function zoomBy(d) { TWR.zoom = Math.max(1, Math.min(5, TWR.zoom + d)); TWR.resize(); }
   document.getElementById('zin').onclick = () => zoomBy(1); document.getElementById('zout').onclick = () => zoomBy(-1);
   document.getElementById('tod').onchange = e => { TWR.tod = e.target.value; if (TWR.tod !== 'auto') TWR.clock = { day: 11, dusk: 18.2, night: 22 }[TWR.tod]; };
   addEventListener('resize', () => TWR.resize());
-  addEventListener('keydown', e => { const s = 160 / TWR.zoom; if (e.key === 'ArrowLeft') TWR.cx -= s; if (e.key === 'ArrowRight') TWR.cx += s; if (e.key === 'ArrowUp') TWR.cy -= s; if (e.key === 'ArrowDown') TWR.cy += s;
+  addEventListener('keydown', e => { TWR.userT = TWR.t; const s = 160 / TWR.zoom; if (e.key === 'ArrowLeft') TWR.cx -= s; if (e.key === 'ArrowRight') TWR.cx += s; if (e.key === 'ArrowUp') TWR.cy -= s; if (e.key === 'ArrowDown') TWR.cy += s;
     if (e.key === '+' || e.key === '=') zoomBy(1); if (e.key === '-') zoomBy(-1); if (e.key === 'g') TWR.debug = !TWR.debug; TWR.clamp(); });
   TWA.loadSprites().then(() => setTimeout(boot, 30));
 })();

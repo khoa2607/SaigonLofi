@@ -51,7 +51,7 @@ const TWA = (function () {
     vine: ramp(['#244a32', '#2f6040', '#3e7a4c', '#56965a']),
   };
   const PH = {   // development placeholder palettes (3 tones + accent) per biome (design palette table)
-    lat: ['#cdb27a', '#d8c08a', '#e4cf9c', '#fff0b0'], hds: ['#7e3420', '#8e3c24', '#9e4a2c', '#ffb04a'], hps: ['#3c4a4c', '#485a5c', '#546a6c', '#e8a050'],
+    lat: ['#cdb27a', '#d8c08a', '#e4cf9c', '#fff0b0'], hds: ['#7e3420', '#8e3c24', '#9e4a2c', '#ffb04a'], hps: ['#3c4a4c', '#485a5c', '#546a6c', '#e8a050'], nhs: ['#4a7a3c', '#5e9248', '#78ac56', '#f2d878'],
     bcl: ['#827c8c', '#8e8898', '#9a94a4', '#ece6dc'], clt: ['#9a7e52', '#a88a5a', '#b69866', '#e8c860'], tth: ['#36689e', '#3e74aa', '#4a80b6', '#9adcff'],
     tc: ['#ddd0e2', '#e6dbea', '#efe6f2', '#e8c860'], btp: ['#e2c880', '#ead490', '#f2e0a4', '#fff2c8'], nhs: ['#7c8894', '#88949e', '#94a0aa', '#7ea06a'],
     ntq: ['#708e78','#87a18a','#9fb49b','#e8d6a0'], hvd: ['#8a5146','#a96350','#c47c60','#f2b77b'], lhd: ['#79647c','#927a8c','#ae9298','#e3bf97'], sdl: ['#776758','#927d69','#ad9680','#d9bd8a'],
@@ -87,7 +87,7 @@ const TWA = (function () {
     if (TWM.bleed && TWM.bleed[k] && TWA.fire && m < M.PH) { const c0 = top0(m, I, J, X, Y, k, dith), v = TWM.bleed[k] / 5, r = hash2(X, Y, 130), nn = vnoise(I * 0.8, J * 0.8, 131); if (r < v * (0.35 + nn * 0.6)) { const a = TWA.fire.seamTone(I, J, n0, n1); if (r < 0.012 * v) { SH.em = [255, 150, 60]; return [255, 150, 60]; } return mix(c0, a, 0.78); } return c0; }   // Hỏa Diệm Sơn ash staining on built neighbours (dithered, colour only)
     if (m < M.PH && TWA.fire && TWM.seam[k] && TWM.seamK[k] === TWM.bi.hds && m !== M.SKYC) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 7), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
     if (m < M.PH && TWA.river && TWM.seam[k] && TWM.seamK[k] === TWM.bi.tth) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 6), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.river.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Thông Thiên Hà river-bank seam
-    if (m < M.PH && TWA.hps && TWM.seam[k] && TWM.seamK[k] === TWM.bi.hps) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 7), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.hps.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Hắc Phong Sơn mountain-turf seam
+    if (m < M.PH && TWM.seam[k] && seamArt(k)) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 7), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, seamArt(k).seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Hắc Phong Sơn / Ngũ Hành Sơn seam
     if (m < M.PH && TWA.lion && TWM.seam[k] && TWM.seamK[k] === TWM.bi.sdl) { const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 2) / 6), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.lion.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }   // Sư Đà Lĩnh slate seam
     if (m !== M.SKYC && m !== M.SKYD && m < M.PH && TWA.ext && TWM.seam[k] && TWM.seamK[k] === TWM.bi.btp) {      // provisional paths inside the palm's cloud fade ring dissolve into cloud too
       const sm = TWM.seam[k], dd = sm >> 2, t = Math.max(0, 1 - (dd - 1 + (n1 - 0.5) * 3) / 15), c0 = top0(m, I, J, X, Y, k, dith); return mix(c0, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12));
@@ -98,10 +98,12 @@ const TWA = (function () {
     SH.em = null; SH.water = 0;
     const n0 = vnoise(I * 0.55, J * 0.55, 3), n1 = vnoise(I * 1.6, J * 1.6, 4), hp = hash2(X, Y, 9), d = dith;
     if (TWA.hps && TWM.BIO[k] === TWM.bi.hps && (m === M.STREAM || m === M.POOL)) return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn stream
+    if (TWA.nhs && TWM.BIO[k] === TWM.bi.nhs && (m === M.STREAM || m === M.POOL)) return TWA.nhs.top(m, I, J, X, Y, k, dith, SH);   // Ngũ Hành Sơn water
     if (TWA.lion && TWM.BIO[k] === TWM.bi.sdl && (m === M.CHASM || m === M.STREAM || m === M.POOL)) return TWA.lion.top(m, I, J, X, Y, k, dith, SH);   // Sư Đà Lĩnh gorge and river
     if (TWA.river && (TWM.BIO[k] === TWM.bi.tth || (TWM.tthNear && TWM.tthNear[k])) && (m === M.STREAM || m === M.POOL || m === M.SEA)) return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà: the great river
     switch (m) {
       case M.BANK: case M.WSAND: case M.WREED: case M.COBBLE: case M.DOCK: case M.BLUFF: case M.PAVER: return TWA.river.top(m, I, J, X, Y, k, dith, SH);   // Thông Thiên Hà (tw-river-art.js)
+      case M.NTURF: case M.NROCK: case M.NGRAV: case M.NFLAG: return TWA.nhs.top(m, I, J, X, Y, k, dith, SH);   // Ngũ Hành Sơn (tw-nhs-art.js)
       case M.HROCK: case M.HMOSS: case M.HGRAV: case M.HFLAG: case M.HDECK: return TWA.hps.top(m, I, J, X, Y, k, dith, SH);   // Hắc Phong Sơn (tw-hps-art.js)
       case M.SLATE: case M.BONE: case M.RAMP: case M.MIRE: case M.YARD: case M.PLANK: case M.SCRUB: return TWA.lion.top(m, I, J, X, Y, k, dith, SH);   // Sư Đà Lĩnh (tw-lion-art.js)
       case M.ASH: case M.BASALT: case M.LAVA: case M.WARM: case M.CINDER: case M.SCORCH: case M.LBRIDGE: case M.CRUST: return TWA.fire.top(m, I, J, X, Y, k, dith, SH);   // Hỏa Diệm Sơn (tw-fire-art.js)
@@ -189,7 +191,7 @@ const TWA = (function () {
         if (m >= M.PH) {   // development placeholder: own palette + a faint diagonal hatch so nobody mistakes it for finished art
           const b = TWM.biomes[m - M.PH].id, r = PHR[b] || PHR.tc; let c = tone(r, 0.5 + n0 * 2 + n1 * 0.6);
           const sm = TWM.seam[k]; if (sm && TWM.seamK[k] === TWM.bi.hds && TWA.fire) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 7); return mix(c, TWA.fire.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
-          if (sm && TWM.seamK[k] === TWM.bi.hps && TWA.hps) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 7); return mix(c, TWA.hps.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
+          if (sm && seamArt(k)) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 7); return mix(c, seamArt(k).seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
           if (sm && TWM.seamK[k] === TWM.bi.tth && TWA.river) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 6); return mix(c, TWA.river.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
           if (sm && TWM.seamK[k] === TWM.bi.sdl && TWA.lion) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 2) / 6); return mix(c, TWA.lion.seamTone(I, J, n0, n1), Math.min(0.95, t * 1.05)); }
           if (sm && TWM.seamK[k] === TWM.bi.btp && TWA.ext) { const d = sm >> 2, t = Math.max(0, 1 - (d - 1 + (n1 - 0.5) * 3) / 15); return mix(c, TWA.ext.seamTone(I, J, n0, n1), Math.min(0.97, t * 1.12)); }
@@ -225,6 +227,7 @@ const TWA = (function () {
   function faceCol(b, side, lx, ry, drop, elev, gx, k) {
     if (b === 'btp' && TWA.ext) return TWA.ext.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) return TWA.lion.face(side, lx, ry, drop, elev, gx, k, SH);
+    if ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) return TWA.nhs.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) return TWA.hps.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) return TWA.river.face(side, lx, ry, drop, elev, gx, k, SH);
     if ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) return TWA.fire.face(side, lx, ry, drop, elev, gx, k, SH);
@@ -337,7 +340,7 @@ const TWA = (function () {
     for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!TWM.inMap(i + di, j + dj)) continue; const q = TWM.id(i + di, j + dj); if (H[q] !== h) continue; if (TWM.isWater(MAT[q])) nearW = true; else if (!landM && MAT[q] !== M.BRIDGE && MAT[q] !== M.SILKB && MAT[q] !== M.VOID) landM = MAT[q]; }
     if (!landM) landM = b === 'btd' ? M.CAVEF : b === 'hqs' && m === M.SEA ? M.SAND : M.MOSSY;
     // Heaven's narrow cloud channel is tile-authored rather than an analytic lake.
-    if (b === 'tc' || b === 'tth' || b === 'sdl' || b === 'hps' || (TWM.tthNear && TWM.tthNear[k])) nearW = false;   // (Sư Đà Lĩnh's river is tile-authored too: cascades, no analytic shore)
+    if (b === 'tc' || b === 'tth' || b === 'sdl' || b === 'hps' || b === 'nhs' || (TWM.tthNear && TWM.tthNear[k])) nearW = false;   // (Sư Đà Lĩnh's river is tile-authored too: cascades, no analytic shore)
     if (m === M.BRIDGE || m === M.SILKB || m === M.CHASM) nearW = false;
     for (let r = 0; r < 32; r++) {
       const hw = r < 16 ? 2 * r + 2 : 2 * (31 - r) + 2, y = sy + r;
@@ -367,14 +370,14 @@ const TWA = (function () {
         const below1 = r + 1 > 31 || Math.abs(lx + 0.5 - 32) > (r + 1 < 16 ? 2 * (r + 1) + 2 : 2 * (30 - r) + 2);
         const below2 = r + 2 > 31 || Math.abs(lx + 0.5 - 32) > (r + 2 < 16 ? 2 * (r + 2) + 2 : 2 * (29 - r) + 2);
         const drop = lx < 32 ? dropL : dropR;
-        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
+        if (drop > 0 && below1) c = (b === 'btp' && TWA.ext) ? TWA.ext.edge(c) : ((b === 'sdl' || (TWM.lionNear && TWM.lionNear[k])) && TWA.lion) ? TWA.lion.edge(c, k) : ((b === 'nhs' || (TWM.nhsNear && TWM.nhsNear[k])) && TWA.nhs) ? TWA.nhs.edge(c, k) : ((b === 'hps' || (TWM.hpsNear && TWM.hpsNear[k])) && TWA.hps) ? TWA.hps.edge(c, k) : ((b === 'tth' || (TWM.tthNear && TWM.tthNear[k])) && TWA.river) ? TWA.river.edge(c, k) : ((b === 'hds' || (TWM.fireNear && TWM.fireNear[k])) && TWA.fire) ? TWA.fire.edge(c, k) : INK; else if (drop > 0 && below2) c = mix(c, [255, 255, 235], 0.28);
         put(X, y, c, em, below1 && drop > 0 ? 0 : wt);
       }
     }
   }
   function stairs(i, j, h, st, sx, sy, put, b) {
     // steps rise from this (lower) tile to the upper neighbour behind it; drawn back to front
-    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : P.pave;
+    const n = st.dh * 3, R = st.dh * LV, pal = b === 'tc' ? P.jade : b === 'btd' ? P.ledgeB : b === 'btp' && TWA.ext ? TWA.ext.stairPal : b === 'hds' && TWA.fire ? TWA.fire.stairPal : b === 'sdl' && TWA.lion ? TWA.lion.stairPal : b === 'tth' && TWA.river ? TWA.river.stairPal : b === 'hps' && TWA.hps ? TWA.hps.stairPal : b === 'nhs' && TWA.nhs ? TWA.nhs.stairPal : P.pave;
     for (let s = n - 1; s >= 0; s--) {
       const f0 = s / n, f1 = (s + 1) / n, z = Math.round(R * (s + 1) / n), rz = Math.round(R / n);
       for (let r = -R - 2; r < 34; r++) for (let lx = 0; lx < 64; lx++) {
@@ -639,6 +642,7 @@ const TWA = (function () {
   };
   // ---------------------------------------------------------------- PixelLab object sprites (tayduky/sprites/, packed by docs/tayduky/v2/tools/pack_sprites.py)
   const IMG = {};
+  const seamArt = k => TWM.seamK[k] === TWM.bi.hps ? TWA.hps : TWM.seamK[k] === TWM.bi.nhs ? TWA.nhs : null;
   // life masks built from the sprite itself: GLOW = saturated bright violet/green/teal pixels (crystals, mushrooms, eggs) that pulse and come back at night;
   // SILK = bright desaturated pixels (webs, silk wraps) that shimmer. Which sprites get which is a name-prefix table.
   const GLOWS = ['crystals_', 'mush_', 'altar_', 'tent_', 'cave_', 'arch_', 'lantern_', 'tc_furnace_', 'tc_lantern_', 'tc_brazier_', 'tc_silklamp_', 'tc_kiln_'], SILKS = ['spire_', 'tent_', 'altar_', 'silkbridge_', 'crystals_', 'loom_', 'cave_', 'silkrack_', 'arch_'];
@@ -669,6 +673,7 @@ const TWA = (function () {
   function sprite(p) {
     if (TWA.ext && TWA.ext.sprite) { const r = TWA.ext.sprite(p); if (r) return r; }
     if (TWA.fire && TWA.fire.sprite) { const r = TWA.fire.sprite(p); if (r) return r; }
+    if (TWA.nhs && TWA.nhs.sprite) { const r = TWA.nhs.sprite(p); if (r) return r; }
     const variants = { peach: 6, pine: 4, bamboo: 5, bush: 6, flowers: 6, tuft: 6, fern: 4, rock: 6, crag: 4, lily: 4, banner: 2, spire: 3, eggs: 3, cocoon: 4, crystal: 6, mushroom: 5, moss: 5, shard: 4 };
     if (IMGKINDS[p.kind]) { const m = IMGKINDS[p.kind].filter(n => IMG[n]); return m.length ? (function () { const r = IMG[m[(p.v || 0) % m.length]]; return { w: r.w, h: r.h, py: r.py, frames: [r.im], em: r.glow, glow: r.glow, silk: r.silk, sway: SWAY[p.kind] || 0, flat: false, img: true }; })() : null; }
     const vv = variants[p.kind] ? p.v % variants[p.kind] : 0, key = p.kind + ':' + vv + ':' + (p.size || 0) + ':' + (p.dark || p.biome === 'btd' ? 1 : 0);

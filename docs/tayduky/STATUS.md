@@ -110,6 +110,7 @@ Idle characters sometimes **chat**: two neighbours face each other and trade pix
 | Cao Lão Trang | The Bride Is a Monkey, The Pilgrims Visit |
 | Bạch Cốt Lĩnh | Three Disguises |
 | Hắc Phong Sơn | The Black Bear and the Burning Temple (replaces Nữ Nhi Quốc) |
+| Ngũ Hành Sơn (v2) | Five Hundred Years Beneath the Mountain: the 500-year time-lapse of four seasons, Tang Sanzang rides in on the white horse, lifts the golden seal, Wukong bursts out, changes into pilgrim robes and bows |
 | Bàn Tơ Động | The Seven Sisters' Net |
 | Hỏa Diệm Sơn | The Palm-Leaf Fan (fire, then rain) |
 | Lôi Âm Tự | The Scriptures Received, The False Thunderclap |

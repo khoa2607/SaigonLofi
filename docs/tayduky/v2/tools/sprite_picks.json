@@ -700,5 +700,33 @@
  "hps_lantern_b": [
   "hps_lantern_1",
   0.15
+ ],
+ "nhs_summit_a": [
+  "nhs_summit_0",
+  0.09
+ ],
+ "nhs_prison_a": [
+  "nhs_prison_0",
+  0.16
+ ],
+ "nhs_prison_b": [
+  "nhs_prison_1",
+  0.16
+ ],
+ "nhs_tree_a": [
+  "nhs_tree_0",
+  0.1
+ ],
+ "nhs_tree_b": [
+  "nhs_tree_1",
+  0.1
+ ],
+ "nhs_tree_c": [
+  "nhs_tree_2",
+  0.1
+ ],
+ "nhs_tree_d": [
+  "nhs_tree_3",
+  0.1
  ]
 }

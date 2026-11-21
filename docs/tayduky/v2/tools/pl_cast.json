@@ -479,5 +479,63 @@
   "biome": "hps",
   "speed": 14,
   "role": "guanyin"
+ },
+ {
+  "name": "wk_pilgrim",
+  "id": "9a703216-e60d-490d-a186-2a3a3744f044",
+  "title": [
+   "Tôn Ngộ Không (hành giả)",
+   "Sun Wukong, the pilgrim disciple"
+  ],
+  "biome": "nhs",
+  "speed": 26,
+  "role": "king"
+ },
+ {
+  "name": "nhs_hermit",
+  "id": "26abea7c-585c-47af-8a5a-f120676691ba",
+  "title": [
+   "Ẩn sĩ núi",
+   "Mountain Hermit"
+  ],
+  "biome": "nhs",
+  "speed": 13,
+  "role": "hermit"
+ },
+ {
+  "name": "nhs_deer",
+  "id": "3b9b26a8-f918-4d12-9e6e-96de35d91a2d",
+  "title": [
+   "Hươu sao",
+   "Sika Deer"
+  ],
+  "biome": "nhs",
+  "speed": 22,
+  "role": "deer",
+  "shadow": 16
+ },
+ {
+  "name": "nhs_goat",
+  "id": "dd603767-c938-426b-a246-3bc2828b26de",
+  "title": [
+   "Dê núi",
+   "Mountain Goat"
+  ],
+  "biome": "nhs",
+  "speed": 18,
+  "role": "goat",
+  "shadow": 12
+ },
+ {
+  "name": "nhs_horse",
+  "id": "81bb1816-e6cd-46ec-9038-c3e899656e91",
+  "title": [
+   "Ngựa trắng của Đường Tăng",
+   "Tang Sanzang's white horse"
+  ],
+  "biome": "nhs",
+  "speed": 20,
+  "role": "horse",
+  "shadow": 22
  }
 ]

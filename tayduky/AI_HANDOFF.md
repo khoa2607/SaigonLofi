@@ -7,7 +7,7 @@ Updated 2026-11-20 after the integration of Buddha's Palm. Scope: Tây Du Ký on
 - Built: **Hoa Quả Sơn (`hqs`)**, **Bàn Tơ Động (`btd`)**, **Thiên Cung (`tc`, elevated jade terraces, Codex's redesign)**, **Lòng Bàn Tay Phật Tổ (`btp`, cloud sea with five finger pillars)**.
 - Built last: **Hoa Diem Son (`hds`)**, authored in world space: see `docs/tayduky/v2/STATUS.md` (2026-11-21) and `tw-fire*.js`.
 - Built after that: **Thông Thiên Hà (`tth`)** (`tw-river*.js`, STATUS 2026-11-23) and **Sư Đà Lĩnh (`sdl`)**, also world-space: `docs/tayduky/v2/STATUS.md` (2026-11-22) and `tw-lion*.js`.
-- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, nhs, ntq (Hắc Phong Sơn, id `hps`, replaced Nữ Nhi Quốc and is built: tw-hps*.js). Their regions, masks, adjacency and the Director's rules are real.
+- Placeholders (hatched development ground, no residents/stories): bcl, clt, hvd, lat, lhd, ntq (Hắc Phong Sơn, id `hps`, replaced Nữ Nhi Quốc and is built: tw-hps*.js). Their regions, masks, adjacency and the Director's rules are real.
 - The source branch `feature/tayduky-buddha-palm` (`b8f2006`) is kept for now; its worktree was `E:/game/web-lofi/testFableLofi-palm`.
 - Untracked and deliberately preserved: `tmp-tayduky-animation/`, `tmp-tayduky-review/` (owner decides about deleting).
 
@@ -31,3 +31,5 @@ Known failing, pre-existing: `tayduky-v2-pilot.mjs` (the legacy docs sandbox sti
 - Palm fingers are stylised smooth pillars; the signature's divine column is boxy; grey placeholder terrain shows through south of the palm.
 - Eleven regions are still placeholders; idle/sit/act are code-driven for most characters.
 - `tayduky/alpha/` (traced-alpha prototype) is kept because `tests/tayduky-world.mjs` and docs still reference it; delete only together with that test.
+
+- **Ngũ Hành Sơn (`nhs`)** is built (2026-11-25): `tw-nhs.js` (map), `tw-nhs-art.js` (terrain, seasonal overlays + sprite recolour), `tw-nhs-data.js` (seasons, residents, 10 minis, signature `five_hundred_years`), `tw-nhs-fx.js` (living effects, prison / seal, story camera). Details: `docs/tayduky/v2/STATUS.md`. Preview targets: `?at=nhs|nhsprison|nhssummit|nhsgate|nhsfall|nhseast|nhsrim|nhsborder|nhstail` (+ `&force=nhs&speed=3` for the signature).

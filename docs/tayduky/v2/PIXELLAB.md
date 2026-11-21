@@ -103,3 +103,11 @@ Balance before **589.65**. All prompts began "isometric 2:1 view pixel art, dark
 **Characters** (v3 `create_character`, 2 gens, + `animate_character` templates, 1 gen per direction x 4): `hps_monk` c8b221bf (walking + picking-up), `hps_novice` 46648ad4 (walking), `hps_abbot` 9f7e29d4 (walking), `hac_hung_tinh` 3c9c7b7d (humanoid demon king, 88 px; walking + cross-punch),
 `hps_minion` e086bebc (walking + throw-object), `guanyin` 23cf3def (walking). The giant bear is a separate sprite (not the humanoid scaled up); its transformation / dissolve smoke, shockwave, aura, golden binding and every environmental reaction are code.
 Packed with `tools/sprite_picks.json` -> `pack_sprites.py` and `tools/pl_cast.json` -> `pack_pl_chars.py`.
+
+## Ngũ Hành Sơn batch (2026-11-25)
+
+Balance before **192.65**, after **120.65** (72 generations). Prompts: pixel art, 3/4 isometric view, transparent background.
+**Objects** (`create_1_direction_object`): `nhs_summit_seal` 66e34059 (256 px, 1 candidate, 10 gens: the summit crag with its shrine; the golden seal is drawn by code so it can lift), `nhs_wukong_prison` bc99209b (128 px, 4 candidates, 10 gens; frames 1 and 2 kept as 677da1ab / 2cf64e05),
+`nhs_tree_a` fe6e7890 and `nhs_tree_b` 065aa917 (96 px, 4 candidates, 10 gens each; 2 kept from each: four broadleaf trees recoloured by code into blossom / summer / russet / bare). Animations (`animate_object` v3, 8 frames -> 9 stored, 2 gens each): `idle`, `struggle`, `hope`, `plead` (regenerated once so the rock matches) on 677da1ab -> `tayduky/sprites/anim/nhs_prison_<anim>_<i>.png`.
+**Characters:** v3 `create_character` (2 gens) + `walking-8-frames` south / west / east / north (1 gen each): `wk_pilgrim` 9a703216 (56 px: the simple 1986-style pilgrim, no armour), `nhs_hermit` 26abea7c (52 px); standard quadrupeds (1 gen) + `walk-8-frames`: `nhs_deer` 3b9b26a8 (horse template), `nhs_goat` dd603767 (dog template). The white horse reuses the existing horse character (id 81bb1816 packed again as `nhs_horse`): an ordinary white horse, not yet the dragon horse. Packed with `pack_pl_chars.py --refresh --only ...`; `tools/pl_cast.json` and `tools/sprite_picks.json` updated.
+Seasons, snow, blossoms, clouds, birds, the seal, the burst, the ghost return and the caption are code.

@@ -69,7 +69,7 @@ const TWR = (function () {
     const i = k % TWM.N, j = Math.floor(k / TWM.N), hh = TWM.H[k], sx = A.SX(i, j), st = A.SY(i, j, hh), sb = A.SY(i, j, lvl);
     g.save(); g.beginPath(); g.moveTo(sx, st); g.lineTo(sx + 32, st + 16); g.lineTo(sx + 32, sb + 16); g.lineTo(sx, sb + 32); g.lineTo(sx - 32, sb + 16); g.lineTo(sx - 32, st + 16); g.closePath(); g.clip();
     const x0 = sx - 32, x1 = sx + 32, y0 = st, y1 = sb + 32;
-    for (let cj = Math.floor(y0 / CH); cj <= Math.floor(y1 / CH); cj++) for (let ci = Math.floor(x0 / CH); ci <= Math.floor(x1 / CH); ci++) { const c = R.chunks.get(ci + ',' + cj); if (c && c.ready) g.drawImage(c.cv, ci * CH, cj * CH); }
+    for (let cj = Math.floor(y0 / CH); cj <= Math.floor(y1 / CH); cj++) for (let ci = Math.floor(x0 / CH); ci <= Math.floor(x1 / CH); ci++) { const c = R.chunks.get(ci + ',' + cj); if (c && c.ready) { g.drawImage(c.cv, ci * CH, cj * CH); if (window.TWFX && TWFX.nhs && TWFX.nhs.chunkOverlay) TWFX.nhs.chunkOverlay(g, c, ci * CH, cj * CH, true); } }
     g.restore();
   }
 
@@ -268,7 +268,7 @@ const TWR = (function () {
     for (const c of need) { if (used > budget) break; const s = performance.now(); bake(c); used += performance.now() - s; }
     R.first = true;
     const wfI = Math.floor(R.t * 5) % 4;
-    for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) continue; g.drawImage(c.cv, ci * CH, cj * CH); if (c.wf) g.drawImage(c.wf[wfI], ci * CH, cj * CH); }
+    for (let cj = cj0; cj <= cj1; cj++) for (let ci = ci0; ci <= ci1; ci++) { const c = chunk(ci, cj); if (!c.ready) continue; g.drawImage(c.cv, ci * CH, cj * CH); if (c.wf) g.drawImage(c.wf[wfI], ci * CH, cj * CH); if (window.TWFX && TWFX.nhs && TWFX.nhs.chunkOverlay) TWFX.nhs.chunkOverlay(g, c, ci * CH, cj * CH); }
     // flat decals
     for (const s of R.flats) if (s.X < x0 + W && s.X + s.sp.w > x0 && s.Y < y0 + Hh && s.Y + s.sp.h > y0) g.drawImage(s.sp.frames[0], s.X, s.Y);
     if (sim && window.TWFX) TWFX.ground(g, sim, R, x0, y0, W, Hh);
@@ -285,7 +285,8 @@ const TWR = (function () {
     }
     if (window.TWFX && TWFX.palm && TWFX.palm.drawables) TWFX.palm.drawables(D, R, x0, y0, W, Hh);
     if (window.TWFX && TWFX.river && TWFX.river.drawables) TWFX.river.drawables(D, R, x0, y0, W, Hh);   // Thông Thiên Hà: the divine turtle and the boats (depth-sorted with the riders)
-    if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);   // Hắc Phong Sơn: the great hall's ruin / scaffold / new faces
+    if (window.TWFX && TWFX.hps && TWFX.hps.drawables) TWFX.hps.drawables(D, R, x0, y0, W, Hh);
+    if (window.TWFX && TWFX.nhs && TWFX.nhs.drawables) TWFX.nhs.drawables(D, R, x0, y0, W, Hh, sim);   // Ngũ Hành Sơn: the prison, the seal, the riders   // Hắc Phong Sơn: the great hall's ruin / scaffold / new faces
     for (const f of TWM.falls) D.push([(f.i + f.j + 1) * 8 + 2, 2, f]);
     for (const [k, lvl] of cols) { const i = k % TWM.N, j = Math.floor(k / TWM.N); D.push([(i + j + 1) * 8 - 0.01, 3, k, lvl]); }
     D.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
