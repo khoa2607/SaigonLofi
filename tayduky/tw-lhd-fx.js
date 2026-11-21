@@ -85,7 +85,7 @@ window.TWFX = window.TWFX || {};
   }
   function drawCaption(g, R, f, x0, y0, W, Hh) {
     if (!f.caption) return; const left = f.capT - (window.TWS ? TWS.t : 0); if (left <= 0 || !inBox(R)) return; const a = clamp(Math.min(left, 1.2), 0, 1);
-    g.save(); g.globalAlpha = a; g.textAlign = 'center'; g.font = 'bold 18px "Segoe UI", "Noto Sans", Arial, sans-serif'; const w = Math.max(g.measureText(f.caption[0]).width, 260) + 44, X = x0 + W / 2, Y = y0 + Hh * 0.16;
+    g.save(); g.globalAlpha = a; g.textAlign = 'center'; g.font = 'bold 18px "Segoe UI", "Noto Sans", Arial, sans-serif'; const w = Math.max(g.measureText(f.caption[0]).width, 260) + 44, X = x0 + W / 2, Y = y0 + Hh * 0.27;
     g.fillStyle = 'rgba(28,20,40,0.68)'; g.fillRect(Math.round(X - w / 2), Math.round(Y - 22), Math.round(w), 46); g.strokeStyle = 'rgba(236,176,110,0.9)'; g.strokeRect(Math.round(X - w / 2) + 0.5, Math.round(Y - 22) + 0.5, Math.round(w) - 1, 45);
     g.fillStyle = '#fff0d8'; g.fillText(f.caption[0], X, Y); g.font = '12px "Segoe UI", "Noto Sans", Arial, sans-serif'; g.fillStyle = '#ecc8a0'; g.fillText(f.caption[1], X, Y + 16); g.restore();
   }
