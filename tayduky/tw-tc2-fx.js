@@ -20,13 +20,28 @@ window.TWFX = window.TWFX || {};
   const prevSprite = A.ext && A.ext.sprite; A.ext = A.ext || {};
   A.ext.sprite = p => {
     const key = p.kind === 'tcgate' ? 'tc_monument_a' : p.kind === 'tcfurnace' ? 'tc_kiln_a' : p.kind === 'tcpalace' && p.big ? 'tc_palace_a' : null, im = key && A.IMG[key];
-    if (!im) return prevSprite ? prevSprite(p) : null; const K = 2;
+    if (!im) return prevSprite ? prevSprite(p) : null; const K = p.kind === 'tcgate' ? 1 : 2;   // the great gate stays at the world's own scale so it frames the court instead of hiding it
     return { w: im.w * K, h: im.h * K, py: im.py * K, frames: [im.im], em: null, glow: null, silk: null, flat: false, img: true, draw(g, s, f) { const sv = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; g.drawImage(f, 0, 0, f.width, f.height, s.X, s.Y, f.width * K, f.height * K); g.imageSmoothingEnabled = sv; } };
   };
   // ---------------------------------------------------------------- depth-sorted: silk banners on poles and the flying lid
   function banner(g, X, Y, t, ph, col) { px(g, X, Y - 52, 2, 52, '#7a5a2a'); px(g, X - 1, Y - 54, 4, 3, '#e8c860'); for (let q = 0; q < 14; q++) { const w = Math.sin(t * 2.6 + ph + q * 0.5) * (1 + q * 0.25); g.fillStyle = col[q % 2 ? 0 : 1]; g.fillRect(Math.round(X + 2 + q), Math.round(Y - 50 + w), 1, 18 - (q > 9 ? q - 9 : 0)); } px(g, X + 2, Y - 50, 14, 1, '#e8c860'); }
+  // ---------------------------------------------------------------- the borders: soft cloud wraps every edge where Thiên Cung meets a neighbouring biome's rock, so no hard seam shows
+  let seamPts = null;
+  function seamList() {
+    if (seamPts) return seamPts; seamPts = []; const N = TWM.N, M = TWM.M, B = F().B, id = TWM.id, solid = k => TWM.MAT[k] !== M.VOID && TWM.MAT[k] !== M.CLOUD;
+    for (let k = 0; k < N * N; k++) { if (TWM.BIO[k] !== B || !solid(k) || TWM.MAT[k] === M.POOL) continue; const i = k % N, j = Math.floor(k / N);
+      for (const [da, db] of [[1, 0], [0, 1]]) { const a = i + da, b = j + db; if (!TWM.inMap(a, b)) continue; const z = id(a, b); if ((TWM.BIO[z] === B && solid(z)) || TWM.MAT[z] === M.VOID || TWM.H[k] - TWM.H[z] < 2) continue;
+        // only where Thiên Cung stands higher: its cliff foot meets cloud or the neighbour's lower rock (a rock wall rising above Thiên Cung hides this edge itself)
+        seamPts.push({ x: (i + 0.5 + da * 0.5) * T, y: (j + 0.5 + db * 0.5) * T, cx: (a + 0.5) * T, cy: (b + 0.5) * T, d: (a + b + 1) * T + 0.3, n: seamPts.length, dh: TWM.H[k] - TWM.H[z], hi: TWM.H[k], lo: TWM.MAT[z] === M.CLOUD ? -1 : TWM.H[z], corner: da === 1 && !(TWM.inMap(i, j - 1) && TWM.BIO[id(i, j - 1)] === B && solid(id(i, j - 1))), cox: (i + 1) * T, coy: j * T }); } }
+    return seamPts;
+  }
+  function seamMist(D, R) {
+    const t = R.t; for (const p of seamList()) { const Z = TWM.MAT[TWM.id(Math.floor(p.cx / T), Math.floor(p.cy / T))] === TWM.M.CLOUD ? -1 : ground(p.cx, p.cy), X = R.wx(p.x, p.y), Y = R.wy(p.x, p.y, Z); if (!inView(R, X, Y, 60)) continue;
+      D.push([p.d, 5, { draw: g => { const sw = Math.sin(t * 0.3 + p.n * 1.9) * 3; mist(g, X + sw, Y + 2, 30, 10, 0.55, '246,250,255'); mist(g, X - 12 - sw, Y + 7, 22, 8, 0.4, '255,244,248'); } }]);
+      if (p.corner) { const cx = R.wx(p.cox, p.coy); for (let q = 0; q < 5; q++) { const z = p.lo + (p.hi - p.lo) * (q + 0.5) / 5, cy = R.wy(p.cox, p.coy, z); if (inView(R, cx, cy, 40)) D.push([p.d + 0.1, 5, { draw: g => mist(g, cx + Math.sin(t * 0.4 + q + p.n) * 2, cy, 24, 16, 0.6, '244,249,255') }]); } } }
+  }
   function drawables(D, R) {
-    const f = st(), Fm = F(); if (!f || !Fm || !near(R)) return; const t = R.t;
+    const f = st(), Fm = F(); if (!f || !Fm || !near(R)) return; const t = R.t; seamMist(D, R);
     for (const [n, c] of Fm.flags.entries()) { const x = (c[0] + 0.5) * T, y = (c[1] + 0.5) * T, [X, Y] = scr(R, x, y); if (inView(R, X, Y, 60)) D.push([x + y + 0.2, 5, { draw: g => banner(g, X, Y, t, n * 1.7, n % 2 ? ['#d83a2a', '#f0c050'] : ['#2a9a8a', '#f0e8c0']) }]); }
     for (const [n, c] of Fm.fires.entries()) { const x = (c[0] + 0.5) * T, y = (c[1] + 0.5) * T, [X, Y] = scr(R, x, y, 10); if (!inView(R, X, Y, 40)) continue; D.push([x + y + 0.3, 5, { draw: g => { g.globalCompositeOperation = 'lighter'; for (let q = 0; q < 5; q++) { const u = (t * 1.4 + q / 5 + n * 0.3) % 1; blob(g, X + Math.sin(t * 5 + q + n) * 2, Y - 8 - u * 22, 5 + (1 - u) * 4, q % 2 ? '255,150,50' : '255,220,110', (1 - u) * (0.5 + f.heat * 0.3)); } g.globalCompositeOperation = 'source-over'; } }]); }
     for (const d of f.debris) { const [X, Y] = [R.wx(d.x, d.y), R.wy(d.x, d.y, ground(d.x, d.y) + d.z / 4)]; if (!inView(R, X, Y, 20)) continue; D.push([d.x + d.y + 30, 5, { draw: g => { g.save(); g.translate(X, Y); g.rotate(d.r + d.t * 6); g.fillStyle = '#7a5a2a'; g.fillRect(-d.s, -d.s / 2, d.s * 2, d.s); g.fillStyle = '#e8c860'; g.fillRect(-d.s, -d.s / 2, d.s * 2, 1); g.restore(); if (d.t < 1.5) { g.globalCompositeOperation = 'lighter'; blob(g, X, Y, 8, '255,150,60', 0.4 * (1 - d.t / 1.5)); g.globalCompositeOperation = 'source-over'; } } }]); }
@@ -101,5 +116,5 @@ window.TWFX = window.TWFX || {};
     for (const c of Fm.lamps) { const x = (c[0] + 0.5) * T, y = (c[1] + 0.5) * T, [LX, LY] = scr(R, x, y, 14); if (inView(R, LX, LY, 60)) blob(g, LX, LY, 46, '255,214,140', (0.22 + f.lampPulse * 0.4) * amt * (0.88 + 0.12 * Math.sin(t * 5 + c[0]))); }
     for (const c of Fm.fires) { const x = (c[0] + 0.5) * T, y = (c[1] + 0.5) * T, [LX, LY] = scr(R, x, y, 10); if (inView(R, LX, LY, 60)) blob(g, LX, LY, 52, '255,150,60', 0.3 * amt * (0.8 + 0.2 * Math.sin(t * 8 + c[1]))); }
   }
-  window.TWFX.tc2 = { draw, light, drawables };
+  window.TWFX.tc2 = { draw, light, drawables, seamList };
 })();

@@ -20,7 +20,9 @@ window.TW_TC2_BUILD = function (X) {
   ell(36.5, 12.5, 3.7, 2.7, (a, b) => set(a, b, 8, M.BRONZE)); ell(36.5, 12.5, 2.5, 1.8, (a, b) => set(a, b, 9, M.BRONZE)); for (let a = 35; a <= 37; a++) set(a, 14, 7, M.BRONZE);
   for (let b = 20; b <= 22; b++) for (let a = 14; a <= 15; a++) if (inB(a, b)) set(a, b, 6, M.POOL); TWM.water.push({ type: 'ell', c: [15.5, 21.5], rx: 1.5, ry: 2.2, mat: M.POOL });
   for (let k = 0; k < N * N; k++) { if (BIO[k] !== B || MAT[k] === M.VOID || MAT[k] === M.CLOUD || MAT[k] === M.POOL) continue; const i = k % N, j = Math.floor(k / N); for (const [da, db] of [[1, 0], [0, 1]]) { const z = id(i + da, j + db); if (BIO[z] !== B || MAT[z] === M.CLOUD || MAT[z] === M.VOID || MAT[z] === M.POOL || MAT[z] === M.HEAVENBRIDGE || MAT[k] === M.HEAVENBRIDGE) continue; if (Math.abs(H[k] - H[z]) === 1 && !TWM.stairs.has(k + ',' + z)) { TWM.stairs.set(k + ',' + z, 1); TWM.stairs.set(z + ',' + k, 1); } } }
-  const walk = m => m === M.HEAVENPAVE || m === M.HEAVEN || m === M.PEACHLAWN || m === M.BRONZE || m === M.HEAVENBRIDGE;
+  // the pilot's pale HEAVEN stone read as blank white patches in the garden: turn it into lawn, keep one jade path (j = 23) toward the court
+  for (let k = 0; k < N * N; k++) if (BIO[k] === B && MAT[k] === M.HEAVEN) MAT[k] = Math.floor(k / N) === 23 ? M.HEAVENPAVE : M.PEACHLAWN;
+  const walk = m =>m === M.HEAVENPAVE || m === M.HEAVEN || m === M.PEACHLAWN || m === M.BRONZE || m === M.HEAVENBRIDGE;
   const blocked = new Set(), rb = () => { blocked.clear(); for (const p of TWM.props) if (p.block && mine(p.i, p.j)) { const fw = p.fp ? p.fp[0] : 1, fh = p.fp ? p.fp[1] : 1; for (let q = 0; q < fh; q++) for (let r = 0; r < fw; r++) blocked.add(id(p.i + r, p.j + q)); } };
   const free = (a, b) => inB(a, b) && walk(MAT[id(a, b)]) && !blocked.has(id(a, b));
   const P = (kind, a, b, o) => { o = o || {}; const fw = o.fp ? o.fp[0] : 1, fh = o.fp ? o.fp[1] : 1; rb(); for (let q = 0; q < fh; q++) for (let r = 0; r < fw; r++) { if (!inB(a + r, b + q) || !walk(MAT[id(a + r, b + q)]) || blocked.has(id(a + r, b + q)) || (o.block && PATHC[id(a + r, b + q)])) return null; } return prop(kind, a, b, o); };
@@ -29,7 +31,7 @@ window.TW_TC2_BUILD = function (X) {
   const Q = (kind, a, b, o) => { const s = snap(a, b, 2); if (!s) { F.failed.push('poi:' + kind + '@' + a + ',' + b); return null; } const p = poi(kind, 'tc', s[0], s[1], o); if (p) RES[id(s[0], s[1])] = 1; return p; };
   const LT = (a, b, r, col, kind) => TWM.lights.push({ biome: 'tc', i: a, j: b, r, col, kind: kind || 'lantern' });
   // ---- 1. Nam Thiên Môn: the great gate across the south plaza, with lantern towers either side
-  F.gate = L1('tcgate', 24, 26, { fp: [9, 2], piers: [[0, 1], [2, 1], [6, 0], [8, 0]], v: 0 });
+  F.gate = L1('tcgate', 25, 27, { fp: [7, 2], piers: [[0, 1], [2, 1], [4, 0], [6, 0]], v: 0 });
   for (const [a, b] of [[24, 25], [32, 25]]) { if (L1('tclantern', a, b, { v: 1 })) { F.lamps.push([a, b]); LT(a, b, 64, '255,202,125'); } }
   for (const [a, b] of [[25, 28], [31, 28]]) if (L1('tcbrazier', a, b, { v: 0 })) { F.fires.push([a, b]); LT(a, b, 50, '255,159,80', 'fire'); }
   // ---- 2. the Court of Heaven
