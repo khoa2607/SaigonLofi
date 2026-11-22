@@ -1,0 +1,464 @@
+{
+ "version": 1,
+ "name": "nhen_tinh",
+ "title": [
+  "Nhện Tinh (chị cả)",
+  "Spider Spirit, eldest sister"
+ ],
+ "biome": "btd",
+ "canvas": [
+  32,
+  48
+ ],
+ "pivot": [
+  16,
+  46
+ ],
+ "speed": 14,
+ "gait": "glide",
+ "notes": "Own hand-drawn lady body. Twin buns with silver spider-leg pins (the silhouette key), long hair down the back, violet robe with silver web marks, poison-green sash, wide sleeves that swing.",
+ "palette": {
+  "o": "#2a1726",
+  "H": "#3a2c4a",
+  "h": "#6a5a8a",
+  "X": "#24182e",
+  "I": "#ffffff",
+  "i": "#a49ad0",
+  "S": "#fbe0cc",
+  "P": "#f4a0a8",
+  "l": "#d2405a",
+  "e": "#5a2a7a",
+  "w": "#ffffff",
+  "K": "#2e2440",
+  "V": "#8f5ad0",
+  "v": "#5e3a9a",
+  "N": "#7cf05a",
+  "n": "#3ea84a"
+ },
+ "views": {
+  "down": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "...I............",
+     "....i...........",
+     ".....i..ooo.....",
+     "......ioHhho....",
+     ".Iiiii.oHHhHo...",
+     "......oHHHHo....",
+     ".....ioXHHXoooo.",
+     "....I..oXXoHHhhh",
+     "........oHHHHhhh",
+     ".......oHHHHHHhh",
+     ".......oHHHHHHHH",
+     ".......oHHHHXXXX",
+     ".......oHHXSSSSX",
+     ".......oHXSSSSSS",
+     ".......oHXSSSSSS",
+     ".......oHXoooSSS",
+     ".......oHXSewSSS",
+     ".......oHXSSSSSS",
+     ".......oHXPSSSSS",
+     ".......oHHSSSSSl",
+     ".......oHHoSSSSS",
+     ".......oHHHooooo",
+     "......oHHHHoIoSS",
+     "......oHHoVVVVIS",
+     ".....oVVVVVVVVVI",
+     "....oVVVVvVVVVVV",
+     "....oVVVvVVVVVVV",
+     "...oVVVvVVVVVVVV",
+     "...oVVVvVNNNNNNN",
+     "...oVVVvVnnnnnnN",
+     "..oVVVVvVVVVVVnV",
+     "..oIIIIvVVVVVVnV",
+     "..oooooovVVVVVVV",
+     ".......ovVVVVVVV",
+     ".......oVvVVVVVV",
+     "......oVVVVIVVVV",
+     "......oVVVIVIVVV",
+     "......oVVVVIVVVV",
+     ".....ovVVVVVVVVV",
+     ".....oVVVVVVVVVV"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVV",
+      "....ovVVVVVVVVVV",
+      "....oooooooooooo",
+      "..........oKKo..",
+      "..........oooo..",
+      "................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      ".....ovVVVVVVVVVVVVVVVVVVVvo....",
+      ".....ooooooooooooooooooooooo....",
+      "..........oKKo..................",
+      "..........oooo..................",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      "....ovVVVVVVVVVVVVVVVVVVVvo.....",
+      "....ooooooooooooooooooooooo.....",
+      "..................oKKo..........",
+      "..................oooo..........",
+      "................................"
+     ]
+    },
+    "sit": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................",
+      "....ovVVVVVVVVVV",
+      "...ovVVVVVVVVVVV",
+      "...ooooooooooooo",
+      "................",
+      "................"
+     ]
+    }
+   }
+  },
+  "up": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "...I............",
+     "....i...........",
+     ".....i..ooo.....",
+     "......ioHhho....",
+     ".Iiiii.oHHhHo...",
+     "......oHHHHo....",
+     ".....ioXHHXoooo.",
+     "....I..oXXoHHhhh",
+     "........oHHHHhhh",
+     ".......oHHHHHHhh",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHh",
+     ".......oHHHHHHhH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oHHHHHHHH",
+     ".......oXHHHHHHH",
+     "......oVXHHHHHHH",
+     "......oVVXHHHHHH",
+     ".....oVVVVXHHHHH",
+     "....oVVVVvVXHHHH",
+     "....oVVVvVVVXHHH",
+     "...oVVVvVVVVVXHH",
+     "...oVVVvVNNNNNNN",
+     "...oVVVvVnnnNNNn",
+     "..oVVVVvVVVoNNNo",
+     "..oIIIIvVVVVonnV",
+     "..oooooovVVVVoVV",
+     ".......ovVVVVVVV",
+     ".......oVvVVVVVV",
+     "......oVVVVIVVVV",
+     "......oVVVIVIVVV",
+     "......oVVVVIVVVV",
+     ".....ovVVVVVVVVV",
+     ".....oVVVVVVVVVV"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVV",
+      "....ovVVVVVVVVVV",
+      "....oooooooooooo",
+      "..........oKKo..",
+      "..........oooo..",
+      "................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      ".....ovVVVVVVVVVVVVVVVVVVVvo....",
+      ".....ooooooooooooooooooooooo....",
+      "..........oKKo..................",
+      "..........oooo..................",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      ".....ovVVVvVVVVVVVVVVvVVVvo.....",
+      "....ovVVVVVVVVVVVVVVVVVVVvo.....",
+      "....ooooooooooooooooooooooo.....",
+      "..................oKKo..........",
+      "..................oooo..........",
+      "................................"
+     ]
+    },
+    "sit": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................",
+      "....ovVVVVVVVVVV",
+      "...ovVVVVVVVVVVV",
+      "...ooooooooooooo",
+      "................",
+      "................"
+     ]
+    }
+   }
+  },
+  "right": {
+   "upper": {
+    "rows": [
+     "................................",
+     "................................",
+     "...........ooo..................",
+     "..........oHhHo.................",
+     ".Iiiii.o.oHHHHo.................",
+     "......ooooHHHHo.................",
+     ".....ii.oXHHXo..................",
+     "..........oXXoooooo.............",
+     ".........oHHHHHhhhhoo...........",
+     "........oHHHHHHHHhhhho..........",
+     "........oHHHHHHHHHHHHHo.........",
+     "........oHHHHHHHHHXXXXo.........",
+     "........oHHHHHHHXSSSSSXo........",
+     "........oHHHHHHXSSSSSSSo........",
+     "........oHHHHHHXSSSSSSSSo.......",
+     "........oHHHHHHXSSSooSSSo.......",
+     "........oHHHHHHXSSSewSSSo.......",
+     "........oHHHHHHXSSSSSSSo........",
+     "........oHHHHHHXSPSSSSSo........",
+     "........oHHHHHHHSSSSSlSo........",
+     "........oHHHHHHHoSSSSSo.........",
+     "........oHHHHHHHHooooo..........",
+     ".........oHHHHHHoIoS............",
+     ".........oHHHHHVVVIVo...........",
+     "........oHHHHVVVVVVVVo..........",
+     "........oHHHVVVVVVVVVo..........",
+     "........oHHVVVVVVVVVVo..........",
+     "........oHVVVVVVVVVVVo..........",
+     "........oHNNNNNNNNNNNo..........",
+     "........onnnnnnnnnnnNo..........",
+     "........oVVVVVVVVVVVVo..........",
+     "........ovVVVVVVVVVVVo..........",
+     ".......ovVVVVVVIVVVVVo..........",
+     ".......oVVVVVVIVIVVVVo..........",
+     ".......oVVVVVVVIVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVo.........",
+     "......oVVVVVVVVVVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVo.........",
+     "......oVVVVVVVVVVVVVVVo.........",
+     "......ovVVVVVVVVVVVVVVVo........"
+    ]
+   },
+   "arm": {
+    "n": {
+     "at": [
+      13,
+      23
+     ],
+     "rows": [
+      ".oooo.",
+      "oVVVVo",
+      "oVVVVo",
+      "oVVvVo",
+      "oVVvVo",
+      "oVVvVo",
+      "oVVvVVo",
+      "oIIIIIo",
+      ".ooooo."
+     ]
+    },
+    "f": {
+     "at": [
+      14,
+      23
+     ],
+     "rows": [
+      ".oooo..",
+      "oVVVVo.",
+      "oVVVVVo",
+      ".oVVvVo",
+      ".oVVvVVo",
+      "..oVvVVo",
+      "..oVvVVVo",
+      "..oIIIIIo",
+      "...ooooo."
+     ]
+    },
+    "b": {
+     "at": [
+      11,
+      23
+     ],
+     "rows": [
+      "...oooo",
+      "..oVVVVo",
+      ".oVVVVVo",
+      "oVVvVVo.",
+      "oVvVVo..",
+      "oVvVVo..",
+      "oVvVVo..",
+      "oIIIIo..",
+      ".oooo..."
+     ]
+    }
+   },
+   "lower": {
+    "stand": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVo.........",
+      "......ovVVVVVVVVVVVVVVVo........",
+      "......oooooooooooooooooo........",
+      "...............oKKKo............",
+      "...............ooooo............",
+      "................................"
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVVo........",
+      "......ovVVVVVVVVVVVVVVVVo.......",
+      "......ooooooooooooooooooo.......",
+      "..........ooo.......oKKKo.......",
+      "...................ooooo........",
+      "................................"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "......oVVVVVVVVVVVVVVVo.........",
+      ".....ovVVVVVVVVVVVVVVVo.........",
+      ".....oooooooooooooooooo.........",
+      "........oKKKo.....ooo...........",
+      "........ooooo...................",
+      "................................"
+     ]
+    },
+    "sit": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................................",
+      "......oVVVVVVVVVVVVVVVVo........",
+      ".....ovVVVVVVVVVVVVVVVVVo.......",
+      ".....oooooooooooooooooooo.......",
+      "................................",
+      "................................"
+     ]
+    }
+   },
+   "acts": {
+    "act0": {
+     "arm": {
+      "at": [
+       14,
+       15
+      ],
+      "rows": [
+       "......oo.",
+       ".....oIIo",
+       "....oVVIo",
+       "...oVVVo.",
+       "..oVvVo..",
+       ".oVvVo...",
+       "oVVVo....",
+       "oVVo.....",
+       "oVVo.....",
+       ".oo......"
+      ]
+     }
+    },
+    "act1": {
+     "arm": {
+      "at": [
+       14,
+       23
+      ],
+      "rows": [
+       ".oooooooo.",
+       "oVVVVVVIIo",
+       "ovVvVVVIIo",
+       "oVVVVoooo.",
+       ".oooo....."
+      ]
+     }
+    }
+   }
+  }
+ },
+ "sitDrop": 3,
+ "variants": [
+  {
+   "name": "nhen_tinh_bath",
+   "title": [
+    "Nhện Tinh (áo tắm)",
+    "Spider Spirit, bathing robe"
+   ],
+   "palette": {
+    "V": "#f2eef8",
+    "v": "#c8c0dc",
+    "N": "#f4c0d4",
+    "n": "#c890a8"
+   }
+  }
+ ]
+}

@@ -1,0 +1,123 @@
+# Tây Du Ký v2 — footprint normalisation (2026-11-20)
+
+Branch `feature/tayduky-redesign-v2`. Code: `tayduky/tw-layout.js` (+ a `TW_LAYOUT` block and a "gates" block in `tw-map.js`). Test: `node tests/tayduky-v2-map15.mjs`. Overview: `node tests/tayduky-v2-overview.mjs out.png` -> `screenshots/footprint/overview-before-after.png`.
+
+## 1. Was the layout suitable for 15 biomes in practice? No.
+
+The 160 x 160 world had 15 regions but 24,964 tiles (avg 1,664 per region). Only Hoa Quả Sơn (1,406) and Bàn Tơ Động (1,101) were authored at the intended density. Measured before the pass:
+
+| Region | Tiles | Active (not plain sea / walkable / elevated / prop) | Verdict |
+|---|---|---|---|
+| Thiên Cung | 2,231 | 490 (22 %) | 78 % empty cloud sea |
+| Buddha's Palm | 2,099 | 798 (38 %) | 62 % empty sea |
+| Hoa Quả Sơn | 1,406 | 1,133 (81 %) | reference density |
+| Bàn Tơ Động | 1,101 | 1,000 (91 %) | reference density |
+| 11 placeholders | 615 - 3,321 (avg 1,950) | - | far too big; a viewer crossing one sees only hatched ground |
+
+One screen (1920 x 1080, zoom 1, a 64 x 32 tile = 1,024 px^2) shows only about **2,025 tiles** (zoom 2: 506; 2560 x 1440 zoom 1: 3,600; 4K zoom 1: 8,100). With 1,664 tiles per region a wide view never showed more than 1-2 regions, mostly empty ones. The distance between built biomes (Thiên Cung to Bàn Tơ Động was ~130 tiles) was almost entirely placeholder.
+
+## 2. Footprint rules (the standard from now on)
+
+1. **Density reference:** Hoa Quả Sơn / Bàn Tơ Động (active share >= 80 %). A biome contains only: **active core + a small support ring + compact transition edges (short exits)**. Plain cloud / plain ground / padding terraces that do not serve silhouette, activity or traversal are removed.
+2. **Size standard:** new biomes are planned at **<= ~900 tiles** (target 500 - 800; the placeholders are now 482 - 616). The hard maximum for a *designed* biome is the active core of Thiên Cung plus its ring (847 tiles). Hoa Quả Sơn (1,406) and Bàn Tơ Động (1,101) are **above** the standard but are the owner-approved reference and pinned by the pilot hash test, so they are left unchanged (a later, explicitly approved trim would be possible).
+3. **Wide view:** at the default wide zoom a 1080p screen holds ~2,000 tiles, so a junction between regions shows **3-5 regions** (see `ntq-day.png`: Thiên Cung, Buddha's Palm, Hoa Quả Sơn and Bàn Tơ Động are all visible).
+4. **Ring / exits:** Thiên Cung core rectangle (69,9)-(98,30) + ring 2 + level-1 exits within 4 tiles; Buddha's Palm = active art (cloud terraces, platform >= level 3, props, paths) + ring 1 (the cloud-tone seam band still fades 16 tiles into neighbours, so the sea reads as large without owning the tiles).
+5. **Connectivity:** every trimmed built biome opens onto the world through one **ramped gate** (`TWM.gates`): the placeholder tiles running out from its border step down/up to level 1 with stairs.
+6. **Adjacency is derived** from the final tile mask (never hand-written); the Director's rule (no simultaneous signatures in adjacent regions, <= 5 active) is unchanged.
+
+## 3. What changed
+
+| Item | Before | After | Why |
+|---|---|---|---|
+| World | 160 x 160 (24,964 tiles) | **104 x 104 (10,404 tiles)** | density; -58 % |
+| Hoa Quả Sơn | 1,406 tiles | 1,406 (translated only) | reference |
+| Bàn Tơ Động | 1,101 | 1,101 (translated only, moved next to the palm / below Thiên Cung) | reference |
+| Thiên Cung | 2,231 | **847** | only active core + ring 2 + short exits |
+| Buddha's Palm | 2,099 | **953** | only active art + ring 1; 4 palm dressing/edge lists remapped |
+| Placeholders (11) | 615 - 3,321 | **482 - 616** (avg ~540) | re-planned: farthest-point seeds, area-balanced Lloyd relaxation, named by where each used to sit |
+| Distance between built biomes | up to ~130 tiles | adjacent / one placeholder apart | |
+
+Translations (authoring -> world): Hoa Quả Sơn + Thiên Cung + Buddha's Palm move **as one rigid block** by (-57, 0); Bàn Tơ Động by (-58, -76). Nothing is rotated or edited. `tests/tayduky-v2-map15.mjs` un-maps both pilot biomes and checks their tile lists and props against the pre-pass SHA-256 hashes (identical to commit 404b90f).
+
+### Adjacency consequences
+Edges 31 -> **32** (derived). Built-biome neighbours, before -> after:
+- **Thiên Cung** `bcl, hqs, btp, clt` -> `bcl, hvd, ntq` : it **no longer touches Hoa Quả Sơn or Buddha's Palm** (a placeholder, NTQ, now sits between them), so the Director may run Thiên Cung and Palm signatures at the same time (previously forbidden by the adjacency rule). Thiên Cung stays reachable through its gate.
+- **Buddha's Palm** `tc, hqs, nhs, clt, ntq` -> `hqs, ntq, nhs, clt, tth, lhd`.
+- **Hoa Quả Sơn** `tc, btp, nhs` -> `hvd, nhs, ntq, btp`.
+- **Bàn Tơ Động** `tth, nnq, sdl, lat` -> `hds, clt, lat, sdl`.
+Placeholder names were matched greedily to the seed nearest to where each region used to sit, so the overall arrangement is only approximate and the placeholders' neighbours changed; the 15-biome review's adjacency table (`TAYDUKY-15-BIOME-REVIEW.md` section 3) is therefore **historical**: design each remaining biome against `TWM.adj` of the current build (printed by `node tests/tayduky-v2-map15.mjs`). The Director found no violations in 900 s runs on seeds 7, 21 and 33.
+
+Other consequences: START camera points, 'mouthE' story points and test look-at points were authored in the old space and now go through `TWM.layout.map(i, j)`; sea/pocket tiles sealed between built biomes become empty sea of the neighbouring Palm / Thiên Cung; placeholder transition seams (`TWM.seam`, `edgeOther`) are recomputed in the new space.
+
+## 4. Verified
+`map15` PASS (15 regions, one component each, all reachable, Director with 15 regions); `sim 900` PASS on seeds 7, 21, 33 (no stuck agents, no teleports - Wukong's landing glide is now speed-limited); `heaven-assets`, `heaven` (both signatures, 60 fps median), `world 30` (no console errors) PASS. Screenshots: `screenshots/footprint/` (four biomes day/night, `ntq-day.png` and `clt-day.png` junction views, `overview-before-after.png`).
+
+## 5. Limits / next
+Placeholder terrain (hatched, level 1) now touches Thiên Cung and the Palm directly, so their sea edges show a visible cliff against it until the neighbours are built; the 11 placeholders are mask-only; Hoa Quả Sơn / Bàn Tơ Động are still above the size standard; the Palm's rim walkway to Hoa Quả Sơn is a dead-end strip (its link to the lanes lies outside the trimmed ring).
+
+## Update 2026-11-21 - Hoa Diem Son (build first, size second)
+
+The owner lifted the universal size ceiling: each new biome is built at the size its landmarks, activities and story need. **World 104 x 104 -> 124 x 124** (+20 rows and columns of free land; no existing biome moved or edited, `OFF_CLUSTER` / `OFF_BTD` unchanged). Hoa Diem Son is authored directly in world space (`tw-fire.js`) inside a footprint reserved by `tw-layout.js`.
+
+| Biome | Tiles | Notes |
+|---|---|---|
+| Hoa Diem Son | **1,362** (about 900 walkable) | squircle core + two map-edge strips: it hugs the world's south-west corner so no dead wedge is left against the rim; the strips are composed (ruined shrine, lookout ledge, ash-basin vents, dead trees, broken ridge), not padding |
+| the other 10 placeholders | re-planned on the remaining free land | still mask-only |
+
+**Adjacency** (derived): HDS touches `hvd, btd, lhd, sdl`. The Director rules are unchanged (900 s runs, seeds 7, 21, 33: no adjacent simultaneous signatures). The village's east road ramps down to level 1 at the east edge so HDS stays connected (`map15`: all 15 regions reachable).
+
+**Border blending (new rule).** A biome edge is a layered band, never a straight cut: (1) the volcano pushes OUT - placeholder tiles within 6 tiles become ash / scorched ground with dead trees and vents (`TWM.fire.out`); (2) the neighbour pushes IN - Ban To Dong's cave floor, glow patches and crystals creep into HDS's edge tiles, HDS slopes down to Ban To Dong's level in a talus band instead of ending at a cliff, and Ban To Dong's own ground gets dithered ash/ember staining within 3 tiles (`TWM.bleed`, colour only, geometry untouched); (3) the ridge along the rest of the edge is broken (shelves, notches). Screenshots: `screenshots/hds/hds-neighbours-wide-btd.png`, `hds-seam-close.png`, `hds-corner-wide.png`.
+
+Frame-time note: headless frame time grows with world size (about 1.5 ms at 104, 6-12 ms at 124 on software GL); the gloom overlay is now clipped to the viewport. Re-check on a real GPU before adding more biomes.
+
+## Update 2026-11-22 - Sư Đà Lĩnh
+
+World stays **124 x 124**. Sư Đà Lĩnh takes **1,517 tiles** (squircle 47 x 39 at world (30, 84) plus the south rim strip, never over Hỏa Diệm Sơn's tiles); the other nine placeholders are re-planned around it. Hỏa Diệm Sơn's footprint grew by one row (`h` 39 -> 40, strip rule `b >= 34`) so its south strip reaches the rim row: that closed a one-tile placeholder sliver that was left under the volcano (the lhd mask was otherwise cut in two). Hỏa Diệm Sơn's authored content is unchanged.
+
+**Adjacency** (derived): Sư Đà Lĩnh touches `hds, lhd, tth, hps, clt`. (Hắc Phong Sơn `hps` took the former Nữ Nhi Quốc region.) Director rules unchanged: 900 s runs on seeds 7 / 21 / 33 have no adjacent simultaneous signatures. The valley road starts where Hỏa Diệm Sơn's east road ends (level 1) and leaves through the east edge at level 2, so the ridge is connected both ways (map15 PASS: 15 regions reachable).
+
+**Border blending.** (1) Hỏa Diệm Sơn side: ash and scorched ground eat into the slate within 4 tiles of the border while cold slate creeps into the volcano's edge (colour only; geometry untouched). (2) Placeholders near the ridge turn slate and dead scrub with dead pines within 6 tiles and their seam tone blends toward slate (`TWM.seamK`). (3) The rim: every unbuilt tile within 14 tiles (including the world-rim wall) paints its cliff faces in slate with bone strata, mossy drips and an ink lip (`TWM.lionNear`, tw-art.js faceCol); where Hỏa Diệm Sơn is nearer, its scorched faces win.
+
+## Update 2026-11-23 - Thông Thiên Hà
+
+World stays **124 x 124**. Thông Thiên Hà takes **1,732 tiles** (squircle 46 x 39 at world (77, 84), the south and east rim strips, and the placeholder pocket between Sư Đà Lĩnh's corner and the west bank). Adjacent: `sdl, nhs, ntq, lhd`. Placeholders were re-planned over the smaller free land; `tests/tayduky-v2-map15.mjs` still passes (15 regions, global walk component, Director).
+
+## Hắc Phong Sơn (Black Wind Mountain) — replaces Nữ Nhi Quốc
+
+The planner's former `nnq` region (758 tiles: a wedge at local 30 x 50 from world (73, 54), a 30 x 30 mountain body plus a 5-wide south tail) is flagged built by `tw-layout.js` (after the placeholders are planned, so the other regions do not move) and authored in world space by `tw-hps.js`.
+Neighbours: `btp` (back / north-west), `ntq` (north tip), `nhs` (east flank), `lhd` (west), `sdl` (tail, west) and `tth` (tail, east; its river rises at the foot of the mountain). Heights: the peak (level 13) at the back falls to level 1-3 on the east and south; terraces of
+11 (great hall), 9 (upper court), 7 (monks' court), 3 (gate plaza), 6 (lair ledge). The south tail is a level-6 ridge-walk that meets Thông Thiên Hà's bluff path, so Sư Đà Lĩnh and the river stay connected to the world.
+Gates: the standard gate opens east onto `nhs`; a second hand-built ramp leaves the lair ledge west into `lhd`. Thông Thiên Hà's old northern river cleft (it cut through this land) was removed; the mountain stream now runs along the south edge and becomes the river's head.
+
+## Ngũ Hành Sơn (Five Elements Mountain)
+
+The planner's `nhs` region (744 tiles: a 26 x 42 wedge at world (97, 48), main body x 97-122 / y 55-83, a narrow north tail to y 48, a south tail to y 89) is flagged built by `tw-layout.js` (step 3c) and authored in world space by `tw-nhs.js`.
+Neighbours: `ntq` (north tip, placeholder), `hps` (west flank; the mountain slopes down from Hắc Phong Sơn's level into its own, never a cliff of more than one level at the border), `tth` (south tail; the south road meets the river's bluff path tile (118, 86) on the same level 5), the world rim (east, x = 123, finished with a 7-level moss cliff and the rim waterfall).
+Heights: massif peak level 18 (pad at (13.5, 13)), prison court 4, hermit ledge 9, meadow 3, east foot 3-6. Gates: the Hắc Phong Sơn exit at (102, 80) meets the meadow road at (103, 80) on level 3; the standard gate leaves the north tail at (118, 50) into `ntq`; the south road joins Thông Thiên Hà.
+
+## Ngũ Trang Quán (Wuzhuang Temple)
+
+The planner's `ntq` region (654 tiles: a block x 91-122 / y 36-48 with a diagonal tail to the west bulge at x 84 / y 47-57 and a north tip at x 102-108 / y 30-35) is flagged built by `tw-layout.js` (step 3d) and authored in world space by `tw-ntq.js`; no footprint change was needed.
+Neighbours: `nhs` (south; the road from Ngũ Hành Sơn's north gate at (119, 50) on level 3 continues into the monastery gate court at (119, 49); the mountain's north skirt is slope-blended into the garden's south edge, never a cliff of more than one level), `hqs` (west / north-west; the Huaguo door: a road ends at (91, 38) on level 1, the same level as the hqs gate tile (91, 37)), `hps` and `btp` (south-west; slopes blend in), `lat` (north and north-east, placeholder; one gate at (121, 36) steps down the north-east corner to the lowland, and a 10-tile outward band of limestone / moss / peach / bamboo covers the placeholder tiles next to the biome), the world rim (east, x = 123: a 7-9-level moss cliff with the lotus pond's outflow pouring over it at (122, 41)).
+Heights: gate court 3, forecourt 4, herb terrace 5, Ginseng Court 6, hall terrace 10, spring shrine 12-13, west garden falling to 1-3 toward the Huaguo door, lookout terrace 6. Unfixed ground is relaxed so that no two neighbouring tiles differ by more than one level, and every one-level edge carries a walkable stair link (visible stairs along the avenue and paths).
+
+## Hoa Quả Sơn rebuild (2026-11-21)
+
+The planner region (1,406 tiles) is kept; `tw-hqs.js` rebuilds it in world space. Heights: back wall 11-13 (plateau 13), lake / plaza / orchard 3-5, village 6, summit 10, yard 2, gate and beach 1. Neighbours: `bcl`, `clt`, `lat` (placeholders: 12-tile foothill band on the west, sea + beach band on the east), `btp` (cliff over the cloud sea), `ntq` (the Huaguo gate road meets Ngũ Trang Quán's west road at (91, 38) on level 1). The old pilot assertion (translated tile hash) is replaced by the regular map15 checks (15 regions connected, adjacency from the tile mask).
+
+## Buddha's Palm rebuild (2026-11-22)
+
+The planner region (953 tiles, x 53-90 / y 30-76) is kept and rebuilt by `tw-btp.js`. Heights: palm 6, fingers 12-18, thumb 10, Buddha terrace 10, wrist 5 -> 3, cloud terraces 2-3, cloud sea -1..2 (0-1 at the borders). Neighbours: `hqs` (north-east; the east cloud walkway meets Hoa Quả Sơn / Ngũ Trang Quán on level 1), `ntq` (east), `hps` (south-east), `clt` (west) and `lhd` (south-west) (placeholders get an 11-tile cloud band). The old `tw-palm.js` authoring (translated by the layout) is purged.
+
+## Bạch Cốt Lĩnh (White Bone Ridge)
+
+The planner's `bcl` region (1,005 tiles) is a C that wraps the Heaven cloud sea; it is authored by `tw-bcl.js` with no footprint change. Heights: entry 2, valley floor 3, canyon walls up to 13 (east wall = Hoa Quả Sơn's rim), lair and palace terraces 7, ridge 8-9, chasm floor 1. Neighbours: `tc` (the cloud sea below the cliffs), `hqs` (east, rim matched), `clt` (south, placeholder; the road leaves the pocket through the entry pass at (44, 39)), `hvd` (west, placeholder), the world rim (north).
+
+## Lòng Bàn Tay Phật Tổ — hand rebuild (2026-11-22)
+Region unchanged (953 tiles, x 53-90 / y 30-76). The hand is centred on (74, 50), fingers pointing screen-right (toward Hoa Quả Sơn's rim, fingertips about x 80-88 / y 35-46), wrist toward the Buddha's lotus mountain (centre (62.5, 61.5), levels 7-10). Hand tiles are flat level 6, hidden (`VOID`) under the sprite. Cloud walkway from the middle fingertip to the Hoa Quả Sơn rim at (90, 39). Seams: a cloud band over unbuilt neighbours (existing) and a mist curtain along built ones.
+
+## Thiên Cung (2026-11-22)
+No footprint change (847 tiles, x 10-43 / y 7-34). Camera targets `?at=tcgate|tcfurnace|tcgarden|tcpalace`.
+
+## Đại Lôi Âm Tự (2026-11-22)
+Region kept (692 tiles, x 102-122 / y 1-35). Levels: foot 7-8, gate terrace 10, landing 12, arhat court 13, landing 15, hall terrace 16, dais 17, mountain walls to about 25. Entry at (113, 34) <-> Ngũ Trang Quán (113, 35) level 7 (two connector tiles in Ngũ Trang Quán at (113, 37-38)). Camera targets `?at=latfoot|latgate|latcourt|lathall|latpool|latfall|latbodhi|latrim|latwest|latnorth|latseam`.

@@ -1,0 +1,86 @@
+/* Tây Du Ký — the shared Lofi Worlds UI (../css/lofi-ui.css: same layout, sizes, positions and behaviour as SaigonLofi / Holdfast) in an Eastern-immortal palette:
+   jade and deep emerald plates, antique gold trim, imperial-red accents, warm ivory paper, dark bronze ink. Only colours, the biome navigator grid, the static dragon frame and the loading card live here. */
+:root { --ink: #0c2620; --cream: #f1e8cf; --paper: #e2d5ae; --peach: #d9a93c; --clay: #b3261e; --brown: #3d2a16; --wood: #174a3c; --jade: #1f7a63; --soft: #7a6a44;
+  --tile: #b3261e; --leaf: #1f7a63; --sun: #f0bd3e; --white: #f8f1dc; --plate: #123a32; --plate-2: #1c5646; --shadow: #071a15; --gold: #e0b040;
+  --font: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #e8e2ef; color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 500; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+#c { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
+#hud, #dock, #lang, #ytbox, #card { z-index: 3; }
+/* recolour the decorative tints the shared sheet hard-codes in Saigon's peach */
+#eras { background: repeating-linear-gradient(180deg, #174a3c 0 9px, #12402f 9px 11px); border: 3px solid var(--gold); box-shadow: inset 0 2px 0 #2f7a62, 0 0 0 2px var(--ink), 0 5px 0 var(--ink); }
+#eras .cap { color: #f6e7b4; text-shadow: 0 2px 0 var(--ink); }
+#eras button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); box-shadow: inset 0 -3px 0 #c3b27c, 0 2px 0 var(--ink); }
+#eras button:hover { background: #f4e7bc; border-color: var(--gold); }
+#eras button[aria-pressed="true"] { background: var(--clay); color: #fbe9c4; border-color: var(--gold); box-shadow: inset 0 3px 0 #7c1812; }
+#info { background: var(--cream); border: 2px solid var(--gold); box-shadow: inset 0 2px 0 #fff8e2, 0 0 0 2px var(--ink), 0 4px 0 var(--ink); }
+#eraSub { color: var(--clay); }
+#ticker { background: var(--plate); border: 2px solid var(--gold); box-shadow: 0 3px 0 var(--ink); }
+#dock { background: var(--cream); border: 3px solid var(--gold); box-shadow: inset 0 3px 0 #fff8e2, inset 0 -4px 0 #d5c48f, 0 0 0 2px var(--ink), 0 6px 0 var(--ink); }
+#dock::before, #dock::after { content: ""; position: absolute; top: -8px; width: 22px; height: 12px; background: var(--clay); border: 2px solid var(--ink); border-radius: 3px; box-shadow: inset 0 -3px 0 #7c1812; }
+#dock::before { left: 22px; } #dock::after { right: 22px; }
+#dock button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); box-shadow: inset 0 -3px 0 #c3b27c, 0 2px 0 var(--ink); }
+#dock button:hover { background: #f4e7bc; }
+#dock button[aria-pressed="true"] { background: var(--jade); color: #fbf3da; box-shadow: inset 0 3px 0 #135040; }
+#play { background: var(--clay) !important; border: 3px solid var(--ink) !important; box-shadow: inset 0 -4px 0 #7c1812, 0 3px 0 var(--ink) !important; color: #fbe9c4 !important; }
+#hint { background: var(--sun); color: var(--ink); }
+#tname { color: var(--clay); }
+#panel { border-top: 2px dashed #b9a56a; }
+input[type=range] { accent-color: var(--clay); }
+#ytUrl { background: #fff8e2; border: 2px solid var(--ink); }
+#ytbox { background: var(--cream); border: 3px solid var(--gold); box-shadow: 0 5px 0 var(--ink); }
+#lang { background: var(--cream); border: 2px solid var(--gold); box-shadow: inset 0 2px 0 #fff8e2, 0 0 0 2px var(--ink), 0 3px 0 var(--ink); }
+#lang button { background: var(--paper); color: var(--brown); box-shadow: none; }
+#lang button + button { border-left: 2px solid var(--ink); }
+#lang button:hover { background: #f4e7bc; }
+#lang button[aria-pressed="true"] { background: var(--clay); color: #fbe9c4; box-shadow: inset 0 3px 0 #7c1812; }
+#toMenu { background: var(--cream); color: var(--brown); border: 2px solid var(--gold); box-shadow: 0 0 0 2px var(--ink), 0 3px 0 var(--ink); }
+#toMenu i { background: var(--gold); box-shadow: inset -3px -3px 0 #a67a1c; }
+/* the biome navigator replaces Saigon's era tabs / Holdfast's timeline tabs: same plate, same position, same button style, 15 buttons in a 5 x 3 grid */
+#eras .tabs.nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+#eras .tabs.nav button { min-width: 0; min-height: 36px; padding: 0 4px; font-size: 15px; letter-spacing: .3px; position: relative; }
+#eras .tabs.nav button .dotb { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50%; background: #5c8a6e; opacity: 0; }
+#eras .tabs.nav button.busy .dotb { opacity: 1; background: #e8b03a; box-shadow: 0 0 4px #e8b03a; }
+#eras .tabs.nav button:focus-visible { outline: 3px solid var(--sun); outline-offset: 1px; }
+#navTip { position: fixed; z-index: 6; pointer-events: none; background: var(--plate); color: #f6e7b4; border: 2px solid var(--gold); border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 13px; box-shadow: 0 3px 0 var(--ink); opacity: 0; transition: opacity .12s; white-space: nowrap; max-width: calc(100% - 16px); }
+#navTip.on { opacity: 1; } #navTip small { display: block; font-weight: 500; font-size: 11px; color: #cdbf8f; }
+#card { background: var(--plate); border: 2px solid var(--gold); box-shadow: 0 0 0 2px var(--ink), 0 4px 0 var(--ink); color: #f6e7b4; }
+#card b { color: var(--sun); } #card span { color: #cdbf8f; }
+.nm { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--brown); }
+.nm input { width: 18px; height: 18px; accent-color: var(--clay); }
+body.clean #deco { display: none; }
+/* loading card */
+#load { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(circle at 50% 42%, #f1e8cf, #c9b983); z-index: 50; transition: opacity .6s; color: var(--ink); }
+#load.done { opacity: 0; pointer-events: none; }
+#load b { font-family: 'Pixelify Sans', monospace; font-size: 34px; letter-spacing: 4px; color: var(--clay); text-shadow: 0 3px 0 #c9a840; text-align: center; padding: 0 12px; }
+#load span { font-size: 15px; font-weight: 700; }
+#load .p { width: min(240px, 60%); height: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #d9c993; overflow: hidden; }
+#load .p i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--clay) 0 6px, #7c1812 6px 8px); transition: width .2s; }
+@media (prefers-reduced-motion: reduce) { #load, #navTip { transition: none; } }
+.row[hidden] { display: none !important; }
+
+/* ===== Static dragon frame (Reference A). #deco is one transparent PNG/WebP layer drawn ABOVE the controls with pointer-events:none;
+   its plaque interior is transparent, so the real DOM board (#eras) shows through and the 15 buttons stay interactive.
+   Everything is placed in units of --u = 1/1000 of the artwork width, so it scales as one piece. Art px (1000 x 637):
+   board interior x 108-860, y 164-522; title centre y 186; button grid x 150-832, y 225-497. */
+#deco { position: fixed; left: var(--ax); top: var(--ay); width: var(--aw); height: auto; z-index: 4; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+#hud { position: fixed; inset: 0; max-width: none; display: block; pointer-events: none; }
+#hud > * { pointer-events: auto; }
+#toMenu { position: absolute; left: 14px; top: 8px; }
+#eras { position: absolute; left: calc(var(--ax) + 104 * var(--u)); top: calc(var(--ay) + 160 * var(--u)); width: calc(760 * var(--u)); height: calc(366 * var(--u)); padding: 0; border: 0; outline: 0; border-radius: 0; box-sizing: border-box;
+  background: repeating-linear-gradient(180deg, #174a3c 0 calc(9 * var(--u)), #12402f calc(9 * var(--u)) calc(11 * var(--u))); box-shadow: inset 0 0 calc(30 * var(--u)) #0a2a22; }
+#eras .cap { position: absolute; left: 0; right: 0; top: calc(8 * var(--u)); height: calc(46 * var(--u)); display: flex; align-items: center; justify-content: center; padding: 0; white-space: nowrap; text-align: center;
+  font-size: clamp(9px, calc(33 * var(--u)), 24px); letter-spacing: calc(3.4 * var(--u)); font-weight: 800; text-transform: uppercase; color: #ecd68a; text-shadow: 0 calc(2 * var(--u)) 0 #0a2a22; }
+#eras .tabs.nav { position: absolute; left: calc(46 * var(--u)); top: calc(65 * var(--u)); width: calc(682 * var(--u)); height: calc(268 * var(--u)); gap: calc(14 * var(--u)) calc(17 * var(--u)); }
+#eras .tabs.nav button { min-height: 0; height: 100%; font-size: clamp(10px, calc(46 * var(--u)), 28px); border-radius: calc(8 * var(--u)); border-width: calc(2.5 * var(--u)); }
+#info { position: absolute; left: 14px; top: calc(var(--ay) + var(--aw) * 0.637 + 4px); }
+#eras .tabs.nav button.busy .dotb { top: calc(5 * var(--u)); right: calc(5 * var(--u)); }
+
+/* ----- compact polish: Saigon's density (cap 10.5px, small labels). Art 1000px wide is shown at ~400px (350px on phones). ----- */
+:root { --aw: min(calc(100vw - 16px), 400px); --u: calc(var(--aw) / 1000); --ax: 6px; --ay: 40px; }
+@media (max-width: 480px) { :root { --aw: min(calc(100vw - 12px), 340px); --ax: 4px; --ay: 38px; } }
+#eras .cap { font-size: 10.5px; letter-spacing: 1.4px; font-weight: 700; }
+#eras .tabs.nav button { font-size: 12.5px; letter-spacing: .3px; font-weight: 800; border-width: 2px; border-radius: 4px; box-shadow: inset 0 -2px 0 #c3b27c, 0 1px 0 var(--ink); }
+#eras .tabs.nav { gap: 4px 5px; }
+@media (max-width: 480px) { #eras .cap { font-size: 8.5px; letter-spacing: .6px; } #eras .tabs.nav button { font-size: 11px; } #eras .tabs.nav { gap: 3px 4px; } }
+#info { padding: 4px 9px 5px; } #eraSub { font-size: 12px; } #status { font-size: 11px; }

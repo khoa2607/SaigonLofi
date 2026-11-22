@@ -60,6 +60,8 @@ Run locally: `serve.bat` or `python -m http.server 8765` from the repo root, the
 | `node tests/holdfast-sim.mjs 3600` | Map sanity + 3 game days of combat, expeditions, repairs |
 | `node tests/holdfast-warm.mjs [seeds]` | Warm start (the world is already alive on the first frame) |
 | `node tests/holdfast-browser.mjs [--shots] [--bench]`, `node tests/holdfast-flow.mjs`, `node tests/holdfast-bench.mjs` | Headless Chrome: self-test, gallery + Saigon smoke, UI flow, fps |
+| `node tests/tayduky-v2-sim.mjs [secs] [seed]`, `node tests/tayduky-v2-world.mjs [secs]` | Tây Du Ký v2 (branch `feature/tayduky-redesign-v2`): simulation invariants in Node; the world in headless Chrome |
+| `node tests/tayduky-v2-clt-sim.mjs [seed]`, `node tests/tayduky-v2-lhd-sim.mjs [seed]`, `node tests/tayduky-v2-newbiome-shots.mjs <clt\|lhd>`, `node tests/tayduky-v2-newbiome-perf.mjs` | Tây Du Ký Cao Lão Trang / Liên Hoa Động: both signatures end to end in Node, minis, links; review shots and signature stages in headless Chrome; frame times |
 | `node tests/holdfast-diag.mjs`, `node tests/holdfast-mapdump.mjs` | Diagnostics (numbers / a top-down character map of the layout) |
 | `tests/tet.mjs`, `tests/dance.mjs`, `tests/events.mjs`, `tests/riverfront-turns.mjs` | Saigon checks (need the `playwright` package, not installed here) |
 

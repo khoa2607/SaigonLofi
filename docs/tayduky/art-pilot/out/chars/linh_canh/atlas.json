@@ -1,0 +1,72 @@
+{
+  "format": "pixel-art-studio-atlas-v1",
+  "name": "linh_canh",
+  "image": "atlas.png",
+  "canvas": [
+    33,
+    55
+  ],
+  "size": [
+    135,
+    55
+  ],
+  "padding": 1,
+  "frames": [
+    {
+      "name": "linh_canh-d1",
+      "rect": [
+        0,
+        0,
+        33,
+        55
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        16,
+        54
+      ]
+    },
+    {
+      "name": "linh_canh-d2",
+      "rect": [
+        34,
+        0,
+        33,
+        55
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        16,
+        54
+      ]
+    },
+    {
+      "name": "linh_canh-d3",
+      "rect": [
+        68,
+        0,
+        33,
+        55
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        16,
+        54
+      ]
+    },
+    {
+      "name": "linh_canh-d4",
+      "rect": [
+        102,
+        0,
+        33,
+        55
+      ],
+      "duration_ms": 200,
+      "pivot": [
+        16,
+        54
+      ]
+    }
+  ]
+}

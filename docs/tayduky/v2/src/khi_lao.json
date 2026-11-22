@@ -1,0 +1,823 @@
+{
+ "version": 1,
+ "name": "khi_lao",
+ "title": [
+  "Khỉ Lão",
+  "Old Monkey"
+ ],
+ "biome": "hqs",
+ "canvas": [
+  32,
+  48
+ ],
+ "pivot": [
+  16,
+  46
+ ],
+ "speed": 11,
+ "notes": "Variant of Wukong's hand-drawn body: grey fur, a moss robe, white brows and beard, no feathers or circlet, and a crooked cane. The cane is held on the near side and redrawn per view.",
+ "palette": {
+  "o": "#2a1726",
+  "q": "#c8384a",
+  "F": "#a8968a",
+  "f": "#6e6070",
+  "h": "#d4c8b8",
+  "S": "#f0c8a8",
+  "s": "#c8967e",
+  "P": "#f08a8a",
+  "w": "#ffffff",
+  "m": "#7a2a34",
+  "G": "#8a6a4a",
+  "g": "#5e4636",
+  "Y": "#a8865e",
+  "R": "#6e8a5a",
+  "r": "#4a6448",
+  "d": "#3a2c24",
+  "T": "#8a6a4a",
+  "t": "#5e4636",
+  "W": "#f4e8cc",
+  "V": "#c8b49a",
+  "K": "#3a2c44",
+  "k": "#5e4c6a",
+  "J": "#241a30",
+  "B": "#4a3a52",
+  "b": "#7a6a8a",
+  "E": "#fff8ec",
+  "e": "#c8c0d0",
+  "U": "#9a6a3a",
+  "u": "#6a4428"
+ },
+ "views": {
+  "down": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "...........ooooo",
+     ".........ooFFhhh",
+     "........oFFFFhhh",
+     ".......oFFFFFFFh",
+     ".......oFFFFFFhh",
+     ".......oFFFFFFFF",
+     ".....ooofSSSSfFF",
+     "....oSSofEEESSSf",
+     "....oSsofSSooSSS",
+     "....ossofSSwoSSS",
+     ".....ooofSSooSSS",
+     ".......ofSSSSSSm",
+     ".......ofSSSSSSS",
+     "........ofEESEEE",
+     ".........oEEEEEE",
+     "..........oEEEeE",
+     ".........ooRREEe",
+     "........oRRRRoEE",
+     ".......oFfrRRRoE",
+     ".......oFfGGGGRR",
+     ".......oFfgggggR",
+     ".......oFfGGGGrR",
+     ".......oSSgggggr",
+     ".......osSdddddd",
+     ".......ooTTTtTTt",
+     "........oTtTTTtT",
+     "........otTTtTtT",
+     "........oooooooo"
+    ],
+    "edits": {}
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................",
+      "..........oGGGo.",
+      "..........oGGGo.",
+      "..........ogggo.",
+      "..........ogdgo.",
+      "..........ogggo.",
+      ".........oSSSSo.",
+      ".........oSsSSo.",
+      ".........oSSSSo.",
+      ".........oooooo."
+     ]
+    },
+    "a": {
+     "from": "stand",
+     "lift": [
+      0,
+      15
+     ]
+    },
+    "b": {
+     "from": "stand",
+     "lift": [
+      16,
+      31
+     ]
+    },
+    "sit": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................",
+      "........oGGGGGGG",
+      ".......oSGGGGGGG",
+      ".......oSSoooooo",
+      "........oo......",
+      "................"
+     ]
+    }
+   },
+   "items": [
+    {
+     "layer": "back",
+     "part": {
+      "at": [
+       17,
+       27
+      ],
+      "rows": [
+       "oo.........",
+       "oFo........",
+       "oFFo.......",
+       ".oFFo......",
+       "..oFFo.....",
+       "...oFFo..oo",
+       "....oFFooFo",
+       ".....oFFFFo",
+       "......oooo."
+      ]
+     }
+    },
+    {
+     "layer": "front",
+     "part": {
+      "at": [
+       3,
+       14
+      ],
+      "rows": [
+       "oooo.",
+       "oUUo.",
+       "ooUo.",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..oUo",
+       "..ooo"
+      ]
+     }
+    }
+   ]
+  },
+  "up": {
+   "upper": {
+    "mirror": true,
+    "rows": [
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "...........ooooo",
+     ".........ooFFhhh",
+     "........oFFFFhhh",
+     ".......oFFFFFFFh",
+     ".......oFFFFFFFF",
+     ".......offffffff",
+     ".....oooFFFFFFFF",
+     "....oSSoFFFFFFFF",
+     "....oSsoFFFFFFFF",
+     "....ossofFFFFFFF",
+     ".....ooofFFFFFFF",
+     ".......ofFFFFFFF",
+     ".......offFFFFFF",
+     "........offFFFFF",
+     ".........offFFFF",
+     "..........oooooo",
+     ".........ooRRRRR",
+     "........oRRRRRRR",
+     ".......oFfRRRRRR",
+     ".......oFfrRRRRR",
+     ".......oFfGrrrrr",
+     ".......oFfGGGGGG",
+     ".......oSSgGGGGG",
+     ".......osSdddddd",
+     ".......ooTTTtTTt",
+     "........oTtTTTtT",
+     "........otTTtTtT",
+     "........oooooooo"
+    ]
+   },
+   "lower": {
+    "stand": {
+     "mirror": true,
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................",
+      "..........oGGGo.",
+      "..........oGGGo.",
+      "..........ogggo.",
+      "..........ogdgo.",
+      "..........ogggo.",
+      ".........oSSSSo.",
+      ".........oSSSSo.",
+      ".........oSsSSo.",
+      ".........oooooo."
+     ]
+    },
+    "a": {
+     "from": "stand",
+     "lift": [
+      0,
+      15
+     ]
+    },
+    "b": {
+     "from": "stand",
+     "lift": [
+      16,
+      31
+     ]
+    },
+    "sit": {
+     "mirror": true,
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................",
+      "........oGGGGGGG",
+      ".......oSGGGGGGG",
+      ".......oSSoooooo",
+      "........oo......",
+      "................"
+     ]
+    }
+   },
+   "items": [
+    {
+     "layer": "front",
+     "part": {
+      "at": [
+       15,
+       31
+      ],
+      "rows": [
+       "oo.........",
+       "oFo........",
+       "oFFo.......",
+       ".oFFo......",
+       "..oFFo.....",
+       "...oFFo..oo",
+       "....oFFooFo",
+       ".....oFFFFo",
+       "......oooo."
+      ]
+     }
+    },
+    {
+     "layer": "back",
+     "part": {
+      "at": [
+       24,
+       14
+      ],
+      "rows": [
+       ".oooo",
+       ".oUUo",
+       ".oUoo",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "ooo.."
+      ]
+     }
+    }
+   ]
+  },
+  "right": {
+   "upper": {
+    "rows": [
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     "................................",
+     ".............oooooo.............",
+     "...........ooFFFFhhoo...........",
+     "..........oFFFFFFFhhho..........",
+     ".........oFFFFFFFFFFFFo.........",
+     ".........oFFFFFFFFFFFFFo........",
+     ".........offffffffffffffo.......",
+     "........oFFFoooFFFSSSSSo........",
+     "........oFFoSSoFFSSEEEESo.......",
+     "........oFFoSsoFSSSSSooSo.......",
+     "........oFFossoFSSSSSwoSSo......",
+     "........ofFFooFFSSSSSooSSSo.....",
+     "........ofFFFFFSSSSSSSSSSmo.....",
+     "........offFFFFSSSSSSSSmSSo.....",
+     ".........offFFFSSSSSSSSmmo......",
+     "..........offFFSSSSSSSSSo.......",
+     "...........oooooooooooooo.......",
+     "............ooRRRRRRRo..........",
+     "...........oRRRRRRRRRRo.........",
+     "...........oRrGGGGGGGGo.........",
+     "............oGGGGGGGGGo.........",
+     "............ogggggggggo.........",
+     "............oGGGGGGGGgo.........",
+     "............ogggggggggo.........",
+     "............odddddddddo.........",
+     "...........oTTtTTTtTTTo.........",
+     "...........oTtTTTtTTtTTo........",
+     "...........otTTtTtTTtTTo........",
+     "...........oooooooooooo........."
+    ]
+   },
+   "arm": {
+    "n": {
+     "at": [
+      15,
+      26
+     ],
+     "rows": [
+      ".oo.",
+      "oFFo",
+      "oFFo",
+      "oFfo",
+      "oFfo",
+      "oSSo",
+      "oSso",
+      ".oo."
+     ]
+    },
+    "f": {
+     "at": [
+      15,
+      26
+     ],
+     "rows": [
+      ".oo...",
+      "oFFo..",
+      "oFFFo.",
+      ".oFFFo",
+      "..oFfo",
+      "..oSSo",
+      "..osso",
+      "...oo."
+     ]
+    },
+    "b": {
+     "at": [
+      12,
+      26
+     ],
+     "rows": [
+      "...oo.",
+      "..oFFo",
+      ".oFFFo",
+      "oFFFo.",
+      "oFfo..",
+      "oSSo..",
+      "osso..",
+      ".oo..."
+     ]
+    }
+   },
+   "items": [
+    {
+     "layer": "back",
+     "part": {
+      "at": [
+       3,
+       22
+      ],
+      "rows": [
+       ".ooo......",
+       "oFFFo.....",
+       "oFooFo....",
+       ".o.oFo....",
+       "...oFo....",
+       "...oFFo...",
+       "....oFo...",
+       "....oFFo..",
+       ".....oFFoo",
+       "......oFFF",
+       ".......ooo"
+      ]
+     }
+    },
+    {
+     "layer": "front",
+     "part": {
+      "at": [
+       18,
+       22
+      ],
+      "rows": [
+       "....oo",
+       "...oEE",
+       "..oEEE",
+       "..oEEe",
+       "...oEo",
+       "....o."
+      ]
+     }
+    },
+    {
+     "layer": "front",
+     "part": {
+      "at": [
+       22,
+       14
+      ],
+      "rows": [
+       ".oooo",
+       ".oUUo",
+       ".oUoo",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "oUo..",
+       "ooo.."
+      ]
+     }
+    }
+   ],
+   "lower": {
+    "stand": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............oGGGo.............",
+      "..............oGGGo.............",
+      "..............ogggo.............",
+      "..............ogdgo.............",
+      "..............ogggo.............",
+      "..............oSSSSo............",
+      "..............oSsSSSo...........",
+      "..............oSSSSSo...........",
+      "..............ooooooo..........."
+     ]
+    },
+    "a": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............oggGGo............",
+      ".............oggoGGGo...........",
+      "............oddo..oggo..........",
+      "............oddo..ogdgo.........",
+      "...........oddo....oggo.........",
+      "..........ossso....oSSSSo.......",
+      "..........osssso...oSsSSSo......",
+      "..........ooooo....oSSSSSo......",
+      "...................ooooooo......"
+     ]
+    },
+    "b": {
+     "at": [
+      0,
+      36
+     ],
+     "rows": [
+      "................................",
+      "..............oGGggo............",
+      ".............oGGGogggo..........",
+      "............oggo..oddo..........",
+      "............ogdo..odddo.........",
+      "...........oggo....oddo.........",
+      "..........oSSSo....osssso.......",
+      "..........oSsSSo...ossssso......",
+      "..........ooooo....ossssso......",
+      "...................ooooooo......"
+     ]
+    },
+    "sit": {
+     "at": [
+      0,
+      40
+     ],
+     "rows": [
+      "................................",
+      "...........oGGGGGGGGo...........",
+      "...........oGGGGGGGGGGooo.......",
+      "............oooooooooSSSSo......",
+      "....................ooooo.......",
+      "................................"
+     ]
+    }
+   },
+   "acts": {
+    "act0": {
+     "arm": {
+      "at": [
+       15,
+       17
+      ],
+      "rows": [
+       ".oo..",
+       "oSSo.",
+       "oSso.",
+       "oFFo.",
+       "oFFo.",
+       "oFfo.",
+       "oFFo.",
+       "oFfo.",
+       ".oFo.",
+       "..oo."
+      ]
+     },
+     "items": [
+      {
+       "layer": "back",
+       "part": {
+        "at": [
+         3,
+         22
+        ],
+        "rows": [
+         ".ooo......",
+         "oFFFo.....",
+         "oFooFo....",
+         ".o.oFo....",
+         "...oFo....",
+         "...oFFo...",
+         "....oFo...",
+         "....oFFo..",
+         ".....oFFoo",
+         "......oFFF",
+         ".......ooo"
+        ]
+       }
+      },
+      {
+       "layer": "front",
+       "part": {
+        "at": [
+         18,
+         22
+        ],
+        "rows": [
+         "....oo",
+         "...oEE",
+         "..oEEE",
+         "..oEEe",
+         "...oEo",
+         "....o."
+        ]
+       }
+      },
+      {
+       "layer": "front",
+       "part": {
+        "at": [
+         22,
+         14
+        ],
+        "rows": [
+         ".oooo",
+         ".oUUo",
+         ".oUoo",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "ooo.."
+        ]
+       }
+      }
+     ]
+    },
+    "act1": {
+     "arm": {
+      "at": [
+       16,
+       25
+      ],
+      "rows": [
+       ".oooooo.",
+       "oFFFFSSo",
+       "oFfFFSso",
+       ".ooooooo"
+      ]
+     },
+     "items": [
+      {
+       "layer": "back",
+       "part": {
+        "at": [
+         3,
+         22
+        ],
+        "rows": [
+         ".ooo......",
+         "oFFFo.....",
+         "oFooFo....",
+         ".o.oFo....",
+         "...oFo....",
+         "...oFFo...",
+         "....oFo...",
+         "....oFFo..",
+         ".....oFFoo",
+         "......oFFF",
+         ".......ooo"
+        ]
+       }
+      },
+      {
+       "layer": "front",
+       "part": {
+        "at": [
+         18,
+         22
+        ],
+        "rows": [
+         "....oo",
+         "...oEE",
+         "..oEEE",
+         "..oEEe",
+         "...oEo",
+         "....o."
+        ]
+       }
+      },
+      {
+       "layer": "front",
+       "part": {
+        "at": [
+         22,
+         14
+        ],
+        "rows": [
+         ".oooo",
+         ".oUUo",
+         ".oUoo",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "oUo..",
+         "ooo.."
+        ]
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "sitDrop": 4
+}

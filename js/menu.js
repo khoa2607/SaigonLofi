@@ -19,9 +19,10 @@ Object.assign(UI, {
   'w.clean': ['Thành Phố Xanh Lại', 'Clean-Up World'], 'w.clean.d': ['Robot nhỏ dọn dẹp, cây xanh mọc lại.', 'Little robots tidy up; the green grows back.'],
   'w.ocean': ['Đại Dương', 'Ocean Life'], 'w.ocean.d': ['Ánh sáng xuyên nước, sứa phát quang.', 'Sunbeams through water, glowing jellyfish.'],
   'w.holdfast': ['Holdfast — Bên bờ sinh tồn', 'Holdfast — Edge of Survival'], 'w.holdfast.d': ['Một khu định cư có tường bao, sống sót giữa đại dịch xác sống.', 'A walled settlement holding out through the zombie years.'],
+  'w.tayduky': ['Tây Du Ký — Huyền Thoại Sống', 'Journey to the West — Living Legend'], 'w.tayduky.d': ['Bốn thầy trò, vạn dặm thỉnh kinh. Một thế giới thần thoại đang sống.', 'Four pilgrims, ten thousand miles. A mythic world, alive.'],
   'w.fall': ['Sau Cơn Sụp Đổ', 'After The Fall'], 'w.fall.d': ['Một vùng an toàn, đống lửa và dây đèn.', 'A safe zone, a campfire and string lights.']
 });
-const WORLDS = [{ id: 'saigon', live: true }, { id: 'snow' }, { id: 'wild' }, { id: 'clean' }, { id: 'ocean' }, { id: 'holdfast', live: true }];
+const WORLDS = [{ id: 'saigon', live: true }, { id: 'snow' }, { id: 'wild' }, { id: 'clean' }, { id: 'ocean' }, { id: 'holdfast', live: true }, { id: 'tayduky', live: true }];
 
 // ---------------------------------------------------------------- pixel-art thumbnails: 96x96 postcards, shared palette, light from the left
 const MS = 96, MINK = '#2b1a16', BAY4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
@@ -87,6 +88,60 @@ const SCENES = {
     for (let k = 0; k < 3; k++) { const x = 30 + k * 22, y = 26 + k * 9 + Math.sin(t * 1.4 + k) * 3, c = k === 1 ? '#f7b8e8' : '#b8f0ff'; El(g, x, y, 5, 4, c); for (let i = -3; i <= 3; i += 2) for (let j = 0; j < 7; j++) P(g, x + i + Math.sin(t * 2 + j + i) * 0.6, y + 3 + j, c); El(g, x - 1, y - 1, 2, 1, '#ffffff'); }
     for (let i = 0; i < 12; i++) { const x = (t * 12 + i * 7 + (i % 3) * 3) % 120 - 12, y = 58 + Math.sin(i * 1.7) * 5 + Math.sin(t * 2 + i); Rc(g, x, y, 3, 1, '#f2c94c'); P(g, x - 1, y, '#e08a2c'); }
     const tx = 60 + Math.sin(t * 0.4) * 6, ty = 46; El(g, tx, ty, 8, 5, '#5a8a4a'); El(g, tx, ty - 1, 6, 3, '#7aa85a'); El(g, tx + 9, ty, 3, 2, '#8ab86a'); Rc(g, tx - 6, ty + 4, 4, 2, '#7aa85a'); Rc(g, tx + 3, ty + 4, 4, 2, '#7aa85a'); P(g, tx + 10, ty - 1, MINK);
+  },
+  tayduky(g, t) {
+    // Four pilgrims walking right along a mountain ridge at sunset. Left to right: Sa Tăng, Bát Giới, Đường Tăng on the white horse, Tôn Ngộ Không (leading).
+    const INK = '#2b1a16', ln = (x0, y0, x1, y1, c) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let i = 0; i <= n; i++) P(g, x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, c); };
+    Sky(g, 0, 60, ['#2e2a5e', '#6a3a7a', '#c85a6a', '#f08a5a', '#fbc070']); Stars(g, 16, 7, 5);
+    El(g, 60, 41, 11, 11, '#f8a860'); El(g, 60, 41, 8, 8, '#ffd58a'); El(g, 60, 41, 5, 5, '#fff0b8');
+    for (let x = 0; x < MS; x++) { const h = 40 + Math.sin(x / 11 + 1) * 6 + Math.sin(x / 5) * 2; for (let y = h | 0; y < 64; y++) P(g, x, y, y < h + 2 ? '#d0a8d0' : '#a884bc'); }
+    for (let x = 0; x < MS; x++) { const h = 47 + Math.sin(x / 9 + 3) * 6 - 18 * Math.exp(-(((x - 84) / 8) ** 2)); for (let y = h | 0; y < 64; y++) P(g, x, y, y < h + 2 ? '#a07cb4' : '#7e5a9c'); }
+    // pagoda on the far right peak
+    Rc(g, 80, 32, 9, 2, '#4a3068'); Rc(g, 82, 28, 5, 4, '#d8604a'); Rc(g, 83, 29, 1, 2, '#2e1c48'); Rc(g, 81, 27, 7, 1, '#3a2858'); Rc(g, 83, 24, 3, 3, '#d8604a'); Rc(g, 82, 23, 5, 1, '#3a2858'); P(g, 84, 21, '#f2c94c'); P(g, 84, 22, '#3a2858');
+    for (let y = 48; y < 62; y++) if (((y + (t * 5 | 0)) & 3) !== 0) P(g, 66, y, '#eaf4ff');                 // small waterfall
+    for (const [x0, w, h] of [[0, 18, 14], [76, 20, 12]]) for (let x = 0; x < w; x++) { const hh = h * (1 - Math.abs(x / w - 0.5) * 1.6); for (let y = 0; y < hh; y++) P(g, x0 + x, 66 - y, '#4e3a76'); }
+    // cloud sea (drifts slowly)
+    for (let y = 52; y < 72; y++) Rc(g, 0, y, MS, 1, y < 56 ? '#f4b8b8' : y < 62 ? '#e8a0b8' : y < 68 ? '#c898c0' : '#a080b8');
+    for (let i = 0; i < 9; i++) { const x = (mh(i, 4) * 120 + t * 1.3 * (1 + i % 3 * 0.5)) % 120 - 12, y = 50 + (mh(4, i) * 16 | 0), w = 8 + i % 4 * 3; El(g, x, y, w, 2, i % 2 ? '#fbd0c8' : '#f4c0cc'); El(g, x + 3, y - 1, w * 0.6, 2, '#fde0d8'); }
+    Rc(g, 0, 72, MS, 12, '#5e4684'); for (let x = 0; x < MS; x++) { const h = 72 + Math.sin(x / 6 + 2) * 1.5; Rc(g, x, h | 0, 1, 1, '#7a5e9c'); }   // near haze hills under the path
+    // ridge path (rises to the right) and foreground hill
+    const pathY = x => Math.round(78 - x * 0.035);
+    for (let x = 0; x < MS; x++) { const py = pathY(x); Rc(g, x, py + 1, 1, 3, '#8a5c74'); P(g, x, py + 1, '#c08ea0'); for (let y = py + 4; y < 96; y++) P(g, x, y, y > 86 ? '#1c1228' : '#2e2040'); P(g, x, py, '#3a2a4a'); }
+    for (let i = 0; i < 30; i++) { const x = i * 3.3 + 1, py = pathY(x) + 5 + (i * 7 % 9), sw = Math.sin(t * 1.5 + i) > 0 ? 1 : 0; ln(x, py, x + sw, py - 3, '#3e3a52'); }
+    // pine tree (left foreground)
+    Rc(g, 3, 40, 3, 40, '#1c1424'); for (const [cx, cy, rx] of [[7, 36, 9], [3, 41, 8], [9, 31, 7], [2, 28, 6], [8, 45, 6]]) { El(g, cx, cy, rx, 3, '#1e2c34'); El(g, cx - 1, cy - 1, rx - 3, 2, '#2c4044'); }
+    // characters: a dark outline pass in four directions, then the colour pass
+    const lift = (s, a) => (((s + a) & 3) === 0 ? 1 : 0), step = k => ((t * 3.5 + k) | 0) & 3;
+    const CH = {
+      sha(fx, fy, s, R) { const b = s & 1 ? -1 : 0;
+        R(fx - 2, fy - 5 - lift(s, 0), 2, 5, '#2e4a58'); R(fx + 1, fy - 5 - lift(s, 2), 2, 5, '#2e4a58'); R(fx - 3, fy - 14 + b, 7, 9, '#3e6a7a'); R(fx - 3, fy - 8 + b, 7, 1, '#d8a040'); R(fx - 2, fy - 14 + b, 5, 1, '#f4eee4');
+        R(fx - 2, fy - 19 + b, 5, 5, '#8aa0b0'); R(fx - 2, fy - 16 + b, 5, 2, '#2a2a3a'); R(fx + 2, fy - 18 + b, 1, 1, '#fff2dc'); R(fx - 3, fy - 19 + b, 1, 3, '#c9384c');
+        R(fx - 7, fy - 13 + b, 4, 6, '#a8783c'); R(fx - 6, fy - 14 + b, 2, 1, '#6e4c2c'); R(fx - 7, fy - 10 + b, 4, 1, '#6e4c2c');
+        R(fx + 4, fy - 20 + b, 1, 21, '#8a6a4a'); R(fx + 3, fy - 11 + b, 3, 1, '#4a3a2a');
+        R(fx + 2, fy - 25 + b, 3, 1, '#d8e0e8'); R(fx + 5, fy - 24 + b, 1, 4, '#d8e0e8'); R(fx + 2, fy - 20 + b, 3, 1, '#d8e0e8'); },
+      baj(fx, fy, s, R) { const b = s & 1 ? -1 : 0;
+        R(fx - 3, fy - 3 - lift(s, 0), 2, 3, '#5a6a4a'); R(fx + 1, fy - 3 - lift(s, 2), 2, 3, '#5a6a4a'); R(fx - 5, fy - 11 + b, 11, 8, '#8a9a6a'); R(fx - 4, fy - 12 + b, 9, 1, '#8a9a6a'); R(fx - 2, fy - 9 + b, 6, 5, '#e8a0a0'); R(fx - 5, fy - 6 + b, 11, 1, '#5a6a4a');
+        R(fx - 3, fy - 17 + b, 8, 6, '#e8a0a0'); R(fx + 4, fy - 14 + b, 3, 3, '#f2b0b0'); R(fx + 6, fy - 13 + b, 1, 1, '#a85a62'); R(fx + 2, fy - 16 + b, 1, 1, INK); R(fx - 4, fy - 16 + b, 2, 4, '#d88890'); R(fx + 1, fy - 19 + b, 2, 3, '#d88890');
+        for (let i = 0; i <= 19; i++) R(fx - 4 + i * 0.47, fy + b - 1 - i, 1, 1, '#8a6a4a');
+        R(fx + 3, fy - 22 + b, 6, 1, '#c8d0d8'); R(fx + 3, fy - 21 + b, 1, 2, '#c8d0d8'); R(fx + 5, fy - 21 + b, 1, 2, '#c8d0d8'); R(fx + 8, fy - 21 + b, 1, 2, '#c8d0d8'); },
+      tang(fx, fy, s, R) { const b = s & 1 ? -1 : 0, lg = (dx, a) => { const l = lift(s, a) * 2; R(fx + dx, fy - 6 + l, 2, 6 - l, '#e0d8cc'); R(fx + dx, fy - 1 - l, 2, 1, '#8a7a6a'); };
+        lg(-7, 0); lg(-4, 2); lg(3, 2); lg(6, 0); R(fx - 7, fy - 12 + b, 15, 7, '#f6f0e6'); R(fx - 7, fy - 6 + b, 15, 1, '#d8d0c4'); R(fx + 5, fy - 17 + b, 4, 7, '#f6f0e6'); R(fx + 7, fy - 18 + b, 5, 4, '#f6f0e6'); R(fx + 11, fy - 15 + b, 1, 2, '#e8b8b0'); R(fx + 9, fy - 17 + b, 1, 1, INK); R(fx + 7, fy - 20 + b, 1, 2, '#f6f0e6'); R(fx + 4, fy - 18 + b, 1, 7, '#e0c890');
+        R(fx - 10, fy - 11 + b + (s & 1), 3, 5, '#e8e0d4'); R(fx - 4, fy - 13 + b, 7, 2, '#c9384c'); R(fx - 4, fy - 13 + b, 7, 1, '#f2c94c');
+        R(fx - 2, fy - 19 + b, 5, 7, '#d84a3a'); R(fx - 2, fy - 16 + b, 5, 1, '#f2c94c'); R(fx - 3, fy - 18 + b, 1, 4, '#f2c94c'); R(fx - 2, fy - 23 + b, 5, 4, '#f4cfa0'); R(fx + 2, fy - 22 + b, 1, 1, INK); R(fx - 3, fy - 25 + b, 7, 2, '#f2c94c'); R(fx - 1, fy - 27 + b, 3, 2, '#f2c94c'); },
+      wuk(fx, fy, s, R) { const b = s & 1 ? -1 : 0;
+        R(fx - 2, fy - 3 - lift(s, 0), 2, 3, '#d89030'); R(fx + 1, fy - 3 - lift(s, 2), 2, 3, '#d89030'); R(fx - 2, fy - 1 - lift(s, 0), 2, 1, INK); R(fx + 1, fy - 1 - lift(s, 2), 2, 1, INK);
+        R(fx - 3, fy - 6 + b, 6, 3, '#e87a2a'); R(fx - 1, fy - 5 + b, 1, 1, INK); R(fx - 2, fy - 9 + b, 5, 3, '#f2c030'); R(fx - 2, fy - 7 + b, 5, 1, '#c9384c');
+        R(fx - 2, fy - 14 + b, 5, 5, '#d89030'); R(fx - 1, fy - 12 + b, 4, 3, '#f4cfa0'); R(fx + 2, fy - 12 + b, 1, 1, INK); R(fx - 3, fy - 12 + b, 1, 2, '#f4cfa0'); R(fx - 2, fy - 14 + b, 5, 1, '#f2c94c');
+        R(fx, fy - 17 + b, 1, 3, '#e83a4a'); R(fx + 1, fy - 16 + b, 1, 2, '#e83a4a'); R(fx - 4, fy - 6 + b, 1, 1, '#d89030'); R(fx - 5, fy - 7 + b, 1, 2, '#d89030'); R(fx - 5, fy - 9 + b, 2, 1, '#d89030');
+        R(fx + 2, fy - 8 + b, 3, 1, '#d89030'); R(fx + 4, fy - 22 + b, 1, 22, '#f2c94c'); R(fx + 4, fy - 22 + b, 1, 2, '#c9384c'); R(fx + 4, fy - 2 + b, 1, 2, '#c9384c'); }
+    };
+    const WALK = [['sha', 16, 0], ['baj', 34, 1], ['tang', 56, 2], ['wuk', 80, 3]];       // left -> right; Wukong leads on the far right
+    for (const [id, fx, k] of WALK) {
+      const fy = pathY(fx), s = step(k * 0.6);
+      for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) CH[id](fx, fy, s, (x, y, w, h) => Rc(g, x + ox, y + oy, w, h, INK));
+      CH[id](fx, fy, s, (x, y, w, h, c) => Rc(g, x, y, w, h, c));
+    }
+    for (let i = 0; i < 14; i++) P(g, (mh(i, 6) * MS + t * 3 * (1 + i % 3)) % MS, 68 + (mh(6, i) * 10 | 0), 'rgba(255,226,236,.55)');          // drifting mist wisps
   },
   fall(g, t) {
     Sky(g, 0, 60, ['#2a2236', '#5a3a4e', '#a85a5a', '#d8865a']); Stars(g, 24, 8, 11);
@@ -154,6 +209,7 @@ function menuEnter(card) {
   art.style.transform = `translate(${vw / 2 - (r.left + r.width / 2)}px, ${vh / 2 - (r.top + r.height / 2)}px) scale(${sc})`; card.classList.add('zoom');
   if (!AU.playing && !(typeof YTS !== 'undefined' && YTS.on)) { try { audioPlay(); } catch (e) { } }              // entering is a user gesture: start the radio if it was silent
   setTimeout(() => {
+    if (card.dataset.world === 'tayduky') { location.href = 'tayduky/index.html'; return; }   // a separate page with its own simulation; lofi prefs are shared through localStorage
     if (FRAMED[card.dataset.world]) { $m('menu').classList.add('leaving'); wfOpen(card.dataset.world); setTimeout(() => { $m('menu').hidden = true; art.style.transform = ''; card.classList.remove('zoom'); }, 520); return; }
     $m('menu').classList.add('leaving'); document.body.classList.remove('menu'); G.menu = false; document.title = t('title');
     for (const [id, k] of [['vMusic', 'music'], ['vAmb', 'amb'], ['vVinyl', 'vinyl'], ['vStreet', 'street']]) { const e = $m(id); if (e) e.value = AU.vol[k] * 100; }
@@ -163,9 +219,10 @@ function menuEnter(card) {
 }
 // animation: only playable worlds move; dust drifts; nothing runs while the world is open
 let _mt = 0;
+MENU.still = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);   // the Tây Du Ký card keeps its still frame under reduced motion
 function menuFrame(ts) {
   requestAnimationFrame(menuFrame); if (!MENU.open || document.hidden || ts - _mt < 80) return; _mt = ts; MENU.T += 0.08;
-  for (const [c, id, live] of MENU.cvs) if (live) { const g = c.getContext('2d'); g.clearRect(0, 0, MS, MS); SCENES[id](g, MENU.T); }
+  for (const [c, id, live] of MENU.cvs) if (live && !(id === 'tayduky' && MENU.still)) { const g = c.getContext('2d'); g.clearRect(0, 0, MS, MS); SCENES[id](g, MENU.T); }
   const d = $m('mdust'), g = d.getContext('2d'); g.clearRect(0, 0, d.width, d.height); for (const p of MENU.dust) { p.y -= 0.05 * p.s; p.x += Math.sin(MENU.T * 0.3 + p.s * 9) * 0.04; if (p.y < 0) p.y = d.height; g.fillStyle = p.c; g.fillRect(p.x | 0, p.y | 0, 1, 1); }
   if ((MENU.T * 10 | 0) % 5 === 0) menuMusic();
 }

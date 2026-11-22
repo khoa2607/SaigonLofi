@@ -1,0 +1,812 @@
+{
+ "peachtree_a": [
+  "peachtree_0",
+  0.1
+ ],
+ "peachtree_b": [
+  "peachtree_1",
+  0.1
+ ],
+ "peachtree_c": [
+  "peachtree_2",
+  0.1
+ ],
+ "peachtree_d": [
+  "peachtree_3",
+  0.1
+ ],
+ "statue_a": [
+  "statue_0",
+  0.15
+ ],
+ "statue_b": [
+  "statue_3",
+  0.15
+ ],
+ "playground_a": [
+  "playground_0",
+  0.16
+ ],
+ "spire_a": [
+  "spire_0",
+  0.13
+ ],
+ "spire_b": [
+  "spire_1",
+  0.13
+ ],
+ "mush_a": [
+  "mush_0",
+  0.17
+ ],
+ "mush_b": [
+  "mush_1",
+  0.17
+ ],
+ "bath_a": [
+  "bath_1",
+  0.2
+ ],
+ "loom_a": [
+  "loom_0",
+  0.17
+ ],
+ "hall_a": [
+  "hall_1",
+  0.14
+ ],
+ "hall_b": [
+  "hall_3",
+  0.14
+ ],
+ "cave_a": [
+  "cave_1",
+  0.17
+ ],
+ "cave_b": [
+  "cave_0",
+  0.17
+ ],
+ "gate_a": [
+  "gate_1",
+  0.15
+ ],
+ "gate_b": [
+  "gate_0",
+  0.15
+ ],
+ "bamboo_a": [
+  "bamboo_0",
+  0.14
+ ],
+ "bamboo_b": [
+  "bamboo_1",
+  0.14
+ ],
+ "bamboo_c": [
+  "bamboo_3",
+  0.14
+ ],
+ "scholar_a": [
+  "scholarrock_1",
+  0.15
+ ],
+ "scholar_b": [
+  "scholarrock_2",
+  0.15
+ ],
+ "lantern_a": [
+  "lantern_0",
+  0.2
+ ],
+ "lantern_b": [
+  "lantern_2",
+  0.2
+ ],
+ "silkrack_a": [
+  "silkrack_1",
+  0.18
+ ],
+ "arch_a": [
+  "rockarch_0",
+  0.15
+ ],
+ "arch_b": [
+  "rockarch_1",
+  0.15
+ ],
+ "lotus_a": [
+  "lotus_1",
+  0.2
+ ],
+ "tc_monument_a": [
+  "tc_gate_3",
+  0.22,
+  2
+ ],
+ "tc_kiln_a": [
+  "heaven-terraces/imperialkiln",
+  0.13
+ ],
+ "tc_bank_a": [
+  "heaven-terraces/bank",
+  0.22,
+  2
+ ],
+ "tc_silklamp_a": [
+  "heaven-terraces/lantern",
+  0.06
+ ],
+ "tc_gatehouse_a": [
+  "heaven-terraces/portal",
+  0.17
+ ],
+ "tc_pavilion_a": [
+  "heaven-terraces/peachbelvedere_1",
+  0.13
+ ],
+ "tc_pillar_a": [
+  "heaven-terraces/pillar",
+  0.06
+ ],
+ "tc_brazier_a": [
+  "heaven-terraces/brazier",
+  0.1
+ ],
+ "tc_cloud_a": [
+  "heaven-terraces/cloud",
+  0.2
+ ],
+ "tc_scroll_a": [
+  "heaven-terraces/auspicious",
+  0.3
+ ],
+ "tc_gate_a": [
+  "tc_gate_0",
+  0.15
+ ],
+ "tc_gate_b": [
+  "tc_gate_3",
+  0.15
+ ],
+ "tc_palace_a": [
+  "tc_palace_0",
+  0.15
+ ],
+ "tc_palace_b": [
+  "tc_palace_2",
+  0.15
+ ],
+ "tc_furnace_a": [
+  "tc_furnace_0",
+  0.16
+ ],
+ "tc_furnace_b": [
+  "tc_furnace_2",
+  0.16
+ ],
+ "tc_bridge_a": [
+  "tc_bridge_0",
+  0.2
+ ],
+ "tc_bridge_b": [
+  "tc_bridge_1",
+  0.2
+ ],
+ "tc_lantern_a": [
+  "tc_lantern_1",
+  0.17
+ ],
+ "tc_lantern_b": [
+  "tc_lantern_2",
+  0.17
+ ],
+ "tc_peach_a": [
+  "tc_peach_1",
+  0.1
+ ],
+ "tc_peach_b": [
+  "tc_peach_2",
+  0.1
+ ],
+ "lotus_b": [
+  "lotus_3",
+  0.2
+ ],
+ "buddha_a": [
+  "palmbuddha_256",
+  0.12
+ ],
+ "pcloud_a": [
+  "palmcloudpuffs_0",
+  0.25
+ ],
+ "pcloud_b": [
+  "palmcloudpuffs_1",
+  0.25
+ ],
+ "pcloud_c": [
+  "palmcloudpuffs_2",
+  0.25
+ ],
+ "pcloud_d": [
+  "palmcloudpuffs_3",
+  0.25
+ ],
+ "pcloudw_a": [
+  "palmcloudwide",
+  0.25
+ ],
+ "pcloudw_b": [
+  "palmcloudstrip",
+  0.3
+ ],
+ "pcloudw_c": [
+  "palmcloudmound",
+  0.2
+ ],
+ "pcloudt_a": [
+  "palmcloudtower",
+  0.12
+ ],
+ "pcloudt_b": [
+  "palmcloudarch",
+  0.2
+ ],
+ "plotus_a": [
+  "palmlotus_0",
+  0.2
+ ],
+ "plotus_b": [
+  "palmlotus_1",
+  0.2
+ ],
+ "pwheel_a": [
+  "palmwheel_0",
+  0.14
+ ],
+ "pbell_a": [
+  "palmbell_3",
+  0.2
+ ],
+ "plantern_a": [
+  "palmlanterns_0",
+  0.5
+ ],
+ "pmist_a": [
+  "palmmist_0",
+  0.3
+ ],
+ "pmist_b": [
+  "palmmist_1",
+  0.3
+ ],
+ "pride_a": [
+  "palmwukongcloud_3",
+  0.3
+ ],
+ "hds_volcano_a": [
+  "hds_volcano_big2_0",
+  0.2
+ ],
+ "hds_bridge_a": [
+  "hds_bridge_2",
+  0.3
+ ],
+ "hds_bridge_b": [
+  "hds_bridge_0",
+  0.3
+ ],
+ "hds_oven_a": [
+  "hds_oven_0",
+  0.22
+ ],
+ "hds_oven_b": [
+  "hds_oven_3",
+  0.22
+ ],
+ "hds_stall_a": [
+  "hds_stall_0",
+  0.2
+ ],
+ "hds_stall_b": [
+  "hds_stall_2",
+  0.2
+ ],
+ "hds_hut_a": [
+  "hds_hut_0",
+  0.2
+ ],
+ "hds_hut_b": [
+  "hds_hut_2",
+  0.2
+ ],
+ "hds_hut_c": [
+  "hds_hut_3",
+  0.2
+ ],
+ "hds_vent_a": [
+  "hds_ventnf_0",
+  0.2
+ ],
+ "hds_vent_b": [
+  "hds_ventnf_2",
+  0.2
+ ],
+ "hds_vent_c": [
+  "hds_ventnf_3",
+  0.2
+ ],
+ "hds_shrine_a": [
+  "hds_shrine_2",
+  0.22
+ ],
+ "hds_crates_a": [
+  "hds_crates_0",
+  0.25
+ ],
+ "hds_crates_b": [
+  "hds_crates_2",
+  0.25
+ ],
+ "hds_lantern_a": [
+  "hds_lantern_2",
+  0.1
+ ],
+ "hds_tree_a": [
+  "hds_tree_1",
+  0.12
+ ],
+ "hds_tree_b": [
+  "hds_tree_2",
+  0.12
+ ],
+ "hds_rock_a": [
+  "hds_rock_0",
+  0.18
+ ],
+ "hds_rock_b": [
+  "hds_rock_1",
+  0.18
+ ],
+ "hds_ruin_a": [
+  "hds_ruin_0",
+  0.22
+ ],
+ "hds_ruin_b": [
+  "hds_ruin_2",
+  0.22
+ ],
+ "hds_gate_a": [
+  "hds_gate_0",
+  0.2
+ ],
+ "hds_volcano_b": [
+  "hds_volcano_big_0",
+  0.2
+ ],
+ "sdl_gate_a": [
+  "sdl_gate_0",
+  0.2
+ ],
+ "sdl_keep_a": [
+  "sdl_keep_0",
+  0.2
+ ],
+ "sdl_nest_a": [
+  "sdl_nest_0",
+  0.17
+ ],
+ "sdl_den_a": [
+  "sdl_den_0",
+  0.2
+ ],
+ "sdl_tusk_a": [
+  "sdl_tusk_0",
+  0.2
+ ],
+ "sdl_tent_a": [
+  "sdl_tent_0",
+  0.16
+ ],
+ "sdl_tent_b": [
+  "sdl_tent_1",
+  0.16
+ ],
+ "sdl_banner_a": [
+  "sdl_banner_0",
+  0.15
+ ],
+ "sdl_banner_b": [
+  "sdl_banner_1",
+  0.15
+ ],
+ "sdl_rack_a": [
+  "sdl_rack_0",
+  0.16
+ ],
+ "sdl_brazier_a": [
+  "sdl_brazier_0",
+  0.2
+ ],
+ "sdl_brazier_b": [
+  "sdl_brazier_1",
+  0.2
+ ],
+ "sdl_bridge_a": [
+  "sdl_bridge_0",
+  0.2
+ ],
+ "sdl_pine_a": [
+  "sdl_pine_0",
+  0.12
+ ],
+ "sdl_pine_b": [
+  "sdl_pine_1",
+  0.12
+ ],
+ "sdl_rock_a": [
+  "sdl_rock_0",
+  0.15
+ ],
+ "sdl_rock_b": [
+  "sdl_rock_1",
+  0.15
+ ],
+ "sdl_totem_a": [
+  "sdl_totem_0",
+  0.12
+ ],
+ "tth_dock_a": [
+  "tth_dock_0",
+  0.2
+ ],
+ "tth_shrine_a": [
+  "tth_shrine_0",
+  0.2
+ ],
+ "tth_tower_a": [
+  "tth_tower_0",
+  0.17
+ ],
+ "tth_turtle_a": [
+  "tth_turtle_0",
+  0.2
+ ],
+ "tth_boat_a": [
+  "tth_boat_0",
+  0.2
+ ],
+ "tth_boat_b": [
+  "tth_boat_1",
+  0.2
+ ],
+ "tth_hut_a": [
+  "tth_hut_0",
+  0.2
+ ],
+ "tth_hut_b": [
+  "tth_hut_1",
+  0.2
+ ],
+ "tth_willow_a": [
+  "tth_willow_0",
+  0.2
+ ],
+ "tth_willow_b": [
+  "tth_willow_3",
+  0.2
+ ],
+ "tth_rock_a": [
+  "tth_rocks_0",
+  0.2
+ ],
+ "tth_rock_b": [
+  "tth_rocks_1",
+  0.2
+ ],
+ "tth_rock_c": [
+  "tth_rocks_2",
+  0.2
+ ],
+ "tth_wreck_a": [
+  "tth_wreck_0",
+  0.2
+ ],
+ "tth_wreck_b": [
+  "tth_wreck_2",
+  0.2
+ ],
+ "tth_gate_a": [
+  "tth_gate_0",
+  0.2
+ ],
+ "tth_gate_b": [
+  "tth_gate_2",
+  0.2
+ ],
+ "tth_netrack_a": [
+  "tth_netrack_0",
+  0.17
+ ],
+ "tth_netrack_b": [
+  "tth_netrack_3",
+  0.17
+ ],
+ "tth_reeds_a": [
+  "tth_reeds_0",
+  0.12
+ ],
+ "tth_reeds_b": [
+  "tth_reeds_2",
+  0.12
+ ],
+ "tth_statue_a": [
+  "tth_statue_0",
+  0.17
+ ],
+ "tth_statue_b": [
+  "tth_statue_2",
+  0.17
+ ],
+ "hps_temple_a": [
+  "hps_temple_0",
+  0.17
+ ],
+ "hps_ruin_a": [
+  "hps_ruin_0",
+  0.17
+ ],
+ "hps_scaffold_a": [
+  "hps_scaffold_0",
+  0.17
+ ],
+ "hps_pagoda_a": [
+  "hps_pagoda_0",
+  0.17
+ ],
+ "hps_gate_a": [
+  "hps_gate_0",
+  0.17
+ ],
+ "hps_lair_a": [
+  "hps_lair_0",
+  0.17
+ ],
+ "hps_bell_a": [
+  "hps_bell_0",
+  0.17
+ ],
+ "hps_bell_b": [
+  "hps_bell_1",
+  0.17
+ ],
+ "hps_dorm_a": [
+  "hps_dorm_0",
+  0.17
+ ],
+ "hps_dorm_b": [
+  "hps_dorm_1",
+  0.17
+ ],
+ "hps_dorm_c": [
+  "hps_dorm_2",
+  0.17
+ ],
+ "hps_kitchen_a": [
+  "hps_kitchen_0",
+  0.17
+ ],
+ "hps_kitchen_b": [
+  "hps_kitchen_1",
+  0.17
+ ],
+ "hps_burner_a": [
+  "hps_burner_0",
+  0.17
+ ],
+ "hps_burner_b": [
+  "hps_burner_1",
+  0.17
+ ],
+ "hps_pine_a": [
+  "hps_pine_0",
+  0.1
+ ],
+ "hps_pine_b": [
+  "hps_pine_1",
+  0.1
+ ],
+ "hps_pine_c": [
+  "hps_pine_2",
+  0.1
+ ],
+ "hps_pavilion_a": [
+  "hps_pavilion_0",
+  0.17
+ ],
+ "hps_pavilion_b": [
+  "hps_pavilion_1",
+  0.17
+ ],
+ "hps_stupa_a": [
+  "hps_stupa_0",
+  0.17
+ ],
+ "hps_stupa_b": [
+  "hps_stupa_1",
+  0.17
+ ],
+ "hps_rock_a": [
+  "hps_rock_0",
+  0.15
+ ],
+ "hps_rock_b": [
+  "hps_rock_1",
+  0.15
+ ],
+ "hps_rock_c": [
+  "hps_rock_2",
+  0.15
+ ],
+ "hps_wayshrine_a": [
+  "hps_wayshrine_0",
+  0.17
+ ],
+ "hps_wayshrine_b": [
+  "hps_wayshrine_1",
+  0.17
+ ],
+ "hps_well_a": [
+  "hps_well_0",
+  0.17
+ ],
+ "hps_well_b": [
+  "hps_well_1",
+  0.17
+ ],
+ "hps_sutra_a": [
+  "hps_sutra_0",
+  0.17
+ ],
+ "hps_sutra_b": [
+  "hps_sutra_1",
+  0.17
+ ],
+ "hps_bamboo_a": [
+  "hps_bamboo_0",
+  0.12
+ ],
+ "hps_bamboo_b": [
+  "hps_bamboo_1",
+  0.12
+ ],
+ "hps_maple_a": [
+  "hps_maple_0",
+  0.1
+ ],
+ "hps_maple_b": [
+  "hps_maple_1",
+  0.1
+ ],
+ "hps_maple_c": [
+  "hps_maple_2",
+  0.1
+ ],
+ "hps_lantern_a": [
+  "hps_lantern_0",
+  0.15
+ ],
+ "hps_lantern_b": [
+  "hps_lantern_1",
+  0.15
+ ],
+ "nhs_summit_a": [
+  "nhs_summit_0",
+  0.09
+ ],
+ "nhs_prison_a": [
+  "nhs_prison_0",
+  0.16
+ ],
+ "nhs_prison_b": [
+  "nhs_prison_1",
+  0.16
+ ],
+ "nhs_tree_a": [
+  "nhs_tree_0",
+  0.1
+ ],
+ "nhs_tree_b": [
+  "nhs_tree_1",
+  0.1
+ ],
+ "nhs_tree_c": [
+  "nhs_tree_2",
+  0.1
+ ],
+ "nhs_tree_d": [
+  "nhs_tree_3",
+  0.1
+ ],
+ "ntq_tree_a": [
+  "ntq_tree_0",
+  0.08
+ ],
+ "ntq_hall_a": [
+  "ntq_hall_0",
+  0.16
+ ],
+ "ntq_hall_b": [
+  "ntq_hall_1",
+  0.16
+ ],
+ "bt_cave_a": [
+  "banto-redesign/cave",
+  0.12
+ ],
+ "bt_throne_a": [
+  "banto-redesign/throne",
+  0.12
+ ],
+ "bt_prison_a": [
+  "banto-redesign/prison",
+  0.12
+ ],
+ "hvd_fortress_a": [
+  "hvd/cave_fortress",
+  0.08
+ ],
+ "hvd_mountain_a": [
+  "hvd/cliff_spire",
+  0.14
+ ],
+ "hvd_hut_a": [
+  "hvd/hut",
+  0.15
+ ],
+ "hvd_ritual_a": [
+  "hvd/ritual",
+  0.13
+ ],
+ "hvd_tower_a": [
+  "hvd/tower",
+  0.12
+ ],
+ "hvd_pine_a": [
+  "hvd/pine",
+  0.11
+ ],
+ "hvd_bridge_a": [
+  "hvd/bridge",
+  0.22
+ ],
+ "hvd_brazier_a": [
+  "hvd/brazier",
+  0.18
+ ],
+ "hvd_banner_a": [
+  "hvd/banner",
+  0.16
+ ],
+ "hvd_waterfall_a": [
+  "hvd/waterfall",
+  0.1
+ ],
+ "lat_hall_a": [
+  "lat_hall_0",
+  0.1
+ ],
+ "lat_gate_a": [
+  "lat_gate_0",
+  0.1
+ ],
+ "clt_gao_a": [
+  "clt_gao_0",
+  0.2
+ ],
+ "clt_gao_b": [
+  "clt_gao_1",
+  0.2
+ ]
+}

@@ -1,0 +1,4979 @@
+{
+ "sprites": {
+  "hut_a": {
+   "file": "sprites/hut_a.png",
+   "size": [
+    105,
+    108
+   ],
+   "anchor_y": 90,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "hut_b": {
+   "file": "sprites/hut_b.png",
+   "size": [
+    107,
+    122
+   ],
+   "anchor_y": 101,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "hut_c": {
+   "file": "sprites/hut_c.png",
+   "size": [
+    103,
+    120
+   ],
+   "anchor_y": 100,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave (door POI), lantern glow at night",
+   "runtime_kind": "hut",
+   "source": "pixellab create_1_direction_object job 64e8709c"
+  },
+  "shrine_a": {
+   "file": "sprites/shrine_a.png",
+   "size": [
+    84,
+    107
+   ],
+   "anchor_y": 91,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "shrine_b": {
+   "file": "sprites/shrine_b.png",
+   "size": [
+    96,
+    115
+   ],
+   "anchor_y": 98,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "shrine_c": {
+   "file": "sprites/shrine_c.png",
+   "size": [
+    94,
+    118
+   ],
+   "anchor_y": 100,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "2x2",
+   "life": "residents pray / sit at the steps",
+   "runtime_kind": "shrine",
+   "source": "pixellab create_1_direction_object job 0e249abe"
+  },
+  "stall_a": {
+   "file": "sprites/stall_a.png",
+   "size": [
+    111,
+    114
+   ],
+   "anchor_y": 95,
+   "category": "stalls",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents trade, carry peaches away",
+   "runtime_kind": "stall",
+   "source": "pixellab create_1_direction_object job 7d079980"
+  },
+  "stall_b": {
+   "file": "sprites/stall_b.png",
+   "size": [
+    114,
+    116
+   ],
+   "anchor_y": 96,
+   "category": "stalls",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "2x2",
+   "life": "residents trade, carry peaches away",
+   "runtime_kind": "stall",
+   "source": "pixellab create_1_direction_object job 7d079980"
+  },
+  "bridge_a": {
+   "file": "sprites/bridge_a.png",
+   "size": [
+    123,
+    105
+   ],
+   "anchor_y": 84,
+   "category": "bridges",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "spans a 2-tile stream (mirror to cross along i)",
+   "life": "residents cross it; water underneath animates",
+   "runtime_kind": "hbridge",
+   "source": "pixellab create_1_direction_object job f47ea782"
+  },
+  "crystals_a": {
+   "file": "sprites/crystals_a.png",
+   "size": [
+    116,
+    104
+   ],
+   "anchor_y": 83,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "crystals_b": {
+   "file": "sprites/crystals_b.png",
+   "size": [
+    94,
+    114
+   ],
+   "anchor_y": 91,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "crystals_c": {
+   "file": "sprites/crystals_c.png",
+   "size": [
+    115,
+    113
+   ],
+   "anchor_y": 90,
+   "category": "crystals",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse (glow mask), silk shimmer, lights at night, spores",
+   "runtime_kind": "pcrystals",
+   "source": "pixellab create_1_direction_object job cd4218c0"
+  },
+  "tent_a": {
+   "file": "sprites/tent_a.png",
+   "size": [
+    105,
+    123
+   ],
+   "anchor_y": 103,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave; silk shimmer, green lantern glow",
+   "runtime_kind": "tent",
+   "source": "pixellab create_1_direction_object job 7277f9bd"
+  },
+  "tent_b": {
+   "file": "sprites/tent_b.png",
+   "size": [
+    108,
+    116
+   ],
+   "anchor_y": 97,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "residents enter and leave; silk shimmer, green lantern glow",
+   "runtime_kind": "tent",
+   "source": "pixellab create_1_direction_object job 7277f9bd"
+  },
+  "altar_a": {
+   "file": "sprites/altar_a.png",
+   "size": [
+    117,
+    116
+   ],
+   "anchor_y": 96,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters tend it; egg glow pulses, silk shimmers, violet spores",
+   "runtime_kind": "altar",
+   "source": "pixellab create_1_direction_object job 97819ce3"
+  },
+  "altar_b": {
+   "file": "sprites/altar_b.png",
+   "size": [
+    120,
+    112
+   ],
+   "anchor_y": 93,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters tend it; egg glow pulses, silk shimmers, violet spores",
+   "runtime_kind": "altar",
+   "source": "pixellab create_1_direction_object job 97819ce3"
+  },
+  "silkbridge_a": {
+   "file": "sprites/silkbridge_a.png",
+   "size": [
+    121,
+    116
+   ],
+   "anchor_y": 93,
+   "category": "bridges",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "spans a 3-tile chasm along j",
+   "life": "silk shimmer; the abyss underneath",
+   "runtime_kind": "silkbr",
+   "source": "pixellab create_1_direction_object job 0caab83e"
+  },
+  "peachtree_a": {
+   "file": "sprites/peachtree_a.png",
+   "size": [
+    143,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_b": {
+   "file": "sprites/peachtree_b.png",
+   "size": [
+    143,
+    142
+   ],
+   "anchor_y": 128,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_c": {
+   "file": "sprites/peachtree_c.png",
+   "size": [
+    146,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "peachtree_d": {
+   "file": "sprites/peachtree_d.png",
+   "size": [
+    146,
+    137
+   ],
+   "anchor_y": 123,
+   "category": "trees",
+   "biomes": [
+    "hqs",
+    "earthly"
+   ],
+   "footprint": "1x1 (canopy 2.5 tiles)",
+   "life": "sway (6 px strips), drifting petals",
+   "runtime_kind": "bigpeach",
+   "source": "pixellab create_1_direction_object job 1423100d"
+  },
+  "statue_a": {
+   "file": "sprites/statue_a.png",
+   "size": [
+    72,
+    116
+   ],
+   "anchor_y": 99,
+   "category": "statues",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "1x1",
+   "life": "landmark",
+   "runtime_kind": "statue",
+   "source": "pixellab create_1_direction_object job 9de37e22"
+  },
+  "statue_b": {
+   "file": "sprites/statue_b.png",
+   "size": [
+    98,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "statues",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "1x1",
+   "life": "landmark",
+   "runtime_kind": "statue",
+   "source": "pixellab create_1_direction_object job 9de37e22"
+  },
+  "playground_a": {
+   "file": "sprites/playground_a.png",
+   "size": [
+    116,
+    115
+   ],
+   "anchor_y": 97,
+   "category": "village-props",
+   "biomes": [
+    "hqs"
+   ],
+   "footprint": "2x2",
+   "life": "kids climb the frame and drop down",
+   "runtime_kind": "playground",
+   "source": "pixellab create_1_direction_object job 77428071"
+  },
+  "spire_a": {
+   "file": "sprites/spire_a.png",
+   "size": [
+    105,
+    141
+   ],
+   "anchor_y": 123,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1 or 2x2",
+   "life": "silk shimmer",
+   "runtime_kind": "bspire",
+   "source": "pixellab create_1_direction_object job 3e2ddeec"
+  },
+  "spire_b": {
+   "file": "sprites/spire_b.png",
+   "size": [
+    102,
+    142
+   ],
+   "anchor_y": 124,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1 or 2x2",
+   "life": "silk shimmer",
+   "runtime_kind": "bspire",
+   "source": "pixellab create_1_direction_object job 3e2ddeec"
+  },
+  "mush_a": {
+   "file": "sprites/mush_a.png",
+   "size": [
+    81,
+    118
+   ],
+   "anchor_y": 98,
+   "category": "mushrooms",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse + flicker, rising spores",
+   "runtime_kind": "bigmush",
+   "source": "pixellab create_1_direction_object job 4e93cb98"
+  },
+  "mush_b": {
+   "file": "sprites/mush_b.png",
+   "size": [
+    114,
+    111
+   ],
+   "anchor_y": 92,
+   "category": "mushrooms",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "1x1",
+   "life": "pulse + flicker, rising spores",
+   "runtime_kind": "bigmush",
+   "source": "pixellab create_1_direction_object job 4e93cb98"
+  },
+  "bath_a": {
+   "file": "sprites/bath_a.png",
+   "size": [
+    118,
+    114
+   ],
+   "anchor_y": 91,
+   "category": "village-props",
+   "biomes": [
+    "btd"
+   ],
+   "footprint": "2x2",
+   "life": "not placed yet (hot-spring bath terrace)",
+   "runtime_kind": "bath",
+   "source": "pixellab create_1_direction_object job 274abac0"
+  },
+  "loom_a": {
+   "file": "sprites/loom_a.png",
+   "size": [
+    118,
+    117
+   ],
+   "anchor_y": 97,
+   "category": "silk-props",
+   "biomes": [
+    "btd",
+    "cave"
+   ],
+   "footprint": "2x2",
+   "life": "sisters weave here; silk threads run from their sleeves",
+   "runtime_kind": "bloom",
+   "source": "pixellab create_1_direction_object job cd7a9fd8"
+  },
+  "hall_a": {
+   "file": "sprites/hall_a.png",
+   "size": [
+    155,
+    150
+   ],
+   "anchor_y": 129,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "3x3",
+   "life": "landmark; prayers at the stairs",
+   "runtime_kind": "hall",
+   "source": "pixellab create_1_direction_object job 4e334cf4"
+  },
+  "hall_b": {
+   "file": "sprites/hall_b.png",
+   "size": [
+    161,
+    156
+   ],
+   "anchor_y": 134,
+   "category": "buildings",
+   "biomes": [
+    "hqs",
+    "heaven"
+   ],
+   "footprint": "3x3",
+   "life": "landmark; prayers at the stairs",
+   "runtime_kind": "hall",
+   "source": "pixellab create_1_direction_object job 4e334cf4"
+  },
+  "cave_a": {
+   "file": "sprites/cave_a.png",
+   "size": [
+    142,
+    130
+   ],
+   "anchor_y": 108,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "cave_b": {
+   "file": "sprites/cave_b.png",
+   "size": [
+    137,
+    128
+   ],
+   "anchor_y": 106,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "gate_a": {
+   "file": "sprites/gate_a.png",
+   "size": [
+    118,
+    116
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "gate_b": {
+   "file": "sprites/gate_b.png",
+   "size": [
+    99,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_a": {
+   "file": "sprites/bamboo_a.png",
+   "size": [
+    94,
+    116
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_b": {
+   "file": "sprites/bamboo_b.png",
+   "size": [
+    106,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bamboo_c": {
+   "file": "sprites/bamboo_c.png",
+   "size": [
+    115,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "scholar_a": {
+   "file": "sprites/scholar_a.png",
+   "size": [
+    92,
+    111
+   ],
+   "anchor_y": 94,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "scholar_b": {
+   "file": "sprites/scholar_b.png",
+   "size": [
+    78,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lantern_a": {
+   "file": "sprites/lantern_a.png",
+   "size": [
+    82,
+    81
+   ],
+   "anchor_y": 65,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lantern_b": {
+   "file": "sprites/lantern_b.png",
+   "size": [
+    78,
+    88
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "silkrack_a": {
+   "file": "sprites/silkrack_a.png",
+   "size": [
+    114,
+    117
+   ],
+   "anchor_y": 96,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "arch_a": {
+   "file": "sprites/arch_a.png",
+   "size": [
+    118,
+    115
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "arch_b": {
+   "file": "sprites/arch_b.png",
+   "size": [
+    117,
+    109
+   ],
+   "anchor_y": 93,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "lotus_a": {
+   "file": "sprites/lotus_a.png",
+   "size": [
+    87,
+    82
+   ],
+   "anchor_y": 66,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tc_monument_a": {
+   "file": "sprites/tc_monument_a.png",
+   "size": [
+    300,
+    306
+   ],
+   "anchor_y": 239,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "5x2 landmark",
+   "life": "ceremonial gate, integer 2x",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_kiln_a": {
+   "file": "sprites/tc_kiln_a.png",
+   "size": [
+    142,
+    175
+   ],
+   "anchor_y": 152,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "trigram fire mouth, smoke and sparks",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job 855cdb4e"
+  },
+  "tc_bank_a": {
+   "file": "sprites/tc_bank_a.png",
+   "size": [
+    260,
+    152
+   ],
+   "anchor_y": 119,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drifting banks",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job 445431e5"
+  },
+  "tc_silklamp_a": {
+   "file": "sprites/tc_silklamp_a.png",
+   "size": [
+    28,
+    70
+   ],
+   "anchor_y": 66,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "red lantern glow",
+   "runtime_kind": "tcsilklamp",
+   "source": "pixellab create_map_object job 6507a136"
+  },
+  "tc_gatehouse_a": {
+   "file": "sprites/tc_gatehouse_a.png",
+   "size": [
+    145,
+    164
+   ],
+   "anchor_y": 136,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "gatehouse behind main arch",
+   "runtime_kind": "tcgatehouse",
+   "source": "pixellab create_map_object job 94673d0b"
+  },
+  "tc_pavilion_a": {
+   "file": "sprites/tc_pavilion_a.png",
+   "size": [
+    128,
+    145
+   ],
+   "anchor_y": 126,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "2x2",
+   "life": "banquet pavilion",
+   "runtime_kind": "tcpavilion",
+   "source": "pixellab create_1_direction_object job e2fdc359"
+  },
+  "tc_pillar_a": {
+   "file": "sprites/tc_pillar_a.png",
+   "size": [
+    30,
+    113
+   ],
+   "anchor_y": 106,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "paired jade huabiao",
+   "runtime_kind": "tcpillar",
+   "source": "pixellab create_map_object job 9c2b0f9e"
+  },
+  "tc_brazier_a": {
+   "file": "sprites/tc_brazier_a.png",
+   "size": [
+    52,
+    58
+   ],
+   "anchor_y": 52,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "firelight",
+   "runtime_kind": "tcbrazier",
+   "source": "pixellab create_map_object job d65dbacd"
+  },
+  "tc_cloud_a": {
+   "file": "sprites/tc_cloud_a.png",
+   "size": [
+    126,
+    38
+   ],
+   "anchor_y": 30,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drift",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job 81f96319"
+  },
+  "tc_scroll_a": {
+   "file": "sprites/tc_scroll_a.png",
+   "size": [
+    117,
+    65
+   ],
+   "anchor_y": 46,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud sea",
+   "life": "slow drift",
+   "runtime_kind": "tccloud",
+   "source": "pixellab create_map_object job a81498c0"
+  },
+  "tc_gate_a": {
+   "file": "sprites/tc_gate_a.png",
+   "size": [
+    136,
+    155
+   ],
+   "anchor_y": 132,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "gate landmark",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_gate_b": {
+   "file": "sprites/tc_gate_b.png",
+   "size": [
+    150,
+    153
+   ],
+   "anchor_y": 130,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "gate landmark",
+   "runtime_kind": "tcgate",
+   "source": "pixellab create_1_direction_object job 1348df9c"
+  },
+  "tc_palace_a": {
+   "file": "sprites/tc_palace_a.png",
+   "size": [
+    148,
+    142
+   ],
+   "anchor_y": 121,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "palace landmark",
+   "runtime_kind": "tcpalace",
+   "source": "pixellab create_1_direction_object job eac2e662"
+  },
+  "tc_palace_b": {
+   "file": "sprites/tc_palace_b.png",
+   "size": [
+    157,
+    147
+   ],
+   "anchor_y": 125,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "palace landmark",
+   "runtime_kind": "tcpalace",
+   "source": "pixellab create_1_direction_object job eac2e662"
+  },
+  "tc_furnace_a": {
+   "file": "sprites/tc_furnace_a.png",
+   "size": [
+    78,
+    110
+   ],
+   "anchor_y": 92,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "flickering glow, rising smoke",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job e52bfc0f"
+  },
+  "tc_furnace_b": {
+   "file": "sprites/tc_furnace_b.png",
+   "size": [
+    85,
+    117
+   ],
+   "anchor_y": 98,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "flickering glow, rising smoke",
+   "runtime_kind": "tcfurnace",
+   "source": "pixellab create_1_direction_object job e52bfc0f"
+  },
+  "tc_bridge_a": {
+   "file": "sprites/tc_bridge_a.png",
+   "size": [
+    120,
+    92
+   ],
+   "anchor_y": 74,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud-channel crossing",
+   "life": "walkable bridge over animated cloud stream",
+   "runtime_kind": "tcbridge",
+   "source": "pixellab create_1_direction_object job 3c8beb65"
+  },
+  "tc_bridge_b": {
+   "file": "sprites/tc_bridge_b.png",
+   "size": [
+    123,
+    94
+   ],
+   "anchor_y": 75,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "cloud-channel crossing",
+   "life": "walkable bridge over animated cloud stream",
+   "runtime_kind": "tcbridge",
+   "source": "pixellab create_1_direction_object job 3c8beb65"
+  },
+  "tc_lantern_a": {
+   "file": "sprites/tc_lantern_a.png",
+   "size": [
+    86,
+    115
+   ],
+   "anchor_y": 95,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "golden glow",
+   "runtime_kind": "tclantern",
+   "source": "pixellab create_1_direction_object job 380f2729"
+  },
+  "tc_lantern_b": {
+   "file": "sprites/tc_lantern_b.png",
+   "size": [
+    79,
+    122
+   ],
+   "anchor_y": 101,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "golden glow",
+   "runtime_kind": "tclantern",
+   "source": "pixellab create_1_direction_object job 380f2729"
+  },
+  "tc_peach_a": {
+   "file": "sprites/tc_peach_a.png",
+   "size": [
+    130,
+    144
+   ],
+   "anchor_y": 130,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "sway and drifting petals",
+   "runtime_kind": "tcpeach",
+   "source": "pixellab create_1_direction_object job c4da708e"
+  },
+  "tc_peach_b": {
+   "file": "sprites/tc_peach_b.png",
+   "size": [
+    150,
+    143
+   ],
+   "anchor_y": 129,
+   "category": "heaven",
+   "biomes": [
+    "tc"
+   ],
+   "footprint": "1x1",
+   "life": "sway and drifting petals",
+   "runtime_kind": "tcpeach",
+   "source": "pixellab create_1_direction_object job c4da708e"
+  },
+  "lotus_b": {
+   "file": "sprites/lotus_b.png",
+   "size": [
+    89,
+    88
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "buddha_a": {
+   "file": "sprites/buddha_a.png",
+   "size": [
+    171,
+    245
+   ],
+   "anchor_y": 216,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_a": {
+   "file": "sprites/pcloud_a.png",
+   "size": [
+    109,
+    95
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_b": {
+   "file": "sprites/pcloud_b.png",
+   "size": [
+    110,
+    96
+   ],
+   "anchor_y": 72,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_c": {
+   "file": "sprites/pcloud_c.png",
+   "size": [
+    112,
+    90
+   ],
+   "anchor_y": 68,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloud_d": {
+   "file": "sprites/pcloud_d.png",
+   "size": [
+    110,
+    99
+   ],
+   "anchor_y": 74,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_a": {
+   "file": "sprites/pcloudw_a.png",
+   "size": [
+    255,
+    223
+   ],
+   "anchor_y": 167,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_b": {
+   "file": "sprites/pcloudw_b.png",
+   "size": [
+    241,
+    148
+   ],
+   "anchor_y": 104,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudw_c": {
+   "file": "sprites/pcloudw_c.png",
+   "size": [
+    250,
+    224
+   ],
+   "anchor_y": 179,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudt_a": {
+   "file": "sprites/pcloudt_a.png",
+   "size": [
+    205,
+    240
+   ],
+   "anchor_y": 211,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pcloudt_b": {
+   "file": "sprites/pcloudt_b.png",
+   "size": [
+    241,
+    213
+   ],
+   "anchor_y": 170,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plotus_a": {
+   "file": "sprites/plotus_a.png",
+   "size": [
+    94,
+    109
+   ],
+   "anchor_y": 87,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plotus_b": {
+   "file": "sprites/plotus_b.png",
+   "size": [
+    115,
+    106
+   ],
+   "anchor_y": 85,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pwheel_a": {
+   "file": "sprites/pwheel_a.png",
+   "size": [
+    83,
+    115
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pbell_a": {
+   "file": "sprites/pbell_a.png",
+   "size": [
+    111,
+    116
+   ],
+   "anchor_y": 93,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "plantern_a": {
+   "file": "sprites/plantern_a.png",
+   "size": [
+    97,
+    118
+   ],
+   "anchor_y": 59,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pmist_a": {
+   "file": "sprites/pmist_a.png",
+   "size": [
+    62,
+    112
+   ],
+   "anchor_y": 78,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pmist_b": {
+   "file": "sprites/pmist_b.png",
+   "size": [
+    101,
+    97
+   ],
+   "anchor_y": 68,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "pride_a": {
+   "file": "sprites/pride_a.png",
+   "size": [
+    46,
+    55
+   ],
+   "anchor_y": 38,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_volcano_a": {
+   "file": "sprites/hds_volcano_a.png",
+   "size": [
+    236,
+    234
+   ],
+   "anchor_y": 187,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_bridge_a": {
+   "file": "sprites/hds_bridge_a.png",
+   "size": [
+    146,
+    119
+   ],
+   "anchor_y": 83,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_bridge_b": {
+   "file": "sprites/hds_bridge_b.png",
+   "size": [
+    146,
+    119
+   ],
+   "anchor_y": 83,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_oven_a": {
+   "file": "sprites/hds_oven_a.png",
+   "size": [
+    119,
+    105
+   ],
+   "anchor_y": 82,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_oven_b": {
+   "file": "sprites/hds_oven_b.png",
+   "size": [
+    120,
+    109
+   ],
+   "anchor_y": 85,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_stall_a": {
+   "file": "sprites/hds_stall_a.png",
+   "size": [
+    106,
+    112
+   ],
+   "anchor_y": 90,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_stall_b": {
+   "file": "sprites/hds_stall_b.png",
+   "size": [
+    100,
+    116
+   ],
+   "anchor_y": 93,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_hut_a": {
+   "file": "sprites/hds_hut_a.png",
+   "size": [
+    115,
+    105
+   ],
+   "anchor_y": 84,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_hut_b": {
+   "file": "sprites/hds_hut_b.png",
+   "size": [
+    113,
+    110
+   ],
+   "anchor_y": 88,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_hut_c": {
+   "file": "sprites/hds_hut_c.png",
+   "size": [
+    118,
+    103
+   ],
+   "anchor_y": 82,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_vent_a": {
+   "file": "sprites/hds_vent_a.png",
+   "size": [
+    114,
+    88
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_vent_b": {
+   "file": "sprites/hds_vent_b.png",
+   "size": [
+    119,
+    110
+   ],
+   "anchor_y": 88,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_vent_c": {
+   "file": "sprites/hds_vent_c.png",
+   "size": [
+    120,
+    104
+   ],
+   "anchor_y": 83,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_shrine_a": {
+   "file": "sprites/hds_shrine_a.png",
+   "size": [
+    112,
+    115
+   ],
+   "anchor_y": 90,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_crates_a": {
+   "file": "sprites/hds_crates_a.png",
+   "size": [
+    83,
+    79
+   ],
+   "anchor_y": 59,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_crates_b": {
+   "file": "sprites/hds_crates_b.png",
+   "size": [
+    85,
+    73
+   ],
+   "anchor_y": 55,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_lantern_a": {
+   "file": "sprites/hds_lantern_a.png",
+   "size": [
+    45,
+    88
+   ],
+   "anchor_y": 79,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_tree_a": {
+   "file": "sprites/hds_tree_a.png",
+   "size": [
+    85,
+    115
+   ],
+   "anchor_y": 101,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_tree_b": {
+   "file": "sprites/hds_tree_b.png",
+   "size": [
+    106,
+    113
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_rock_a": {
+   "file": "sprites/hds_rock_a.png",
+   "size": [
+    84,
+    59
+   ],
+   "anchor_y": 48,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_rock_b": {
+   "file": "sprites/hds_rock_b.png",
+   "size": [
+    86,
+    66
+   ],
+   "anchor_y": 54,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_ruin_a": {
+   "file": "sprites/hds_ruin_a.png",
+   "size": [
+    97,
+    114
+   ],
+   "anchor_y": 89,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_ruin_b": {
+   "file": "sprites/hds_ruin_b.png",
+   "size": [
+    111,
+    111
+   ],
+   "anchor_y": 87,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_gate_a": {
+   "file": "sprites/hds_gate_a.png",
+   "size": [
+    215,
+    237
+   ],
+   "anchor_y": 190,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hds_volcano_b": {
+   "file": "sprites/hds_volcano_b.png",
+   "size": [
+    249,
+    241
+   ],
+   "anchor_y": 193,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_gate_a": {
+   "file": "sprites/sdl_gate_a.png",
+   "size": [
+    240,
+    246
+   ],
+   "anchor_y": 197,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_keep_a": {
+   "file": "sprites/sdl_keep_a.png",
+   "size": [
+    234,
+    242
+   ],
+   "anchor_y": 194,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_nest_a": {
+   "file": "sprites/sdl_nest_a.png",
+   "size": [
+    164,
+    224
+   ],
+   "anchor_y": 186,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_den_a": {
+   "file": "sprites/sdl_den_a.png",
+   "size": [
+    238,
+    245
+   ],
+   "anchor_y": 196,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_tusk_a": {
+   "file": "sprites/sdl_tusk_a.png",
+   "size": [
+    229,
+    248
+   ],
+   "anchor_y": 198,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_tent_a": {
+   "file": "sprites/sdl_tent_a.png",
+   "size": [
+    124,
+    110
+   ],
+   "anchor_y": 92,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_tent_b": {
+   "file": "sprites/sdl_tent_b.png",
+   "size": [
+    120,
+    120
+   ],
+   "anchor_y": 101,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_banner_a": {
+   "file": "sprites/sdl_banner_a.png",
+   "size": [
+    58,
+    117
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_banner_b": {
+   "file": "sprites/sdl_banner_b.png",
+   "size": [
+    59,
+    119
+   ],
+   "anchor_y": 101,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_rack_a": {
+   "file": "sprites/sdl_rack_a.png",
+   "size": [
+    119,
+    107
+   ],
+   "anchor_y": 90,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_brazier_a": {
+   "file": "sprites/sdl_brazier_a.png",
+   "size": [
+    48,
+    60
+   ],
+   "anchor_y": 48,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_brazier_b": {
+   "file": "sprites/sdl_brazier_b.png",
+   "size": [
+    45,
+    61
+   ],
+   "anchor_y": 49,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_bridge_a": {
+   "file": "sprites/sdl_bridge_a.png",
+   "size": [
+    123,
+    112
+   ],
+   "anchor_y": 90,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_pine_a": {
+   "file": "sprites/sdl_pine_a.png",
+   "size": [
+    66,
+    83
+   ],
+   "anchor_y": 73,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_pine_b": {
+   "file": "sprites/sdl_pine_b.png",
+   "size": [
+    72,
+    80
+   ],
+   "anchor_y": 70,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_rock_a": {
+   "file": "sprites/sdl_rock_a.png",
+   "size": [
+    77,
+    87
+   ],
+   "anchor_y": 74,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_rock_b": {
+   "file": "sprites/sdl_rock_b.png",
+   "size": [
+    85,
+    83
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "sdl_totem_a": {
+   "file": "sprites/sdl_totem_a.png",
+   "size": [
+    63,
+    92
+   ],
+   "anchor_y": 81,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_dock_a": {
+   "file": "sprites/tth_dock_a.png",
+   "size": [
+    247,
+    248
+   ],
+   "anchor_y": 198,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_shrine_a": {
+   "file": "sprites/tth_shrine_a.png",
+   "size": [
+    224,
+    221
+   ],
+   "anchor_y": 177,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_tower_a": {
+   "file": "sprites/tth_tower_a.png",
+   "size": [
+    117,
+    239
+   ],
+   "anchor_y": 198,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_turtle_a": {
+   "file": "sprites/tth_turtle_a.png",
+   "size": [
+    241,
+    183
+   ],
+   "anchor_y": 146,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_boat_a": {
+   "file": "sprites/tth_boat_a.png",
+   "size": [
+    116,
+    90
+   ],
+   "anchor_y": 72,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_boat_b": {
+   "file": "sprites/tth_boat_b.png",
+   "size": [
+    116,
+    95
+   ],
+   "anchor_y": 76,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_hut_a": {
+   "file": "sprites/tth_hut_a.png",
+   "size": [
+    117,
+    117
+   ],
+   "anchor_y": 94,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_hut_b": {
+   "file": "sprites/tth_hut_b.png",
+   "size": [
+    117,
+    120
+   ],
+   "anchor_y": 96,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_willow_a": {
+   "file": "sprites/tth_willow_a.png",
+   "size": [
+    100,
+    115
+   ],
+   "anchor_y": 92,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_willow_b": {
+   "file": "sprites/tth_willow_b.png",
+   "size": [
+    104,
+    119
+   ],
+   "anchor_y": 95,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_rock_a": {
+   "file": "sprites/tth_rock_a.png",
+   "size": [
+    76,
+    67
+   ],
+   "anchor_y": 54,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_rock_b": {
+   "file": "sprites/tth_rock_b.png",
+   "size": [
+    85,
+    56
+   ],
+   "anchor_y": 45,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_rock_c": {
+   "file": "sprites/tth_rock_c.png",
+   "size": [
+    86,
+    80
+   ],
+   "anchor_y": 64,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_wreck_a": {
+   "file": "sprites/tth_wreck_a.png",
+   "size": [
+    136,
+    127
+   ],
+   "anchor_y": 102,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_wreck_b": {
+   "file": "sprites/tth_wreck_b.png",
+   "size": [
+    142,
+    131
+   ],
+   "anchor_y": 105,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_gate_a": {
+   "file": "sprites/tth_gate_a.png",
+   "size": [
+    125,
+    148
+   ],
+   "anchor_y": 118,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_gate_b": {
+   "file": "sprites/tth_gate_b.png",
+   "size": [
+    123,
+    149
+   ],
+   "anchor_y": 119,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_netrack_a": {
+   "file": "sprites/tth_netrack_a.png",
+   "size": [
+    80,
+    85
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_netrack_b": {
+   "file": "sprites/tth_netrack_b.png",
+   "size": [
+    80,
+    86
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_reeds_a": {
+   "file": "sprites/tth_reeds_a.png",
+   "size": [
+    67,
+    85
+   ],
+   "anchor_y": 75,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_reeds_b": {
+   "file": "sprites/tth_reeds_b.png",
+   "size": [
+    79,
+    81
+   ],
+   "anchor_y": 71,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_statue_a": {
+   "file": "sprites/tth_statue_a.png",
+   "size": [
+    106,
+    119
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "tth_statue_b": {
+   "file": "sprites/tth_statue_b.png",
+   "size": [
+    109,
+    117
+   ],
+   "anchor_y": 97,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_temple_a": {
+   "file": "sprites/hps_temple_a.png",
+   "size": [
+    222,
+    222
+   ],
+   "anchor_y": 184,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_ruin_a": {
+   "file": "sprites/hps_ruin_a.png",
+   "size": [
+    242,
+    219
+   ],
+   "anchor_y": 182,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_scaffold_a": {
+   "file": "sprites/hps_scaffold_a.png",
+   "size": [
+    236,
+    224
+   ],
+   "anchor_y": 186,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pagoda_a": {
+   "file": "sprites/hps_pagoda_a.png",
+   "size": [
+    207,
+    246
+   ],
+   "anchor_y": 204,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_gate_a": {
+   "file": "sprites/hps_gate_a.png",
+   "size": [
+    216,
+    233
+   ],
+   "anchor_y": 193,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_lair_a": {
+   "file": "sprites/hps_lair_a.png",
+   "size": [
+    244,
+    232
+   ],
+   "anchor_y": 193,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_bell_a": {
+   "file": "sprites/hps_bell_a.png",
+   "size": [
+    96,
+    119
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_bell_b": {
+   "file": "sprites/hps_bell_b.png",
+   "size": [
+    102,
+    121
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_dorm_a": {
+   "file": "sprites/hps_dorm_a.png",
+   "size": [
+    120,
+    99
+   ],
+   "anchor_y": 82,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_dorm_b": {
+   "file": "sprites/hps_dorm_b.png",
+   "size": [
+    123,
+    107
+   ],
+   "anchor_y": 89,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_dorm_c": {
+   "file": "sprites/hps_dorm_c.png",
+   "size": [
+    121,
+    102
+   ],
+   "anchor_y": 85,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_kitchen_a": {
+   "file": "sprites/hps_kitchen_a.png",
+   "size": [
+    117,
+    124
+   ],
+   "anchor_y": 103,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_kitchen_b": {
+   "file": "sprites/hps_kitchen_b.png",
+   "size": [
+    120,
+    123
+   ],
+   "anchor_y": 102,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_burner_a": {
+   "file": "sprites/hps_burner_a.png",
+   "size": [
+    84,
+    121
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_burner_b": {
+   "file": "sprites/hps_burner_b.png",
+   "size": [
+    90,
+    120
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pine_a": {
+   "file": "sprites/hps_pine_a.png",
+   "size": [
+    108,
+    106
+   ],
+   "anchor_y": 95,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pine_b": {
+   "file": "sprites/hps_pine_b.png",
+   "size": [
+    102,
+    109
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pine_c": {
+   "file": "sprites/hps_pine_c.png",
+   "size": [
+    115,
+    110
+   ],
+   "anchor_y": 99,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pavilion_a": {
+   "file": "sprites/hps_pavilion_a.png",
+   "size": [
+    97,
+    122
+   ],
+   "anchor_y": 101,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_pavilion_b": {
+   "file": "sprites/hps_pavilion_b.png",
+   "size": [
+    85,
+    125
+   ],
+   "anchor_y": 104,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_stupa_a": {
+   "file": "sprites/hps_stupa_a.png",
+   "size": [
+    108,
+    114
+   ],
+   "anchor_y": 95,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_stupa_b": {
+   "file": "sprites/hps_stupa_b.png",
+   "size": [
+    110,
+    114
+   ],
+   "anchor_y": 95,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_rock_a": {
+   "file": "sprites/hps_rock_a.png",
+   "size": [
+    85,
+    71
+   ],
+   "anchor_y": 60,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_rock_b": {
+   "file": "sprites/hps_rock_b.png",
+   "size": [
+    71,
+    88
+   ],
+   "anchor_y": 75,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_rock_c": {
+   "file": "sprites/hps_rock_c.png",
+   "size": [
+    83,
+    87
+   ],
+   "anchor_y": 74,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_wayshrine_a": {
+   "file": "sprites/hps_wayshrine_a.png",
+   "size": [
+    84,
+    90
+   ],
+   "anchor_y": 75,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_wayshrine_b": {
+   "file": "sprites/hps_wayshrine_b.png",
+   "size": [
+    84,
+    87
+   ],
+   "anchor_y": 72,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_well_a": {
+   "file": "sprites/hps_well_a.png",
+   "size": [
+    92,
+    83
+   ],
+   "anchor_y": 69,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_well_b": {
+   "file": "sprites/hps_well_b.png",
+   "size": [
+    90,
+    71
+   ],
+   "anchor_y": 59,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_sutra_a": {
+   "file": "sprites/hps_sutra_a.png",
+   "size": [
+    103,
+    116
+   ],
+   "anchor_y": 96,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_sutra_b": {
+   "file": "sprites/hps_sutra_b.png",
+   "size": [
+    114,
+    118
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_bamboo_a": {
+   "file": "sprites/hps_bamboo_a.png",
+   "size": [
+    69,
+    90
+   ],
+   "anchor_y": 79,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_bamboo_b": {
+   "file": "sprites/hps_bamboo_b.png",
+   "size": [
+    73,
+    87
+   ],
+   "anchor_y": 77,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_maple_a": {
+   "file": "sprites/hps_maple_a.png",
+   "size": [
+    114,
+    117
+   ],
+   "anchor_y": 105,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_maple_b": {
+   "file": "sprites/hps_maple_b.png",
+   "size": [
+    83,
+    109
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_maple_c": {
+   "file": "sprites/hps_maple_c.png",
+   "size": [
+    121,
+    108
+   ],
+   "anchor_y": 97,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_lantern_a": {
+   "file": "sprites/hps_lantern_a.png",
+   "size": [
+    24,
+    62
+   ],
+   "anchor_y": 53,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "hps_lantern_b": {
+   "file": "sprites/hps_lantern_b.png",
+   "size": [
+    48,
+    61
+   ],
+   "anchor_y": 52,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_summit_a": {
+   "file": "sprites/nhs_summit_a.png",
+   "size": [
+    221,
+    247
+   ],
+   "anchor_y": 225,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_prison_a": {
+   "file": "sprites/nhs_prison_a.png",
+   "size": [
+    118,
+    97
+   ],
+   "anchor_y": 81,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_prison_b": {
+   "file": "sprites/nhs_prison_b.png",
+   "size": [
+    116,
+    115
+   ],
+   "anchor_y": 97,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_tree_a": {
+   "file": "sprites/nhs_tree_a.png",
+   "size": [
+    74,
+    88
+   ],
+   "anchor_y": 79,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_tree_b": {
+   "file": "sprites/nhs_tree_b.png",
+   "size": [
+    92,
+    83
+   ],
+   "anchor_y": 75,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_tree_c": {
+   "file": "sprites/nhs_tree_c.png",
+   "size": [
+    86,
+    85
+   ],
+   "anchor_y": 76,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "nhs_tree_d": {
+   "file": "sprites/nhs_tree_d.png",
+   "size": [
+    84,
+    86
+   ],
+   "anchor_y": 77,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "ntq_tree_a": {
+   "file": "sprites/ntq_tree_a.png",
+   "size": [
+    214,
+    242
+   ],
+   "anchor_y": 223,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "ntq_hall_a": {
+   "file": "sprites/ntq_hall_a.png",
+   "size": [
+    122,
+    117
+   ],
+   "anchor_y": 98,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "ntq_hall_b": {
+   "file": "sprites/ntq_hall_b.png",
+   "size": [
+    112,
+    119
+   ],
+   "anchor_y": 100,
+   "category": "misc",
+   "biomes": [],
+   "footprint": "",
+   "life": "",
+   "runtime_kind": "",
+   "source": "pixellab create_1_direction_object job "
+  },
+  "bt_cave_a": {
+   "file": "sprites/bt_cave_a.png",
+   "size": [
+    95,
+    148
+   ],
+   "anchor_y": 130,
+   "category": "silk-props",
+   "biomes": [
+    "btd"
+   ],
+   "footprint": "3x1",
+   "life": "landmark cave",
+   "runtime_kind": "btcave",
+   "source": "pixellab create_map_object job 0c90a2ec"
+  },
+  "bt_throne_a": {
+   "file": "sprites/bt_throne_a.png",
+   "size": [
+    123,
+    154
+   ],
+   "anchor_y": 136,
+   "category": "silk-props",
+   "biomes": [
+    "btd"
+   ],
+   "footprint": "2x2",
+   "life": "ritual throne",
+   "runtime_kind": "btthrone",
+   "source": "pixellab create_map_object job 20f9d434"
+  },
+  "bt_prison_a": {
+   "file": "sprites/bt_prison_a.png",
+   "size": [
+    137,
+    132
+   ],
+   "anchor_y": 116,
+   "category": "silk-props",
+   "biomes": [
+    "btd"
+   ],
+   "footprint": "2x2",
+   "life": "elevated silk prison",
+   "runtime_kind": "btprison",
+   "source": "pixellab create_map_object job 1c1ce3f8"
+  },
+  "hvd_fortress_a": {
+   "file": "sprites/hvd_fortress_a.png",
+   "size": [
+    189,
+    154
+   ],
+   "anchor_y": 142,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "3x3",
+   "life": "monumental cave fortress, fire glow",
+   "runtime_kind": "hvdfortress",
+   "source": "pixellab create_1_direction_object job 9e37745f"
+  },
+  "hvd_mountain_a": {
+   "file": "sprites/hvd_mountain_a.png",
+   "size": [
+    162,
+    175
+   ],
+   "anchor_y": 150,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "3x3",
+   "life": "crimson mountain landmark",
+   "runtime_kind": "hvdpeak",
+   "source": "pixellab create_1_direction_object job 82e1c210"
+  },
+  "hvd_hut_a": {
+   "file": "sprites/hvd_hut_a.png",
+   "size": [
+    82,
+    85
+   ],
+   "anchor_y": 72,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "2x2",
+   "life": "demon settlement",
+   "runtime_kind": "hvdhut",
+   "source": "pixellab create_1_direction_object job f2a42172"
+  },
+  "hvd_ritual_a": {
+   "file": "sprites/hvd_ritual_a.png",
+   "size": [
+    132,
+    123
+   ],
+   "anchor_y": 107,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "2x2",
+   "life": "True Fire ritual platform",
+   "runtime_kind": "hvdritual",
+   "source": "pixellab create_1_direction_object job 9556cccf"
+  },
+  "hvd_tower_a": {
+   "file": "sprites/hvd_tower_a.png",
+   "size": [
+    106,
+    151
+   ],
+   "anchor_y": 133,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "2x2",
+   "life": "mountain watchtower",
+   "runtime_kind": "hvdtower",
+   "source": "pixellab create_1_direction_object job 21303d99"
+  },
+  "hvd_pine_a": {
+   "file": "sprites/hvd_pine_a.png",
+   "size": [
+    84,
+    114
+   ],
+   "anchor_y": 101,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "1x1",
+   "life": "wind sway",
+   "runtime_kind": "hvdpine",
+   "source": "pixellab create_1_direction_object job b0093b9e"
+  },
+  "hvd_bridge_a": {
+   "file": "sprites/hvd_bridge_a.png",
+   "size": [
+    120,
+    96
+   ],
+   "anchor_y": 75,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "2x1",
+   "life": "ravine bridge",
+   "runtime_kind": "hvdbridge",
+   "source": "pixellab create_1_direction_object job ad981b8c"
+  },
+  "hvd_brazier_a": {
+   "file": "sprites/hvd_brazier_a.png",
+   "size": [
+    68,
+    86
+   ],
+   "anchor_y": 71,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "1x1",
+   "life": "fire glow",
+   "runtime_kind": "hvdbrazier",
+   "source": "pixellab create_1_direction_object job 92d25200"
+  },
+  "hvd_banner_a": {
+   "file": "sprites/hvd_banner_a.png",
+   "size": [
+    59,
+    124
+   ],
+   "anchor_y": 104,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "1x1",
+   "life": "wind sway",
+   "runtime_kind": "hvdbanner",
+   "source": "pixellab create_1_direction_object job 973f52b7"
+  },
+  "hvd_waterfall_a": {
+   "file": "sprites/hvd_waterfall_a.png",
+   "size": [
+    77,
+    172
+   ],
+   "anchor_y": 155,
+   "category": "hvd-props",
+   "biomes": [
+    "hvd"
+   ],
+   "footprint": "2x1",
+   "life": "animated spray overlay",
+   "runtime_kind": "hvdwaterfall",
+   "source": "pixellab create_1_direction_object job f8883123"
+  }
+ },
+ "characters": {
+  "wukong": {
+   "file": "chars/wukong.png",
+   "title": [
+    "Tôn Ngộ Không",
+    "Sun Wukong, Great Sage Equal to Heaven"
+   ],
+   "biome": "hqs",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/wukong.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "staff-practice"
+   },
+   "source": "pixellab",
+   "role": "king",
+   "bantoAction": {
+    "src": "chars/actions/btd_wukong.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "btd_hair_clones"
+   }
+  },
+  "khi_linh": {
+   "file": "chars/khi_linh.png",
+   "title": [
+    "Khỉ Lính",
+    "Monkey Guard"
+   ],
+   "biome": "hqs",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "guard"
+  },
+  "khi_lao": {
+   "file": "chars/khi_lao.png",
+   "title": [
+    "Khỉ Lão",
+    "Old Monkey"
+   ],
+   "biome": "hqs",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "elder"
+  },
+  "khi_con": {
+   "file": "chars/khi_con.png",
+   "title": [
+    "Khỉ Con",
+    "Monkey Kid"
+   ],
+   "biome": "hqs",
+   "size": [
+    36,
+    36
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "kid"
+  },
+  "khi_dan": {
+   "file": "chars/khi_dan.png",
+   "title": [
+    "Khỉ Dân",
+    "Monkey Villager"
+   ],
+   "biome": "hqs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "citizen"
+  },
+  "khi_dan_b": {
+   "file": "chars/khi_dan_b.png",
+   "title": [
+    "Khỉ Dân",
+    "Monkey Villager"
+   ],
+   "biome": "hqs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "citizen"
+  },
+  "tam_tang": {
+   "file": "chars/tam_tang.png",
+   "title": [
+    "Đường Tam Tạng",
+    "Tang Sanzang"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "visitor",
+   "bantoAction": {
+    "src": "chars/actions/btd_tam_tang.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "btd_tam_tang_combat"
+   }
+  },
+  "sister1_violet": {
+   "file": "chars/sister1_violet.png",
+   "title": [
+    "Nhện Tinh cả",
+    "Eldest Spider Sister (violet)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister1_violet.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister2_teal": {
+   "file": "chars/sister2_teal.png",
+   "title": [
+    "Nhện Tinh hai",
+    "Second Sister, the scholar (teal)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister2_teal.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister3_rose": {
+   "file": "chars/sister3_rose.png",
+   "title": [
+    "Nhện Tinh ba",
+    "Third Sister, the dancer (rose)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister3_rose.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister4_amber": {
+   "file": "chars/sister4_amber.png",
+   "title": [
+    "Nhện Tinh tư",
+    "Fourth Sister, the warrior (amber)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister4_amber.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister5_crimson": {
+   "file": "chars/sister5_crimson.png",
+   "title": [
+    "Nhện Tinh năm",
+    "Fifth Sister, the huntress (crimson)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister5_crimson.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister6_silver": {
+   "file": "chars/sister6_silver.png",
+   "title": [
+    "Nhện Tinh sáu",
+    "Sixth Sister, the ghostly weaver (silver)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister6_silver.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "sister7_indigo": {
+   "file": "chars/sister7_indigo.png",
+   "title": [
+    "Nhện Tinh bảy",
+    "Seventh Sister, the trickster (indigo)"
+   ],
+   "biome": "btd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/sister7_indigo.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "silk-weaving"
+   },
+   "source": "pixellab",
+   "role": "sister"
+  },
+  "nhen_con": {
+   "file": "chars/nhen_con.png",
+   "title": [
+    "Nhện Con",
+    "Spiderling (charcoal)"
+   ],
+   "biome": "btd",
+   "size": [
+    48,
+    48
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "spiderling"
+  },
+  "nhen_con_b": {
+   "file": "chars/nhen_con_b.png",
+   "title": [
+    "Nhện Con",
+    "Spiderling (silver)"
+   ],
+   "biome": "btd",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "spiderling"
+  },
+  "tc_fairy": {
+   "file": "chars/tc_fairy.png",
+   "title": [
+    "Tiên nữ",
+    "Heavenly fairy"
+   ],
+   "biome": "tc",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_fairy.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "tend-peach"
+   },
+   "source": "pixellab",
+   "role": "fairy"
+  },
+  "tc_guard": {
+   "file": "chars/tc_guard.png",
+   "title": [
+    "Thiên binh",
+    "Heavenly guard"
+   ],
+   "biome": "tc",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_guard.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "guard-watch"
+   },
+   "source": "pixellab",
+   "role": "heavenguard"
+  },
+  "tc_laojun": {
+   "file": "chars/tc_laojun.png",
+   "title": [
+    "Thái Thượng Lão Quân",
+    "Lao Jun"
+   ],
+   "biome": "tc",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": {
+    "src": "chars/actions/tc_laojun.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "tend-furnace"
+   },
+   "source": "pixellab",
+   "role": "laojun"
+  },
+  "tc_wukong": {
+   "file": "chars/tc_wukong.png",
+   "title": [
+    "Tôn Ngộ Không",
+    "Sun Wukong in heaven"
+   ],
+   "biome": "tc",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "trickster"
+  },
+  "palm_attendant": {
+   "file": "chars/palm_attendant.png",
+   "title": [
+    "Tiên Đồng Phật Quang",
+    "Palm Attendant"
+   ],
+   "biome": "btp",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "attendant"
+  },
+  "bajie": {
+   "file": "chars/bajie.png",
+   "title": [
+    "Trư Bát Giới",
+    "Zhu Bajie"
+   ],
+   "biome": "hds",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "fire_bajie",
+   "bantoAction": {
+    "src": "chars/actions/btd_bajie.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "btd_bajie_combat"
+   }
+  },
+  "hds_baker": {
+   "file": "chars/hds_baker.png",
+   "title": [
+    "Thợ nướng bánh",
+    "Cake Baker"
+   ],
+   "biome": "hds",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "baker"
+  },
+  "hds_seller": {
+   "file": "chars/hds_seller.png",
+   "title": [
+    "Người bán bánh",
+    "Cake Seller"
+   ],
+   "biome": "hds",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "seller"
+  },
+  "tiefan": {
+   "file": "chars/tiefan.png",
+   "title": [
+    "Thiết Phiến Công Chúa",
+    "Princess Iron Fan"
+   ],
+   "biome": "hds",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "princess"
+  },
+  "hds_mule": {
+   "file": "chars/hds_mule.png",
+   "title": [
+    "Con la",
+    "Mule"
+   ],
+   "biome": "hds",
+   "size": [
+    68,
+    68
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "mule"
+  },
+  "sa_tang": {
+   "file": "chars/sa_tang.png",
+   "title": [
+    "Sa Tăng",
+    "Sha Wujing"
+   ],
+   "biome": "hds",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "sha",
+   "bantoAction": {
+    "src": "chars/actions/btd_sa_tang.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "btd_straight_staff_combat"
+   }
+  },
+  "thanh_su": {
+   "file": "chars/thanh_su.png",
+   "title": [
+    "Thanh Sư Vương",
+    "Azure Lion King"
+   ],
+   "biome": "sdl",
+   "size": [
+    72,
+    72
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "lion_king"
+  },
+  "bach_tuong": {
+   "file": "chars/bach_tuong.png",
+   "title": [
+    "Bạch Tượng Vương",
+    "White Elephant King"
+   ],
+   "biome": "sdl",
+   "size": [
+    76,
+    76
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     7
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "elephant_king"
+  },
+  "kim_si": {
+   "file": "chars/kim_si.png",
+   "title": [
+    "Kim Sí Đại Bàng",
+    "Golden-Winged Roc"
+   ],
+   "biome": "sdl",
+   "size": [
+    72,
+    72
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "roc_king"
+  },
+  "sdl_guard": {
+   "file": "chars/sdl_guard.png",
+   "title": [
+    "Tiểu yêu canh",
+    "Imp Guard"
+   ],
+   "biome": "sdl",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "guard"
+  },
+  "sdl_porter": {
+   "file": "chars/sdl_porter.png",
+   "title": [
+    "Tiểu yêu khuân vác",
+    "Imp Porter"
+   ],
+   "biome": "sdl",
+   "size": [
+    48,
+    48
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "porter"
+  },
+  "bach_long_ma": {
+   "file": "chars/bach_long_ma.png",
+   "title": [
+    "Bạch Long Mã",
+    "White Dragon Horse"
+   ],
+   "biome": "tth",
+   "size": [
+    92,
+    92
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "horse"
+  },
+  "tth_fisher": {
+   "file": "chars/tth_fisher.png",
+   "title": [
+    "Ngư dân",
+    "River Fisherman"
+   ],
+   "biome": "tth",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     7
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "fisher"
+  },
+  "tth_ferryman": {
+   "file": "chars/tth_ferryman.png",
+   "title": [
+    "Lão lái đò",
+    "Old Ferryman"
+   ],
+   "biome": "tth",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     5
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "ferryman"
+  },
+  "tth_imp": {
+   "file": "chars/tth_imp.png",
+   "title": [
+    "Tiểu yêu thủy tộc",
+    "River Imp"
+   ],
+   "biome": "tth",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "imp"
+  },
+  "hps_monk": {
+   "file": "chars/hps_monk.png",
+   "title": [
+    "Tăng nhân",
+    "Monastery Monk"
+   ],
+   "biome": "hps",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     5
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "monk"
+  },
+  "hps_novice": {
+   "file": "chars/hps_novice.png",
+   "title": [
+    "Tiểu sa di",
+    "Novice"
+   ],
+   "biome": "hps",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "novice"
+  },
+  "hps_abbot": {
+   "file": "chars/hps_abbot.png",
+   "title": [
+    "Trụ trì",
+    "Abbot"
+   ],
+   "biome": "hps",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "abbot"
+  },
+  "hac_hung_tinh": {
+   "file": "chars/hac_hung_tinh.png",
+   "title": [
+    "Hắc Hùng Tinh",
+    "Black Bear Guai"
+   ],
+   "biome": "hps",
+   "size": [
+    88,
+    88
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "bear"
+  },
+  "hps_minion": {
+   "file": "chars/hps_minion.png",
+   "title": [
+    "Tiểu yêu Hắc Phong",
+    "Black Wind Minion"
+   ],
+   "biome": "hps",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ],
+    "act": [
+     12,
+     7
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "minion"
+  },
+  "guanyin": {
+   "file": "chars/guanyin.png",
+   "title": [
+    "Quan Âm Bồ Tát",
+    "Guanyin"
+   ],
+   "biome": "hps",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "guanyin"
+  },
+  "wk_pilgrim": {
+   "file": "chars/wk_pilgrim.png",
+   "title": [
+    "Tôn Ngộ Không (hành giả)",
+    "Sun Wukong, the pilgrim disciple"
+   ],
+   "biome": "nhs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "king"
+  },
+  "nhs_hermit": {
+   "file": "chars/nhs_hermit.png",
+   "title": [
+    "Ẩn sĩ núi",
+    "Mountain Hermit"
+   ],
+   "biome": "nhs",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "hermit"
+  },
+  "nhs_deer": {
+   "file": "chars/nhs_deer.png",
+   "title": [
+    "Hươu sao",
+    "Sika Deer"
+   ],
+   "biome": "nhs",
+   "size": [
+    68,
+    68
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "deer"
+  },
+  "nhs_horse": {
+   "file": "chars/nhs_horse.png",
+   "title": [
+    "Ngựa trắng của Đường Tăng",
+    "Tang Sanzang's white horse"
+   ],
+   "biome": "nhs",
+   "size": [
+    92,
+    92
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "horse"
+  },
+  "nhs_goat": {
+   "file": "chars/nhs_goat.png",
+   "title": [
+    "Dê núi",
+    "Mountain Goat"
+   ],
+   "biome": "nhs",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "goat"
+  },
+  "ntq_zhenyuan": {
+   "file": "chars/ntq_zhenyuan.png",
+   "title": [
+    "Trấn Nguyên Đại Tiên",
+    "Zhenyuan Daxian, Great Immortal of Wuzhuang"
+   ],
+   "biome": "ntq",
+   "size": [
+    56,
+    56
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "sage"
+  },
+  "ntq_qingfeng": {
+   "file": "chars/ntq_qingfeng.png",
+   "title": [
+    "Thanh Phong",
+    "Qingfeng, the azure-robed boy"
+   ],
+   "biome": "ntq",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "boy"
+  },
+  "ntq_mingyue": {
+   "file": "chars/ntq_mingyue.png",
+   "title": [
+    "Minh Nguyệt",
+    "Mingyue, the white-robed girl"
+   ],
+   "biome": "ntq",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "girl"
+  },
+  "bgt_girl": {
+   "file": "chars/bgt_girl.png",
+   "title": [
+    "Bạch Cốt Tinh — cô gái",
+    "White Bone Demon as the girl"
+   ],
+   "biome": "bcl",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "actor"
+  },
+  "bgt_crone": {
+   "file": "chars/bgt_crone.png",
+   "title": [
+    "Bạch Cốt Tinh — bà lão",
+    "White Bone Demon as the old woman"
+   ],
+   "biome": "bcl",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "actor"
+  },
+  "bgt_elder": {
+   "file": "chars/bgt_elder.png",
+   "title": [
+    "Bạch Cốt Tinh — ông lão",
+    "White Bone Demon as the old man"
+   ],
+   "biome": "bcl",
+   "size": [
+    52,
+    52
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "actor"
+  },
+  "bgt_bone": {
+   "file": "chars/bgt_bone.png",
+   "title": [
+    "Bạch Cốt Tinh — nguyên hình",
+    "The White Bone Demon, true form"
+   ],
+   "biome": "bcl",
+   "size": [
+    60,
+    60
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "demon"
+  },
+  "bgt_skel": {
+   "file": "chars/bgt_skel.png",
+   "title": [
+    "Tiểu quỷ xương",
+    "Skeleton servant of the White Bone Demon"
+   ],
+   "biome": "bcl",
+   "size": [
+    44,
+    44
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     8
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "servant"
+  },
+  "hvd_redboy": {
+   "file": "chars/hvd_redboy.png",
+   "title": [
+    "Hồng Hài Nhi",
+    "Red Boy"
+   ],
+   "biome": "hvd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "redboy",
+   "hvdAction": {
+    "src": "chars/actions/hvd_redboy.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "hvd_true_fire"
+   }
+  },
+  "hvd_guanyin": {
+   "file": "chars/hvd_guanyin.png",
+   "title": [
+    "Quan Âm",
+    "Guanyin"
+   ],
+   "biome": "hvd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "guanyin",
+   "hvdAction": {
+    "src": "chars/actions/hvd_guanyin.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "hvd_divine_water"
+   }
+  },
+  "hvd_guard": {
+   "file": "chars/hvd_guard.png",
+   "title": [
+    "Tiểu yêu canh núi",
+    "Fire Cloud Guard"
+   ],
+   "biome": "hvd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "guard",
+   "hvdAction": {
+    "src": "chars/actions/hvd_guard.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "hvd_spear"
+   }
+  },
+  "hvd_worker": {
+   "file": "chars/hvd_worker.png",
+   "title": [
+    "Tiểu yêu thợ",
+    "Fire Cloud Worker"
+   ],
+   "biome": "hvd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "worker"
+  },
+  "hvd_trainee": {
+   "file": "chars/hvd_trainee.png",
+   "title": [
+    "Tiểu yêu tập sự",
+    "Young Demon Trainee"
+   ],
+   "biome": "hvd",
+   "size": [
+    64,
+    64
+   ],
+   "anim": {
+    "idle": [
+     0,
+     4
+    ],
+    "walk": [
+     4,
+     6
+    ]
+   },
+   "action": null,
+   "source": "pixellab",
+   "role": "trainee",
+   "hvdAction": {
+    "src": "chars/actions/hvd_trainee.png",
+    "size": [
+     80,
+     80
+    ],
+    "pivot": [
+     40,
+     68
+    ],
+    "count": 8,
+    "duration": 0.18,
+    "clip": "hvd_spell"
+   }
+  }
+ }
+}
