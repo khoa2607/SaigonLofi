@@ -25,9 +25,9 @@
     TWR.zoom = +(Q.get('zoom') || Math.max(1, Math.min(4, Math.round(Math.sqrt(innerWidth * innerHeight * (window.devicePixelRatio || 1) ** 2 / (960 * 540)))))); TWR.resize();
     const at = START[Q.get('at')] || (Q.get('at') && TWM.biomes[TWM.bi[Q.get('at')]] ? TWM.biomes[TWM.bi[Q.get('at')]].centre : START.hqs);
     TWR.lookAt((at[0] + 0.5) * 8, (at[1] + 0.5) * 8, TWM.H[TWM.id(Math.round(at[0]), Math.round(at[1]))] * 4);
-    if (Q.get('tod')) { TWR.tod = Q.get('tod'); TWR.clock = { day: 11, dusk: 18.2, night: 22 }[TWR.tod] || 9.5; document.getElementById('tod').value = TWR.tod; }
+    if (Q.get('tod')) { TWR.tod = Q.get('tod'); TWR.clock = { day: 11, dusk: 18.2, night: 22 }[TWR.tod] || 9.5; const todEl = document.getElementById('tod'); if (todEl) todEl.value = TWR.tod; }
     if (Q.get('debug')) TWR.debug = true;
-    document.getElementById('load').remove();
+    const ld = document.getElementById('load'); if (ld) ld.remove(); window.TWNAV && TWNAV.ready && TWNAV.ready();
     requestAnimationFrame(loop);
   }
   let last = 0, acc = 0;
@@ -35,6 +35,7 @@
     requestAnimationFrame(loop);
     const dt = Math.min(0.1, (now - last) / 1000 || 0); last = now;
     if (sim && sim.tick) { sim.hour = TWR.clock; acc += dt * (sim.speed || 1); let n = 0; while (acc >= 0.1 && n++ < 12) { sim.tick(0.1); acc -= 0.1; } if (n >= 12) acc = 0; }
+    if (nav) stepNav(dt);
     TWR.frame(dt, sim && sim.agents ? sim : null);
     placeCard(dt);
   }
@@ -45,7 +46,7 @@
     const el = document.getElementById('card');
     if (b !== card.biome) { card.biome = b; card.t = 0; return; }
     card.t += dt;
-    if (b && card.t > 2 && card.t - dt <= 2 && document.getElementById('names').checked && (!card.shown[b] || TWR.t - card.shown[b] > 180)) {
+    if (b && card.t > 2 && card.t - dt <= 2 && (!document.getElementById('names') || document.getElementById('names').checked) && (!card.shown[b] || TWR.t - card.shown[b] > 180)) {
       const B = TWM.biomes[TWM.bi[b]]; card.shown[b] = TWR.t;
       el.querySelector('b').textContent = B.title[0]; el.querySelector('span').textContent = B.title[1] + (B.built ? '' : ' · đang xây dựng / in development');
       el.style.opacity = 1; clearTimeout(placeCard.h); placeCard.h = setTimeout(() => el.style.opacity = 0, 4200);
@@ -53,13 +54,31 @@
   }
   // camera: drag, wheel/＋－ zoom in integer steps, arrow keys
   let drag = null;
-  cv.addEventListener('pointerdown', e => { TWR.userT = TWR.t; drag = [e.clientX, e.clientY, TWR.cx, TWR.cy]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+  cv.addEventListener('pointerdown', e => { nav = null; TWR.userT = TWR.t; drag = [e.clientX, e.clientY, TWR.cx, TWR.cy]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
   cv.addEventListener('pointermove', e => { if (!drag) return; TWR.userT = TWR.t; const dpr = window.devicePixelRatio || 1; TWR.cx = drag[2] - (e.clientX - drag[0]) * dpr / TWR.zoom; TWR.cy = drag[3] - (e.clientY - drag[1]) * dpr / TWR.zoom; TWR.clamp(); });
   cv.addEventListener('pointerup', () => { drag = null; cv.style.cursor = 'grab'; });
   cv.addEventListener('wheel', e => { TWR.userT = TWR.t; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1 : -1); }, { passive: false });
   function zoomBy(d) { TWR.zoom = Math.max(1, Math.min(5, TWR.zoom + d)); TWR.resize(); }
-  document.getElementById('zin').onclick = () => zoomBy(1); document.getElementById('zout').onclick = () => zoomBy(-1);
-  document.getElementById('tod').onchange = e => { TWR.tod = e.target.value; if (TWR.tod !== 'auto') TWR.clock = { day: 11, dusk: 18.2, night: 22 }[TWR.tod]; };
+  const bind = (id, ev, fn) => { const el = document.getElementById(id); if (el) el[ev] = fn; };
+  const CLOCKS = { day: 11, morning: 7.5, noon: 12.5, dusk: 18.2, night: 22 };
+  function setTime(m) { TWR.tod = m; if (m !== 'auto') TWR.clock = CLOCKS[m] || 9.5; }
+  bind('zin', 'onclick', () => zoomBy(1)); bind('zout', 'onclick', () => zoomBy(-1));
+  bind('tod', 'onchange', e => setTime(e.target.value));
+  // biome navigator: ease the camera to a biome's bookmark (or centre). Camera only: zoom, time of day, music and the simulation are untouched.
+  let nav = null;
+  function go(id, instant) {
+    const p = START[id] || (TWM.bi[id] !== undefined ? TWM.biomes[TWM.bi[id]].centre : null); if (!p) return false;
+    const z = (TWM.H[TWM.id(Math.round(p[0]), Math.round(p[1]))] || 0) * 4, c0 = [TWR.cx, TWR.cy]; TWR.lookAt((p[0] + 0.5) * 8, (p[1] + 0.5) * 8, z);
+    const c1 = [TWR.cx, TWR.cy]; TWR.userT = TWR.t;
+    if (instant || matchMedia('(prefers-reduced-motion: reduce)').matches) { nav = null; return true; }
+    TWR.cx = c0[0]; TWR.cy = c0[1]; const d = Math.hypot(c1[0] - c0[0], c1[1] - c0[1]); nav = { c0, c1, t: 0, dur: Math.max(0.6, Math.min(2.6, d / 900)), id }; return true;
+  }
+  function stepNav(dt) {
+    nav.t += dt; const k = Math.min(1, nav.t / nav.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    TWR.cx = nav.c0[0] + (nav.c1[0] - nav.c0[0]) * e; TWR.cy = nav.c0[1] + (nav.c1[1] - nav.c0[1]) * e; TWR.userT = TWR.t; if (k >= 1) nav = null;
+  }
+  function biomeHere() { const x = TWR.cx - TWA.OX, y = TWR.cy - TWA.OY, i = Math.floor((y / 16 + x / 32) / 2), j = Math.floor((y / 16 - x / 32) / 2); return TWM.biomeAt(i, j); }
+  window.TWNAV = Object.assign(window.TWNAV || {}, { go, setTime, zoomBy, biomeHere, moving: () => !!nav, cancel: () => { nav = null; } });
   addEventListener('resize', () => TWR.resize());
   addEventListener('keydown', e => { TWR.userT = TWR.t; const s = 160 / TWR.zoom; if (e.key === 'ArrowLeft') TWR.cx -= s; if (e.key === 'ArrowRight') TWR.cx += s; if (e.key === 'ArrowUp') TWR.cy -= s; if (e.key === 'ArrowDown') TWR.cy += s;
     if (e.key === '+' || e.key === '=') zoomBy(1); if (e.key === '-') zoomBy(-1); if (e.key === 'g') TWR.debug = !TWR.debug; TWR.clamp(); });

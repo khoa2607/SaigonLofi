@@ -4,30 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tây Du Ký — Huyền Thoại Sống</title>
-<style>
-  :root { --bg: #e8e2ef; --plate: rgba(42, 23, 38, .84); --gold: #e8b03a; --fg: #f6ecd8; --muted: #c9b8a0; }
-  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; font: 14px/1.4 system-ui, sans-serif; color: var(--fg); }
-  canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
-  #hud { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--plate); padding: 8px 10px; border-radius: 8px; max-width: calc(100% - 52px); }
-  #hud b { color: var(--gold); margin-right: 4px; }
-  #hud button, #hud select { background: #3a2a34; color: var(--fg); border: 1px solid #6a5060; border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
-  #hud label { color: var(--muted); font-size: 12px; display: flex; gap: 4px; align-items: center; }
-  #card { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); background: var(--plate); border: 2px solid var(--gold); border-radius: 8px;
-          padding: 6px 20px; text-align: center; opacity: 0; transition: opacity .9s; pointer-events: none; max-width: calc(100% - 40px); }
-  #card b { display: block; font-size: 19px; color: var(--gold); } #card span { color: var(--muted); font-size: 12px; }
-  #load { position: absolute; inset: 0; display: grid; place-items: center; color: #6a5070; font-size: 15px; background: var(--bg); }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Pixelify+Sans:wght@700&display=swap" rel="stylesheet">
+<!-- the shared Lofi Worlds stylesheet (SaigonLofi / Holdfast layout, sizes, positions, behaviour) + Tây Du Ký's own palette, biome navigator and dragon layer -->
+<link rel="stylesheet" href="../css/lofi-ui.css">
+<link rel="stylesheet" href="td-theme.css">
+<style>#card { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); padding: 6px 20px; text-align: center; opacity: 0; transition: opacity .9s; pointer-events: none; max-width: calc(100% - 40px); border-radius: 8px; } #card b { display: block; font-size: 19px; } #card span { font-size: 12px; }</style>
 </head>
 <body>
-<canvas id="c" aria-label="Tây Du Ký: a living isometric map of eleven legendary places"></canvas>
+<canvas id="c" aria-label="Tây Du Ký: a living isometric map of fifteen legendary places"></canvas>
+<canvas id="dragon" aria-hidden="true"></canvas>
+<div id="lang" role="group" aria-label="Ngôn ngữ giao diện" data-i18n-attr="aria-label:lang.group"><button data-lang="vi" lang="vi" aria-pressed="true" title="Tiếng Việt" data-i18n-attr="title:lang.vi">VI</button><button data-lang="en" lang="en" aria-pressed="false" title="English" data-i18n-attr="title:lang.en">EN</button></div>
 <div id="hud">
-  <b>Tây Du Ký — Huyền Thoại Sống</b>
-  <button id="zin" title="Phóng to">＋</button><button id="zout" title="Thu nhỏ">－</button>
-  <select id="tod" title="Giờ trong ngày"><option value="auto">Tự chạy</option><option value="day">Ngày</option><option value="dusk">Chiều tà</option><option value="night">Đêm</option></select>
-  <label><input id="names" type="checkbox" checked> Tên địa danh</label>
+  <button id="toMenu" data-i18n-attr="title:menu.back.t;aria-label:menu.back.t"><i></i><span data-i18n="menu.back">Lofi Worlds</span></button>
+  <div id="eras" role="group" aria-label="Chọn vùng đất" data-i18n-attr="aria-label:td.nav">
+    <div class="cap" data-i18n="td.cap">Tây Du Ký — Huyền Thoại Sống</div>
+    <div class="tabs nav" id="nav"></div>
+  </div>
+  <div id="info"><div id="eraSub">—</div><div id="status">—</div></div>
 </div>
+<div id="navTip" role="tooltip"></div>
+<div id="dock">
+  <div class="row">
+    <button id="play" aria-label="Bật / tắt nhạc" data-i18n-attr="aria-label:play"><span id="hint" data-i18n="hint">Bấm để bật nhạc</span>
+      <svg class="iplay" viewBox="0 0 12 12"><path d="M3.5 1.5v9l7-4.5z"/></svg>
+      <svg class="ipause" viewBox="0 0 12 12"><rect x="2.5" y="1.5" width="2.6" height="9"/><rect x="6.9" y="1.5" width="2.6" height="9"/></svg>
+    </button>
+    <div class="trk"><div class="names"><div id="tname">—</div><div id="tnum">—</div></div><canvas id="viz" width="40" height="14"></canvas></div>
+    <button id="prev" class="sq" aria-label="Bài trước" data-i18n-attr="aria-label:prev"><svg viewBox="0 0 12 12"><rect x="1.5" y="2" width="2" height="8"/><path d="M10.5 2v8l-6-4z"/></svg></button>
+    <button id="next" class="sq" aria-label="Bài kế tiếp" data-i18n-attr="aria-label:next"><svg viewBox="0 0 12 12"><path d="M1.5 2v8l6-4z"/><rect x="8.5" y="2" width="2" height="8"/></svg></button>
+    <button id="more" class="sq" aria-label="Mở bảng tuỳ chỉnh" data-i18n-attr="aria-label:more" aria-expanded="false"><svg viewBox="0 0 12 12"><circle cx="2.5" cy="6" r="1.4"/><circle cx="6" cy="6" r="1.4"/><circle cx="9.5" cy="6" r="1.4"/></svg></button>
+  </div>
+  <div class="row">
+    <div class="seg" role="group" aria-label="Thời gian trong ngày" data-i18n-attr="aria-label:time.group">
+      <button data-time="auto" data-i18n="time.auto">Tự chạy</button><button data-time="morning" data-i18n="time.morning">Sáng</button><button data-time="noon" data-i18n="time.noon">Trưa</button><button data-time="dusk" data-i18n="time.dusk">Chiều tà</button><button data-time="night" data-i18n="time.night">Đêm</button>
+    </div>
+  </div>
+  <div id="panel" hidden>
+    <div class="row wrap"><div class="lab">YouTube</div><input id="ytUrl" type="url" inputmode="url" placeholder="Dán link playlist YouTube…" aria-label="Đường dẫn playlist YouTube" data-i18n-attr="placeholder:yt.ph;aria-label:yt.aria"><button id="ytGo" data-i18n="yt.go">Phát</button></div>
+    <div class="row"><div class="lab"></div><div id="ytMsg">Dán playlist rồi bấm Phát. Nhạc lofi của game vẫn giữ nguyên.</div></div>
+    <div class="row wrap"><div class="lab" data-i18n="vol.lab">Âm lượng</div>
+      <label class="sl" for="vMusic"><span data-i18n="vol.music">Nhạc</span><input id="vMusic" type="range" min="0" max="100"></label>
+      <label class="sl" for="vAmb"><span data-i18n="vol.amb">Âm nền</span><input id="vAmb" type="range" min="0" max="100"></label>
+      <label class="sl" for="vVinyl"><span data-i18n="vol.vinyl">Đĩa than</span><input id="vVinyl" type="range" min="0" max="100"></label></div>
+    <div class="row wrap" hidden><button id="streetOn" aria-pressed="true">Bật</button><input id="vStreet" type="range" min="0" max="100"></div>
+    <div class="row wrap"><div class="lab" data-i18n="view.lab">Khung nhìn</div><div class="seg two">
+      <button id="zout" data-i18n="zout">Thu nhỏ</button><button id="zin" data-i18n="zin">Phóng to</button><button id="full" data-i18n="full">Toàn màn hình</button><button id="hide" data-i18n="hide">Ẩn bảng</button></div></div>
+    <div class="row wrap"><div class="lab" data-i18n="td.names.lab">Địa danh</div><label class="nm"><input id="names" type="checkbox" checked><span data-i18n="td.names">Hiện tên vùng khi đến nơi</span></label></div>
+  </div>
+</div>
+<div id="ytbox" hidden><div class="bar"><span>YouTube</span><button id="ytOff" title="Tắt YouTube, quay về nhạc lofi của game" data-i18n-attr="title:yt.off.t" data-i18n="yt.off">Tắt</button></div><div id="ytplayer"></div></div>
 <div id="card"><b></b><span></span></div>
-<div id="load">Đang dựng thế giới…</div>
+<div id="load"><b>TÂY DU KÝ</b><span>Đang dựng thế giới…</span><div class="p"><i id="loadB"></i></div></div>
+<script src="../js/i18n.js"></script>
+<script src="../js/core.js"></script>
+<script src="../js/audio.js"></script>
+<script src="../js/yt.js"></script>
+<script src="../js/dock.js"></script>
 <script src="tw-layout.js"></script>
 <script src="tw-palm.js"></script>
 <script src="tw-fire.js"></script>
@@ -99,5 +132,7 @@
 <script src="tw-hvd-fx.js"></script>
 <script src="tw-render.js"></script>
 <script src="tw-main.js"></script>
+<script src="td-dragon.js"></script>
+<script src="td-ui.js"></script>
 </body>
 </html>

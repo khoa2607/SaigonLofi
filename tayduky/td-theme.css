@@ -1,0 +1,63 @@
+/* Tây Du Ký — the shared Lofi Worlds UI (../css/lofi-ui.css: same layout, sizes, positions and behaviour as SaigonLofi / Holdfast) in an Eastern-immortal palette:
+   jade and deep emerald plates, antique gold trim, imperial-red accents, warm ivory paper, dark bronze ink. Only colours, the biome navigator grid, the dragon layer and the loading card live here. */
+:root { --ink: #0c2620; --cream: #f1e8cf; --paper: #e2d5ae; --peach: #d9a93c; --clay: #b3261e; --brown: #3d2a16; --wood: #174a3c; --jade: #1f7a63; --soft: #7a6a44;
+  --tile: #b3261e; --leaf: #1f7a63; --sun: #f0bd3e; --white: #f8f1dc; --plate: #123a32; --plate-2: #1c5646; --shadow: #071a15; --gold: #e0b040;
+  --font: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #e8e2ef; color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 500; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+#c { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: none; }
+#dragon { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; image-rendering: crisp-edges; z-index: 1; }
+#hud, #dock, #lang, #ytbox, #card { z-index: 3; }
+/* recolour the decorative tints the shared sheet hard-codes in Saigon's peach */
+#eras { background: repeating-linear-gradient(180deg, #174a3c 0 9px, #12402f 9px 11px); border: 3px solid var(--gold); box-shadow: inset 0 2px 0 #2f7a62, 0 0 0 2px var(--ink), 0 5px 0 var(--ink); }
+#eras .cap { color: #f6e7b4; text-shadow: 0 2px 0 var(--ink); }
+#eras button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); box-shadow: inset 0 -3px 0 #c3b27c, 0 2px 0 var(--ink); }
+#eras button:hover { background: #f4e7bc; border-color: var(--gold); }
+#eras button[aria-pressed="true"] { background: var(--clay); color: #fbe9c4; border-color: var(--gold); box-shadow: inset 0 3px 0 #7c1812; }
+#info { background: var(--cream); border: 2px solid var(--gold); box-shadow: inset 0 2px 0 #fff8e2, 0 0 0 2px var(--ink), 0 4px 0 var(--ink); }
+#eraSub { color: var(--clay); }
+#ticker { background: var(--plate); border: 2px solid var(--gold); box-shadow: 0 3px 0 var(--ink); }
+#dock { background: var(--cream); border: 3px solid var(--gold); box-shadow: inset 0 3px 0 #fff8e2, inset 0 -4px 0 #d5c48f, 0 0 0 2px var(--ink), 0 6px 0 var(--ink); }
+#dock::before, #dock::after { content: ""; position: absolute; top: -8px; width: 22px; height: 12px; background: var(--clay); border: 2px solid var(--ink); border-radius: 3px; box-shadow: inset 0 -3px 0 #7c1812; }
+#dock::before { left: 22px; } #dock::after { right: 22px; }
+#dock button { background: var(--paper); color: var(--brown); border: 2px solid var(--ink); box-shadow: inset 0 -3px 0 #c3b27c, 0 2px 0 var(--ink); }
+#dock button:hover { background: #f4e7bc; }
+#dock button[aria-pressed="true"] { background: var(--jade); color: #fbf3da; box-shadow: inset 0 3px 0 #135040; }
+#play { background: var(--clay) !important; border: 3px solid var(--ink) !important; box-shadow: inset 0 -4px 0 #7c1812, 0 3px 0 var(--ink) !important; color: #fbe9c4 !important; }
+#hint { background: var(--sun); color: var(--ink); }
+#tname { color: var(--clay); }
+#panel { border-top: 2px dashed #b9a56a; }
+input[type=range] { accent-color: var(--clay); }
+#ytUrl { background: #fff8e2; border: 2px solid var(--ink); }
+#ytbox { background: var(--cream); border: 3px solid var(--gold); box-shadow: 0 5px 0 var(--ink); }
+#lang { background: var(--cream); border: 2px solid var(--gold); box-shadow: inset 0 2px 0 #fff8e2, 0 0 0 2px var(--ink), 0 3px 0 var(--ink); }
+#lang button { background: var(--paper); color: var(--brown); box-shadow: none; }
+#lang button + button { border-left: 2px solid var(--ink); }
+#lang button:hover { background: #f4e7bc; }
+#lang button[aria-pressed="true"] { background: var(--clay); color: #fbe9c4; box-shadow: inset 0 3px 0 #7c1812; }
+#toMenu { background: var(--cream); color: var(--brown); border: 2px solid var(--gold); box-shadow: 0 0 0 2px var(--ink), 0 3px 0 var(--ink); }
+#toMenu i { background: var(--gold); box-shadow: inset -3px -3px 0 #a67a1c; }
+/* the biome navigator replaces Saigon's era tabs / Holdfast's timeline tabs: same plate, same position, same button style, 15 buttons in a 5 x 3 grid */
+#eras .tabs.nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+#eras .tabs.nav button { min-width: 0; min-height: 36px; padding: 0 4px; font-size: 15px; letter-spacing: .3px; position: relative; }
+#eras .tabs.nav button .dotb { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50%; background: #5c8a6e; opacity: 0; }
+#eras .tabs.nav button.busy .dotb { opacity: 1; background: #e8b03a; box-shadow: 0 0 4px #e8b03a; }
+#eras .tabs.nav button:focus-visible { outline: 3px solid var(--sun); outline-offset: 1px; }
+#navTip { position: fixed; z-index: 6; pointer-events: none; background: var(--plate); color: #f6e7b4; border: 2px solid var(--gold); border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 13px; box-shadow: 0 3px 0 var(--ink); opacity: 0; transition: opacity .12s; white-space: nowrap; max-width: calc(100% - 16px); }
+#navTip.on { opacity: 1; } #navTip small { display: block; font-weight: 500; font-size: 11px; color: #cdbf8f; }
+#card { background: var(--plate); border: 2px solid var(--gold); box-shadow: 0 0 0 2px var(--ink), 0 4px 0 var(--ink); color: #f6e7b4; }
+#card b { color: var(--sun); } #card span { color: #cdbf8f; }
+.nm { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--brown); }
+.nm input { width: 18px; height: 18px; accent-color: var(--clay); }
+body.clean #dragon { display: none; }
+/* loading card */
+#load { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(circle at 50% 42%, #f1e8cf, #c9b983); z-index: 50; transition: opacity .6s; color: var(--ink); }
+#load.done { opacity: 0; pointer-events: none; }
+#load b { font-family: 'Pixelify Sans', monospace; font-size: 34px; letter-spacing: 4px; color: var(--clay); text-shadow: 0 3px 0 #c9a840; text-align: center; padding: 0 12px; }
+#load span { font-size: 15px; font-weight: 700; }
+#load .p { width: min(240px, 60%); height: 12px; border: 2px solid var(--ink); border-radius: 3px; background: #d9c993; overflow: hidden; }
+#load .p i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--clay) 0 6px, #7c1812 6px 8px); transition: width .2s; }
+@media (max-width: 700px) { #eras .tabs.nav button { font-size: 13px; min-height: 34px; } #eras .cap { font-size: 10.5px; } }
+@media (max-width: 480px) { #eras .tabs.nav { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; } #eras .tabs.nav button { font-size: 12px; padding: 0 1px; } #eras { padding: 5px 5px 6px; } }
+@media (prefers-reduced-motion: reduce) { #load, #navTip { transition: none; } }
+.row[hidden] { display: none !important; }
