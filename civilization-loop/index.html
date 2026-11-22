@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Civilization Loop</title>
+<style>
+  :root { --ink: #f1e6cf; --dim: #b9aa8c; --plate: rgba(34, 27, 20, .66); --line: rgba(241, 230, 207, .16); --accent: #e0b868; --ok: #8fbf6a; --bad: #d9805a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #1f2a26; color: var(--ink); font: 13px/1.35 ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow: hidden; user-select: none; -webkit-user-select: none; }
+  #world { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: grab; touch-action: none; }
+  #world.drag { cursor: grabbing; }
+  .plate { position: fixed; background: var(--plate); border: 1px solid var(--line); border-radius: 6px; backdrop-filter: blur(3px); padding: 8px 11px; }
+  #hud { left: 12px; top: 12px; min-width: 232px; }
+  #hud .big { font-size: 17px; letter-spacing: .02em; }
+  #hud .sub { color: var(--dim); }
+  #hud .row { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; margin-top: 4px; }
+  #hud .stage { color: var(--accent); }
+  .bar { height: 4px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; margin-top: 5px; }
+  .bar i { display: block; height: 100%; background: var(--ok); width: 50%; transition: width .4s, background .4s; }
+  .res { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 7px; }
+  .res div { background: rgba(255,255,255,.06); border-radius: 4px; padding: 3px 6px; }
+  .res b { display: block; font-weight: 600; font-size: 13px; }
+  .res span { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+  #log { right: 12px; top: 12px; width: 300px; max-height: calc(100% - 96px); display: flex; flex-direction: column; }
+  #log h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; display: flex; justify-content: space-between; }
+  #spark { width: 100%; height: 44px; display: block; margin-bottom: 6px; }
+  #events { overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+  #events li { padding: 4px 0; border-top: 1px solid var(--line); }
+  #events li b { color: var(--accent); font-weight: 600; margin-right: 6px; }
+  #events li.bad { color: #f0b49a; } #events li.good b, #events li.build b { color: var(--ok); }
+  #events li.end, #events li.newcomers { color: #cdb6f0; }
+  body.nolog #log { display: none; }
+  #bar { left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; padding: 6px 8px; }
+  #bar button { background: rgba(255,255,255,.07); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; height: 30px; min-width: 38px; padding: 0 9px; font: inherit; cursor: pointer; display: grid; place-items: center; }
+  #bar button:hover { background: rgba(255,255,255,.16); }
+  #bar button.on { background: var(--accent); color: #2a1e12; border-color: transparent; }
+  #bar .sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+  .ic { display: flex; gap: 2px; } .ic i { width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 8px solid currentColor; }
+  .ic.pause i { width: 3px; height: 12px; border: 0; background: currentColor; }
+  #inspect { left: 12px; bottom: 14px; width: 300px; display: none; }
+  #inspect h4 { margin: 0 0 4px; font-size: 11px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; }
+  #inspect p { margin: 2px 0; }
+  #menu { right: 12px; bottom: 14px; display: flex; gap: 6px; align-items: center; padding: 6px 8px; }
+  #menu input { width: 64px; background: rgba(0,0,0,.25); border: 1px solid var(--line); color: var(--ink); border-radius: 4px; height: 26px; padding: 0 6px; font: inherit; }
+  #menu button { background: rgba(255,255,255,.07); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; height: 26px; padding: 0 8px; font: inherit; cursor: pointer; }
+  #toast { left: 50%; top: 16px; transform: translateX(-50%); opacity: 0; transition: opacity .4s; pointer-events: none; }
+  #toast.show { opacity: 1; }
+  @media (max-width: 760px) { #log { display: none; } #menu { display: none; } #hud { min-width: 0; } }
+</style>
+</head>
+<body>
+<canvas id="world" aria-label="An isometric pixel-art world: a settlement grows, declines and is remembered by the land"></canvas>
+<div id="hud" class="plate">
+  <div class="row" style="margin-top:0"><span class="big" id="yr">Year 1</span><span class="sub" id="season">Spring</span></div>
+  <div class="row"><span class="stage" id="stage">Foraging Camp</span><span class="sub" id="civ">Civilization I</span></div>
+  <div class="row"><span>Population <b id="pop" style="font-size:15px">10</b></span><span class="sub">Stability <b id="stabv">70%</b></span></div>
+  <div class="bar"><i id="stab"></i></div>
+  <div class="res">
+    <div><span>Food</span><b id="rFood">0</b></div><div><span>Wood</span><b id="rWood">0</b></div><div><span>Stone</span><b id="rStone">0</b></div>
+    <div><span>Water</span><b id="rWater">100%</b></div><div><span>Housing</span><b id="rHouse">0</b></div><div><span>Forest</span><b id="rForest">100%</b></div>
+  </div>
+</div>
+<div id="log" class="plate"><h3><span>Chronicle</span><span id="ruins"></span></h3><canvas id="spark" width="280" height="44"></canvas><ul id="events"></ul></div>
+<div id="inspect" class="plate"></div>
+<div id="bar" class="plate">
+  <button id="bPause" title="Pause (Space)"><span class="ic pause"><i></i><i></i></span></button>
+  <button id="b1" title="Normal (1)"><span class="ic"><i></i></span></button>
+  <button id="b2" title="Fast (2)"><span class="ic"><i></i><i></i></span></button>
+  <button id="b3" title="Very fast (3)"><span class="ic"><i></i><i></i><i></i></span></button>
+  <span class="sep"></span>
+  <button id="zOut" title="Zoom out (-)">&minus;</button><button id="zIn" title="Zoom in (+)">+</button>
+  <button id="bLog" title="Chronicle (L)">Log</button>
+</div>
+<div id="menu" class="plate"><span class="sub" style="color:var(--dim)">Seed</span><input id="seed" inputmode="numeric"><button id="bNew" title="Start a new world with this seed">New</button><button id="bSave">Save</button><button id="bLoad">Load</button></div>
+<div id="toast" class="plate"></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

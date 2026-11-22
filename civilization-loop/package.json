@@ -1,0 +1,11 @@
+{
+  "name": "civilization-loop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Civilization Loop - a persistent, evolving pixel-art world simulation (no dependencies, no build step)",
+  "scripts": {
+    "serve": "python3 -m http.server 8780",
+    "test": "node tests/sim.test.mjs"
+  }
+}
