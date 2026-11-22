@@ -115,8 +115,8 @@ export function createRenderer(canvas) {
     const home = S.buildings.filter(b => b.done && !b.ruined && !b.abandoned && BT[b.type].dwelling);
     switch (a.role) {
       case 'farm': { const f = S.buildings.filter(b => b.type === 'farm' && b.done && !b.ruined && !b.fallow && !b.abandoned); if (f.length) { const b = f[Math.floor(r() * f.length)]; return [b.x + 0.5 + r() * (b.w - 1), b.y + 0.5 + r() * (b.d - 1)]; } break; }
-      case 'wood': if (S.cutSite) return around(S.cutSite.x + 0.5, S.cutSite.y + 0.5, 1.2); break;
-      case 'stone': if (S.quarrySite) return around(S.quarrySite.x + 0.5, S.quarrySite.y + 0.5, 1.2); if (S.salvageSite) return around(S.salvageSite.x + 0.5, S.salvageSite.y + 0.5, 1); break;
+      case 'wood': if (S.cutSite) return around(S.cutSite.x + 0.5, S.cutSite.y + 0.5, 3); break;
+      case 'stone': if (S.quarrySite) return around(S.quarrySite.x + 0.5, S.quarrySite.y + 0.5, 2.6); if (S.salvageSite) return around(S.salvageSite.x + 0.5, S.salvageSite.y + 0.5, 2); break;
       case 'build': { const p = S.buildings.filter(b => !b.done && !b.ruined); const l = p.length ? p : S.buildings.filter(b => b.done && !b.ruined && b.cond < 0.9); if (l.length) { const b = l[Math.floor(r() * l.length)]; return [b.x + b.w / 2 + (r() - 0.5) * b.w, b.y + b.d + 0.4]; } break; }
       case 'gather': return around(S.center.x + (r() - 0.5) * 10, S.center.y + (r() - 0.5) * 10, 3);
     }

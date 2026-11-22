@@ -221,7 +221,7 @@ export function buildingSprite(type, skin, stage, wear, ab, seed) {
     B.box(m, m, 1.4, w - 2 * m, d - 2 * m, H, WALL[skin], wallPaint(skin, s, { door: { u: 0.45, w: 0.4 }, window: skin >= 1, wear, ab, h: H }));
     if (skin === 0) roofLayers(B, -0.1, -0.1, w + 0.2, d + 0.2, 1.4 + H, 8, 0.12, thatch(s), 0xc8a860, o);
     else if (skin === 1) roofLayers(B, -0.12, -0.12, w + 0.24, d + 0.24, 1.4 + H, 7, 0.14, shingle(s, 0x7a5a40), 0x7a5a40, o);
-    else { roofLayers(B, -0.12, -0.12, w + 0.24, d + 0.24, 1.4 + H, 7, 0.14, clay(s), 0xb0583c, o); B.box(1.3, 1.3, 1.4 + H + 4, 0.3, 0.3, 6, 0x8a847a); }
+    else { roofLayers(B, -0.12, -0.12, w + 0.24, d + 0.24, 1.4 + H, 7, 0.14, clay(s), 0xb0583c, o); B.box(1.45, 1.05, 1.4 + H + 3.5, 0.2, 0.2, 5, 0x8a5a48); }
     if (skin === 0 && wear < 2) B.box(0.9, 0.9, 1.4 + H + 12, 0.2, 0.2, 2, 0x3a2a20);                                                  // smoke hole
   } else if (type === 'shelter') {   // a hide tent over a ring of poles
     roofLayers(B, 0.05, 0.05, w - 0.1, d - 0.1, 0.5, 9, 0.105, hideP(s), 0x8a6a48, o);

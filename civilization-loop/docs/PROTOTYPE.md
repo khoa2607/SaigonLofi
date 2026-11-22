@@ -31,6 +31,14 @@ A watchable, passive simulation of **one settlement's whole arc** on a fixed 48x
 ## Verification (see `tests/`)
 Determinism, frame-rate independence (uneven batching gives identical state), invariants over 6 seeds x 800 years, condition-driven progress (barren land stays small), functional buildings, forest depletion persistence, roads/fields persistence, collapse into ruins, reclamation, inheritance (second civilization reuses foundations in most worlds), disasters occur and leave marks, boom-and-bust decline, save/load round trip.
 
+## Measured (headless Chromium, software canvas, 1920x1080, scale 2, a town of ~140-190 people and ~90-100 buildings)
+- Drawing one frame: median 10 ms, p95 13 ms (a real GPU-backed browser is faster). One simulated month: ~0.2 ms. 30 months/s at "very fast" is therefore cheap.
+- Normal / fast / very fast = 2 / 8 / 30 simulated months per real second (verified in `tests/browser.test.mjs`); a year is 6 s at normal speed.
+- Typical arc on seed 7: camp (year 1) -> hamlet (~20) -> village (~35) -> town (~60-75, 150-350 people) -> overshoot, deforestation, droughts/fires/plague -> decline and ruin (year ~250-450) -> a new people arrives and builds among the ruins.
+
+## Screenshots (`docs/screenshots/`, 1600x900, produced by `node tests/browser.test.mjs --shots`)
+`01-first-camp` (year 3, scale 4), `02-growing-settlement` (year 36), `03-town` (year 71), `04-town-night` (year 71, lit windows and fires), `05-ruins-and-regrowth` (seed 2, year 431: second civilization among the ruins, forest regrown, deer back).
+
 ## Known limitations
 See the final report in the pull request / session notes and the list below.
 - Only one technology line (a Neolithic-to-town arc); no alternative branches, no later eras, no artifacts or technology inheritance beyond "the old fields and ruins are recognised".

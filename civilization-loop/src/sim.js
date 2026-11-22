@@ -83,6 +83,7 @@ function siteScore(S, type, x, y) {
   if (type === 'farm') s += -dc * 0.45 + fert * 14 + (wd <= 4 ? 2 : 0) + farmed * 1.5;
   else if (type === 'well') { s += -dc * 0.8 + (wd > 4 ? 3 : -4); for (const o of S.buildings) if (o.type === 'well' && !o.ruined && dist(o.x, o.y, x, y) < 6) s -= 6; }
   else { s += -dc + road * 3 + ruin * 3 - flood * 6; if (bt.dwelling) s += (wd <= 5 ? 2 : 0) - (wd <= 1 ? 3 : 0); }
+  if (type !== 'farm') { let adj = 0; for (let j = -1; j <= bt.d; j++) for (let i = -1; i <= bt.w; i++) { if (i >= 0 && j >= 0 && i < bt.w && j < bt.d) continue; if (inb(x + i, y + j) && W.bld[idx(x + i, y + j)] >= 0) adj++; } s -= adj * 0.35; }   // leave lanes between buildings: paths wear in there
   return s;
 }
 export function findSite(S, type) {
@@ -294,7 +295,7 @@ function plan(S) {
   const pending = S.buildings.filter(b => !b.done && !b.ruined && BT[b.type].dwelling).reduce((a, b) => a + BT[b.type].cap, 0);
   const slack = (S.capHousing || 0) + pending - pop * 1.12, needs = [];
   if (slack < 0) needs.push([U.farming || pop >= 12 ? 'house' : 'shelter', 90 - slack * 3]);
-  if (U.farming) { const fs = active(S, 'farm').filter(b => !b.abandoned); const prod = fs.reduce((a, f) => a + 7 * 0.75 * 0.83, 0) * 0.8 + (S.gameCap ? 2 : 0); const want = Math.ceil(pop * 0.5 * 1.25 / 4.2); if (cnt('farm') < want) needs.push(['farm', 80 + (want - cnt('farm')) * 2 + (S.foodStress >= 3 ? 50 : 0)]); }
+  if (U.farming) { const fs = active(S, 'farm').filter(b => !b.abandoned); const prod = fs.reduce((a, f) => a + 7 * 0.75 * 0.83, 0) * 0.8 + (S.gameCap ? 2 : 0); const want = Math.ceil(pop * 0.5 * 1.25 / 4.2); if (cnt('farm') < want) needs.push(['farm', 80 + (want - cnt('farm')) * 2 + (S.foodStress >= 3 ? 50 : 0) + (S.res.food < pop * 2 ? 30 : 0)]); }
   if (U.storage && cnt('storage') < Math.floor(pop / 40) + 1) needs.push(['storage', 55]);
   if (U.well) { const unwatered = pop * (1 - S.sat.water); if (unwatered > 3 || (S.t - S.lastPlague < 240 && cnt('well') < 2)) needs.push(['well', 70]); }
   if (U.workshop && cnt('workshop') < Math.min(3, Math.floor(pop / 45) + 1)) needs.push(['workshop', 45]);
