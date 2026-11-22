@@ -43,3 +43,9 @@ navigator compact at ≤700 px and ≤480 px (td-theme.css). Shots: `ui-responsi
 ## Accessibility
 Real `<button>`s with labels, `aria-pressed`/`aria-current`, visible focus, tooltip on focus, reduced-motion rules for the card,
 tooltip, camera tween (instant jump) and dragon (still).
+
+## Compact polish (after Checkpoint A)
+Saigon is the density standard (its plate: 10.5px caption, ~52x36 era buttons). The frame is now 400px wide (340px on phones), the
+title is 10.5px / 1.4px tracking (8.5px on phones) and the 15 labels are 12.5px (11px on phones) in 5x3 buttons of about 46x28px with
+4-5px gaps. The artwork file is unchanged (`a447fc2`); only its scale/position and the DOM typography changed.
+Before/after/Saigon shots at 1920x1080, 1366x768, 820x1180, 390x844: `screenshots/ui/polish/`.

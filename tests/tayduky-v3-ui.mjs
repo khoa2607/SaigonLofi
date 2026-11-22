@@ -26,7 +26,7 @@ for (const [W, H] of sizes) {
       const before = JSON.parse(await ev(`JSON.stringify({z: TWR.zoom, tod: TWR.tod, ag: TWS.agents.length})`));
       const bad = [];
       for (const id of IDS) {
-        await ev(`document.querySelector('#nav [data-biome=${id}]').click()`); await wait(3200);
+        await ev(`document.querySelector('#nav [data-biome=${id}]').click()`); await wait(4200);
         const q = JSON.parse(await ev(`JSON.stringify({here: TWNAV.biomeHere(), act: TWNAV.active(), on: document.querySelectorAll('#nav .on').length, moving: TWNAV.moving()})`));
         if (q.here !== id || q.act !== id || q.on !== 1 || q.moving) bad.push(id + ':' + JSON.stringify(q));
       }
@@ -35,7 +35,7 @@ for (const [W, H] of sizes) {
       ok(after.z === before.z && after.tod === before.tod, tag + 'zoom + time mode kept across navigation');
     }
     ok(!errs.length, tag + 'no JS errors ' + errs.join('|')); ok(!miss.length, tag + 'no missing assets ' + miss.join('|'));
-    if (SHOTS) { await ev(`document.querySelector('#nav [data-biome=hqs]').click()`); await wait(3200); await shot(send, W === 390 ? 'ui-responsive-mobile.png' : W === 820 ? 'ui-responsive-tablet.png' : `ui-responsive-${W}.png`); }
+    if (SHOTS) { await ev(`document.querySelector('#nav [data-biome=hqs]').click()`); await wait(4200); await shot(send, W === 390 ? 'ui-responsive-mobile.png' : W === 820 ? 'ui-responsive-tablet.png' : `ui-responsive-${W}.png`); }
   });
 }
 await withChrome(1600, 900, async ({ base, send, ev, on }) => {

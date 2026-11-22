@@ -63,8 +63,6 @@ body.clean #deco { display: none; }
    its plaque interior is transparent, so the real DOM board (#eras) shows through and the 15 buttons stay interactive.
    Everything is placed in units of --u = 1/1000 of the artwork width, so it scales as one piece. Art px (1000 x 637):
    board interior x 108-860, y 164-522; title centre y 186; button grid x 150-832, y 225-497. */
-:root { --aw: clamp(290px, min(calc(100vw - 16px), 560px, calc((100vh - 220px) * 1.57)), 620px); --u: calc(var(--aw) / 1000); --ax: 8px; --ay: 46px; }
-@media (min-width: 1700px) and (min-height: 900px) { :root { --aw: 620px; } }
 #deco { position: fixed; left: var(--ax); top: var(--ay); width: var(--aw); height: auto; z-index: 4; pointer-events: none; user-select: none; -webkit-user-drag: none; }
 #hud { position: fixed; inset: 0; max-width: none; display: block; pointer-events: none; }
 #hud > * { pointer-events: auto; }
@@ -77,3 +75,12 @@ body.clean #deco { display: none; }
 #eras .tabs.nav button { min-height: 0; height: 100%; font-size: clamp(10px, calc(46 * var(--u)), 28px); border-radius: calc(8 * var(--u)); border-width: calc(2.5 * var(--u)); }
 #info { position: absolute; left: 14px; top: calc(var(--ay) + var(--aw) * 0.637 + 4px); }
 #eras .tabs.nav button.busy .dotb { top: calc(5 * var(--u)); right: calc(5 * var(--u)); }
+
+/* ----- compact polish: Saigon's density (cap 10.5px, small labels). Art 1000px wide is shown at ~400px (350px on phones). ----- */
+:root { --aw: min(calc(100vw - 16px), 400px); --u: calc(var(--aw) / 1000); --ax: 6px; --ay: 40px; }
+@media (max-width: 480px) { :root { --aw: min(calc(100vw - 12px), 340px); --ax: 4px; --ay: 38px; } }
+#eras .cap { font-size: 10.5px; letter-spacing: 1.4px; font-weight: 700; }
+#eras .tabs.nav button { font-size: 12.5px; letter-spacing: .3px; font-weight: 800; border-width: 2px; border-radius: 4px; box-shadow: inset 0 -2px 0 #c3b27c, 0 1px 0 var(--ink); }
+#eras .tabs.nav { gap: 4px 5px; }
+@media (max-width: 480px) { #eras .cap { font-size: 8.5px; letter-spacing: .6px; } #eras .tabs.nav button { font-size: 11px; } #eras .tabs.nav { gap: 3px 4px; } }
+#info { padding: 4px 9px 5px; } #eraSub { font-size: 12px; } #status { font-size: 11px; }
