@@ -13,7 +13,7 @@ window.TW_BTP_BUILD = function (X) {
   const mine = (i, j) => { i = Math.floor(i); j = Math.floor(j); return inMap(i, j) && BIO[id(i, j)] === B; };
   TWM.props = TWM.props.filter(p => !mine(p.i, p.j)); TWM.pois = TWM.pois.filter(p => p.biome !== 'btp'); TWM.lights = TWM.lights.filter(l => l.biome !== 'btp'); TWM.decals = TWM.decals.filter(d => !mine(d.i, d.j)); TWM.falls = TWM.falls.filter(f => !mine(f.i, f.j));
   for (const key of [...TWM.stairs.keys()]) { const [a, b] = key.split(',').map(Number); if (BIO[a] === B || BIO[b] === B) TWM.stairs.delete(key); } for (const key of [...TWM.stairAt.keys()]) if (BIO[key] === B) TWM.stairAt.delete(key);
-  const F = TWM.palm = { B, x0, y0, x1, y1, tiles: [], fingers: [], tiers: [], islands: [], clouds: [], drift: [], edges: [], pois: {}, lamps: [], lotuses: [], runes: [], path: [], failed: [], centre: [74, 50], buddha: [61, 60], island: { west: [59, 50], east: [88, 44] }, seal: [74, 50] };
+  const F = TWM.palm = { B, x0, y0, x1, y1, tiles: [], fingers: [], tiers: [], islands: [], clouds: [], drift: [], edges: [], pois: {}, lamps: [], lotuses: [], runes: [], path: [], failed: [], centre: [74, 50], buddha: [85, 43], island: { west: [59, 50], east: [88, 44] }, seal: [74, 50] };
   TWM.layout.btp = { x0, y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
   const FIX = new Uint8Array(N * N);
   // ---------------------------------------------------------------- 1. the cloud sea: deep sky, shallow near the borders so no cliff shows against a neighbour
@@ -27,7 +27,7 @@ window.TW_BTP_BUILD = function (X) {
   // ---------------------------------------------------------------- 2. the cloud terraces under the hand (so the slab floats on layered cloud), lotus islands
   const island = (ca, cb, ra, rb, lv, mat) => ell(ca, cb, ra, rb, (k, d) => { if (d < 1) { H[k] = lv; MAT[k] = mat || M.SKYC; FIX[k] = 1; } else if (d < 1.9 && !FIX[k] && H[k] < lv - 1) { H[k] = Math.max(H[k], lv - 2); MAT[k] = M.SKYC; } });
   island(74, 55, 15, 11, 2, M.SKYC); island(74, 53, 12.5, 9, 3, M.SKYC);                                    // two cloud terraces around the palm
-  island(88, 44, 2.4, 2.2, 3, M.SKYC);   // lotus islands
+     // lotus islands
   for (const [a, b, ra, rb, lv] of [[56, 38, 4.6, 3.6, 4], [63, 33, 3.8, 3, 3], [84, 33, 4, 3, 3], [88, 52, 3, 2.6, 3], [86, 66, 4.2, 3.4, 3], [72, 72, 5, 3.4, 3], [58, 66, 4, 3, 3], [56, 56, 3, 2.6, 3], [78, 72, 3.4, 2.6, 2], [90, 60, 2.6, 2.4, 2], [66, 40, 3, 2.4, 3], [89, 36, 2.6, 2.2, 3]]) island(a, b, ra, rb, lv, M.SKYC);   // cloud cliffs: rolling billows around the hand
   // ---------------------------------------------------------------- 3. the hand
   // the hand is an organic shape (a signed-distance field in the hand's own frame: u along the fingers = screen-right, v across = screen-down). Its visual is one big pixel-art sprite (tw-btp-fx.js, kind 'palmhand');
@@ -39,14 +39,16 @@ window.TW_BTP_BUILD = function (X) {
     { n: 'thumb', u0: -0.8, v0: -5.0, L: 7.2, r0: 2.1, r1: 1.5, ang: -1.2, bend: 0.1, thumb: true }];
   const chain = (f, s) => { const a0 = f.ang * (f.thumb ? 0.55 + 0.45 * s : s), ls = [0.42, 0.33, 0.25], pts = [[f.u0, f.v0]], rs = [f.r0]; let a = a0, t = 0; for (let q = 0; q < 3; q++) { const p = pts[q]; pts.push([p[0] + Math.cos(a) * f.L * ls[q], p[1] + Math.sin(a) * f.L * ls[q]]); t += ls[q]; rs.push(f.r0 + (f.r1 - f.r0) * t); a += f.bend; } return { pts, rs, a, ls }; };
   const chains = s => DIGITS.map(f => chain(f, s === undefined ? 1 : s));
-  const sdfC = (u, v, CH) => { const nar = 1 - 0.2 * sm(clampf(-u / 5.5, 0, 1)), q = (Math.pow(Math.abs(u / 5.6), 3) + Math.pow(Math.abs(v / (6.2 * nar)), 3)) ** (1 / 3), dp = (q - 1) * 4.6, dw = rcone(u, v, -3, 0.2, -12, 0.8, 3.7, 3.1); let d = smin(dp, dw, 1.2);
+  const sdfC = (u, v, CH) => { const nar = 1 - 0.2 * sm(clampf(-u / 5.5, 0, 1)), q = (Math.pow(Math.abs(u / 5.6), 3) + Math.pow(Math.abs(v / (6.2 * nar)), 3)) ** (1 / 3), dp = (q - 1) * 4.6, dw = rcone(u, v, -3, 0.2, -17.5, 1.0, 3.7, 3.4); let d = smin(dp, dw, 1.2);
     for (let k = 0; k < CH.length; k++) { const c = CH[k]; let df = 1e9; for (let q2 = 0; q2 < 3; q2++) { const e = rcone(u, v, c.pts[q2][0], c.pts[q2][1], c.pts[q2 + 1][0], c.pts[q2 + 1][1], c.rs[q2], c.rs[q2 + 1]); if (e < df) df = e; } d = smin(d, df, 0.6); } return d; };
   const geo = F.geo = { C: C0, DU, DV, DIGITS, chain, chains, sdfC, rcone, smin, toLocal: (i, j) => { const a = i - C0[0], b = j - C0[1]; return [a * DU[0] + b * DU[1], a * DV[0] + b * DV[1]]; }, toWorld: (u, v) => [C0[0] + u * DU[0] + v * DV[0], C0[1] + u * DU[1] + v * DV[1]] };
   { const CH = chains(1); F.fingers = DIGITS.map((f, k) => { const c = CH[k], tipL = [c.pts[3][0] + Math.cos(c.a) * f.r1, c.pts[3][1] + Math.sin(c.a) * f.r1], tw = geo.toWorld(tipL[0], tipL[1]), bw = geo.toWorld(c.pts[0][0], c.pts[0][1]), mid = geo.toWorld((c.pts[1][0] + c.pts[2][0]) / 2, (c.pts[1][1] + c.pts[2][1]) / 2), back = geo.toWorld(c.pts[3][0] - 0.3, c.pts[3][1] - 0.1);
       return { k, name: f.n, i: Math.floor(tw[0]), j: Math.floor(tw[1]), cx: tw[0] - 0.5, cy: tw[1] - 0.5, y0: tw[1] - 0.5, y1: bw[1], lv: 6, w: 64, tip: tw, base: bw, mid, back, front: [Math.floor(bw[0]), Math.floor(bw[1])] }; });
-    F.handTiles = []; for (let b = 28; b <= 66; b++) for (let a = 56; a <= 92; a++) { const k = tile(a, b); if (k < 0) continue; const [u, v] = geo.toLocal(a + 0.5, b + 0.5); if (sdfC(u, v, CH) < -0.25) { set(a, b, 6, M.PGOLD); F.handTiles.push(k); } } }
+    F.handTiles = []; for (let b = 28; b <= 70; b++) for (let a = 53; a <= 92; a++) { const k = tile(a, b); if (k < 0) continue; const [u, v] = geo.toLocal(a + 0.5, b + 0.5); if (sdfC(u, v, CH) < -0.25) { set(a, b, 6, M.PGOLD); F.handTiles.push(k); } } }
+  // the wrist reaches the planner's west corner: a short flat level-6 walkway joins it to Liên Hoa Động's north-east ramp ending at (58, 58) (level 6)
+  { let best = null, bd = 1e9; for (const k of F.handTiles) { const a = k % N, b = Math.floor(k / N), d = Math.hypot(a - 59, b - 58); if (d < bd) { bd = d; best = [a, b]; } } if (best) { let [a, b] = [59, 58]; while (a !== best[0] || b !== best[1]) { set(a, b, 6, M.PGOLD); PATHC[id(a, b)] = 1; F.handTiles.push(id(a, b)); if (a !== best[0]) a += Math.sign(best[0] - a); else b += Math.sign(best[1] - b); } } }
   // the Buddha's lotus mountain at the west corner: four concentric tiers (7, 8, 9, 10); the top is the lotus dais of the (large) seated Buddha
-  for (const [r, lv, mat] of [[5.2, 7, M.PGOLD], [4.3, 8, M.PFING], [3.4, 9, M.PGOLD], [2.6, 10, M.PLOT]]) ell(62.5, 61.5, r, r * 0.95, (k, d) => { if (d < 1) { H[k] = lv; MAT[k] = mat; FIX[k] = 1; } });
+  for (const [r, lv, mat] of [[5.2, 7, M.PGOLD], [4.3, 8, M.PFING], [3.4, 9, M.PGOLD], [2.6, 10, M.PLOT]]) ell(86.5, 44.5, r, r * 0.95, (k, d) => { if (d < 1) { H[k] = lv; MAT[k] = mat; FIX[k] = 1; } });
   // ---------------------------------------------------------------- 4. relax unfixed ground to one level, then routes with stairs
   const isWalkMat = m => m === M.SKYC || m === M.PGOLD || m === M.PLINE || m === M.PLOT || m === M.PFING;
   for (let pass = 0; pass < 60; pass++) { let ch = 0; for (const k of F.tiles) { if (FIX[k]) continue; const i = k % N, j = Math.floor(k / N); let lo = -9, hi = 99; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if (!inB(i + a, j + b)) continue; const q = id(i + a, j + b), h = H[q]; if (!isWalkMat(MAT[q])) { lo = Math.max(lo, h - 2); hi = Math.min(hi, h + 2); } else { lo = Math.max(lo, h - 3); hi = Math.min(hi, h + 3); } } const v = lo <= hi ? clamp(H[k], lo, hi) : Math.round((lo + hi) / 2); if (v !== H[k]) { H[k] = v; ch++; } } if (!ch) break; }
@@ -67,14 +69,14 @@ window.TW_BTP_BUILD = function (X) {
   const snap = (a, b, r) => { for (let q = 0; q <= (r === undefined ? 2 : r); q++) for (let dj = -q; dj <= q; dj++) for (let di = -q; di <= q; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== q) continue; const k = tile(a + di, b + dj); if (k >= 0 && isWalkMat(MAT[k]) && !blocked.has(k)) return [a + di, b + dj]; } return null; };
   const Q = (kind, a, b, o) => { rb(); const s = snap(a, b, 2); if (!s) { F.failed.push('poi:' + kind + '@' + a + ',' + b); return null; } const p = poi(kind, 'btp', s[0], s[1], o); if (p) RES[id(s[0], s[1])] = 1; return p; };
   const LT2 = (a, b, r, col, kind) => TWM.lights.push({ biome: 'btp', i: a, j: b, r, col, kind: kind || 'lantern' });
-  L1('buddha', 61, 60, { fp: [3, 3], v: 0, block: true }); LT2(62, 61, 190, '255,232,160', 'magic'); LT2(62, 59, 120, '255,240,190', 'magic');                                  // Phật Tổ
+  L1('buddha', 85, 43, { fp: [3, 3], v: 0, block: true }); LT2(87, 45, 190, '255,232,160', 'magic'); LT2(87, 43, 120, '255,240,190', 'magic');                                  // Phật Tổ
   const W = (u, v) => { const w = geo.toWorld(u, v); return [Math.floor(w[0]), Math.floor(w[1])]; };
   L1('pwheel', ...W(-4.4, -3.6), { fp: [1, 1], v: 0, block: true }); L1('pwheel', ...W(-4.4, 3.8), { fp: [1, 1], v: 0, block: true });
   for (const [u, v, vv] of [[-3.6, -5.4, 0], [-3.6, 5.6, 1], [4, 5.8, 1]]) { const w = W(u, v); if (L1('plantern', w[0], w[1], { fp: [1, 1], v: vv, block: true })) { F.lamps.push(w); LT2(w[0], w[1], 60, '255,226,150'); } }
-  for (const [a, b] of [[88, 44]]) { L1('plotus', a, b, { fp: [1, 1], v: (a + b) & 1, block: true }); F.lotuses.push([a, b]); }
-  L1('pbell', 58, 64, { fp: [1, 1], v: 0, block: true }); L1('pbell', 89, 45, { fp: [1, 1], v: 0, block: true });
+  for (const [a, b] of [[83, 47]]) { L1('plotus', a, b, { fp: [1, 1], v: (a + b) & 1, block: true }); F.lotuses.push([a, b]); }
+  L1('pbell', 66, 64, { fp: [1, 1], v: 0, block: true }); L1('pbell', 89, 48, { fp: [1, 1], v: 0, block: true });
   F.fingers.forEach(f => { LT2(Math.round(f.tip[0]) - 1, Math.round(f.tip[1]) + 1, 90, '255,230,150', 'magic'); Q('pillar', f.front[0], f.front[1], { cap: 2, face: 'up', finger: f.k }); Q('pillar_back', Math.floor(f.back[0]), Math.floor(f.back[1]), { cap: 1, face: 'down', finger: f.k }); });
-  Q('devotion', 66, 62, { cap: 5, face: 'up' }); Q('devotion', 65, 66, { cap: 3, face: 'up' }); Q('lotus', 88, 45, { cap: 3, face: 'left' });
+  Q('devotion', 84, 48, { cap: 5, face: 'up' }); Q('devotion', 88, 48, { cap: 3, face: 'up' }); Q('lotus', 84, 47, { cap: 3, face: 'left' });
   Q('launch', ...W(1, 1.4), { cap: 3, face: 'up' }); Q('rest', ...W(-2, -4), { cap: 4, face: 'down' }); Q('rest', ...W(2, 4.6), { cap: 4, face: 'up' });
   for (const [u, v] of [[0, -3], [0, 3.6], [-3, 0], [3, 0.5], [-7, 0.4], [8, -1.4]]) Q('stroll', ...W(u, v), { cap: 2 });
   for (const [u, v] of [[-2.2, -1.8], [2.2, -1.8], [-2.2, 1.8], [2.2, 1.8]]) Q('bpseal', ...W(u, v), { cap: 1, face: 'up' });
@@ -82,7 +84,7 @@ window.TW_BTP_BUILD = function (X) {
   for (const [u, v] of [[-4.6, -4.2], [-4.6, 4.2], [-9, 0.5], [1, 6.4]]) Q('bplamp', ...W(u, v), { cap: 2, face: 'down' });
   F.runes = [[74, 50]]; F.edges = [[64, 40], [60, 62], [76, 64], [70, 72], [86, 40], [88, 36]].filter(p => inB(p[0], p[1]));
   // ---------------------------------------------------------------- 6. cloud dressing: banks along the terraces (animated by the fx), a few sprite clouds low in the sea
-  for (let n = 0; n < 160; n++) { const k = F.tiles[Math.floor(R() * F.tiles.length)], i = k % N, j = Math.floor(k / N); if (MAT[k] !== M.SKYD || RES[k]) continue; { const [u, v] = geo.toLocal(i + 0.5, j + 0.5); if (geo.sdfC(u, v, geo.chains(1)) < 6 || Math.hypot(i - 62.5, j - 61.5) < 9) continue; } F.clouds.push({ kind: R() < 0.3 ? 'pcloudw' : 'pcloud', i, j, lift: [-10, -6, -3, 0, 2][Math.floor(R() * 5)], v: Math.floor(R() * 8) }); }
+  for (let n = 0; n < 160; n++) { const k = F.tiles[Math.floor(R() * F.tiles.length)], i = k % N, j = Math.floor(k / N); if (MAT[k] !== M.SKYD || RES[k]) continue; { const [u, v] = geo.toLocal(i + 0.5, j + 0.5); if (geo.sdfC(u, v, geo.chains(1)) < 6 || Math.hypot(i - 86.5, j - 44.5) < 9) continue; } F.clouds.push({ kind: R() < 0.3 ? 'pcloudw' : 'pcloud', i, j, lift: [-10, -6, -3, 0, 2][Math.floor(R() * 5)], v: Math.floor(R() * 8) }); }
   for (let n = 0; n < 12; n++) { const k = F.tiles[Math.floor(R() * F.tiles.length)], i = k % N, j = Math.floor(k / N); F.drift.push({ kind: n % 3 ? 'pcloud' : 'pcloudw', i, j, lift: 6 + R() * 26, v: Math.floor(R() * 8), speed: 0.4 + R() * 0.9 }); }
   // ---------------------------------------------------------------- 7. the world around: the cloud sea fades into the neighbours (seam band, tw-map.js)
   TWM.homes = TWM.homes || {}; TWM.homes.btp = { crane: [F.fingers[1].tip[0] | 0, F.fingers[1].tip[1] | 0], maiden: [72, 54] };

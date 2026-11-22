@@ -21,13 +21,11 @@ window.TWFX = window.TWFX || {};
   A.ext.sprite = p => {
     if (p.kind !== 'buddha') return prevSprite ? prevSprite(p) : null; const im = A.IMG['buddha_a']; if (!im) return prevSprite ? prevSprite(p) : null;
     return { w: im.w * BK, h: im.h * BK, py: im.py * BK, frames: [im.im], em: null, glow: null, silk: null, flat: false, img: true, draw(g, s, f, R) {
-      const w = f.width, h = f.height, split = Math.floor(h * 0.56), sv = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; const ga = g.globalAlpha; g.globalAlpha = ga * budFade(R);
+      const w = f.width, h = f.height, split = Math.floor(h * 0.56), sv = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; 
       g.drawImage(f, 0, 0, w, split, s.X, s.Y, w * BK, split * BK);
       for (let y = split; y < h; y += 4) { const o = Math.round(Math.sin(R.t * 0.8 + y * 0.06 + s.ph) * 0.9 * ((y - split) / (h - split))) * BK, hh = Math.min(4, h - y); g.drawImage(f, 0, y, w, hh, s.X + o, s.Y + y * BK, w * BK, hh * BK); }
-      g.imageSmoothingEnabled = sv; g.globalAlpha = ga; } };
+      g.imageSmoothingEnabled = sv; } };
   };
-  // seam fix (Cao Lão Trang / Liên Hoa Động): the giant Buddha stands just south-east of both villages and its sprite covers their gardens, pond and yard; while the camera looks at either village he turns translucent
-  let budA = 1, budT = 0; const budFade = R => { const dt = Math.min(0.2, Math.max(0, R.t - budT)); budT = R.t; let near = false; for (const [i, j] of [[50, 46], [48, 66]]) { const X = A.SX(i, j), Y = A.SY(i, j, 4); if (Math.hypot(R.cx - X, (R.cy - Y) * 1.6) < 560) near = true; } budA += ((near ? 0.34 : 1) - budA) * Math.min(1, dt * 3); return budA; };
   // ---------------------------------------------------------------- the hand: one big pixel-art sprite painted from the signed-distance field (exact organic silhouette, true 2:1 projection)
   const hx = s => { const v = parseInt(s.slice(1), 16); return [v >> 16, v >> 8 & 255, v & 255]; }, ramp = a => a.map(hx);
   const STN = ramp(['#8a7248', '#b09660', '#d2b87c', '#e8d29c', '#f6e6bc', '#fff6dc']), NAIL = ramp(['#d894a8', '#ecb2c2', '#f8d0da', '#fde6ec', '#fff4f6', '#ffffff']), WAL = ramp(['#6e5a38', '#8e7648', '#b49a62', '#d2b87c', '#e8d29c', '#f6e6bc']);
@@ -37,7 +35,7 @@ window.TWFX = window.TWFX || {};
   const tone = (r, t) => { t = Math.max(0, Math.min(r.length - 1.001, t)); const i = Math.floor(t), f = t - i, a = r[i], b = r[i + 1]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; };
   function paintHand(spread) {
     const G = Fm().geo, C = G.C, CH = G.chains(spread), THK = 20, vn = TWM.vnoise;
-    let mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9; for (const [u, v] of [[-13, -11], [-13, 11], [19, -11], [19, 11], [19, 0], [-13, 0], [0, -11], [0, 11]]) { const w = G.toWorld(u, v), di = w[0] - C[0], dj = w[1] - C[1], sx = 32 * (di - dj), sy = 16 * (di + dj); mnx = Math.min(mnx, sx); mxx = Math.max(mxx, sx); mny = Math.min(mny, sy); mxy = Math.max(mxy, sy); }
+    let mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9; for (const [u, v] of [[-19, -11], [-19, 11], [19, -11], [19, 11], [19, 0], [-19, 0], [0, -11], [0, 11]]) { const w = G.toWorld(u, v), di = w[0] - C[0], dj = w[1] - C[1], sx = 32 * (di - dj), sy = 16 * (di + dj); mnx = Math.min(mnx, sx); mxx = Math.max(mxx, sx); mny = Math.min(mny, sy); mxy = Math.max(mxy, sy); }
     const ox = Math.floor(-mnx) + 8, py = Math.floor(-mny) + 8 + 40, W = Math.ceil(mxx - mnx) + 16, Hh = Math.ceil(mxy - mny) + 16 + 40 + THK;
     const D = new Float32Array(W * Hh), HG = new Float32Array(W * Hh), I = new Uint8Array(W * Hh);
     for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) { const a = (x + 0.5 - ox) / 32, b = (y + 0.5 - py) / 16, di = (a + b) / 2, dj = (b - a) / 2, u = di * G.DU[0] + dj * G.DU[1], v = di * G.DV[0] + dj * G.DV[1], d = G.sdfC(u, v, CH), q = y * W + x; D[q] = d; if (d < 0) { I[q] = 1; const t = Math.min(1, -d / 1.05); HG[q] = Math.sqrt(1 - (1 - t) * (1 - t)); } }

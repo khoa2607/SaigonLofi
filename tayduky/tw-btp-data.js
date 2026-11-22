@@ -24,7 +24,7 @@
   const X = S.stepExt, P = S.pointExt, A = S.ACT, pois = k => H.pois(B, k), free = a => H.free(a);
   X.btpcall = (a, st) => { st.fn(a); return true; };
   const SEAL = [74 * T, 50 * T], L = (u, v) => { const w = F.geo.toWorld(u, v); return [w[0] * T, w[1] * T]; }, TOP = L(13, -2);
-  P.btp_seal = () => SEAL; P.btp_palm = () => L(1, 1); P.btp_buddha = () => wp(63, 62); P.btp_top = () => TOP;
+  P.btp_seal = () => SEAL; P.btp_palm = () => L(1, 1); P.btp_buddha = () => wp(86, 47); P.btp_top = () => TOP;
   const king = () => S.agents.find(a => a.biome === B && a.role === 'monkeyking' && !a.gone);
   const cap = (a, b, dur) => { const f = S.btp; f.caption = [a, b]; f.capT = S.t + (dur || 6); };
   const focus = (xy, dur) => { const f = S.btp; f.focus = xy; f.focusT = S.t + (dur || 12); };
