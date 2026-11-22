@@ -11,18 +11,15 @@ await full('ui-wide-day.png', 1920, 1080, '&zoom=2&tod=noon');
 await full('ui-wide-night.png', 1920, 1080, '&zoom=2&tod=night');
 await full('ui-normal-day.png', 1366, 768, '&zoom=2&tod=noon');
 await full('ui-normal-night.png', 1366, 768, '&zoom=2&tod=night');
-// dragon close-up: park the head at the top-right corner and crop it, scaled x2
-await page(1600, 900, TD + '&zoom=2&tod=night', 5000, async ({ send, ev }) => {
-  await ev(`(()=>{ const d = TWDRAGON; d.s = 400; d.draw(0); document.getElementById('card').style.display='none'; })()`);
-  await ev(`document.getElementById('hud').style.visibility='hidden'; document.getElementById('dock').style.visibility='hidden'; document.getElementById('lang').style.visibility='hidden'`);
-  await wait(200);
-  save(await send('Page.captureScreenshot', { format: 'png', clip: { x: 1000, y: 0, width: 400, height: 130, scale: 4 } }), 'ui-dragon-closeup.png');
+// dragon art close-up (static): the whole frame region at 2x
+await page(1920, 1080, TD + '&zoom=2&tod=noon', 5000, async ({ send }) => {
+  save(await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 660, height: 470, scale: 2 } }), 'ui-dragon-closeup.png');
 });
 // biome navigator with a hover tooltip and the active highlight
 await page(1600, 900, 'tayduky/index.html?seed=7&zoom=2&at=nhs&tod=noon', 5500, async ({ send, ev }) => {
   const r = JSON.parse(await ev(`JSON.stringify(document.querySelector('#nav [data-biome=lhd]').getBoundingClientRect())`));
   await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: r.x + r.width / 2, y: r.y + r.height / 2 }); await wait(400);
-  save(await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 520, height: 340, scale: 2 } }), 'ui-biome-navigator.png');
+  save(await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 660, height: 470, scale: 2 } }), 'ui-biome-navigator.png');
 });
 // music controls: playing, panel open
 await page(1600, 900, TD + '&zoom=2&tod=noon', 5000, async ({ send, ev }) => {

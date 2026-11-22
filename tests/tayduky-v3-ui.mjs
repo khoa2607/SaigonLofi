@@ -19,9 +19,9 @@ for (const [W, H] of sizes) {
     await send('Page.navigate', { url: base + 'tayduky/index.html?at=hqs&zoom=2&seed=7' }); await wait(5000);
     const tag = `[${W}x${H}] `;
     const r = JSON.parse(await ev(`JSON.stringify({
-      nav: document.querySelectorAll('#nav button').length, dpe: getComputedStyle(document.getElementById('dragon')).pointerEvents,
+      nav: document.querySelectorAll('#nav button').length, dpe: getComputedStyle(document.getElementById('deco')).pointerEvents, oldDragon: !!document.getElementById('dragon') || typeof TWDRAGON !== 'undefined' || [...document.scripts].some(x => /td-dragon/.test(x.src)), anim: getComputedStyle(document.getElementById('deco')).animationName, tag: document.getElementById('deco').tagName, ok: document.getElementById('deco').complete && document.getElementById('deco').naturalWidth === 1000, hit: [...document.querySelectorAll('#nav button')].filter(b => { const r = b.getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return e === b || b.contains(e); }).length, clipped: (() => { const r = document.getElementById('deco').getBoundingClientRect(); return r.left < 0 || r.right > innerWidth || r.bottom > innerHeight; })(),
       over: document.documentElement.scrollWidth > innerWidth + 1, active: TWNAV.active(), here: TWNAV.biomeHere() })`));
-    ok(r.nav === 15, tag + '15 navigator buttons'); ok(r.dpe === 'none', tag + 'dragon pointer-events none'); ok(!r.over, tag + 'no horizontal overflow'); ok(r.active === 'hqs', tag + 'active biome = hqs (' + r.active + ')');
+    ok(r.nav === 15, tag + '15 navigator buttons'); ok(r.dpe === 'none', tag + 'dragon art pointer-events none'); ok(!r.oldDragon && r.anim === 'none' && r.tag === 'IMG' && r.ok, tag + 'old centipede removed; static <img> art loaded'); ok(r.hit === 15, tag + 'all 15 buttons receive pointer events (art does not cover them): ' + r.hit); ok(!r.clipped, tag + 'art fully inside the viewport'); ok(!r.over, tag + 'no horizontal overflow'); ok(r.active === 'hqs', tag + 'active biome = hqs (' + r.active + ')');
     if (W === 1920 || W === 390 || W === 820 || W === 1366) {
       const before = JSON.parse(await ev(`JSON.stringify({z: TWR.zoom, tod: TWR.tod, ag: TWS.agents.length})`));
       const bad = [];
@@ -59,7 +59,7 @@ await withChrome(1600, 900, async ({ base, send, ev, on }) => {
   await click('[data-time=night]'); await click('#nav [data-biome=lat]'); await wait(3000); a = await J(`({tod: TWR.tod})`); ok(a.tod === 'night', 'time: night persists across biome navigation');
   await click('[data-lang=en]'); a = await J(`({t: document.getElementById('tnum').textContent, tip: document.querySelector('#nav [data-biome=hqs]').title})`); ok(/track/.test(a.t) && /Flower/.test(a.tip), 'language: EN applies (' + a.t + ' / ' + a.tip + ')');
   await click('[data-lang=vi]');
-  await click('#hide'); a = await J(`({clean: document.body.classList.contains('clean'), dr: getComputedStyle(document.getElementById('dragon')).display})`); ok(a.clean && a.dr === 'none', 'view: hide panels hides dragon too');
+  await click('#hide'); a = await J(`({clean: document.body.classList.contains('clean'), dr: getComputedStyle(document.getElementById('deco')).display})`); ok(a.clean && a.dr === 'none', 'view: hide panels hides dragon too');
   await ev(`dispatchEvent(new KeyboardEvent('keydown',{key:'h'}))`); a = await J(`({clean: document.body.classList.contains('clean')})`); ok(!a.clean, 'view: H restores');
   await send('Page.navigate', { url: base + 'tayduky/index.html?at=hqs&zoom=2&seed=7' }); await wait(4500);
   a = await J(`({tr: AU.track, v: AU.vol.music, tm: localStorage.getItem('tayduky-time'), tod: TWR.tod})`); ok(a.tr === 5 && Math.abs(a.v - 0.7) < 0.01 && a.tm === 'night' && a.tod === 'night', 'prefs restored after reload ' + JSON.stringify(a));

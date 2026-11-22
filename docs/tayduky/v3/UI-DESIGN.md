@@ -26,13 +26,15 @@ pressed and the **active** state (red + gold ring, `aria-current`) are styled. T
 400 ms from the biome under the view centre), so dragging the map also moves the highlight. A small gold dot marks a biome whose
 story loop is running.
 
-## Dragon
-Code-painted pixel-art dragon (no PixelLab credits; the balance was ~1.65). A 1/3-resolution canvas (1/2 on phones) is scaled
-with `image-rendering: pixelated`. 96 body segments follow a clockwise rounded-rectangle path inset ~36 px from the window edge,
-with a travelling sine wave; outline-then-fill discs, jade/emerald banding, ivory belly stripe, red/gold dorsal spines, two
-gold-clawed limbs, a tail tuft, antler horns, red eye (gold at night), animated whiskers and a glowing pearl ahead of the jaws.
-`pointer-events:none`, `z-index:1` (panels are `z-index:3`), hidden with the panels (`body.clean`), paused when the tab is hidden,
-a single still frame under `prefers-reduced-motion`.
+## Dragon (static artwork, Checkpoint A)
+The earlier animated, code-painted creature (it read as a centipede) was **deleted** (`td-dragon.js`, its canvas, CSS and loop).
+The frame is now the supplied Reference A (`reference/ref-a-dragon-ui.png`), processed by `tayduky/art/build-dragon-frame.py`:
+white paper -> transparent (including enclosed pockets), edge pixels un-matted from white (no halo), and the plaque interior
+(green board, baked title and buttons) knocked out so the frame, dragon, clouds, mountains, pagoda and sunset remain as one
+static `art/dragon-frame.webp` (1000x637, lossless alpha). It is an `<img id="deco">` drawn above the controls with
+`pointer-events:none`; the real emerald board (`#eras`), title and 15 buttons are DOM and sit under its transparent window.
+All geometry is in units of the art width (`--u`), so it scales as one piece (560-620 px on desktop, full width minus 16 px on phones).
+No animation of any kind. 0 PixelLab generations.
 
 ## Responsive
 Tested at 1920×1080, 1600×900, 1366×768, 1280×720, 820×1180 (tablet), 390×844 (phone): no horizontal overflow; the dock and

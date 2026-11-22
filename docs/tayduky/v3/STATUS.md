@@ -5,7 +5,7 @@ Branch `feature/tayduky-redesign-v2`. Local commit only (no push, no merge).
 ## Done
 - Shared Lofi Worlds UI (music dock, YouTube box, volume, track change, VI/EN, time-of-day) with an Eastern theme.
 - 15-biome navigator replacing the old era tabs; smooth camera move to each biome's real bookmark/centre.
-- Code-painted border dragon; hides with the panels; reduced-motion safe.
+- **Checkpoint A (this branch `feature/tayduky-dragon-card`)**: the animated dragon is removed and replaced by a static, transparent recreation of Reference A. Awaiting owner review; Phase 2 (world access card) not started.
 - Old inline HUD (`#tod` select, `names`, `zin/zout`) replaced; `tw-main.js` is null-safe for those ids.
 
 ## Tests (run 2026-11-21)
